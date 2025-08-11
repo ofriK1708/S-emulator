@@ -2,56 +2,81 @@ package backend.engine.syntheticCommands;
 
 import backend.engine.Command;
 import backend.engine.CommandType;
+import backend.engine.Instruction;
 
 import java.util.List;
+import java.util.Map;
 
-public class JumpEqualConstant implements Command
+public class JumpEqualConstant extends Instruction implements Command
 {
+    protected JumpEqualConstant(String mainVarName, Map<String, Integer> contextMap)
+    {
+        super(mainVarName, contextMap);
+    }
+
     @Override
-    public int execute(Object... args) {
-        if(args.length == 2 && args[0] instanceof Integer && args[1] instanceof Integer)
+    public void execute(Map<String, String> args)
+    {
+        try
         {
-            return (int)args[1] - (int)args[0];
-        }
-        else
+            String labelName = args.get("label");
+            int checkConstant = Integer.parseInt(args.get("constant"));
+            if (contextMap.containsKey(labelName))
+            {
+                int value = contextMap.get(mainVarName);
+                int labelLineNumber = contextMap.get(labelName);
+                if (value != checkConstant)
+                {
+                    contextMap.put(PCName, contextMap.get(PCName) + 1); // if we are not equal, we go to the next instruction
+                } else
+                {
+                    contextMap.put(PCName, labelLineNumber); // if we are equal, we go to the label line number
+                }
+            } else
+            {
+                throw new IllegalArgumentException("No such label : " + labelName);
+            }
+        } catch (NumberFormatException e)
         {
-            throw new IllegalArgumentException("invalid arguments!!!");
+            throw new IllegalArgumentException("Invalid constant value: " + args.get("constant"));
         }
     }
 
     @Override
-    public int getCycles() {
+    public int getCycles()
+    {
         return 2;
     }
 
     @Override
-    public CommandType getType() {
+    public CommandType getType()
+    {
         return CommandType.SYNTHETIC;
     }
 
     @Override
-    public List<Command> expand(int level) {
+    public List<Command> expand(int level)
+    {
         return List.of();
     }
 
     @Override
-    public int getNumberOfArgs() {
+    public int getNumberOfArgs()
+    {
         return 2;
     }
 
     @Override
-    public String getDisplayFormat(Object... argsNames) {
-        if (argsNames.length == 3 && argsNames[0] instanceof Integer
-                && argsNames[1] instanceof Integer && argsNames[2] instanceof String)
+    public String getDisplayFormat(Map<String, String> args)
+    {
+        try
         {
-            int numOfArgument = (int)argsNames[0];
-            int numOfConstant = (int)argsNames[1];
-            String labelName = argsNames[2].toString();
-            return String.format("IF X%d != %d GOTO %s",numOfArgument,numOfConstant,labelName);
-        }
-        else
+            String labelName = args.get("label");
+            int checkConstant = Integer.parseInt(args.get("constant"));
+            return String.format("IF %s == %d GOTO %s", mainVarName, checkConstant, labelName);
+        } catch (NumberFormatException e)
         {
-            throw new IllegalArgumentException("incorrect display arguments!");
+            throw new IllegalArgumentException("Invalid constant value: " + args.get("constant"));
         }
     }
 }

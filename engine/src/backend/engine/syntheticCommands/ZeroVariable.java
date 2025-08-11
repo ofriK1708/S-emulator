@@ -2,23 +2,33 @@ package backend.engine.syntheticCommands;
 
 import backend.engine.Command;
 import backend.engine.CommandType;
+import backend.engine.Instruction;
 
 import java.util.List;
+import java.util.Map;
 
-public class ZeroVariable implements Command
+public class ZeroVariable extends Instruction implements Command
 {
-    @Override
-    public int execute(Object... args) {
-        return 0;
+    protected ZeroVariable(String mainVarName, Map<String, Integer> contextMap)
+    {
+        super(mainVarName, contextMap);
     }
 
     @Override
-    public int getCycles() {
+    public void execute(Map<String, String> args)
+    {
+        contextMap.put(mainVarName, 0);
+    }
+
+    @Override
+    public int getCycles()
+    {
         return 1;
     }
 
     @Override
-    public CommandType getType() {
+    public CommandType getType()
+    {
         return CommandType.SYNTHETIC;
     }
 
@@ -29,19 +39,14 @@ public class ZeroVariable implements Command
     }
 
     @Override
-    public int getNumberOfArgs() {
+    public int getNumberOfArgs()
+    {
         return 0;
     }
 
     @Override
-    public String getDisplayFormat(Object... argsNames) {
-        if (argsNames[0] instanceof Integer)
-        {
-            return String.format("X%d <- 0", (int)argsNames[0]);
-        }
-        else
-        {
-            throw new IllegalArgumentException("first argument must be int!");
-        }
+    public String getDisplayFormat(Map<String, String> args)
+    {
+        return String.format("%s <- 0", mainVarName);
     }
 }

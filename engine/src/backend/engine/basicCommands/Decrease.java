@@ -2,24 +2,35 @@ package backend.engine.basicCommands;
 
 import backend.engine.Command;
 import backend.engine.CommandType;
+import backend.engine.Instruction;
 
 import java.util.List;
+import java.util.Map;
 
-public class Decrease implements Command
+public class Decrease extends Instruction implements Command
 {
-    @Override
-    public int execute(Object... args)
+    public Decrease(String self, Map<String, Integer> context)
     {
-        if (args[0] instanceof Integer)
+        super(self, context);
+    }
+
+    @Override
+    public void execute(Map<String,String> args)
+    {
+        try
         {
-            int v = (int)args[0];
-            return v - 1;
-        }
-        else
+            contextMap.put(mainVarName, contextMap.get(mainVarName) - 1);
+            contextMap.put(PCName, contextMap.get(PCName) + 1);
+        } catch (NumberFormatException e)
         {
-            throw new IllegalArgumentException("v must be int!");
+            throw new IllegalArgumentException("expected integer value for " + mainVarName);
         }
 
+    }
+
+    @Override
+    public List<Command> expand(int level) {
+        return List.of();
     }
 
     @Override
@@ -33,26 +44,14 @@ public class Decrease implements Command
     }
 
     @Override
-    public List<Command> expand(int level) {
-        return List.of();
-    }
-
-    @Override
     public int getNumberOfArgs()
     {
         return 0;
     }
 
     @Override
-    public String getDisplayFormat(Object... argsNames)
+    public String getDisplayFormat(Map<String,String> args)
     {
-        if (argsNames[0] instanceof Integer)
-        {
-            return String.format("X%d <- X%d - 1", (int)argsNames[0],(int)argsNames[0]);
-        }
-        else
-        {
-            throw new IllegalArgumentException("first argument must be int!");
-        }
+        return String.format("%s <- %s - 1", mainVarName, mainVarName);
     }
 }

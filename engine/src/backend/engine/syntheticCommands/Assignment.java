@@ -2,52 +2,60 @@ package backend.engine.syntheticCommands;
 
 import backend.engine.Command;
 import backend.engine.CommandType;
+import backend.engine.Instruction;
 
 import java.util.List;
+import java.util.Map;
 
-public class Assignment implements Command
+public class Assignment extends Instruction implements Command
 {
+    public Assignment(String mainVarName, Map<String, Integer> contextMap)
+    {
+        super(mainVarName, contextMap);
+    }
+
     @Override
-    public int execute(Object... args) {
-        if(args.length == 2 && args[0] instanceof Integer && args[1] instanceof Integer)
+    public void execute(Map<String, String> args)
+    {
+        String sourceName = args.get("source");
+        if (contextMap.containsKey(sourceName))
         {
-            return (int)args[1];
-        }
-        else
+            int sourceValue = contextMap.get(sourceName);
+            contextMap.put(mainVarName, sourceValue);
+        } else
         {
-            throw new IllegalArgumentException("invalid arguments!!!");
+            throw new IllegalArgumentException("No such variable: " + sourceName);
         }
     }
 
     @Override
-    public int getCycles() {
+    public int getCycles()
+    {
         return 4;
     }
 
     @Override
-    public CommandType getType() {
+    public CommandType getType()
+    {
         return CommandType.SYNTHETIC;
     }
 
     @Override
-    public List<Command> expand(int level) {
+    public List<Command> expand(int level)
+    {
         return List.of();
     }
 
     @Override
-    public int getNumberOfArgs() {
+    public int getNumberOfArgs()
+    {
         return 1;
     }
 
     @Override
-    public String getDisplayFormat(Object... argsNames) {
-        if(argsNames.length == 2 && argsNames[0] instanceof Integer && argsNames[1] instanceof Integer)
-        {
-            return String.format("Z%d <- X%d", (int)argsNames[0],(int)argsNames[1]);
-        }
-        else
-        {
-            throw new IllegalArgumentException("invalid arguments!!!");
-        }
+    public String getDisplayFormat(Map<String, String> args)
+    {
+        String sourceName = args.get("source");
+        return String.format("%s <- %s", mainVarName, sourceName);
     }
 }

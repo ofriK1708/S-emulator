@@ -2,21 +2,28 @@ package backend.engine.syntheticCommands;
 
 import backend.engine.Command;
 import backend.engine.CommandType;
+import backend.engine.Instruction;
 
 import java.util.List;
+import java.util.Map;
 
-public class ConstantAssignment implements Command
+public class ConstantAssignment extends Instruction implements Command
 {
-    @Override
-    public int execute(Object... args)
+    protected ConstantAssignment(String mainVarName, Map<String, Integer> contextMap)
     {
-        if(args.length == 2 && args[0] instanceof Integer && args[1] instanceof Integer)
+        super(mainVarName, contextMap);
+    }
+
+    @Override
+    public void execute(Map<String, String> args)
+    {
+        try
         {
-            return (int)args[1];
-        }
-        else
+            int constantValue = Integer.parseInt(args.get("value"));
+            contextMap.put(mainVarName, constantValue);
+        } catch(NumberFormatException e)
         {
-            throw new IllegalArgumentException("invalid arguments!!!");
+            throw new IllegalArgumentException("Invalid value for constant assignment: " + args.get("value"));
         }
     }
 
@@ -41,14 +48,13 @@ public class ConstantAssignment implements Command
     }
 
     @Override
-    public String getDisplayFormat(Object... argsNames) {
-        if(argsNames.length == 2 && argsNames[0] instanceof Integer && argsNames[1] instanceof Integer)
+    public String getDisplayFormat(Map<String, String> args) {
+        try
         {
-            return String.format("Z%d <- %d", (int)argsNames[0],(int)argsNames[1]);
-        }
-        else
-        {
-            throw new IllegalArgumentException("invalid arguments!!!");
+            int constantValue = Integer.parseInt(args.get("value"));
+            return String.format("%s <- %d", mainVarName, constantValue);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid value for constant assignment: " + args.get("value"));
         }
     }
 }

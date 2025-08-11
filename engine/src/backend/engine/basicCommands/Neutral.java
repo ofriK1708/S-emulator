@@ -2,22 +2,23 @@ package backend.engine.basicCommands;
 
 import backend.engine.Command;
 import backend.engine.CommandType;
+import backend.engine.Instruction;
 
 import java.util.List;
+import java.util.Map;
 
-public class Neutral implements Command
+public class Neutral extends Instruction implements Command
 {
-    @Override
-    public int execute(Object... args)
+
+    protected Neutral(String mainVarName, Map<String, Integer> contextMap)
     {
-        if (args[0] instanceof Integer)
-        {
-            return (int)args[0];
-        }
-        else
-        {
-            throw new IllegalArgumentException("v must be int!");
-        }
+        super(mainVarName, contextMap);
+    }
+
+    @Override
+    public void execute(Map<String, String> args)
+    {
+        return; // No operation, does nothing
     }
 
     @Override
@@ -41,7 +42,7 @@ public class Neutral implements Command
     }
 
     @Override
-    public String getDisplayFormat(Object... argsNames) {
-        return "";
+    public String getDisplayFormat(Map<String, String> args) {
+        return String.format("%s <- %s", mainVarName, mainVarName);
     }
 }

@@ -2,57 +2,70 @@ package backend.engine.basicCommands;
 
 import backend.engine.Command;
 import backend.engine.CommandType;
+import backend.engine.Instruction;
 
 import java.util.List;
+import java.util.Map;
 
-public class JumpNotZero implements Command
+public class JumpNotZero extends Instruction implements Command
 {
-    // return the value of int - the system should manage the flow
-    @Override
-    public int execute(Object... args)
+    public JumpNotZero(String mainVarName, Map<String, Integer> contextMap)
     {
-        if (args[0] instanceof Integer)
+        super(mainVarName, contextMap);
+    }
+
+
+    @Override
+    public void execute(Map<String, String> args)
+    {
+        String labelName = args.get("label");
+        if (contextMap.containsKey(labelName))
         {
-            return (int)args[0];
-        }
-        else
+            int value = contextMap.get(mainVarName);
+            int labelLineNumber = contextMap.get(labelName);
+            if (value == 0)
+            {
+                contextMap.put(PCName, contextMap.get(PCName) + 1);
+            } else
+            {
+                contextMap.put(PCName, labelLineNumber);
+            }
+        } else
         {
-            throw new IllegalArgumentException("v must be int!");
+            throw new IllegalArgumentException("No such label : " + labelName);
         }
     }
 
+
     @Override
-    public List<Command> expand(int level) {
+    public List<Command> expand(int level)
+    {
         return List.of();
     }
 
     @Override
-    public int getCycles() {
+    public int getCycles()
+    {
         return 2;
     }
 
     @Override
-    public CommandType getType() {
+    public CommandType getType()
+    {
         return CommandType.BASIC;
     }
 
     @Override
-    public int getNumberOfArgs() {
+    public int getNumberOfArgs()
+    {
         return 0;
     }
 
     @Override
-    public String getDisplayFormat(Object... argsNames) {
-        if (argsNames.length == 2 && argsNames[0] instanceof Integer
-                && argsNames[1] instanceof String)
-        {
-            int numOfArgument = (int)argsNames[0];
-            String labelName = argsNames[1].toString();
-            return String.format("IF X%d != 0 GOTO %s",numOfArgument,labelName);
-        }
-        else
-        {
-            throw new IllegalArgumentException("incorrect display arguments!");
-        }
+    public String getDisplayFormat(Map<String, String> args)
+    {
+        String labelName = args.get("label");
+        return String.format("if %s != 0 GOTO %s", mainVarName, labelName);
     }
 }
+
