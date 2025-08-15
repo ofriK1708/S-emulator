@@ -9,13 +9,13 @@ import java.util.Map;
 
 public class JumpZero extends Instruction implements Command
 {
-    protected JumpZero(String mainVarName, Map<String, Integer> contextMap)
+    protected JumpZero(String mainVarName, Map<String, String> args)
     {
-        super(mainVarName, contextMap);
+        super(mainVarName, args);
     }
 
     @Override
-    public void execute(Map<String, String> args)
+    public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
     {
         String labelName = args.get("label");
         if (contextMap.containsKey(labelName))
@@ -56,7 +56,7 @@ public class JumpZero extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat(Map<String, String> args) {
+    public String getDisplayFormat() {
         String labelName = args.get("label");
         return String.format("if %s == 0 GOTO %s", mainVarName, labelName);
     }

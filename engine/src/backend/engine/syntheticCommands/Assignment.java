@@ -9,13 +9,13 @@ import java.util.Map;
 
 public class Assignment extends Instruction implements Command
 {
-    public Assignment(String mainVarName, Map<String, Integer> contextMap)
+    public Assignment(String mainVarName, Map<String, String> args)
     {
-        super(mainVarName, contextMap);
+        super(mainVarName, args);
     }
 
     @Override
-    public void execute(Map<String, String> args)
+    public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
     {
         String sourceName = args.get("source");
         if (contextMap.containsKey(sourceName))
@@ -53,7 +53,7 @@ public class Assignment extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat(Map<String, String> args)
+    public String getDisplayFormat()
     {
         String sourceName = args.get("source");
         return String.format("%s <- %s", mainVarName, sourceName);

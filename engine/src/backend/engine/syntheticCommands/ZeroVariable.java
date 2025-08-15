@@ -9,13 +9,13 @@ import java.util.Map;
 
 public class ZeroVariable extends Instruction implements Command
 {
-    protected ZeroVariable(String mainVarName, Map<String, Integer> contextMap)
+    protected ZeroVariable(String mainVarName, Map<String, String> args)
     {
-        super(mainVarName, contextMap);
+        super(mainVarName, args);
     }
 
     @Override
-    public void execute(Map<String, String> args)
+    public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
     {
         contextMap.put(mainVarName, 0);
     }
@@ -45,7 +45,7 @@ public class ZeroVariable extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat(Map<String, String> args)
+    public String getDisplayFormat()
     {
         return String.format("%s <- 0", mainVarName);
     }

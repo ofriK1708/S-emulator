@@ -9,13 +9,13 @@ import java.util.Map;
 
 public class Increase extends Instruction implements Command
 {
-    public Increase(String self, Map<String, Integer> context)
+    public Increase(String self, Map<String, String> args)
     {
-        super(self, context);
+        super(self, args);
     }
 
     @Override
-    public void execute(Map<String,String> args)
+    public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
     {
         try
         {
@@ -50,7 +50,7 @@ public class Increase extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat(Map<String,String> args)
+    public String getDisplayFormat()
     {
         return String.format("%s <- %s + 1", mainVarName, mainVarName);
     }

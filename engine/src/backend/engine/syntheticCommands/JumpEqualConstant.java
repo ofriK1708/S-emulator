@@ -9,13 +9,13 @@ import java.util.Map;
 
 public class JumpEqualConstant extends Instruction implements Command
 {
-    protected JumpEqualConstant(String mainVarName, Map<String, Integer> contextMap)
+    protected JumpEqualConstant(String mainVarName, Map<String, String> args)
     {
-        super(mainVarName, contextMap);
+        super(mainVarName, args);
     }
 
     @Override
-    public void execute(Map<String, String> args)
+    public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
     {
         try
         {
@@ -23,9 +23,9 @@ public class JumpEqualConstant extends Instruction implements Command
             int checkConstant = Integer.parseInt(args.get("constant"));
             if (contextMap.containsKey(labelName))
             {
-                int value = contextMap.get(mainVarName);
+                int mainVarValue = contextMap.get(mainVarName);
                 int labelLineNumber = contextMap.get(labelName);
-                if (value != checkConstant)
+                if (mainVarValue != checkConstant)
                 {
                     contextMap.put(PCName, contextMap.get(PCName) + 1); // if we are not equal, we go to the next instruction
                 } else
@@ -67,7 +67,7 @@ public class JumpEqualConstant extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat(Map<String, String> args)
+    public String getDisplayFormat()
     {
         try
         {

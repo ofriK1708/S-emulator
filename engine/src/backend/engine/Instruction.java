@@ -5,12 +5,12 @@ import java.util.Map;
 public class Instruction
 {
     protected String mainVarName;
-    protected Map<String,Integer> contextMap;
+    protected Map<String,String> args;
     protected final String PCName = "PC";
 
-    protected Instruction(String mainVarName, Map<String, Integer> contextMap)
+    protected Instruction(String mainVarName, Map<String, String> args)
     {
         this.mainVarName = mainVarName;
-        this.contextMap = contextMap;
+        this.args = args;
     }
 }

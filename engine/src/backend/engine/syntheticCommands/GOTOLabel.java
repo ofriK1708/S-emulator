@@ -9,13 +9,13 @@ import java.util.Map;
 
 public class GOTOLabel extends Instruction implements Command
 {
-    protected GOTOLabel(String mainVarName, Map<String, Integer> contextMap)
+    protected GOTOLabel(String mainVarName, Map<String, String> args)
     {
-        super(mainVarName, contextMap);
+        super(mainVarName, args);
     }
 
     @Override
-    public void execute(Map<String, String> args)
+    public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
     {
         String labelName = args.get("label");
         if (contextMap.containsKey(labelName))
@@ -53,7 +53,7 @@ public class GOTOLabel extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat(Map<String, String> args)
+    public String getDisplayFormat()
     {
         String labelName = args.get("label");
         return String.format("GOTO %s", labelName);
