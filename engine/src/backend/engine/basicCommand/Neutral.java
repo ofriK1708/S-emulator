@@ -1,4 +1,4 @@
-package backend.engine.basicCommands;
+package backend.engine.basicCommand;
 
 import backend.engine.Command;
 import backend.engine.CommandType;
@@ -10,7 +10,7 @@ import java.util.Map;
 public class Neutral extends Instruction implements Command
 {
 
-    protected Neutral(String mainVarName, Map<String, String> args)
+    public Neutral(String mainVarName, Map<String, String> args)
     {
         super(mainVarName, args);
     }

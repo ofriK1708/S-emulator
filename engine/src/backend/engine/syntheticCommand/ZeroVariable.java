@@ -1,4 +1,4 @@
-package backend.engine.syntheticCommands;
+package backend.engine.syntheticCommand;
 
 import backend.engine.Command;
 import backend.engine.CommandType;
@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class ZeroVariable extends Instruction implements Command
 {
-    protected ZeroVariable(String mainVarName, Map<String, String> args)
+    public ZeroVariable(String mainVarName, Map<String, String> args)
     {
         super(mainVarName, args);
     }

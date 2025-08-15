@@ -1,4 +1,4 @@
-package backend.engine.basicCommands;
+package backend.engine.basicCommand;
 
 import backend.engine.Command;
 import backend.engine.CommandType;

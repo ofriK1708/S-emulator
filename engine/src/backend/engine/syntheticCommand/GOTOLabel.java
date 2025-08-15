@@ -1,4 +1,4 @@
-package backend.engine.syntheticCommands;
+package backend.engine.syntheticCommand;
 
 import backend.engine.Command;
 import backend.engine.CommandType;
@@ -7,9 +7,10 @@ import backend.engine.Instruction;
 import java.util.List;
 import java.util.Map;
 
-public class Assignment extends Instruction implements Command
+public class GOTOLabel extends Instruction implements Command
 {
-    public Assignment(String mainVarName, Map<String, String> args)
+    private final String labelArgumentName = "gotoLabel";
+    public GOTOLabel(String mainVarName, Map<String, String> args)
     {
         super(mainVarName, args);
     }
@@ -17,21 +18,21 @@ public class Assignment extends Instruction implements Command
     @Override
     public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
     {
-        String sourceName = args.get("source");
-        if (contextMap.containsKey(sourceName))
+        String labelName = args.get(labelArgumentName);
+        if (contextMap.containsKey(labelName))
         {
-            int sourceValue = contextMap.get(sourceName);
-            contextMap.put(mainVarName, sourceValue);
+            int labelLineNumber = contextMap.get(labelName);
+            contextMap.put(PCName, labelLineNumber);
         } else
         {
-            throw new IllegalArgumentException("No such variable: " + sourceName);
+            throw new IllegalArgumentException("No such label : " + labelName);
         }
     }
 
     @Override
     public int getCycles()
     {
-        return 4;
+        return 1;
     }
 
     @Override
@@ -49,13 +50,13 @@ public class Assignment extends Instruction implements Command
     @Override
     public int getNumberOfArgs()
     {
-        return 1;
+        return 0;
     }
 
     @Override
     public String getDisplayFormat()
     {
-        String sourceName = args.get("source");
-        return String.format("%s <- %s", mainVarName, sourceName);
+        String labelName = args.get(labelArgumentName);
+        return String.format("GOTO %s", labelName);
     }
 }

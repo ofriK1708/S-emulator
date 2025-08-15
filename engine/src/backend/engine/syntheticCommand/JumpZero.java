@@ -1,4 +1,4 @@
-package backend.engine.syntheticCommands;
+package backend.engine.syntheticCommand;
 
 import backend.engine.Command;
 import backend.engine.CommandType;
@@ -9,7 +9,8 @@ import java.util.Map;
 
 public class JumpZero extends Instruction implements Command
 {
-    protected JumpZero(String mainVarName, Map<String, String> args)
+    private final String labelArgumentName = "JZLabel";
+    public JumpZero(String mainVarName, Map<String, String> args)
     {
         super(mainVarName, args);
     }
@@ -17,7 +18,7 @@ public class JumpZero extends Instruction implements Command
     @Override
     public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
     {
-        String labelName = args.get("label");
+        String labelName = args.get(labelArgumentName);
         if (contextMap.containsKey(labelName))
         {
             int value = contextMap.get(mainVarName);
@@ -57,7 +58,7 @@ public class JumpZero extends Instruction implements Command
 
     @Override
     public String getDisplayFormat() {
-        String labelName = args.get("label");
+        String labelName = args.get(labelArgumentName);
         return String.format("if %s == 0 GOTO %s", mainVarName, labelName);
     }
 }

@@ -1,4 +1,4 @@
-package backend.engine.syntheticCommands;
+package backend.engine.syntheticCommand;
 
 import backend.engine.Command;
 import backend.engine.CommandType;
@@ -7,9 +7,12 @@ import backend.engine.Instruction;
 import java.util.List;
 import java.util.Map;
 
-public class JumpEqualConstant extends Instruction implements Command
+public class JumpEqualVariable extends Instruction implements Command
 {
-    protected JumpEqualConstant(String mainVarName, Map<String, String> args)
+    private final String labelArgumentName = "JEVariableLabel";
+    private final String variableArgumentName = "variableName";
+
+    public JumpEqualVariable(String mainVarName, Map<String, String> args)
     {
         super(mainVarName, args);
     }
@@ -19,13 +22,15 @@ public class JumpEqualConstant extends Instruction implements Command
     {
         try
         {
-            String labelName = args.get("label");
-            int checkConstant = Integer.parseInt(args.get("constant"));
-            if (contextMap.containsKey(labelName))
+            String labelName = args.get(labelArgumentName);
+            String variableName = args.get(variableArgumentName);
+
+            if (contextMap.containsKey(labelName) && contextMap.containsKey(variableName))
             {
                 int mainVarValue = contextMap.get(mainVarName);
                 int labelLineNumber = contextMap.get(labelName);
-                if (mainVarValue != checkConstant)
+                int variableValue = contextMap.get(variableName);
+                if (mainVarValue != variableValue)
                 {
                     contextMap.put(PCName, contextMap.get(PCName) + 1); // if we are not equal, we go to the next instruction
                 } else
@@ -38,7 +43,7 @@ public class JumpEqualConstant extends Instruction implements Command
             }
         } catch (NumberFormatException e)
         {
-            throw new IllegalArgumentException("Invalid constant value: " + args.get("constant"));
+            throw new IllegalArgumentException("Invalid constant value: " + args.get(variableArgumentName));
         }
     }
 
@@ -69,14 +74,8 @@ public class JumpEqualConstant extends Instruction implements Command
     @Override
     public String getDisplayFormat()
     {
-        try
-        {
-            String labelName = args.get("label");
-            int checkConstant = Integer.parseInt(args.get("constant"));
-            return String.format("IF %s == %d GOTO %s", mainVarName, checkConstant, labelName);
-        } catch (NumberFormatException e)
-        {
-            throw new IllegalArgumentException("Invalid constant value: " + args.get("constant"));
-        }
+        String labelName = args.get(labelArgumentName);
+        String checkConstant = args.get(variableArgumentName);
+        return String.format("IF %s == %s GOTO %s", mainVarName, checkConstant, labelName);
     }
 }
