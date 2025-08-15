@@ -4,6 +4,7 @@ import backend.engine.Command;
 import backend.engine.CommandType;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class Increase implements Command
 {
@@ -24,7 +25,7 @@ public class Increase implements Command
 
     @Override
     public List<Command> expand(int level) {
-        return List.of();
+        return new ArrayList<>();
     }
 
     @Override

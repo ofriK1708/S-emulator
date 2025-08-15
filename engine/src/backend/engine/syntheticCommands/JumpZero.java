@@ -4,6 +4,7 @@ import backend.engine.Command;
 import backend.engine.CommandType;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class JumpZero implements Command
 {
@@ -23,7 +24,8 @@ public class JumpZero implements Command
 
     @Override
     public List<Command> expand(int level) {
-        return List.of();
+        return new ArrayList<>();
+
     }
 
     @Override

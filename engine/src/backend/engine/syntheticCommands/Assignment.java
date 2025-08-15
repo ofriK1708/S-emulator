@@ -4,6 +4,7 @@ import backend.engine.Command;
 import backend.engine.CommandType;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class Assignment implements Command
 {
@@ -31,7 +32,7 @@ public class Assignment implements Command
 
     @Override
     public List<Command> expand(int level) {
-        return List.of();
+        return new ArrayList<>();
     }
 
     @Override
