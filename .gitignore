@@ -32,3 +32,4 @@ bin/
 
 ### macOS ###
 .DS_Store
+/engine/src/backend/system/TestingMain.java
