@@ -10,9 +10,10 @@ import java.util.Map;
 public class ConstantAssignment extends Instruction implements Command
 {
     private final String valueArgumentName = "constantValue";
-    public ConstantAssignment(String mainVarName, Map<String, String> args)
+
+    public ConstantAssignment(String mainVarName, Map<String, String> args, String labelName)
     {
-        super(mainVarName, args);
+        super(mainVarName, args, labelName);
     }
 
     @Override

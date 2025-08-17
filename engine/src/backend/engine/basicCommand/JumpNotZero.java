@@ -9,11 +9,10 @@ import java.util.Map;
 
 public class JumpNotZero extends Instruction implements Command
 {
-    public JumpNotZero(String mainVarName, Map<String, String> args)
+    public JumpNotZero(String mainVarName, Map<String, String> args, String labelName)
     {
-        super(mainVarName, args);
+        super(mainVarName, args, labelName);
     }
-
 
     @Override
     public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
@@ -25,10 +24,10 @@ public class JumpNotZero extends Instruction implements Command
             int labelLineNumber = contextMap.get(labelName);
             if (value == 0)
             {
-                contextMap.put(PCName, contextMap.get(PCName) + 1);
+                contextMap.put(ProgramCounter, contextMap.get(ProgramCounter) + 1);
             } else
             {
-                contextMap.put(PCName, labelLineNumber);
+                contextMap.put(ProgramCounter, labelLineNumber);
             }
         } else
         {

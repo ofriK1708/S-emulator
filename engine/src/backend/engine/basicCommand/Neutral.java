@@ -10,9 +10,9 @@ import java.util.Map;
 public class Neutral extends Instruction implements Command
 {
 
-    public Neutral(String mainVarName, Map<String, String> args)
+    public Neutral(String mainVarName, Map<String, String> args, String labelName)
     {
-        super(mainVarName, args);
+        super(mainVarName, args, labelName);
     }
 
     @Override

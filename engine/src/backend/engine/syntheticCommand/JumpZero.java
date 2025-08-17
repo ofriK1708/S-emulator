@@ -10,9 +10,10 @@ import java.util.Map;
 public class JumpZero extends Instruction implements Command
 {
     private final String labelArgumentName = "JZLabel";
-    public JumpZero(String mainVarName, Map<String, String> args)
+
+    public JumpZero(String mainVarName, Map<String, String> args, String labelName)
     {
-        super(mainVarName, args);
+        super(mainVarName, args, labelName);
     }
 
     @Override
@@ -25,10 +26,10 @@ public class JumpZero extends Instruction implements Command
             int labelLineNumber = contextMap.get(labelName);
             if (value != 0)
             {
-                contextMap.put(PCName, contextMap.get(PCName) + 1);
+                contextMap.put(ProgramCounter, contextMap.get(ProgramCounter) + 1);
             } else
             {
-                contextMap.put(PCName, labelLineNumber);
+                contextMap.put(ProgramCounter, labelLineNumber);
             }
         } else
         {

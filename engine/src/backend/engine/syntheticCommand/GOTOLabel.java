@@ -10,9 +10,10 @@ import java.util.Map;
 public class GOTOLabel extends Instruction implements Command
 {
     private final String labelArgumentName = "gotoLabel";
-    public GOTOLabel(String mainVarName, Map<String, String> args)
+
+    public GOTOLabel(String mainVarName, Map<String, String> args, String labelName)
     {
-        super(mainVarName, args);
+        super(mainVarName, args, labelName);
     }
 
     @Override
@@ -22,7 +23,7 @@ public class GOTOLabel extends Instruction implements Command
         if (contextMap.containsKey(labelName))
         {
             int labelLineNumber = contextMap.get(labelName);
-            contextMap.put(PCName, labelLineNumber);
+            contextMap.put(ProgramCounter, labelLineNumber);
         } else
         {
             throw new IllegalArgumentException("No such label : " + labelName);

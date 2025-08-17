@@ -12,9 +12,9 @@ public class JumpEqualConstant extends Instruction implements Command
     private final String labelArgumentName = "JEConstantLabel";
     private final String constantArgumentName = "constantValue";
 
-    public JumpEqualConstant(String mainVarName, Map<String, String> args)
+    public JumpEqualConstant(String mainVarName, Map<String, String> args, String labelName)
     {
-        super(mainVarName, args);
+        super(mainVarName, args, labelName);
     }
 
     @Override
@@ -30,10 +30,10 @@ public class JumpEqualConstant extends Instruction implements Command
                 int labelLineNumber = contextMap.get(labelName);
                 if (mainVarValue != checkConstant)
                 {
-                    contextMap.put(PCName, contextMap.get(PCName) + 1); // if we are not equal, we go to the next instruction
+                    contextMap.put(ProgramCounter, contextMap.get(ProgramCounter) + 1); // if we are not equal, we go to the next instruction
                 } else
                 {
-                    contextMap.put(PCName, labelLineNumber); // if we are equal, we go to the label line number
+                    contextMap.put(ProgramCounter, labelLineNumber); // if we are equal, we go to the label line number
                 }
             } else
             {

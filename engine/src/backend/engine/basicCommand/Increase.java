@@ -9,9 +9,9 @@ import java.util.Map;
 
 public class Increase extends Instruction implements Command
 {
-    public Increase(String self, Map<String, String> args)
+    public Increase(String mainVarName, Map<String, String> args, String labelName)
     {
-        super(self, args);
+        super(mainVarName, args, labelName);
     }
 
     @Override
@@ -20,7 +20,7 @@ public class Increase extends Instruction implements Command
         try
         {
             contextMap.put(mainVarName, contextMap.get(mainVarName) + 1);
-            contextMap.put(PCName, contextMap.get(PCName) + 1);
+            contextMap.put(ProgramCounter, contextMap.get(ProgramCounter) + 1);
         } catch (NumberFormatException e)
         {
             throw new IllegalArgumentException("expected integer value for " + mainVarName);
