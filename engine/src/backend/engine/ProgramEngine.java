@@ -26,6 +26,7 @@ public class ProgramEngine
                 .stream()
                 .map(SInstruction::getSLabel)
                 .filter(Objects::nonNull)
+                .filter(label -> label.startsWith("L"))
                 .collect(Collectors.toSet());
         initializeContextMap();
 
