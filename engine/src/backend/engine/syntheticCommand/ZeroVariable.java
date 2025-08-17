@@ -9,9 +9,9 @@ import java.util.Map;
 
 public class ZeroVariable extends Instruction implements Command
 {
-    public ZeroVariable(String mainVarName, Map<String, String> args)
+    public ZeroVariable(String mainVarName, Map<String, String> args, String labelName)
     {
-        super(mainVarName, args);
+        super(mainVarName, args, labelName);
     }
 
     @Override

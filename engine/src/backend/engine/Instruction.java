@@ -7,7 +7,9 @@ import backend.engine.basicCommand.Neutral;
 import backend.engine.syntheticCommand.*;
 import backend.system.generated.SInstruction;
 import backend.system.generated.SInstructionArgument;
+import backend.system.generated.SInstructionArguments;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,39 +18,62 @@ public class Instruction
 {
     protected String mainVarName;
     protected Map<String, String> args;
-    protected final String PCName = "PC";
+    protected String label;
+    protected final static String ProgramCounter = "PC";
 
-    protected Instruction(String mainVarName, Map<String, String> args)
+
+    protected Instruction(String mainVarName, Map<String, String> args, String label)
     {
         this.mainVarName = mainVarName;
         this.args = args;
+        this.label = label;
+    }
+
+    public String getLabel()
+    {
+        return label;
+    }
+
+    public String getMainVarName()
+    {
+        return mainVarName;
+    }
+
+    public Map<String, String> getArgs()
+    {
+        return args;
     }
 
     public static Instruction createInstruction(SInstruction sInstruction)
     {
-        Map<String, String> args = sInstruction
-                .getSInstructionArguments()
-                .getSInstructionArgument()
-                .stream()
-                .collect(Collectors.toMap(SInstructionArgument::getName, SInstructionArgument::getValue));
-        String mainVarName = Optional.ofNullable(sInstruction.getName()).orElseThrow(
+
+        Map<String, String> args = Optional.ofNullable(sInstruction.getSInstructionArguments())
+                .map(SInstructionArguments::getSInstructionArgument)
+                .map(argsList -> argsList.stream().collect(Collectors.toMap(
+                        SInstructionArgument::getName,
+                        SInstructionArgument::getValue
+                )))
+                .orElse(Collections.emptyMap());
+        String mainVarName = Optional.ofNullable(sInstruction.getSVariable()).orElseThrow(
                 () -> new IllegalArgumentException("Instruction must have main variable!"));
+        String labelName = sInstruction.getSLabel();
 
         return switch (sInstruction.getName())
         {
-            case "Increase" -> new Increase(mainVarName, args);
-            case "Decrease" -> new Decrease(mainVarName, args);
-            case "JUMP_NOT_ZERO" -> new JumpNotZero(mainVarName, args);
-            case "NEUTRAL" -> new Neutral(mainVarName, args);
-            case "ZERO_VARIABLE" -> new ZeroVariable(mainVarName, args);
-            case "GOTO_LABEL" -> new GOTOLabel(mainVarName, args);
-            case "ASSIGNMENT" -> new Assignment(mainVarName, args);
-            case "CONSTANT_ASSIGNMENT" -> new ConstantAssignment(mainVarName, args);
-            case "JUMP_ZERO" -> new JumpZero(mainVarName, args);
-            case "JUMP_EQUAL_CONSTANT" -> new JumpEqualConstant(mainVarName, args);
-            case "JUMP_EQUAL_VARIABLE" -> new JumpEqualVariable(mainVarName, args);
+            case "INCREASE" -> new Increase(mainVarName, args, labelName);
+            case "DECREASE" -> new Decrease(mainVarName, args, labelName);
+            case "JUMP_NOT_ZERO" -> new JumpNotZero(mainVarName, args, labelName);
+            case "NEUTRAL" -> new Neutral(mainVarName, args, labelName);
+            case "ZERO_VARIABLE" -> new ZeroVariable(mainVarName, args, labelName);
+            case "GOTO_LABEL" -> new GOTOLabel(mainVarName, args, labelName);
+            case "ASSIGNMENT" -> new Assignment(mainVarName, args, labelName);
+            case "CONSTANT_ASSIGNMENT" -> new ConstantAssignment(mainVarName, args, labelName);
+            case "JUMP_ZERO" -> new JumpZero(mainVarName, args, labelName);
+            case "JUMP_EQUAL_CONSTANT" -> new JumpEqualConstant(mainVarName, args, labelName);
+            case "JUMP_EQUAL_VARIABLE" -> new JumpEqualVariable(mainVarName, args, labelName);
             default -> throw new IllegalArgumentException("Unknown instruction type: " + sInstruction.getName());
         };
+
 
     }
 }

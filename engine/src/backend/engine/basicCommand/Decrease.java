@@ -7,11 +7,12 @@ import backend.engine.Instruction;
 import java.util.List;
 import java.util.Map;
 
+
 public class Decrease extends Instruction implements Command
 {
-    public Decrease(String self, Map<String, String> args)
+    public Decrease(String mainVarName, Map<String, String> args, String labelName)
     {
-        super(self, args);
+        super(mainVarName, args, labelName);
     }
 
     @Override
@@ -19,8 +20,8 @@ public class Decrease extends Instruction implements Command
     {
         try
         {
-            contextMap.put(mainVarName, contextMap.get(mainVarName) - 1);
-            contextMap.put(PCName, contextMap.get(PCName) + 1);
+            contextMap.put(mainVarName, Math.max((contextMap.get(mainVarName) - 1),0));
+            contextMap.put(ProgramCounter, contextMap.get(ProgramCounter) + 1);
         } catch (NumberFormatException e)
         {
             throw new IllegalArgumentException("expected integer value for " + mainVarName);

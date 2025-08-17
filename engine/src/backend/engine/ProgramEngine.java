@@ -8,11 +8,12 @@ import java.util.stream.Collectors;
 
 public class ProgramEngine
 {
-    private String programName;
+    private final String programName;
     private Map<String, Integer> contextMap = new HashMap<>();
     private List<Instruction> instructions = new LinkedList<>();
     private Set<String> labels = new HashSet<>();
     private statistics programStats = null;
+    private final String outputName = "y";
 
     public ProgramEngine(SProgram program)
     {
@@ -32,5 +33,28 @@ public class ProgramEngine
 
     private void initializeContextMap()
     {
+        contextMap.clear();
+        contextMap.put(outputName, 0);
+        contextMap.put(Instruction.ProgramCounter, 0); // Program Counter
+        for (int instruction_index = 0; instruction_index < instructions.size(); instruction_index++)
+        {
+            Instruction instruction = instructions.get(instruction_index);
+            contextMap.put(instruction.getMainVarName(), 0);
+            if (instruction.getLabel() != null) {
+                contextMap.put(instruction.getLabel(), instruction_index);
+            }
+            for (String argName : instruction.getArgs().values())
+            {
+                if (!contextMap.containsKey(argName) && !isLabelArgument(argName))
+                {
+                    contextMap.put(argName, 0);
+                }
+            }
+        }
     }
+    private boolean isLabelArgument(String argName)
+    {
+        return labels.contains(argName) || argName.startsWith("L");
+    }
+
 }
