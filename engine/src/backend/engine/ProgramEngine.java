@@ -28,7 +28,6 @@ public class ProgramEngine
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         initializeContextMap();
-        System.out.println("debug!!!");
 
     }
 
@@ -46,12 +45,16 @@ public class ProgramEngine
             }
             for (String argName : instruction.getArgs().values())
             {
-                if (!contextMap.containsKey(argName) && !labels.contains(argName))
+                if (!contextMap.containsKey(argName) && !isLabelArgument(argName))
                 {
                     contextMap.put(argName, 0);
                 }
             }
         }
+    }
+    private boolean isLabelArgument(String argName)
+    {
+        return labels.contains(argName) || argName.startsWith("L");
     }
 
 }

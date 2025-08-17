@@ -25,7 +25,7 @@ public class JumpEqualVariable extends Instruction implements Command
             String labelName = args.get(labelArgumentName);
             String variableName = args.get(variableArgumentName);
 
-            if (contextMap.containsKey(labelName) && contextMap.containsKey(variableName))
+            if (contextMap.containsKey(labelName))
             {
                 int mainVarValue = contextMap.get(mainVarName);
                 int labelLineNumber = contextMap.get(labelName);
