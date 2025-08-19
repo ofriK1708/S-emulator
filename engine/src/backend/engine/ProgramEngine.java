@@ -68,6 +68,7 @@ public class ProgramEngine
 
     private void run()
     {
+        programStats.incrementExecutionCount();
         while(contextMap.get(Instruction.ProgramCounterName) < instructions.size())
         {
             int currentPC = contextMap.get(Instruction.ProgramCounterName);
@@ -78,9 +79,22 @@ public class ProgramEngine
                 programStats.incrementCycles(instruction.getCycles());
             } catch (IllegalArgumentException e)
             {
-                System.err.println("Error executing instruction at PC=" + currentPC + ": " + e.getMessage());
-                break;
+                throw new RuntimeException("Error executing instruction at PC=" + currentPC + ": " + e.getMessage(), e);
             }
         }
+        programStats.setY(contextMap.get(outputName));
+    }
+
+    // TODO - delete this method before commiting
+    public void printProgram()
+    {
+        System.out.println("Program Name: " + programName);
+        System.out.println("Instructions:");
+        for (int i = 0; i < instructions.size(); i++)
+        {
+           System.out.println(instructions.get(i).getDisplayFormat(i));
+        }
+        System.out.println("Context Map: " + contextMap);
+        System.out.println("Labels: " + labels);
     }
 }
