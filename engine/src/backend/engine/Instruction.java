@@ -14,19 +14,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class Instruction
+public abstract class Instruction implements Command
 {
     protected String mainVarName;
     protected Map<String, String> args;
     protected String label;
-    protected final static String ProgramCounter = "PC";
+    protected final static String ProgramCounterName = "PC";
 
 
     protected Instruction(String mainVarName, Map<String, String> args, String label)
     {
         this.mainVarName = mainVarName;
         this.args = args;
-        this.label = label;
+        this.label = label == null ? "" : label;
     }
 
     public String getLabel()
@@ -73,7 +73,13 @@ public class Instruction
             case "JUMP_EQUAL_VARIABLE" -> new JumpEqualVariable(mainVarName, args, labelName);
             default -> throw new IllegalArgumentException("Unknown instruction type: " + sInstruction.getName());
         };
-
-
+    }
+    protected String formatDisplay(int instructionNumber, String commandPart)
+    {
+        String numberPart = "#" + instructionNumber;
+        String typePart = getType() == CommandType.BASIC ? "(B)" : "(S)";
+        String labelPart = "[ " + String.format("%-4s", label) + "]";
+        String cyclesPart = "(" + getCycles() + ")";
+        return String.format("%s %s %s %s %s", numberPart, typePart, labelPart, commandPart, cyclesPart);
     }
 }

@@ -7,7 +7,7 @@ import backend.engine.Instruction;
 import java.util.List;
 import java.util.Map;
 
-public class Assignment extends Instruction implements Command
+public class Assignment extends Instruction
 {
     private final String sourceArgumentName = "assignedVariable";
 
@@ -55,9 +55,10 @@ public class Assignment extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat()
+    public String getDisplayFormat(int instructionNumber)
     {
         String sourceName = args.get(sourceArgumentName);
-        return String.format("%s <- %s", mainVarName, sourceName);
+        String commandPart = String.format("%s <- %s", mainVarName, sourceName);
+        return formatDisplay(instructionNumber, commandPart);
     }
 }

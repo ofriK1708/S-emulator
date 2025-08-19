@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class Decrease extends Instruction implements Command
+public class Decrease extends Instruction
 {
     public Decrease(String mainVarName, Map<String, String> args, String labelName)
     {
@@ -21,7 +21,7 @@ public class Decrease extends Instruction implements Command
         try
         {
             contextMap.put(mainVarName, Math.max((contextMap.get(mainVarName) - 1),0));
-            contextMap.put(ProgramCounter, contextMap.get(ProgramCounter) + 1);
+            contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1);
         } catch (NumberFormatException e)
         {
             throw new IllegalArgumentException("expected integer value for " + mainVarName);
@@ -51,8 +51,9 @@ public class Decrease extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat()
+    public String getDisplayFormat(int instructionNumber)
     {
-        return String.format("%s <- %s - 1", mainVarName, mainVarName);
+        String commandPart = String.format("%s <- %s - 1", mainVarName, mainVarName);
+        return formatDisplay(instructionNumber, commandPart);
     }
 }

@@ -11,5 +11,5 @@ public interface Command
     List<Command> expand(int level);
     int getNumberOfArgs();
     String toString(); // TODO: ask TO KEEP ?
-    String getDisplayFormat();
+    String getDisplayFormat(int instructionNumber);
 }

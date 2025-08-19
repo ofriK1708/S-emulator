@@ -7,7 +7,7 @@ import backend.engine.Instruction;
 import java.util.List;
 import java.util.Map;
 
-public class JumpEqualVariable extends Instruction implements Command
+public class JumpEqualVariable extends Instruction
 {
     private final String labelArgumentName = "JEVariableLabel";
     private final String variableArgumentName = "variableName";
@@ -32,10 +32,10 @@ public class JumpEqualVariable extends Instruction implements Command
                 int variableValue = contextMap.get(variableName);
                 if (mainVarValue != variableValue)
                 {
-                    contextMap.put(ProgramCounter, contextMap.get(ProgramCounter) + 1); // if we are not equal, we go to the next instruction
+                    contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1); // if we are not equal, we go to the next instruction
                 } else
                 {
-                    contextMap.put(ProgramCounter, labelLineNumber); // if we are equal, we go to the label line number
+                    contextMap.put(ProgramCounterName, labelLineNumber); // if we are equal, we go to the label line number
                 }
             } else
             {
@@ -72,10 +72,11 @@ public class JumpEqualVariable extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat()
+    public String getDisplayFormat(int instructionNumber)
     {
         String labelName = args.get(labelArgumentName);
         String checkConstant = args.get(variableArgumentName);
-        return String.format("IF %s == %s GOTO %s", mainVarName, checkConstant, labelName);
+        String commandPart = String.format("IF %s == %s GOTO %s", mainVarName, checkConstant, labelName);
+        return formatDisplay(instructionNumber, commandPart);
     }
 }

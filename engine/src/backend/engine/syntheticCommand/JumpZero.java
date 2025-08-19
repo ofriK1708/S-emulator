@@ -7,7 +7,7 @@ import backend.engine.Instruction;
 import java.util.List;
 import java.util.Map;
 
-public class JumpZero extends Instruction implements Command
+public class JumpZero extends Instruction
 {
     private final String labelArgumentName = "JZLabel";
 
@@ -26,10 +26,10 @@ public class JumpZero extends Instruction implements Command
             int labelLineNumber = contextMap.get(labelName);
             if (value != 0)
             {
-                contextMap.put(ProgramCounter, contextMap.get(ProgramCounter) + 1);
+                contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1);
             } else
             {
-                contextMap.put(ProgramCounter, labelLineNumber);
+                contextMap.put(ProgramCounterName, labelLineNumber);
             }
         } else
         {
@@ -58,8 +58,9 @@ public class JumpZero extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat() {
+    public String getDisplayFormat(int instructionNumber) {
         String labelName = args.get(labelArgumentName);
-        return String.format("if %s == 0 GOTO %s", mainVarName, labelName);
+        String commandPart = String.format("if %s == 0 GOTO %s", mainVarName, labelName);
+        return formatDisplay(instructionNumber, commandPart);
     }
 }

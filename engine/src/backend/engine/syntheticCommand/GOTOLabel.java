@@ -7,7 +7,7 @@ import backend.engine.Instruction;
 import java.util.List;
 import java.util.Map;
 
-public class GOTOLabel extends Instruction implements Command
+public class GOTOLabel extends Instruction
 {
     private final String labelArgumentName = "gotoLabel";
 
@@ -23,7 +23,7 @@ public class GOTOLabel extends Instruction implements Command
         if (contextMap.containsKey(labelName))
         {
             int labelLineNumber = contextMap.get(labelName);
-            contextMap.put(ProgramCounter, labelLineNumber);
+            contextMap.put(ProgramCounterName, labelLineNumber);
         } else
         {
             throw new IllegalArgumentException("No such label : " + labelName);
@@ -55,9 +55,10 @@ public class GOTOLabel extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat()
+    public String getDisplayFormat(int instructionNumber)
     {
         String labelName = args.get(labelArgumentName);
-        return String.format("GOTO %s", labelName);
+        String commandPart = String.format("GOTO %s", labelName);
+        return formatDisplay(instructionNumber, commandPart);
     }
 }

@@ -7,7 +7,7 @@ import backend.engine.Instruction;
 import java.util.List;
 import java.util.Map;
 
-public class JumpEqualConstant extends Instruction implements Command
+public class JumpEqualConstant extends Instruction
 {
     private final String labelArgumentName = "JEConstantLabel";
     private final String constantArgumentName = "constantValue";
@@ -30,10 +30,10 @@ public class JumpEqualConstant extends Instruction implements Command
                 int labelLineNumber = contextMap.get(labelName);
                 if (mainVarValue != checkConstant)
                 {
-                    contextMap.put(ProgramCounter, contextMap.get(ProgramCounter) + 1); // if we are not equal, we go to the next instruction
+                    contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1); // if we are not equal, we go to the next instruction
                 } else
                 {
-                    contextMap.put(ProgramCounter, labelLineNumber); // if we are equal, we go to the label line number
+                    contextMap.put(ProgramCounterName, labelLineNumber); // if we are equal, we go to the label line number
                 }
             } else
             {
@@ -70,13 +70,14 @@ public class JumpEqualConstant extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat()
+    public String getDisplayFormat(int instructionNumber)
     {
         try
         {
             String labelName = args.get(labelArgumentName);
             int checkConstant = Integer.parseInt(args.get(constantArgumentName));
-            return String.format("IF %s == %d GOTO %s", mainVarName, checkConstant, labelName);
+            String CommandPart = String.format("IF %s == %d GOTO %s", mainVarName, checkConstant, labelName);
+            return formatDisplay(instructionNumber, CommandPart);
         } catch (NumberFormatException e)
         {
             throw new IllegalArgumentException("Invalid constant value: " + args.get(constantArgumentName));

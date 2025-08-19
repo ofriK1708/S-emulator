@@ -7,7 +7,7 @@ import backend.engine.Instruction;
 import java.util.List;
 import java.util.Map;
 
-public class Neutral extends Instruction implements Command
+public class Neutral extends Instruction
 {
 
     public Neutral(String mainVarName, Map<String, String> args, String labelName)
@@ -42,7 +42,9 @@ public class Neutral extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat() {
-        return String.format("%s <- %s", mainVarName, mainVarName);
+    public String getDisplayFormat(int instructionNumber)
+    {
+        String commandPart = String.format("%s <- %s", mainVarName, mainVarName);
+        return formatDisplay(instructionNumber, commandPart);
     }
 }

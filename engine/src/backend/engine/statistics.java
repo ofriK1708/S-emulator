@@ -10,9 +10,7 @@ public class statistics
     private int Y = 0;
     private int numOfCycles = 0;
 
-    public statistics()
-    {
-    }
+    public statistics() {}
 
     public statistics(int levelOfExpansion, LinkedList<Integer> argumentsValues)
     {
@@ -42,6 +40,11 @@ public class statistics
     public void setNumOfCycles(int numOfCycles)
     {
         this.numOfCycles = numOfCycles;
+    }
+
+    public void incrementCycles(int numOfCycles)
+    {
+        this.numOfCycles += numOfCycles;
     }
 
     @Override

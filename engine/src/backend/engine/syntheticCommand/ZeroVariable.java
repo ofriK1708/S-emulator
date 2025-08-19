@@ -7,7 +7,7 @@ import backend.engine.Instruction;
 import java.util.List;
 import java.util.Map;
 
-public class ZeroVariable extends Instruction implements Command
+public class ZeroVariable extends Instruction
 {
     public ZeroVariable(String mainVarName, Map<String, String> args, String labelName)
     {
@@ -45,8 +45,9 @@ public class ZeroVariable extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat()
+    public String getDisplayFormat(int instructionNumber)
     {
-        return String.format("%s <- 0", mainVarName);
+        String commandPart = String.format("%s <- 0", mainVarName);
+        return formatDisplay(instructionNumber, commandPart);
     }
 }

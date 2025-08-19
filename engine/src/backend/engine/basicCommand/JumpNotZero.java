@@ -7,7 +7,7 @@ import backend.engine.Instruction;
 import java.util.List;
 import java.util.Map;
 
-public class JumpNotZero extends Instruction implements Command
+public class JumpNotZero extends Instruction
 {
     public JumpNotZero(String mainVarName, Map<String, String> args, String labelName)
     {
@@ -24,10 +24,10 @@ public class JumpNotZero extends Instruction implements Command
             int labelLineNumber = contextMap.get(labelName);
             if (value == 0)
             {
-                contextMap.put(ProgramCounter, contextMap.get(ProgramCounter) + 1);
+                contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1);
             } else
             {
-                contextMap.put(ProgramCounter, labelLineNumber);
+                contextMap.put(ProgramCounterName, labelLineNumber);
             }
         } else
         {
@@ -61,10 +61,10 @@ public class JumpNotZero extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat()
+    public String getDisplayFormat(int instructionNumber)
     {
-        String labelName = args.get("label");
-        return String.format("if %s != 0 GOTO %s", mainVarName, labelName);
+        String commandPart = String.format("if %s != 0 GOTO %s", mainVarName, args.get("label"));
+        return formatDisplay(instructionNumber, commandPart);
     }
 }
 

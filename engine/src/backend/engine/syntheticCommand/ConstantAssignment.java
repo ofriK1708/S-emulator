@@ -7,7 +7,7 @@ import backend.engine.Instruction;
 import java.util.List;
 import java.util.Map;
 
-public class ConstantAssignment extends Instruction implements Command
+public class ConstantAssignment extends Instruction
 {
     private final String valueArgumentName = "constantValue";
 
@@ -50,11 +50,12 @@ public class ConstantAssignment extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat() {
+    public String getDisplayFormat(int instructionNumber) {
         try
         {
             int constantValue = Integer.parseInt(args.get(valueArgumentName));
-            return String.format("%s <- %d", mainVarName, constantValue);
+            String commandPart = String.format("%s <- %d", mainVarName, constantValue);
+            return formatDisplay(instructionNumber, commandPart);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid value for constant assignment: " + args.get(valueArgumentName));
         }

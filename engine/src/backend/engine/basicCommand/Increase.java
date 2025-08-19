@@ -7,7 +7,7 @@ import backend.engine.Instruction;
 import java.util.List;
 import java.util.Map;
 
-public class Increase extends Instruction implements Command
+public class Increase extends Instruction
 {
     public Increase(String mainVarName, Map<String, String> args, String labelName)
     {
@@ -20,7 +20,7 @@ public class Increase extends Instruction implements Command
         try
         {
             contextMap.put(mainVarName, contextMap.get(mainVarName) + 1);
-            contextMap.put(ProgramCounter, contextMap.get(ProgramCounter) + 1);
+            contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1);
         } catch (NumberFormatException e)
         {
             throw new IllegalArgumentException("expected integer value for " + mainVarName);
@@ -50,8 +50,9 @@ public class Increase extends Instruction implements Command
     }
 
     @Override
-    public String getDisplayFormat()
+    public String getDisplayFormat(int instructionNumber)
     {
-        return String.format("%s <- %s + 1", mainVarName, mainVarName);
+        String commandPart = String.format("%s <- %s + 1", mainVarName, mainVarName);
+        return formatDisplay(instructionNumber, commandPart);
     }
 }
