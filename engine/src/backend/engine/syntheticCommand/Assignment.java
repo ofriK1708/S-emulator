@@ -24,6 +24,7 @@ public class Assignment extends Instruction
         {
             int sourceValue = contextMap.get(sourceName);
             contextMap.put(mainVarName, sourceValue);
+            incrementProgramCounter(contextMap);
         } else
         {
             throw new IllegalArgumentException("No such variable: " + sourceName);

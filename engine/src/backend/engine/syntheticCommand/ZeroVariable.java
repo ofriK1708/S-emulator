@@ -18,6 +18,7 @@ public class ZeroVariable extends Instruction
     public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
     {
         contextMap.put(mainVarName, 0);
+        incrementProgramCounter(contextMap);
     }
 
     @Override

@@ -19,18 +19,25 @@ public class TestingMain
     {
         try
         {
-            InputStream inputStream = new FileInputStream("engine/src/backend/system/resources/error-1.xml");
-            SProgram program = deserializeFrom(inputStream);
-            ProgramEngine engine = new ProgramEngine(program);
+            XMLHandler xmlHandler = new XMLHandler();
+            String xmlFilePath = "engine/src/backend/system/resources/basic.xml";
+            SProgram program = xmlHandler.unmaeshalleForm(new File(xmlFilePath).toPath());
+            SystemController systemController = new SystemController();
+            ProgramEngine engine = systemController.createEngine(program);
+            System.out.println("-------Before execution-------");
+            engine.printProgram();
+            engine.run();
+            System.out.println("------After execution-------");
+            engine.printProgram();
         } catch (JAXBException | FileNotFoundException e)
         {
             e.printStackTrace();
         }
     }
 
-    private static SProgram deserializeFrom(InputStream in) throws JAXBException {
+    /*private static SProgram deserializeFrom(InputStream in) throws JAXBException {
         JAXBContext jc = JAXBContext.newInstance(TestingMain.JAXB_XML_GAME_PACKAGE_NAME);
         Unmarshaller u = jc.createUnmarshaller();
         return (SProgram) u.unmarshal(in);
-    }
+    }*/
 }

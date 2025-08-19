@@ -21,7 +21,7 @@ public class Decrease extends Instruction
         try
         {
             contextMap.put(mainVarName, Math.max((contextMap.get(mainVarName) - 1),0));
-            contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1);
+            incrementProgramCounter(contextMap);
         } catch (NumberFormatException e)
         {
             throw new IllegalArgumentException("expected integer value for " + mainVarName);

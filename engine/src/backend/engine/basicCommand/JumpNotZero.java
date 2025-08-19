@@ -9,25 +9,26 @@ import java.util.Map;
 
 public class JumpNotZero extends Instruction
 {
-    public JumpNotZero(String mainVarName, Map<String, String> args, String labelName)
+    private String labelArgumentName = "JNZLabel";
+    public JumpNotZero(String mainVarName, Map<String, String> args, String labelArgumentName)
     {
-        super(mainVarName, args, labelName);
+        super(mainVarName, args, labelArgumentName);
     }
 
     @Override
     public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
     {
-        String labelName = args.get("label");
+        String labelName = args.get(labelArgumentName);
         if (contextMap.containsKey(labelName))
         {
             int value = contextMap.get(mainVarName);
             int labelLineNumber = contextMap.get(labelName);
-            if (value == 0)
-            {
-                contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1);
-            } else
+            if (value != 0)
             {
                 contextMap.put(ProgramCounterName, labelLineNumber);
+            } else
+            {
+                incrementProgramCounter(contextMap);
             }
         } else
         {
@@ -63,7 +64,7 @@ public class JumpNotZero extends Instruction
     @Override
     public String getDisplayFormat(int instructionNumber)
     {
-        String commandPart = String.format("if %s != 0 GOTO %s", mainVarName, args.get("label"));
+        String commandPart = String.format("if %s != 0 GOTO %s", mainVarName, args.get(labelArgumentName));
         return formatDisplay(instructionNumber, commandPart);
     }
 }

@@ -23,6 +23,7 @@ public class ConstantAssignment extends Instruction
         {
             int constantValue = Integer.parseInt(args.get(valueArgumentName));
             contextMap.put(mainVarName, constantValue);
+            incrementProgramCounter(contextMap);
         } catch(NumberFormatException e)
         {
             throw new IllegalArgumentException("Invalid value for constant assignment: " + args.get(valueArgumentName));

@@ -30,7 +30,7 @@ public class JumpEqualConstant extends Instruction
                 int labelLineNumber = contextMap.get(labelName);
                 if (mainVarValue != checkConstant)
                 {
-                    contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1); // if we are not equal, we go to the next instruction
+                    incrementProgramCounter(contextMap);
                 } else
                 {
                     contextMap.put(ProgramCounterName, labelLineNumber); // if we are equal, we go to the label line number

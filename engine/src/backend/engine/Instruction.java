@@ -82,4 +82,8 @@ public abstract class Instruction implements Command
         String cyclesPart = "(" + getCycles() + ")";
         return String.format("%s %s %s %s %s", numberPart, typePart, labelPart, commandPart, cyclesPart);
     }
+    protected void incrementProgramCounter(Map<String, Integer> contextMap)
+    {
+        contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1);
+    }
 }

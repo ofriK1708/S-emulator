@@ -42,7 +42,7 @@ public class ProgramEngine
         {
             Instruction instruction = instructions.get(instruction_index);
             contextMap.put(instruction.getMainVarName(), 0);
-            if (instruction.getLabel() != null)
+            if (!instruction.getLabel().isEmpty())
             {
                 contextMap.put(instruction.getLabel(), instruction_index);
             }
@@ -56,7 +56,6 @@ public class ProgramEngine
                 {
                     contextMap.put(EXITLabelName, instructions.size()); // EXIT label is set to the end of the program
                 }
-
             }
         }
     }
@@ -66,7 +65,7 @@ public class ProgramEngine
         return labels.contains(argName) || argName.startsWith("L");
     }
 
-    private void run()
+    public void run()
     {
         programStats.incrementExecutionCount();
         while(contextMap.get(Instruction.ProgramCounterName) < instructions.size())
@@ -92,7 +91,7 @@ public class ProgramEngine
         System.out.println("Instructions:");
         for (int i = 0; i < instructions.size(); i++)
         {
-           System.out.println(instructions.get(i).getDisplayFormat(i));
+           System.out.println(instructions.get(i).getDisplayFormat(i+1));
         }
         System.out.println("Context Map: " + contextMap);
         System.out.println("Labels: " + labels);

@@ -32,7 +32,7 @@ public class JumpEqualVariable extends Instruction
                 int variableValue = contextMap.get(variableName);
                 if (mainVarValue != variableValue)
                 {
-                    contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1); // if we are not equal, we go to the next instruction
+                    incrementProgramCounter(contextMap);
                 } else
                 {
                     contextMap.put(ProgramCounterName, labelLineNumber); // if we are equal, we go to the label line number

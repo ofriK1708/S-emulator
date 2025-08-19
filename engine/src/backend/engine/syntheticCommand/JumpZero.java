@@ -26,7 +26,7 @@ public class JumpZero extends Instruction
             int labelLineNumber = contextMap.get(labelName);
             if (value != 0)
             {
-                contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1);
+                incrementProgramCounter(contextMap);
             } else
             {
                 contextMap.put(ProgramCounterName, labelLineNumber);

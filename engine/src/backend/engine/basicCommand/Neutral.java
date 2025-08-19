@@ -18,7 +18,7 @@ public class Neutral extends Instruction
     @Override
     public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
     {
-        // This command does nothing, so we don't change the context map.
+        incrementProgramCounter(contextMap);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class Neutral extends Instruction
 
     @Override
     public CommandType getType() {
-        return null;
+        return CommandType.BASIC;
     }
 
     @Override
