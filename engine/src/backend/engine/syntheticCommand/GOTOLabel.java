@@ -57,10 +57,10 @@ public class GOTOLabel extends Instruction
         List<Instruction> instructions = new ArrayList<Instruction>();
         String workVarName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
         String labelName = args.get(labelArgumentName);
-        instructions.add(new Increase(workVarName, null, ""));
+        instructions.add(new Increase(workVarName, null, label, this));
         instructions.add(new JumpNotZero(workVarName,
                 Map.of(JumpNotZero.labelArgumentName, labelName),
-                labelArgumentName));
+                labelArgumentName, this));
         return instructions;
     }
 

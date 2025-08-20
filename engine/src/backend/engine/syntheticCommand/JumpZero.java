@@ -55,8 +55,10 @@ public class JumpZero extends Instruction
         contextMap.put(freeLabelName, expandedInstructionIndex + 2);
         String labelName = args.get(labelArgumentName);
 
-        instructions.add(new JumpNotZero(mainVarName, Map.of(JumpNotZero.labelArgumentName, freeLabelName), label, this));
-        instructions.add(new GOTOLabel("", Map.of(GOTOLabel.labelArgumentName, labelName), null, this));
+        instructions.add(new JumpNotZero(mainVarName,
+                Map.of(JumpNotZero.labelArgumentName, freeLabelName), label, this));
+        instructions.add(new GOTOLabel("",
+                Map.of(GOTOLabel.labelArgumentName, labelName), null, this));
         instructions.add(new Neutral(ProgramEngine.outputName, null, freeLabelName, this));
 
         return instructions;

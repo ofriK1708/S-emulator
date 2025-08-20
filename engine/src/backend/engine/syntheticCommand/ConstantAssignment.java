@@ -46,13 +46,13 @@ public class ConstantAssignment extends Instruction
     {
         derivedFromIndex = originalInstructionIndex;
         List<Instruction> instructions = new ArrayList<Instruction>();
-        instructions.add(new ZeroVariable(mainVarName, null, null));
+        instructions.add(new ZeroVariable(mainVarName, null, label, this));
         try
         {
             int constantValue = Integer.parseInt(args.get(valueArgumentName));
             for (int i = 0; i < constantValue; i++)
             {
-                instructions.add(new Increase(mainVarName, null, null));
+                instructions.add(new Increase(mainVarName, null, null, this));
             }
         } catch (NumberFormatException e)
         {
