@@ -14,7 +14,6 @@ public class ProgramEngine
     private final Set<String> labels;
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
     private final String outputName = "y";
-    private final String EXITLabelName = "EXIT";
 
     public ProgramEngine(SProgram program)
     {
@@ -36,6 +35,7 @@ public class ProgramEngine
     private void initializeContextMap()
     {
         contextMap.clear();
+        String EXITLabelName = "EXIT";
         contextMap.put(outputName, 0);
         contextMap.put(Instruction.ProgramCounterName, 0); // Program Counter
         for (int instruction_index = 0; instruction_index < instructions.size(); instruction_index++)
