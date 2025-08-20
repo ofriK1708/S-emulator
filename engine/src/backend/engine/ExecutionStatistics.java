@@ -2,24 +2,23 @@ package backend.engine;
 
 import java.util.LinkedList;
 
-public class statistics
+public class ExecutionStatistics
 {
-    private int executionCount = 0;
+    private int executionNumber = 0;
     private int levelOfExpansion = 0;
     private LinkedList<Integer> argumentsValues = new LinkedList<>();
     private int Y = 0;
     private int numOfCycles = 0;
 
-    public statistics() {}
+    public ExecutionStatistics(int executionNumber)
+    {
+        this.executionNumber = executionNumber;
+    }
 
-    public statistics(int levelOfExpansion, LinkedList<Integer> argumentsValues)
+    public ExecutionStatistics(int levelOfExpansion, LinkedList<Integer> argumentsValues)
     {
         this.levelOfExpansion = levelOfExpansion;
         this.argumentsValues = argumentsValues;
-    }
-    public void incrementExecutionCount()
-    {
-        executionCount++;
     }
 
     public void setLevelOfExpansion(int levelOfExpansion)
@@ -51,7 +50,7 @@ public class statistics
     public String toString()
     {
         return "Statistics{" +
-                "executionCount=" + executionCount +
+                "executionNumber=" + executionNumber +
                 ", levelOfExpansion=" + levelOfExpansion +
                 ", argumentsValues=" + argumentsValues +
                 ", Y=" + Y +

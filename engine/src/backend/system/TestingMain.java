@@ -1,27 +1,21 @@
 package backend.system;
 
 import backend.engine.ProgramEngine;
-import backend.system.generated.*;
-import jakarta.xml.bind.JAXBContext;
+import backend.system.generated.SProgram;
 import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Unmarshaller;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.List;
+import java.io.IOException;
+import java.nio.file.Path;
 
 public class TestingMain
 {
-    private final static String JAXB_XML_GAME_PACKAGE_NAME = "backend.system.generated";
     public static void main(String[] args)
     {
         try
         {
             XMLHandler xmlHandler = new XMLHandler();
-            String xmlFilePath = "engine/src/backend/system/resources/basic.xml";
-            SProgram program = xmlHandler.unmaeshalleForm(new File(xmlFilePath).toPath());
+            String xmlFilePath = "engine/src/backend/system/resources/successor.xml";
+            SProgram program = xmlHandler.unmarshallForm(Path.of(xmlFilePath));
             SystemController systemController = new SystemController();
             ProgramEngine engine = systemController.createEngine(program);
             System.out.println("-------Before execution-------");
@@ -29,8 +23,9 @@ public class TestingMain
             engine.run();
             System.out.println("------After execution-------");
             engine.printProgram();
-        } catch (JAXBException | FileNotFoundException e)
+        } catch (JAXBException | IOException e)
         {
+            //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }

@@ -9,10 +9,10 @@ import java.util.stream.Collectors;
 public class ProgramEngine
 {
     private final String programName;
-    private Map<String, Integer> contextMap = new HashMap<>();
-    private List<Instruction> instructions;
-    private Set<String> labels;
-    private statistics programStats = new statistics();
+    private final Map<String, Integer> contextMap = new HashMap<>();
+    private final List<Instruction> instructions;
+    private final Set<String> labels;
+    private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
     private final String outputName = "y";
     private final String EXITLabelName = "EXIT";
 
@@ -48,9 +48,21 @@ public class ProgramEngine
             }
             for (String argName : instruction.getArgs().values())
             {
-                if (!contextMap.containsKey(argName) && !isLabelArgument(argName))
+                if (!contextMap.containsKey(argName))
                 {
-                    contextMap.put(argName, 0); // initialize all work/unhandled input variables to 0
+                    if (isLabelArgument(argName))
+                    {
+                        if (!validateLabel(argName))
+                        {
+                            throw new LabelNotExist(
+                                    instruction.getClass().getSimpleName(),
+                                    instruction_index + 1,
+                                    argName);
+                        }
+                    } else
+                    {
+                        contextMap.put(argName, 0);
+                    }
                 }
                 if (argName.equals(EXITLabelName))
                 {
@@ -62,12 +74,17 @@ public class ProgramEngine
 
     private boolean isLabelArgument(String argName)
     {
-        return labels.contains(argName) || argName.startsWith("L");
+        return argName.startsWith("L");
+    }
+
+    private boolean validateLabel(String labelName)
+    {
+        return labels.contains(labelName);
     }
 
     public void run()
     {
-        programStats.incrementExecutionCount();
+        ExecutionStatistics exStats = new ExecutionStatistics(executionStatisticsList.size() + 1);
         while(contextMap.get(Instruction.ProgramCounterName) < instructions.size())
         {
             int currentPC = contextMap.get(Instruction.ProgramCounterName);
@@ -75,13 +92,14 @@ public class ProgramEngine
             try
             {
                 instruction.execute(contextMap);
-                programStats.incrementCycles(instruction.getCycles());
+                exStats.incrementCycles(instruction.getCycles());
             } catch (IllegalArgumentException e)
             {
                 throw new RuntimeException("Error executing instruction at PC=" + currentPC + ": " + e.getMessage(), e);
             }
         }
-        programStats.setY(contextMap.get(outputName));
+        exStats.setY(contextMap.get(outputName));
+        executionStatisticsList.add(exStats);
     }
 
     // TODO - delete this method before commiting
