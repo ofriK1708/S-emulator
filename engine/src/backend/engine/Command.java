@@ -8,8 +8,9 @@ public interface Command
     void execute(Map<String, Integer> contextMap) throws IllegalArgumentException;
     int getCycles();
     CommandType getType();
-    List<Command> expand(int level);
-    int getNumberOfArgs();
-    String toString(); // TODO: ask TO KEEP ?
+
+    List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex);
+
+    int getNumberOfArgs(Map<String, Integer> contextMap);
     String getDisplayFormat(int instructionNumber);
 }

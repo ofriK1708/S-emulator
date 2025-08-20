@@ -13,7 +13,7 @@ public class ProgramEngine
     private final List<Instruction> instructions;
     private final Set<String> labels;
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
-    private final String outputName = "y";
+    public static final String outputName = "y"; // TODO - not sure about this being public
 
     public ProgramEngine(SProgram program)
     {
@@ -70,6 +70,7 @@ public class ProgramEngine
                 }
             }
         }
+        fillUnusedLabels();
     }
 
     private boolean isLabelArgument(String argName)
@@ -77,6 +78,16 @@ public class ProgramEngine
         return argName.startsWith("L");
     }
 
+    private void fillUnusedLabels()
+    {
+        for (String label : labels)
+        {
+            if (!contextMap.containsKey(label))
+            {
+                contextMap.put(label, instructions.size()); // Set unused labels to the end of the program
+            }
+        }
+    }
     private boolean validateLabel(String labelName)
     {
         return labels.contains(labelName);

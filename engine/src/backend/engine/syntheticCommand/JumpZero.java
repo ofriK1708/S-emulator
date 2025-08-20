@@ -1,19 +1,28 @@
 package backend.engine.syntheticCommand;
 
-import backend.engine.Command;
 import backend.engine.CommandType;
 import backend.engine.Instruction;
+import backend.engine.ProgramEngine;
+import backend.engine.ProgramUtils;
+import backend.engine.basicCommand.JumpNotZero;
+import backend.engine.basicCommand.Neutral;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class JumpZero extends Instruction
 {
-    private final String labelArgumentName = "JZLabel";
+    public static final String labelArgumentName = "JZLabel";
 
     public JumpZero(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
+    }
+
+    public JumpZero(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom)
+    {
+        super(mainVarName, args, label, derivedFrom);
     }
 
     @Override
@@ -38,8 +47,19 @@ public class JumpZero extends Instruction
     }
 
     @Override
-    public List<Command> expand(int level) {
-        return List.of();
+    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex)
+    {
+        derivedFromIndex = originalInstructionIndex;
+        List<Instruction> instructions = new ArrayList<Instruction>();
+        String freeLabelName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
+        contextMap.put(freeLabelName, expandedInstructionIndex + 2);
+        String labelName = args.get(labelArgumentName);
+
+        instructions.add(new JumpNotZero(mainVarName, Map.of(JumpNotZero.labelArgumentName, freeLabelName), label, this));
+        instructions.add(new GOTOLabel("", Map.of(GOTOLabel.labelArgumentName, labelName), null, this));
+        instructions.add(new Neutral(ProgramEngine.outputName, null, freeLabelName, this));
+
+        return instructions;
     }
 
     @Override
@@ -53,7 +73,8 @@ public class JumpZero extends Instruction
     }
 
     @Override
-    public int getNumberOfArgs() {
+    public int getNumberOfArgs(Map<String, Integer> contextMap)
+    {
         return 1;
     }
 

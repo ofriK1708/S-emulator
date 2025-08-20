@@ -1,17 +1,24 @@
 package backend.engine.basicCommand;
 
-import backend.engine.Command;
 import backend.engine.CommandType;
 import backend.engine.Instruction;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 public class Increase extends Instruction
 {
+    public static final int expandLevel = 0;
+
     public Increase(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
+    }
+
+    public Increase(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom)
+    {
+        super(mainVarName, args, label, derivedFrom);
     }
 
     @Override
@@ -20,7 +27,7 @@ public class Increase extends Instruction
         try
         {
             contextMap.put(mainVarName, contextMap.get(mainVarName) + 1);
-            incrementProgramCounter(contextMap);;
+            incrementProgramCounter(contextMap);
         } catch (NumberFormatException e)
         {
             throw new IllegalArgumentException("expected integer value for " + mainVarName);
@@ -29,8 +36,9 @@ public class Increase extends Instruction
     }
 
     @Override
-    public List<Command> expand(int level) {
-        return List.of();
+    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex)
+    {
+        return new LinkedList<>(List.of(this));
     }
 
     @Override
@@ -44,7 +52,7 @@ public class Increase extends Instruction
     }
 
     @Override
-    public int getNumberOfArgs()
+    public int getNumberOfArgs(Map<String, Integer> contextMap)
     {
         return 0;
     }

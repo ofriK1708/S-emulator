@@ -1,6 +1,5 @@
 package backend.engine.basicCommand;
 
-import backend.engine.Command;
 import backend.engine.CommandType;
 import backend.engine.Instruction;
 
@@ -9,10 +8,16 @@ import java.util.Map;
 
 public class JumpNotZero extends Instruction
 {
-    private String labelArgumentName = "JNZLabel";
+    public static final String labelArgumentName = "JNZLabel";
+
     public JumpNotZero(String mainVarName, Map<String, String> args, String labelArgumentName)
     {
         super(mainVarName, args, labelArgumentName);
+    }
+
+    public JumpNotZero(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom)
+    {
+        super(mainVarName, args, label, derivedFrom);
     }
 
     @Override
@@ -38,9 +43,11 @@ public class JumpNotZero extends Instruction
 
 
     @Override
-    public List<Command> expand(int level)
+    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex)
     {
-        return List.of();
+        // This command does not expand further, it is already in its final form.
+        // It can be used directly in the program.
+        return List.of(this);
     }
 
     @Override
@@ -56,7 +63,7 @@ public class JumpNotZero extends Instruction
     }
 
     @Override
-    public int getNumberOfArgs()
+    public int getNumberOfArgs(Map<String, Integer> contextMap)
     {
         return 0;
     }
@@ -67,5 +74,7 @@ public class JumpNotZero extends Instruction
         String commandPart = String.format("if %s != 0 GOTO %s", mainVarName, args.get(labelArgumentName));
         return formatDisplay(instructionNumber, commandPart);
     }
+
+
 }
 

@@ -1,9 +1,14 @@
 package backend.engine.syntheticCommand;
 
-import backend.engine.Command;
 import backend.engine.CommandType;
 import backend.engine.Instruction;
+import backend.engine.ProgramEngine;
+import backend.engine.ProgramUtils;
+import backend.engine.basicCommand.Decrease;
+import backend.engine.basicCommand.JumpNotZero;
+import backend.engine.basicCommand.Neutral;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -58,13 +63,40 @@ public class JumpEqualConstant extends Instruction
     }
 
     @Override
-    public List<Command> expand(int level)
+    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex)
     {
-        return List.of();
+        derivedFromIndex = originalInstructionIndex;
+        List<Instruction> instructions = new ArrayList<Instruction>();
+        String freeLabelName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
+        String freeWorkVariableName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
+        String srcVarName = args.get(labelArgumentName);
+        String originalLabel = args.get(labelArgumentName);
+        contextMap.put(freeLabelName, expandedInstructionIndex + 5);
+        try
+        {
+            int checkConstant = Integer.parseInt(args.get(constantArgumentName));
+            instructions.add(new Assignment(freeWorkVariableName, Map.of(Assignment.sourceArgumentName, srcVarName),
+                    label, this));
+            for (int i = 0; i < checkConstant; i++)
+            {
+                instructions.add(new JumpZero(freeWorkVariableName,
+                        Map.of(JumpZero.labelArgumentName, freeLabelName), null, this));
+                instructions.add(new Decrease(freeWorkVariableName, null, null, this));
+            }
+            instructions.add(new JumpNotZero(freeWorkVariableName, Map.of(JumpZero.labelArgumentName, freeLabelName),
+                    null, this));
+            instructions.add(new GOTOLabel("", Map.of(GOTOLabel.labelArgumentName, originalLabel),
+                    null, this));
+            instructions.add(new Neutral(ProgramEngine.outputName, null, freeLabelName, this));
+        } catch (NumberFormatException e)
+        {
+            throw new RuntimeException("Invalid constant value: " + args.get(constantArgumentName));
+        }
+        return instructions;
     }
 
     @Override
-    public int getNumberOfArgs()
+    public int getNumberOfArgs(Map<String, Integer> contextMap)
     {
         return 2;
     }

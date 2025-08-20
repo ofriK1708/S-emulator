@@ -1,6 +1,5 @@
 package backend.engine.basicCommand;
 
-import backend.engine.Command;
 import backend.engine.CommandType;
 import backend.engine.Instruction;
 
@@ -15,6 +14,11 @@ public class Neutral extends Instruction
         super(mainVarName, args, labelName);
     }
 
+    public Neutral(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom)
+    {
+        super(mainVarName, args, label, derivedFrom);
+    }
+
     @Override
     public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
     {
@@ -22,22 +26,28 @@ public class Neutral extends Instruction
     }
 
     @Override
-    public List<Command> expand(int level) {
-        return List.of();
+    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex)
+    {
+        // This command does not expand further, it is already in its final form.
+        // It can be used directly in the program.
+        return List.of(this);
     }
 
     @Override
-    public int getCycles() {
+    public int getCycles()
+    {
         return 0;
     }
 
     @Override
-    public CommandType getType() {
+    public CommandType getType()
+    {
         return CommandType.BASIC;
     }
 
     @Override
-    public int getNumberOfArgs() {
+    public int getNumberOfArgs(Map<String, Integer> contextMap)
+    {
         return 0;
     }
 

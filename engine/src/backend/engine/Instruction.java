@@ -17,10 +17,20 @@ import java.util.stream.Collectors;
 public abstract class Instruction implements Command
 {
     protected String mainVarName;
+
     protected Map<String, String> args;
     protected String label;
     protected final static String ProgramCounterName = "PC";
+    protected Instruction derivedFrom = null;
+    protected int derivedFromIndex;
 
+    protected Instruction(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom)
+    {
+        this.mainVarName = mainVarName;
+        this.args = args;
+        this.label = label;
+        this.derivedFrom = derivedFrom;
+    }
 
     protected Instruction(String mainVarName, Map<String, String> args, String label)
     {
@@ -80,7 +90,12 @@ public abstract class Instruction implements Command
         String typePart = getType() == CommandType.BASIC ? "(B)" : "(S)";
         String labelPart = "[ " + String.format("%-4s", label) + "]";
         String cyclesPart = "(" + getCycles() + ")";
-        return String.format("%s %s %s %s %s", numberPart, typePart, labelPart, commandPart, cyclesPart);
+        String full = String.format("%s %s %s %s %s", numberPart, typePart, labelPart, commandPart, cyclesPart);
+        if (derivedFrom != null)
+        {
+            full += "<<<" + derivedFrom.getDisplayFormat(derivedFromIndex);
+        }
+        return full;
     }
     protected void incrementProgramCounter(Map<String, Integer> contextMap)
     {

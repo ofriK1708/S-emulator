@@ -1,9 +1,12 @@
 package backend.engine.syntheticCommand;
 
-import backend.engine.Command;
 import backend.engine.CommandType;
 import backend.engine.Instruction;
+import backend.engine.ProgramUtils;
+import backend.engine.basicCommand.Decrease;
+import backend.engine.basicCommand.JumpNotZero;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +15,11 @@ public class ZeroVariable extends Instruction
     public ZeroVariable(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
+    }
+
+    public ZeroVariable(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom)
+    {
+        super(mainVarName, args, label, derivedFrom);
     }
 
     @Override
@@ -34,13 +42,19 @@ public class ZeroVariable extends Instruction
     }
 
     @Override
-    public List<Command> expand(int level)
+    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex)
     {
-        return List.of();
+        derivedFromIndex = originalInstructionIndex;
+        List<Instruction> expanded = new LinkedList<>();
+        String freeLabelName = ProgramUtils.getNextFreeLabelName(contextMap);
+        contextMap.put(freeLabelName, expandedInstructionIndex);
+        expanded.add(new Decrease(mainVarName, null, freeLabelName));
+        expanded.add(new JumpNotZero(mainVarName, Map.of(JumpNotZero.labelArgumentName, freeLabelName), freeLabelName));
+        return expanded;
     }
 
     @Override
-    public int getNumberOfArgs()
+    public int getNumberOfArgs(Map<String, Integer> contextMap)
     {
         return 0;
     }

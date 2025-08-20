@@ -1,9 +1,10 @@
 package backend.engine.syntheticCommand;
 
-import backend.engine.Command;
 import backend.engine.CommandType;
 import backend.engine.Instruction;
+import backend.engine.basicCommand.Increase;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,12 +42,28 @@ public class ConstantAssignment extends Instruction
     }
 
     @Override
-    public List<Command> expand(int level) {
-        return List.of();
+    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex)
+    {
+        derivedFromIndex = originalInstructionIndex;
+        List<Instruction> instructions = new ArrayList<Instruction>();
+        instructions.add(new ZeroVariable(mainVarName, null, null));
+        try
+        {
+            int constantValue = Integer.parseInt(args.get(valueArgumentName));
+            for (int i = 0; i < constantValue; i++)
+            {
+                instructions.add(new Increase(mainVarName, null, null));
+            }
+        } catch (NumberFormatException e)
+        {
+            throw new IllegalArgumentException("Invalid value for constant assignment: " + args.get(valueArgumentName));
+        }
+        return instructions;
     }
 
     @Override
-    public int getNumberOfArgs() {
+    public int getNumberOfArgs(Map<String, Integer> contextMap)
+    {
         return 1;
     }
 
