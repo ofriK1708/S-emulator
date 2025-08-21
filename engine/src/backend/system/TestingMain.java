@@ -18,10 +18,10 @@ public class TestingMain
             SProgram program = xmlHandler.unmarshallForm(Path.of(xmlFilePath));
             SystemController systemController = new SystemController();
             ProgramEngine engine = systemController.createEngine(program);
-            System.out.println("-------Before execution-------");
+            System.out.println("-------Before expanding-------");
             engine.printProgram();
-            engine.run();
-            System.out.println("------After execution-------");
+            System.out.println("------After expanding-------");
+            engine.expand(2);
             engine.printProgram();
         } catch (JAXBException | IOException e)
         {

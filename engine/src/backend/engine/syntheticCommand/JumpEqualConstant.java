@@ -102,14 +102,14 @@ public class JumpEqualConstant extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionNumber)
+    public String getDisplayFormat(int instructionIndex)
     {
         try
         {
             String labelName = args.get(labelArgumentName);
             int checkConstant = Integer.parseInt(args.get(constantArgumentName));
             String CommandPart = String.format("IF %s == %d GOTO %s", mainVarName, checkConstant, labelName);
-            return formatDisplay(instructionNumber, CommandPart);
+            return formatDisplay(instructionIndex, CommandPart);
         } catch (NumberFormatException e)
         {
             throw new IllegalArgumentException("Invalid constant value: " + args.get(constantArgumentName));

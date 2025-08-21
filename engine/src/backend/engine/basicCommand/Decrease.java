@@ -61,10 +61,10 @@ public class Decrease extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionNumber)
+    public String getDisplayFormat(int instructionIndex)
     {
         String commandPart = String.format("%s <- %s - 1", mainVarName, mainVarName);
-        return formatDisplay(instructionNumber, commandPart);
+        return formatDisplay(instructionIndex, commandPart);
     }
 
     public int getExpandLevel()

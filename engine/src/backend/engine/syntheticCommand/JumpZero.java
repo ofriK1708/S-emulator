@@ -81,9 +81,10 @@ public class JumpZero extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionNumber) {
+    public String getDisplayFormat(int instructionIndex)
+    {
         String labelName = args.get(labelArgumentName);
         String commandPart = String.format("if %s == 0 GOTO %s", mainVarName, labelName);
-        return formatDisplay(instructionNumber, commandPart);
+        return formatDisplay(instructionIndex, commandPart);
     }
 }

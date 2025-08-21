@@ -11,6 +11,7 @@ public class ProgramEngine
     private final String programName;
     private final Map<String, Integer> contextMap = new HashMap<>();
     private final List<Instruction> instructions;
+    private List<Instruction> expandedInstructions = new ArrayList<>();
     private final Set<String> labels;
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
     public static final String outputName = "y"; // TODO - not sure about this being public
@@ -113,14 +114,43 @@ public class ProgramEngine
         executionStatisticsList.add(exStats);
     }
 
+    public void expand(int level)
+    {
+        if (level > 0)
+        {
+            expandedInstructions.clear();
+            for (int i = 0; i < instructions.size(); i++)
+            {
+                Instruction instruction = instructions.get(i);
+                List<Instruction> expanded = instruction.expand(contextMap, i, expandedInstructions.size());
+                expandedInstructions.addAll(expanded);
+            }
+            if (level > 1)
+            {
+                for (int currLevel = 1; currLevel < level; currLevel++)
+                {
+                    List<Instruction> tempExpanded = new ArrayList<>();
+                    for (int i = 0; i < expandedInstructions.size(); i++)
+                    {
+                        Instruction instruction = expandedInstructions.get(i);
+                        List<Instruction> furtherExpanded = instruction.expand(contextMap, i, tempExpanded.size());
+                        tempExpanded.addAll(furtherExpanded);
+                    }
+                    expandedInstructions = tempExpanded;
+                }
+            }
+        }
+    }
+
     // TODO - delete this method before commiting
     public void printProgram()
     {
+        List<Instruction> instructionsToPrint = expandedInstructions.isEmpty() ? instructions : expandedInstructions;
         System.out.println("Program Name: " + programName);
         System.out.println("Instructions:");
-        for (int i = 0; i < instructions.size(); i++)
+        for (int i = 0; i < instructionsToPrint.size(); i++)
         {
-           System.out.println(instructions.get(i).getDisplayFormat(i+1));
+            System.out.println(instructionsToPrint.get(i).getDisplayFormat(i));
         }
         System.out.println("Context Map: " + contextMap);
         System.out.println("Labels: " + labels);

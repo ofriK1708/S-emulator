@@ -5,6 +5,7 @@ import backend.engine.Instruction;
 import backend.engine.ProgramUtils;
 import backend.engine.basicCommand.Decrease;
 import backend.engine.basicCommand.JumpNotZero;
+import backend.engine.basicCommand.Neutral;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -47,7 +48,8 @@ public class ZeroVariable extends Instruction
         derivedFromIndex = originalInstructionIndex;
         List<Instruction> expanded = new LinkedList<>();
         String freeLabelName = ProgramUtils.getNextFreeLabelName(contextMap);
-        contextMap.put(freeLabelName, expandedInstructionIndex);
+        contextMap.put(freeLabelName, expandedInstructionIndex + 1);
+        expanded.add(new Neutral(mainVarName, null, label, this));
         expanded.add(new Decrease(mainVarName, null, freeLabelName, this));
         expanded.add(new JumpNotZero(mainVarName,
                 Map.of(JumpNotZero.labelArgumentName, freeLabelName), freeLabelName, this));
@@ -61,9 +63,9 @@ public class ZeroVariable extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionNumber)
+    public String getDisplayFormat(int instructionIndex)
     {
         String commandPart = String.format("%s <- 0", mainVarName);
-        return formatDisplay(instructionNumber, commandPart);
+        return formatDisplay(instructionIndex, commandPart);
     }
 }

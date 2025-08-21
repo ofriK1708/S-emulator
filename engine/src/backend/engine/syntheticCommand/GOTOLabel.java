@@ -71,10 +71,10 @@ public class GOTOLabel extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionNumber)
+    public String getDisplayFormat(int instructionIndex)
     {
         String labelName = args.get(labelArgumentName);
         String commandPart = String.format("GOTO %s", labelName);
-        return formatDisplay(instructionNumber, commandPart);
+        return formatDisplay(instructionIndex, commandPart);
     }
 }

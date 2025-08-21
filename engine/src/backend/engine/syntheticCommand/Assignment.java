@@ -70,7 +70,7 @@ public class Assignment extends Instruction
         instructions.add(new ZeroVariable(mainVarName, null, label, this));
         instructions.add(new JumpNotZero(srcVarName, Map.of(JumpNotZero.labelArgumentName, freeLabel1), null, this));
         instructions.add(new GOTOLabel("", Map.of(GOTOLabel.labelArgumentName, freeLabel3), null, this));
-        instructions.add(new Decrease(srcVarName, null, freeWorkVar, this));
+        instructions.add(new Decrease(srcVarName, null, freeLabel1, this));
         instructions.add(new Increase(freeWorkVar, null, null, this));
         instructions.add(new JumpNotZero(srcVarName, Map.of(JumpNotZero.labelArgumentName, freeLabel1), null, this));
         instructions.add(new Decrease(freeWorkVar, null, freeLabel2, this));
@@ -89,10 +89,10 @@ public class Assignment extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionNumber)
+    public String getDisplayFormat(int instructionIndex)
     {
         String sourceName = args.get(sourceArgumentName);
         String commandPart = String.format("%s <- %s", mainVarName, sourceName);
-        return formatDisplay(instructionNumber, commandPart);
+        return formatDisplay(instructionIndex, commandPart);
     }
 }
