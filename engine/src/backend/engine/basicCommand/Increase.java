@@ -16,9 +16,9 @@ public class Increase extends Instruction
         super(mainVarName, args, labelName);
     }
 
-    public Increase(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom)
+    public Increase(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
     {
-        super(mainVarName, args, label, derivedFrom);
+        super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class Increase extends Instruction
     }
 
     @Override
-    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex)
+    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
         return new LinkedList<>(List.of(this));
     }

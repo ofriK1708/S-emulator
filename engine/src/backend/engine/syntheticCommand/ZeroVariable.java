@@ -18,9 +18,9 @@ public class ZeroVariable extends Instruction
         super(mainVarName, args, labelName);
     }
 
-    public ZeroVariable(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom)
+    public ZeroVariable(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
     {
-        super(mainVarName, args, label, derivedFrom);
+        super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }
 
     @Override
@@ -43,16 +43,14 @@ public class ZeroVariable extends Instruction
     }
 
     @Override
-    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex)
+    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
-        derivedFromIndex = originalInstructionIndex;
         List<Instruction> expanded = new LinkedList<>();
         String freeLabelName = ProgramUtils.getNextFreeLabelName(contextMap);
-        contextMap.put(freeLabelName, expandedInstructionIndex + 1);
-        expanded.add(new Neutral(mainVarName, null, label, this));
-        expanded.add(new Decrease(mainVarName, null, freeLabelName, this));
+        expanded.add(new Neutral(mainVarName, null, label, this, originalInstructionIndex));
+        expanded.add(new Decrease(mainVarName, null, freeLabelName, this, originalInstructionIndex));
         expanded.add(new JumpNotZero(mainVarName,
-                Map.of(JumpNotZero.labelArgumentName, freeLabelName), freeLabelName, this));
+                Map.of(JumpNotZero.labelArgumentName, freeLabelName), null, this, originalInstructionIndex));
         return expanded;
     }
 

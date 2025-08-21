@@ -19,9 +19,9 @@ public class GOTOLabel extends Instruction
         super(mainVarName, args, labelName);
     }
 
-    public GOTOLabel(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom)
+    public GOTOLabel(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
     {
-        super(mainVarName, args, label, derivedFrom);
+        super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }
 
     @Override
@@ -51,16 +51,16 @@ public class GOTOLabel extends Instruction
     }
 
     @Override
-    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex)
+    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
-        derivedFromIndex = originalInstructionIndex;
+
         List<Instruction> instructions = new ArrayList<Instruction>();
         String workVarName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
         String originalLabel = args.get(labelArgumentName);
-        instructions.add(new Increase(workVarName, null, label, this));
+        instructions.add(new Increase(workVarName, null, label, this, originalInstructionIndex));
         instructions.add(new JumpNotZero(workVarName,
                 Map.of(JumpNotZero.labelArgumentName, originalLabel),
-                labelArgumentName, this));
+                null, this, originalInstructionIndex));
         return instructions;
     }
 

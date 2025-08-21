@@ -63,31 +63,29 @@ public class JumpEqualConstant extends Instruction
     }
 
     @Override
-    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex)
+    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
-        derivedFromIndex = originalInstructionIndex;
         List<Instruction> instructions = new ArrayList<Instruction>();
-        String freeLabelName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
+        String freeLabelName = ProgramUtils.getNextFreeLabelName(contextMap);
         String freeWorkVariableName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
-        String srcVarName = args.get(labelArgumentName);
         String originalLabel = args.get(labelArgumentName);
-        contextMap.put(freeLabelName, expandedInstructionIndex + 5);
+
         try
         {
             int checkConstant = Integer.parseInt(args.get(constantArgumentName));
-            instructions.add(new Assignment(freeWorkVariableName, Map.of(Assignment.sourceArgumentName, srcVarName),
-                    label, this));
+            instructions.add(new Assignment(freeWorkVariableName, Map.of(Assignment.sourceArgumentName, mainVarName),
+                    label, this, originalInstructionIndex));
             for (int i = 0; i < checkConstant; i++)
             {
                 instructions.add(new JumpZero(freeWorkVariableName,
-                        Map.of(JumpZero.labelArgumentName, freeLabelName), null, this));
-                instructions.add(new Decrease(freeWorkVariableName, null, null, this));
+                        Map.of(JumpZero.labelArgumentName, freeLabelName), null, this, originalInstructionIndex));
+                instructions.add(new Decrease(freeWorkVariableName, null, null, this, originalInstructionIndex));
             }
-            instructions.add(new JumpNotZero(freeWorkVariableName, Map.of(JumpZero.labelArgumentName, freeLabelName),
-                    null, this));
+            instructions.add(new JumpNotZero(freeWorkVariableName, Map.of(JumpNotZero.labelArgumentName, freeLabelName),
+                    null, this, originalInstructionIndex));
             instructions.add(new GOTOLabel("", Map.of(GOTOLabel.labelArgumentName, originalLabel),
-                    null, this));
-            instructions.add(new Neutral(ProgramEngine.outputName, null, freeLabelName, this));
+                    null, this, originalInstructionIndex));
+            instructions.add(new Neutral(ProgramEngine.outputName, null, freeLabelName, this, originalInstructionIndex));
         } catch (NumberFormatException e)
         {
             throw new RuntimeException("Invalid constant value: " + args.get(constantArgumentName));

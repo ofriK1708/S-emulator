@@ -15,9 +15,9 @@ public class JumpNotZero extends Instruction
         super(mainVarName, args, labelArgumentName);
     }
 
-    public JumpNotZero(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom)
+    public JumpNotZero(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
     {
-        super(mainVarName, args, label, derivedFrom);
+        super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class JumpNotZero extends Instruction
 
 
     @Override
-    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex)
+    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
         // This command does not expand further, it is already in its final form.
         // It can be used directly in the program.

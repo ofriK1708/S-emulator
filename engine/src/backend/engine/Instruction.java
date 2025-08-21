@@ -24,12 +24,13 @@ public abstract class Instruction implements Command
     protected Instruction derivedFrom = null;
     protected int derivedFromIndex;
 
-    protected Instruction(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom)
+    protected Instruction(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
     {
         this.mainVarName = mainVarName;
         this.args = args;
         this.label = label == null ? "" : label;
         this.derivedFrom = derivedFrom;
+        this.derivedFromIndex = derivedFromIndex;
     }
 
     protected Instruction(String mainVarName, Map<String, String> args, String label)
