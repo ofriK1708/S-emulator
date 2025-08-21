@@ -56,10 +56,10 @@ public class GOTOLabel extends Instruction
         derivedFromIndex = originalInstructionIndex;
         List<Instruction> instructions = new ArrayList<Instruction>();
         String workVarName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
-        String labelName = args.get(labelArgumentName);
+        String originalLabel = args.get(labelArgumentName);
         instructions.add(new Increase(workVarName, null, label, this));
         instructions.add(new JumpNotZero(workVarName,
-                Map.of(JumpNotZero.labelArgumentName, labelName),
+                Map.of(JumpNotZero.labelArgumentName, originalLabel),
                 labelArgumentName, this));
         return instructions;
     }
