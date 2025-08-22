@@ -13,18 +13,19 @@ public class ProgramEngine
 {
     private final String programName;
     private final Map<String, Integer> contextMap = new HashMap<>();
-    private final List<Instruction> instructions;
-    private List<Instruction> expandedInstructions = new ArrayList<>();
+    private final List<Instruction> originalInstructions;
+    private final List<List<Instruction>> instructionExpansionLevels = new ArrayList<>();
     private final Set<String> labels;
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
     public static final String outputName = "y"; // TODO - not sure about this being public
     private static final String EXITLabelName = "EXIT";
 
     Random random = new Random(); // TODO - delete this!!!
+
     public ProgramEngine(SProgram program)
     {
         this.programName = program.getName();
-        instructions = program.getSInstructions().getSInstruction()
+        originalInstructions = program.getSInstructions().getSInstruction()
                 .stream()
                 .map(Instruction::createInstruction)
                 .collect(Collectors.toList());
@@ -34,6 +35,7 @@ public class ProgramEngine
                 .filter(Objects::nonNull)
                 .filter(label -> label.startsWith("L"))
                 .collect(Collectors.toSet());
+        instructionExpansionLevels.add(originalInstructions); // Level 0 is the original instructions
         initializeContextMap();
 
     }
@@ -44,9 +46,9 @@ public class ProgramEngine
 
         contextMap.put(outputName, 0);
         contextMap.put(Instruction.ProgramCounterName, 0); // Program Counter
-        for (int instruction_index = 0; instruction_index < instructions.size(); instruction_index++)
+        for (int instruction_index = 0; instruction_index < originalInstructions.size(); instruction_index++)
         {
-            Instruction instruction = instructions.get(instruction_index);
+            Instruction instruction = originalInstructions.get(instruction_index);
             contextMap.put(instruction.getMainVarName(), random.nextInt(100)); // TODO - change this to 0!!!
             if (!instruction.getLabel().isEmpty())
             {
@@ -72,7 +74,7 @@ public class ProgramEngine
                 }
                 if (argName.equals(EXITLabelName))
                 {
-                    contextMap.put(EXITLabelName, instructions.size()); // EXIT label is set to the end of the program
+                    contextMap.put(EXITLabelName, originalInstructions.size()); // EXIT label is set to the end of the program
                     labels.add(argName);
                 }
             }
@@ -95,6 +97,7 @@ public class ProgramEngine
             }
         }
     }
+
     private boolean validateLabel(String labelName)
     {
         return labels.contains(labelName);
@@ -104,11 +107,11 @@ public class ProgramEngine
     {
         ExecutionStatistics exStats = new ExecutionStatistics(executionStatisticsList.size() + 1);
         expand(expandLevel);
-        List<Instruction> executedInstructions = expandedInstructions.isEmpty() ? instructions : expandedInstructions;
-        while(contextMap.get(Instruction.ProgramCounterName) < instructions.size())
+        List<Instruction> executedInstructions = instructionExpansionLevels.get(expandLevel);
+        while (contextMap.get(Instruction.ProgramCounterName) < originalInstructions.size())
         {
             int currentPC = contextMap.get(Instruction.ProgramCounterName);
-            Instruction instruction = instructions.get(currentPC);
+            Instruction instruction = originalInstructions.get(currentPC);
             try
             {
                 instruction.execute(contextMap);
@@ -126,28 +129,18 @@ public class ProgramEngine
     {
         if (level > 0)
         {
-            expandedInstructions.clear();
-            for (int i = 0; i < instructions.size(); i++)
+            for (int currLevel = instructionExpansionLevels.size(); currLevel <= level; currLevel++)
             {
-                Instruction instruction = instructions.get(i);
-                List<Instruction> expanded = instruction.expand(contextMap, i);
-                expandedInstructions.addAll(expanded);
-            }
-            updateLabelsAfterExpanding();
-            if (level > 1)
-            {
-                for (int currLevel = 1; currLevel < level; currLevel++)
+                List<Instruction> tempExpanded = new ArrayList<>();
+                List<Instruction> previouslyExpanded = instructionExpansionLevels.get(currLevel - 1);
+                for (int i = 0; i < previouslyExpanded.size(); i++)
                 {
-                    List<Instruction> tempExpanded = new ArrayList<>();
-                    for (int i = 0; i < expandedInstructions.size(); i++)
-                    {
-                        Instruction instruction = expandedInstructions.get(i);
-                        List<Instruction> furtherExpanded = instruction.expand(contextMap, i);
-                        tempExpanded.addAll(furtherExpanded);
-                    }
-                    expandedInstructions = tempExpanded;
-                    updateLabelsAfterExpanding();
+                    Instruction instruction = previouslyExpanded.get(i);
+                    List<Instruction> furtherExpanded = instruction.expand(contextMap, i);
+                    tempExpanded.addAll(furtherExpanded);
                 }
+                instructionExpansionLevels.add(tempExpanded);
+                updateLabelsAfterExpanding();
             }
 
         }
@@ -155,16 +148,17 @@ public class ProgramEngine
 
     private void updateLabelsAfterExpanding()
     {
-        for (int instruction_index = 0; instruction_index < expandedInstructions.size(); instruction_index++)
+        List<Instruction> LatestExpanded = instructionExpansionLevels.getLast();
+        for (int instruction_index = 0; instruction_index < LatestExpanded.size(); instruction_index++)
         {
-            Instruction instruction = expandedInstructions.get(instruction_index);
+            Instruction instruction = LatestExpanded.get(instruction_index);
             if (!instruction.getLabel().isEmpty())
             {
                 contextMap.put(instruction.getLabel(), instruction_index);
             }
             if (labels.contains(EXITLabelName))
             {
-                contextMap.put(EXITLabelName, expandedInstructions.size()); // EXIT label is set to the end of the expanded program
+                contextMap.put(EXITLabelName, LatestExpanded.size()); // EXIT label is set to the end of the expanded program
             }
         }
         contextMap.keySet()
@@ -174,9 +168,9 @@ public class ProgramEngine
     }
 
     // TODO - delete this method after testing
-    public void printProgram()
+    public void printProgram(int expandLevel)
     {
-        List<Instruction> instructionsToPrint = expandedInstructions.isEmpty() ? instructions : expandedInstructions;
+        List<Instruction> instructionsToPrint = instructionExpansionLevels.get(expandLevel);
         System.out.println("Program Name: " + programName);
         System.out.println("Instructions:");
         for (int i = 0; i < instructionsToPrint.size(); i++)
@@ -188,9 +182,9 @@ public class ProgramEngine
     }
 
     // TODO - delete this method after testing
-    public void printProgramToFile(String fileName)
+    public void printProgramToFile(int expandLevel, String fileName)
     {
-        List<Instruction> instructionsToPrint = expandedInstructions.isEmpty() ? instructions : expandedInstructions;
+        List<Instruction> instructionsToPrint = instructionExpansionLevels.get(expandLevel);
         String outputDir = "outputs";
         String outputPath = outputDir + "/" + fileName;
         try
