@@ -41,6 +41,18 @@ public class ProgramUtils
             }
         }
     }
+
+    public static boolean isNumber(String argName)
+    {
+        try
+        {
+            Integer.parseInt(argName);
+            return true;
+        } catch (NumberFormatException e)
+        {
+            return false;
+        }
+    }
     /*public static int calculateExpandedLevel(Instruction instruction)
     {
         // 'this' is not available in static context, so pass a prototype or use a factory if needed
