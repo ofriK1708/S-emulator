@@ -40,6 +40,7 @@ public class ProgramEngine
                 .filter(label -> !label.isBlank())
                 .map(String::trim)
                 .filter(label -> label.startsWith("L"))
+                .map(String::trim)
                 .collect(Collectors.toSet());
         instructionExpansionLevels.add(originalInstructions);
         labelsByExpandLevel.add(originalLabels);
