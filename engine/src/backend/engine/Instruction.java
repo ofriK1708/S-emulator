@@ -6,7 +6,6 @@ import backend.engine.basicCommand.JumpNotZero;
 import backend.engine.basicCommand.Neutral;
 import backend.engine.syntheticCommand.*;
 import backend.system.generated.SInstruction;
-import backend.system.generated.SInstructionArgument;
 import backend.system.generated.SInstructionArguments;
 
 import java.util.Collections;
@@ -60,16 +59,17 @@ public abstract class Instruction implements Command
 
         Map<String, String> args = Optional.ofNullable(sInstruction.getSInstructionArguments())
                 .map(SInstructionArguments::getSInstructionArgument)
-                .map(argsList -> argsList.stream().collect(Collectors.toMap(
-                        SInstructionArgument::getName,
-                        SInstructionArgument::getValue
+                .map(argsList -> argsList.stream()
+                        .collect(Collectors.toMap(
+                                arg -> arg.getName().trim(),
+                                arg -> arg.getValue().trim()
                 )))
                 .orElse(Collections.emptyMap());
-        String mainVarName = Optional.ofNullable(sInstruction.getSVariable()).orElseThrow(
+        String mainVarName = Optional.of(sInstruction.getSVariable().trim()).orElseThrow(
                 () -> new IllegalArgumentException("Instruction must have main variable!"));
-        String labelName = sInstruction.getSLabel();
+        String labelName = Optional.ofNullable(sInstruction.getSLabel()).map(String::trim).orElse("");
 
-        return switch (sInstruction.getName())
+        return switch (sInstruction.getName().trim())
         {
             case "INCREASE" -> new Increase(mainVarName, args, labelName);
             case "DECREASE" -> new Decrease(mainVarName, args, labelName);

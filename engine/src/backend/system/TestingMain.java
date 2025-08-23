@@ -14,7 +14,7 @@ public class TestingMain
         try
         {
             XMLHandler xmlHandler = new XMLHandler();
-            String xmlFilePath = "engine/src/backend/system/resources/synthetic.xml";
+            String xmlFilePath = "engine/src/backend/system/resources/minus.xml";
             SProgram program = xmlHandler.unmarshallForm(Path.of(xmlFilePath));
             SystemController systemController = new SystemController();
             ProgramEngine engine = systemController.createEngine(program);
@@ -34,14 +34,7 @@ public class TestingMain
             engine.printProgramToFile(2, "After expanding 2 times and executing");
         } catch (JAXBException | IOException e)
         {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
+            System.out.println("Exception: " + e.getCause().getMessage());
         }
     }
-
-    /*private static SProgram deserializeFrom(InputStream in) throws JAXBException {
-        JAXBContext jc = JAXBContext.newInstance(TestingMain.JAXB_XML_GAME_PACKAGE_NAME);
-        Unmarshaller u = jc.createUnmarshaller();
-        return (SProgram) u.unmarshal(in);
-    }*/
 }

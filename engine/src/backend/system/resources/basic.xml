@@ -2,16 +2,16 @@
 <S-Program name="Sanity-basic" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="S-Emulator-v1.xsd">
 	<S-Instructions>
 		<S-Instruction type="basic" name="DECREASE">
-			<S-Variable>x1</S-Variable>
-			<S-Label>L1</S-Label>
+            <S-Variable>x1</S-Variable>
+            <S-Label>L1</S-Label>
 		</S-Instruction>
 		<S-Instruction type="basic" name="INCREASE">
-			<S-Variable>y</S-Variable>
+            <S-Variable>y</S-Variable>
 		</S-Instruction>
 		<S-Instruction type="basic" name="JUMP_NOT_ZERO">
-			<S-Variable>x1</S-Variable>
+            <S-Variable>x1</S-Variable>
 			<S-Instruction-Arguments>
-				<S-Instruction-Argument name="JNZLabel" value="L1"/>
+                <S-Instruction-Argument name="JNZLabel" value="   L1   "/>
 			</S-Instruction-Arguments>
 		</S-Instruction>
 		<S-Instruction type="basic" name="NEUTRAL">

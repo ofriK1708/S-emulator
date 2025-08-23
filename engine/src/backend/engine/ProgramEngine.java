@@ -38,6 +38,7 @@ public class ProgramEngine
                 .map(SInstruction::getSLabel)
                 .filter(Objects::nonNull)
                 .filter(label -> !label.isBlank())
+                .map(String::trim)
                 .filter(label -> label.startsWith("L"))
                 .collect(Collectors.toSet());
         instructionExpansionLevels.add(originalInstructions);
@@ -50,15 +51,15 @@ public class ProgramEngine
     private void initializeContextMap()
     {
         originalContextMap.clear();
-        originalContextMap.put(outputName, 0);
+        originalContextMap.put(outputName.trim(), 0);
         originalContextMap.put(Instruction.ProgramCounterName, 0); // Program Counter
         for (int instruction_index = 0; instruction_index < originalInstructions.size(); instruction_index++)
         {
             Instruction instruction = originalInstructions.get(instruction_index);
-            originalContextMap.put(instruction.getMainVarName(), random.nextInt(100)); // TODO - change this to 0!!!
+            originalContextMap.put(instruction.getMainVarName().trim(), random.nextInt(100)); // TODO - change this to 0!!!
             if (!instruction.getLabel().isEmpty())
             {
-                originalContextMap.put(instruction.getLabel(), instruction_index);
+                originalContextMap.put(instruction.getLabel().trim(), instruction_index);
             }
             for (String argName : instruction.getArgs().values())
             {
@@ -73,7 +74,7 @@ public class ProgramEngine
 
                     } else if (!ProgramUtils.isNumber(argName))
                     {
-                        originalContextMap.put(argName, random.nextInt(100)); // TODO - change this to 0!!!
+                        originalContextMap.put(argName.trim(), random.nextInt(100)); // TODO - change this to 0!!!
                     }
                 }
                 if (argName.equals(EXITLabelName))
@@ -97,7 +98,7 @@ public class ProgramEngine
         {
             if (!originalContextMap.containsKey(label))
             {
-                originalContextMap.put(label, -1); // Initialize unused labels with -1 to indicate they are not used
+                originalContextMap.put(label.trim(), -1); // Initialize unused labels with -1 to indicate they are not used
             }
         }
     }
