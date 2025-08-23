@@ -6,6 +6,8 @@ import backend.system.generated.SProgram;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -189,7 +191,7 @@ public class ProgramEngine
         String outputPath = outputDir + "/" + fileName;
         try
         {
-            java.nio.file.Files.createDirectories(java.nio.file.Paths.get(outputDir));
+            Files.createDirectories(Paths.get(outputDir));
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath)))
             {
                 writer.write("Program Name: " + programName);
