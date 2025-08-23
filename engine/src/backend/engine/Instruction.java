@@ -24,12 +24,13 @@ public abstract class Instruction implements Command
     protected Instruction derivedFrom = null;
     protected int derivedFromIndex;
 
-    protected Instruction(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom)
+    protected Instruction(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
     {
         this.mainVarName = mainVarName;
         this.args = args;
-        this.label = label;
+        this.label = label == null ? "" : label;
         this.derivedFrom = derivedFrom;
+        this.derivedFromIndex = derivedFromIndex;
     }
 
     protected Instruction(String mainVarName, Map<String, String> args, String label)
@@ -84,16 +85,17 @@ public abstract class Instruction implements Command
             default -> throw new IllegalArgumentException("Unknown instruction type: " + sInstruction.getName());
         };
     }
-    protected String formatDisplay(int instructionNumber, String commandPart)
+
+    protected String formatDisplay(int instructionIndex, String commandPart)
     {
-        String numberPart = "#" + instructionNumber;
+        String numberPart = "#" + (instructionIndex + 1);
         String typePart = getType() == CommandType.BASIC ? "(B)" : "(S)";
         String labelPart = "[ " + String.format("%-4s", label) + "]";
         String cyclesPart = "(" + getCycles() + ")";
         String full = String.format("%s %s %s %s %s", numberPart, typePart, labelPart, commandPart, cyclesPart);
         if (derivedFrom != null)
         {
-            full += "<<<" + derivedFrom.getDisplayFormat(derivedFromIndex);
+            full += " <<< " + derivedFrom.getDisplayFormat(derivedFromIndex);
         }
         return full;
     }

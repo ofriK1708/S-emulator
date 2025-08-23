@@ -27,6 +27,20 @@ public class ProgramUtils
         contextMap.put(varName, 0); // Initialize variable with a dummy value
         return varName;
     }
+
+    public static void updateLabel(Map<String, Integer> contextMap, String labelName, int newLabelValue)
+    {
+        if (!labelName.isEmpty())
+        {
+            if (contextMap.containsKey(labelName))
+            {
+                contextMap.put(labelName, newLabelValue);
+            } else
+            {
+                throw new IllegalArgumentException("No such label: " + labelName);
+            }
+        }
+    }
     /*public static int calculateExpandedLevel(Instruction instruction)
     {
         // 'this' is not available in static context, so pass a prototype or use a factory if needed

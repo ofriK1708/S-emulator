@@ -42,17 +42,17 @@ public class ConstantAssignment extends Instruction
     }
 
     @Override
-    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex)
+    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
-        derivedFromIndex = originalInstructionIndex;
+        
         List<Instruction> instructions = new ArrayList<Instruction>();
-        instructions.add(new ZeroVariable(mainVarName, null, label, this));
+        instructions.add(new ZeroVariable(mainVarName, null, label, this, originalInstructionIndex));
         try
         {
             int constantValue = Integer.parseInt(args.get(valueArgumentName));
             for (int i = 0; i < constantValue; i++)
             {
-                instructions.add(new Increase(mainVarName, null, null, this));
+                instructions.add(new Increase(mainVarName, null, null, this, originalInstructionIndex));
             }
         } catch (NumberFormatException e)
         {
@@ -68,12 +68,13 @@ public class ConstantAssignment extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionNumber) {
+    public String getDisplayFormat(int instructionIndex)
+    {
         try
         {
             int constantValue = Integer.parseInt(args.get(valueArgumentName));
             String commandPart = String.format("%s <- %d", mainVarName, constantValue);
-            return formatDisplay(instructionNumber, commandPart);
+            return formatDisplay(instructionIndex, commandPart);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid value for constant assignment: " + args.get(valueArgumentName));
         }

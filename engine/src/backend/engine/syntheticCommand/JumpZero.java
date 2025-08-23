@@ -20,9 +20,9 @@ public class JumpZero extends Instruction
         super(mainVarName, args, labelName);
     }
 
-    public JumpZero(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom)
+    public JumpZero(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
     {
-        super(mainVarName, args, label, derivedFrom);
+        super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }
 
     @Override
@@ -47,19 +47,17 @@ public class JumpZero extends Instruction
     }
 
     @Override
-    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex)
+    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
-        derivedFromIndex = originalInstructionIndex;
         List<Instruction> instructions = new ArrayList<Instruction>();
-        String freeLabelName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
-        contextMap.put(freeLabelName, expandedInstructionIndex + 2);
+        String freeLabelName = ProgramUtils.getNextFreeLabelName(contextMap);
         String labelName = args.get(labelArgumentName);
 
         instructions.add(new JumpNotZero(mainVarName,
-                Map.of(JumpNotZero.labelArgumentName, freeLabelName), label, this));
+                Map.of(JumpNotZero.labelArgumentName, freeLabelName), label, this, originalInstructionIndex));
         instructions.add(new GOTOLabel("",
-                Map.of(GOTOLabel.labelArgumentName, labelName), null, this));
-        instructions.add(new Neutral(ProgramEngine.outputName, null, freeLabelName, this));
+                Map.of(GOTOLabel.labelArgumentName, labelName), null, this, originalInstructionIndex));
+        instructions.add(new Neutral(ProgramEngine.outputName, null, freeLabelName, this, originalInstructionIndex));
 
         return instructions;
     }
@@ -81,9 +79,10 @@ public class JumpZero extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionNumber) {
+    public String getDisplayFormat(int instructionIndex)
+    {
         String labelName = args.get(labelArgumentName);
-        String commandPart = String.format("if %s == 0 GOTO %s", mainVarName, labelName);
-        return formatDisplay(instructionNumber, commandPart);
+        String commandPart = String.format("IF %s == 0 GOTO %s", mainVarName, labelName);
+        return formatDisplay(instructionIndex, commandPart);
     }
 }

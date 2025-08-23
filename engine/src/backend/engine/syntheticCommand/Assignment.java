@@ -21,9 +21,9 @@ public class Assignment extends Instruction
         super(mainVarName, args, labelName);
     }
 
-    public Assignment(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom)
+    public Assignment(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
     {
-        super(mainVarName, args, label, derivedFrom);
+        super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }
 
     @Override
@@ -54,30 +54,26 @@ public class Assignment extends Instruction
     }
 
     @Override
-    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex)
+    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
-        derivedFromIndex = originalInstructionIndex;
         List<Instruction> instructions = new ArrayList<Instruction>();
         String freeLabel1 = ProgramUtils.getNextFreeLabelName(contextMap);
         String freeLabel2 = ProgramUtils.getNextFreeLabelName(contextMap);
         String freeLabel3 = ProgramUtils.getNextFreeLabelName(contextMap);
-        contextMap.put(freeLabel1, expandedInstructionIndex + 3);
-        contextMap.put(freeLabel2, expandedInstructionIndex + 6);
-        contextMap.put(freeLabel3, expandedInstructionIndex + 10);
         String freeWorkVar = ProgramUtils.getNextFreeWorkVariableName(contextMap);
         String srcVarName = args.get(sourceArgumentName);
 
-        instructions.add(new ZeroVariable(mainVarName, null, label, this));
-        instructions.add(new JumpNotZero(srcVarName, Map.of(JumpNotZero.labelArgumentName, freeLabel1), null, this));
-        instructions.add(new GOTOLabel("", Map.of(GOTOLabel.labelArgumentName, freeLabel3), null, this));
-        instructions.add(new Decrease(srcVarName, null, freeWorkVar, this));
-        instructions.add(new Increase(freeWorkVar, null, null, this));
-        instructions.add(new JumpNotZero(srcVarName, Map.of(JumpNotZero.labelArgumentName, freeLabel1), null, this));
-        instructions.add(new Decrease(freeWorkVar, null, freeLabel2, this));
-        instructions.add(new Increase(mainVarName, null, null, this));
-        instructions.add(new Increase(srcVarName, null, null, this));
-        instructions.add(new JumpNotZero(freeWorkVar, Map.of(JumpNotZero.labelArgumentName, freeLabel2), null, this));
-        instructions.add(new Neutral(mainVarName, null, freeLabel3, this));
+        instructions.add(new ZeroVariable(mainVarName, null, label, this, originalInstructionIndex));
+        instructions.add(new JumpNotZero(srcVarName, Map.of(JumpNotZero.labelArgumentName, freeLabel1), null, this, originalInstructionIndex));
+        instructions.add(new GOTOLabel("", Map.of(GOTOLabel.labelArgumentName, freeLabel3), null, this, originalInstructionIndex));
+        instructions.add(new Decrease(srcVarName, null, freeLabel1, this, originalInstructionIndex));
+        instructions.add(new Increase(freeWorkVar, null, null, this, originalInstructionIndex));
+        instructions.add(new JumpNotZero(srcVarName, Map.of(JumpNotZero.labelArgumentName, freeLabel1), null, this, originalInstructionIndex));
+        instructions.add(new Decrease(freeWorkVar, null, freeLabel2, this, originalInstructionIndex));
+        instructions.add(new Increase(mainVarName, null, null, this, originalInstructionIndex));
+        instructions.add(new Increase(srcVarName, null, null, this, originalInstructionIndex));
+        instructions.add(new JumpNotZero(freeWorkVar, Map.of(JumpNotZero.labelArgumentName, freeLabel2), null, this, originalInstructionIndex));
+        instructions.add(new Neutral(mainVarName, null, freeLabel3, this, originalInstructionIndex));
 
         return instructions;
     }
@@ -89,10 +85,10 @@ public class Assignment extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionNumber)
+    public String getDisplayFormat(int instructionIndex)
     {
         String sourceName = args.get(sourceArgumentName);
         String commandPart = String.format("%s <- %s", mainVarName, sourceName);
-        return formatDisplay(instructionNumber, commandPart);
+        return formatDisplay(instructionIndex, commandPart);
     }
 }

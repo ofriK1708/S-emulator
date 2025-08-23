@@ -32,3 +32,5 @@ bin/
 
 ### macOS ###
 .DS_Store
+/outputs/
+

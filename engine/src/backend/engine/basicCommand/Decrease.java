@@ -18,9 +18,9 @@ public class Decrease extends Instruction
         super(mainVarName, args, labelName);
     }
 
-    public Decrease(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom)
+    public Decrease(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
     {
-        super(mainVarName, args, label, derivedFrom);
+        super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class Decrease extends Instruction
     }
 
     @Override
-    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex, int expandedInstructionIndex)
+    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
         return new LinkedList<>(List.of(this));
     }
@@ -61,10 +61,10 @@ public class Decrease extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionNumber)
+    public String getDisplayFormat(int instructionIndex)
     {
         String commandPart = String.format("%s <- %s - 1", mainVarName, mainVarName);
-        return formatDisplay(instructionNumber, commandPart);
+        return formatDisplay(instructionIndex, commandPart);
     }
 
     public int getExpandLevel()
