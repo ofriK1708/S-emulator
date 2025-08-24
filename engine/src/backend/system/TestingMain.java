@@ -14,7 +14,7 @@ public class TestingMain
         try
         {
             XMLHandler xmlHandler = new XMLHandler();
-            String xmlFilePath = "engine/src/backend/system/resources/testing.xml";
+            String xmlFilePath = "engine/src/backend/system/resources/minus.xml";
             SProgram program = xmlHandler.unmarshallForm(Path.of(xmlFilePath));
             SystemController systemController = new SystemController();
             ProgramEngine engine = systemController.createEngine(program);

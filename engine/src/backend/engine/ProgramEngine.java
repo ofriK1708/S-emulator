@@ -189,6 +189,10 @@ public class ProgramEngine
         }
         System.out.println("Context Map: " + contextMapToPrint);
         System.out.println("Labels: " + labelsToPrint);
+        if (!executionStatisticsList.isEmpty())
+        {
+            System.out.println("num of cycles:" + executionStatisticsList.getLast().getNumOfCycles());
+        }
     }
 
     // TODO - delete this method after testing
@@ -222,6 +226,10 @@ public class ProgramEngine
                 }
                 writer.write("Labels: " + labelsToPrint);
                 writer.newLine();
+                if (!executionStatisticsList.isEmpty())
+                {
+                    System.out.println("num of cycles:" + executionStatisticsList.getLast().getNumOfCycles());
+                }
             }
         } catch (IOException e)
         {

@@ -57,4 +57,9 @@ public class ExecutionStatistics
                 ", numOfCycles=" + numOfCycles +
                 '}';
     }
+
+    public int getNumOfCycles()
+    {
+        return numOfCycles;
+    }
 }
