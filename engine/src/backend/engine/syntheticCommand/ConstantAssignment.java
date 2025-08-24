@@ -2,6 +2,7 @@ package backend.engine.syntheticCommand;
 
 import backend.engine.CommandType;
 import backend.engine.Instruction;
+import backend.engine.ProgramUtils;
 import backend.engine.basicCommand.Increase;
 
 import java.util.ArrayList;
@@ -11,10 +12,12 @@ import java.util.Map;
 public class ConstantAssignment extends Instruction
 {
     private final String valueArgumentName = "constantValue";
+    private static int expandLevel = -1;
 
     public ConstantAssignment(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
+        expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
 
     @Override
@@ -78,5 +81,11 @@ public class ConstantAssignment extends Instruction
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid value for constant assignment: " + args.get(valueArgumentName));
         }
+    }
+
+    @Override
+    public int getExpandLevel()
+    {
+        return expandLevel;
     }
 }

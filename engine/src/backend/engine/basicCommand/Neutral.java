@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class Neutral extends Instruction
 {
-
+    private static final int expandLevel = 0;
     public Neutral(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
@@ -56,5 +56,11 @@ public class Neutral extends Instruction
     {
         String commandPart = String.format("%s <- %s", mainVarName, mainVarName);
         return formatDisplay(instructionIndex, commandPart);
+    }
+
+    @Override
+    public int getExpandLevel()
+    {
+        return expandLevel;
     }
 }

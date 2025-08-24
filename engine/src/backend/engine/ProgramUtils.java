@@ -1,5 +1,7 @@
 package backend.engine;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ProgramUtils
@@ -53,15 +55,49 @@ public class ProgramUtils
             return false;
         }
     }
-    /*public static int calculateExpandedLevel(Instruction instruction)
+
+    public static int calculateExpandedLevel(Instruction instruction, int currentLevel)
     {
-        // 'this' is not available in static context, so pass a prototype or use a factory if needed
-        List<Instruction> expanded = instruction.expand();
-        int maxSubLevel = 0;
-        for (Instruction instr : expanded)
+        if (currentLevel == -1)
         {
-            maxSubLevel = Math.max(maxSubLevel, instr.getExpandLevel());
+            if (instruction == null)
+            {
+                throw new IllegalArgumentException("Instruction cannot be null");
+            }
+
+            // Basic instructions have expand level 0
+            if (instruction.getType() == CommandType.BASIC)
+            {
+                return 0;
+            }
+
+            // For synthetic instructions, we need to expand and calculate recursively
+            List<Instruction> expanded = instruction.expand(new HashMap<>(), 0);
+
+            int maxSubLevel = getMaxExpandLevel(expanded);
+
+            return 1 + maxSubLevel;
         }
-        return maxSubLevel;
+        return currentLevel;
+    }
+
+    /*private static Map<String, Integer> createDummyContextMap() {
+        Map<String, Integer> dummyContext = new HashMap<>();
+
+        // Add some basic variables that are commonly used
+        dummyContext.put("PC", 0);
+        dummyContext.put("y", 0);
+
+        return dummyContext;
     }*/
+    public static int getMaxExpandLevel(List<Instruction> instructions)
+    {
+        int maxLevel = 0;
+        for (Instruction instr : instructions)
+        {
+            maxLevel = Math.max(maxLevel, instr.getExpandLevel());
+        }
+        return maxLevel;
+    }
+
 }

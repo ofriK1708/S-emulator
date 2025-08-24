@@ -9,6 +9,7 @@ import java.util.Map;
 public class JumpNotZero extends Instruction
 {
     public static final String labelArgumentName = "JNZLabel";
+    private static final int expandLevel = 0;
 
     public JumpNotZero(String mainVarName, Map<String, String> args, String labelArgumentName)
     {
@@ -75,6 +76,11 @@ public class JumpNotZero extends Instruction
         return formatDisplay(instructionIndex, commandPart);
     }
 
+    @Override
+    public int getExpandLevel()
+    {
+        return expandLevel;
+    }
 
 }
 

@@ -16,10 +16,12 @@ public class JumpEqualConstant extends Instruction
 {
     private final String labelArgumentName = "JEConstantLabel";
     private final String constantArgumentName = "constantValue";
+    private static int expandLevel = -1;
 
     public JumpEqualConstant(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
+        expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
 
     @Override
@@ -113,4 +115,11 @@ public class JumpEqualConstant extends Instruction
             throw new IllegalArgumentException("Invalid constant value: " + args.get(constantArgumentName));
         }
     }
+
+    @Override
+    public int getExpandLevel()
+    {
+        return expandLevel;
+    }
+
 }

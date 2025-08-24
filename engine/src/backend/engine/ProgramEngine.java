@@ -228,4 +228,10 @@ public class ProgramEngine
             throw new RuntimeException("Failed to write program output to file", e);
         }
     }
+
+    // TODO - delete this method after testing
+    public int getMaxExpandLevel()
+    {
+        return ProgramUtils.getMaxExpandLevel(originalInstructions);
+    }
 }

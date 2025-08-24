@@ -15,10 +15,12 @@ public class JumpEqualVariable extends Instruction
 {
     private static final String labelArgumentName = "JEVariableLabel";
     private static final String variableArgumentName = "variableName";
+    private static int expandLevel;
 
     public JumpEqualVariable(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
+        expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
 
     @Override
@@ -108,5 +110,11 @@ public class JumpEqualVariable extends Instruction
         String checkConstant = args.get(variableArgumentName);
         String commandPart = String.format("IF %s == %s GOTO %s", mainVarName, checkConstant, labelName);
         return formatDisplay(instructionIndex, commandPart);
+    }
+
+    @Override
+    public int getExpandLevel()
+    {
+        return expandLevel;
     }
 }

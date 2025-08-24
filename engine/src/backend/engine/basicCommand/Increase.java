@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class Increase extends Instruction
 {
-    public static final int expandLevel = 0;
+    private static final int expandLevel = 0;
 
     public Increase(String mainVarName, Map<String, String> args, String labelName)
     {
@@ -62,5 +62,11 @@ public class Increase extends Instruction
     {
         String commandPart = String.format("%s <- %s + 1", mainVarName, mainVarName);
         return formatDisplay(instructionIndex, commandPart);
+    }
+
+    @Override
+    public int getExpandLevel()
+    {
+        return expandLevel;
     }
 }

@@ -14,10 +14,12 @@ import java.util.Map;
 public class JumpZero extends Instruction
 {
     public static final String labelArgumentName = "JZLabel";
+    private static int expandLevel;
 
     public JumpZero(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
+        expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
 
     public JumpZero(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
@@ -84,5 +86,11 @@ public class JumpZero extends Instruction
         String labelName = args.get(labelArgumentName);
         String commandPart = String.format("IF %s == 0 GOTO %s", mainVarName, labelName);
         return formatDisplay(instructionIndex, commandPart);
+    }
+
+    @Override
+    public int getExpandLevel()
+    {
+        return expandLevel;
     }
 }

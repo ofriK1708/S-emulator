@@ -9,6 +9,7 @@ public interface Command
     int getCycles();
     CommandType getType();
 
+    int getExpandLevel();
     List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex);
     int getNumberOfArgs(Map<String, Integer> contextMap);
     String getDisplayFormat(int instructionNumber);

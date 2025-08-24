@@ -14,11 +14,12 @@ public class TestingMain
         try
         {
             XMLHandler xmlHandler = new XMLHandler();
-            String xmlFilePath = "engine/src/backend/system/resources/minus.xml";
+            String xmlFilePath = "engine/src/backend/system/resources/testing.xml";
             SProgram program = xmlHandler.unmarshallForm(Path.of(xmlFilePath));
             SystemController systemController = new SystemController();
             ProgramEngine engine = systemController.createEngine(program);
             System.out.println("-------Before executing-------");
+            System.out.println("max expand level = " + engine.getMaxExpandLevel());
             engine.printProgramToFile(0, "Before executing");
             System.out.println("-------After expanding 3 times and executing-------");
             engine.run(3);

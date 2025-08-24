@@ -13,15 +13,18 @@ import java.util.Map;
 public class GOTOLabel extends Instruction
 {
     public static final String labelArgumentName = "gotoLabel";
+    private static int expandLevel = -1;
 
     public GOTOLabel(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
+        expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
 
     public GOTOLabel(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
     {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
+        expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
 
     @Override
@@ -76,5 +79,11 @@ public class GOTOLabel extends Instruction
         String labelName = args.get(labelArgumentName);
         String commandPart = String.format("GOTO %s", labelName);
         return formatDisplay(instructionIndex, commandPart);
+    }
+
+    @Override
+    public int getExpandLevel()
+    {
+        return expandLevel;
     }
 }

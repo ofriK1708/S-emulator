@@ -13,14 +13,18 @@ import java.util.Map;
 
 public class ZeroVariable extends Instruction
 {
+    private static int expandLevel = -1;
+
     public ZeroVariable(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
+        expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
 
     public ZeroVariable(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
     {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
+        expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
 
     @Override
@@ -65,5 +69,11 @@ public class ZeroVariable extends Instruction
     {
         String commandPart = String.format("%s <- 0", mainVarName);
         return formatDisplay(instructionIndex, commandPart);
+    }
+
+    @Override
+    public int getExpandLevel()
+    {
+        return expandLevel;
     }
 }

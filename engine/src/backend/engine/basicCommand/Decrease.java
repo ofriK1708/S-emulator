@@ -67,6 +67,7 @@ public class Decrease extends Instruction
         return formatDisplay(instructionIndex, commandPart);
     }
 
+    @Override
     public int getExpandLevel()
     {
         return expandLevel;
