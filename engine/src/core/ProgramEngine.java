@@ -1,5 +1,6 @@
 package core;
 
+import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
 import generated.SInstruction;
 import generated.SProgram;
@@ -17,10 +18,6 @@ public class ProgramEngine
     private final Set<String> originalLabels;
     private final List<Set<String>> labelsByExpandLevel = new ArrayList<>();
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
-    private static final String EXITLabelName = "EXIT";
-    public static final String outputName = "y"; // TODO - not sure about this being public
-
-    Random random = new Random(); // TODO - delete this!!!
 
     public ProgramEngine(SProgram program)
     {
@@ -47,12 +44,12 @@ public class ProgramEngine
     private void initializeContextMap()
     {
         originalContextMap.clear();
-        originalContextMap.put(outputName.trim(), 0);
+        originalContextMap.put(ProgramUtils.outputName, 0);
         originalContextMap.put(Instruction.ProgramCounterName, 0); // Program Counter
         for (int instruction_index = 0; instruction_index < originalInstructions.size(); instruction_index++)
         {
             Instruction instruction = originalInstructions.get(instruction_index);
-            originalContextMap.put(instruction.getMainVarName().trim(), random.nextInt(100)); // TODO - change this to 0!!!
+            originalContextMap.put(instruction.getMainVarName().trim(), 0);
             if (!instruction.getLabel().isEmpty())
             {
                 originalContextMap.put(instruction.getLabel().trim(), instruction_index);
@@ -70,12 +67,12 @@ public class ProgramEngine
 
                     } else if (!ProgramUtils.isNumber(argName))
                     {
-                        originalContextMap.put(argName.trim(), random.nextInt(100)); // TODO - change this to 0!!!
+                        originalContextMap.put(argName.trim(), 0);
                     }
                 }
-                if (argName.equals(EXITLabelName))
+                if (argName.equals(ProgramUtils.EXITLabelName))
                 {
-                    originalContextMap.put(EXITLabelName, originalInstructions.size()); // EXIT label is set to the end of the program
+                    originalContextMap.put(argName, originalInstructions.size()); // EXIT label is set to the end of the program
                     originalLabels.add(argName);
                 }
             }
@@ -104,9 +101,11 @@ public class ProgramEngine
         return originalLabels.contains(labelName);
     }
 
-    public void run(int expandLevel)
+    public void run(int expandLevel, List<Integer> arguments)
     {
-        ExecutionStatistics exStats = new ExecutionStatistics(executionStatisticsList.size() + 1);
+        ExecutionStatistics exStats = new ExecutionStatistics(executionStatisticsList.size() + 1,
+                expandLevel, arguments);
+        insertArguments(arguments);
         expand(expandLevel);
         List<Instruction> executedInstructions = instructionExpansionLevels.get(expandLevel);
         Map<String, Integer> executedContextMap = contextMapsByExpandLevel.get(expandLevel);
@@ -123,11 +122,23 @@ public class ProgramEngine
                 throw new RuntimeException("Error executing instruction at PC=" + currentPC + ": " + e.getMessage(), e);
             }
         }
-        exStats.setY(executedContextMap.get(outputName));
+        exStats.setY(executedContextMap.get(ProgramUtils.outputName));
         executionStatisticsList.add(exStats);
     }
 
-    public void expand(int level)
+    private void insertArguments(List<Integer> arguments)
+    {
+        int argIndex = 1;
+        String argName;
+        for (Integer argValue : arguments)
+        {
+            argName = "x" + argIndex;
+            originalContextMap.put(argName, argValue);
+            argIndex++;
+        }
+    }
+
+    private void expand(int level)
     {
         if (level > 0)
         {
@@ -159,9 +170,9 @@ public class ProgramEngine
                 .filter(instr -> !instr.getLabel().isBlank())
                 .forEach(instr -> latestContextMap.put(instr.getLabel(), LatestExpanded.indexOf(instr)));
         // update EXIT label to point to the end of the expanded program
-        if (latestLabels.contains(EXITLabelName))
+        if (latestLabels.contains(ProgramUtils.outputName))
         {
-            latestContextMap.put(EXITLabelName, LatestExpanded.size());
+            latestContextMap.put(ProgramUtils.EXITLabelName, LatestExpanded.size());
         }
         // add any new labels introduced during expansion
         latestContextMap.keySet()
@@ -255,7 +266,6 @@ public class ProgramEngine
 //        }
 //    }
 
-    // TODO - delete this method after testing
     public int getMaxExpandLevel()
     {
         return ProgramUtils.getMaxExpandLevel(originalInstructions);
@@ -271,5 +281,12 @@ public class ProgramEngine
                         .map(Instruction::toDTO)
                         .collect(Collectors.toList())
         );
+    }
+
+    public List<ExecutionStatisticsDTO> getExecutionStatisticsDTOList()
+    {
+        return executionStatisticsList.stream()
+                .map(ExecutionStatistics::toDTO)
+                .toList();
     }
 }

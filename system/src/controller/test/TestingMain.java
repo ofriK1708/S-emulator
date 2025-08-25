@@ -4,6 +4,8 @@ import controller.SystemController;
 import dto.engine.ProgramDTO;
 import jakarta.xml.bind.JAXBException;
 
+import java.util.List;
+
 public class TestingMain
 {
 
@@ -15,7 +17,8 @@ public class TestingMain
             String xmlFilePath = "system/src/file/test/synthetic.xml";
             SystemController systemController = new SystemController();
             systemController.LoadProgramFromFile(xmlFilePath);
-            program = systemController.runLoadedProgram(2);
+            List<Integer> arguments = List.of(1, 2);
+            program = systemController.runLoadedProgram(2, arguments);
             System.out.println("Program loaded and run successfully.");
         } catch (JAXBException e)
         {
