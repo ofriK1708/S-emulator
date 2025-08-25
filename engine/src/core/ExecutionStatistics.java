@@ -46,16 +46,24 @@ public class ExecutionStatistics
         this.numOfCycles += numOfCycles;
     }
 
-    @Override
-    public String toString()
+    public int getExecutionNumber()
     {
-        return "Statistics{" +
-                "executionNumber=" + executionNumber +
-                ", levelOfExpansion=" + levelOfExpansion +
-                ", argumentsValues=" + argumentsValues +
-                ", Y=" + Y +
-                ", numOfCycles=" + numOfCycles +
-                '}';
+        return executionNumber;
+    }
+
+    public int getLevelOfExpansion()
+    {
+        return levelOfExpansion;
+    }
+
+    public LinkedList<Integer> getArgumentsValues()
+    {
+        return argumentsValues;
+    }
+
+    public int getY()
+    {
+        return Y;
     }
 
     public int getNumOfCycles()

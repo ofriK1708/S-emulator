@@ -9,6 +9,7 @@ import generated.SInstruction;
 import generated.SInstructionArguments;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -102,5 +103,16 @@ public abstract class Instruction implements Command
     protected void incrementProgramCounter(Map<String, Integer> contextMap)
     {
         contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1);
+    }
+
+    public Map<Instruction, Integer> getDerivedInstructions()
+    {
+        Map<Instruction, Integer> derivedInstructions = new LinkedHashMap<>();
+        while (derivedFrom != null)
+        {
+            derivedInstructions.put(derivedFrom, derivedFromIndex);
+            derivedFrom = derivedFrom.derivedFrom;
+        }
+        return derivedInstructions;
     }
 }
