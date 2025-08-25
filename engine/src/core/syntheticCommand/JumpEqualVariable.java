@@ -104,17 +104,16 @@ public class JumpEqualVariable extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionIndex)
-    {
-        String labelName = args.get(labelArgumentName);
-        String checkConstant = args.get(variableArgumentName);
-        String commandPart = String.format("IF %s == %s GOTO %s", mainVarName, checkConstant, labelName);
-        return formatDisplay(instructionIndex, commandPart);
-    }
-
-    @Override
     public int getExpandLevel()
     {
         return expandLevel;
+    }
+
+    @Override
+    public String toString()
+    {
+        String labelName = args.get(labelArgumentName);
+        String checkConstant = args.get(variableArgumentName);
+        return String.format("IF %s == %s GOTO %s", mainVarName, checkConstant, labelName);
     }
 }

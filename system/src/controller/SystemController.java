@@ -1,6 +1,7 @@
-package system;
+package controller;
 
 import core.ProgramEngine;
+import dto.engine.ProgramDTO;
 import file.processing.XMLHandler;
 import generated.SProgram;
 import jakarta.xml.bind.JAXBException;
@@ -11,6 +12,7 @@ public class SystemController
 {
     private final XMLHandler xmlHandler;
     private ProgramEngine engine;
+    int maxExpandLevel = 0;
 
     public SystemController() throws JAXBException
     {
@@ -26,6 +28,12 @@ public class SystemController
     private void createEngine(SProgram program)
     {
         engine = new ProgramEngine(program);
+        maxExpandLevel = engine.getMaxExpandLevel();
+    }
+
+    public int getMaxExpandLevel()
+    {
+        return maxExpandLevel;
     }
 
     public void LoadProgramFromFile(String xmlFilePath)
@@ -45,22 +53,30 @@ public class SystemController
         // TODO - pass the UI dto about the max expandedLevel and what else he needs
     }
 
-    public void runLoadedProgram(int expandLevel)
+    public ProgramDTO runLoadedProgram(int expandLevel)
     {
         if (engine == null)
         {
             throw new IllegalStateException("Program engine has not been initialized");
+        }
+        if (expandLevel < 0 || expandLevel > maxExpandLevel)
+        {
+            throw new IllegalArgumentException("Expand level must be between 0 and " + maxExpandLevel);
         }
         engine.run(expandLevel);
-        engine.printProgram(expandLevel);
+        return getProgramByExpandLevel(expandLevel);
     }
 
-    public void printProgram()
+    public ProgramDTO getProgramByExpandLevel(int expandLevel)
     {
         if (engine == null)
         {
             throw new IllegalStateException("Program engine has not been initialized");
         }
-        engine.printProgram(0);
+        if (expandLevel < 0 || expandLevel > maxExpandLevel)
+        {
+            throw new IllegalArgumentException("Expand level must be between 0 and " + maxExpandLevel);
+        }
+        return engine.toDTO(expandLevel);
     }
 }

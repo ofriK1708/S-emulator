@@ -1,5 +1,7 @@
 package core;
 
+import dto.engine.ExecutionStatisticsDTO;
+
 import java.util.LinkedList;
 
 public class ExecutionStatistics
@@ -36,38 +38,13 @@ public class ExecutionStatistics
         Y = y;
     }
 
-    public void setNumOfCycles(int numOfCycles)
-    {
-        this.numOfCycles = numOfCycles;
-    }
-
     public void incrementCycles(int numOfCycles)
     {
         this.numOfCycles += numOfCycles;
     }
 
-    public int getExecutionNumber()
+    public ExecutionStatisticsDTO toDTO()
     {
-        return executionNumber;
-    }
-
-    public int getLevelOfExpansion()
-    {
-        return levelOfExpansion;
-    }
-
-    public LinkedList<Integer> getArgumentsValues()
-    {
-        return argumentsValues;
-    }
-
-    public int getY()
-    {
-        return Y;
-    }
-
-    public int getNumOfCycles()
-    {
-        return numOfCycles;
+        return new ExecutionStatisticsDTO(executionNumber, levelOfExpansion, argumentsValues, Y, numOfCycles);
     }
 }

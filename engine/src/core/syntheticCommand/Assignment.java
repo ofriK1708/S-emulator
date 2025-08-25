@@ -87,16 +87,15 @@ public class Assignment extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionIndex)
-    {
-        String sourceName = args.get(sourceArgumentName);
-        String commandPart = String.format("%s <- %s", mainVarName, sourceName);
-        return formatDisplay(instructionIndex, commandPart);
-    }
-
-    @Override
     public int getExpandLevel()
     {
         return expandLevel;
+    }
+
+    @Override
+    public String toString()
+    {
+        String sourceName = args.get(sourceArgumentName);
+        return String.format("%s <- %s", mainVarName, sourceName);
     }
 }

@@ -1,7 +1,7 @@
 package consoleUI;
 
+import controller.generated.SProgram;
 import core.ProgramEngine;
-import system.generated.SProgram;
 
 import java.util.Scanner;
 

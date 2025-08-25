@@ -52,15 +52,14 @@ public class Neutral extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionIndex)
-    {
-        String commandPart = String.format("%s <- %s", mainVarName, mainVarName);
-        return formatDisplay(instructionIndex, commandPart);
-    }
-
-    @Override
     public int getExpandLevel()
     {
         return expandLevel;
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.format("%s <- %s", mainVarName, mainVarName);
     }
 }
