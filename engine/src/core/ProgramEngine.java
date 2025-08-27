@@ -19,7 +19,7 @@ public class ProgramEngine
     private final List<Set<String>> labelsByExpandLevel = new ArrayList<>();
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
 
-    public ProgramEngine(SProgram program)
+    public ProgramEngine(SProgram program) throws LabelNotExist
     {
         this.programName = program.getName();
 
@@ -41,7 +41,7 @@ public class ProgramEngine
 
     }
 
-    private void initializeContextMap()
+    private void initializeContextMap() throws LabelNotExist
     {
         originalContextMap.clear();
         originalContextMap.put(ProgramUtils.outputName, 0);
