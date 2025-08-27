@@ -1,5 +1,6 @@
 package controller;
 
+import core.LabelNotExist;
 import core.ProgramEngine;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
@@ -29,7 +30,13 @@ public class SystemController
 
     private void createEngine(SProgram program)
     {
-        engine = new ProgramEngine(program);
+        try
+        {
+            engine = new ProgramEngine(program);
+        } catch (LabelNotExist e)
+        {
+            throw new RuntimeException(e); // TODO change this to something meaningful
+        }
         maxExpandLevel = engine.getMaxExpandLevel();
     }
 

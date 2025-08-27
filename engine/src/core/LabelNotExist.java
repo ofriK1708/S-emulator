@@ -1,6 +1,6 @@
 package core;
 
-public class LabelNotExist extends RuntimeException
+public class LabelNotExist extends Exception
 {
     public LabelNotExist(String InstructionName, int InstructionNumber, String labelName)
     {
