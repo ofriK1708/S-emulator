@@ -11,9 +11,9 @@ import java.util.Scanner;
 public class ConsoleUI {
     private final Scanner scanner;
     private ProgramDTO currentProgram;
-    private ProgramEngine programEngine;
+    private ProgramEngine programEngine; // TODO - remove this
     private ExecutionStatisticsDTO currentStatsProgram;
-    private boolean programLoaded;
+    private final boolean programLoaded; // TODO - remove this
     //private List<ExecutionStatisticsDTO> executionHistory;
 
     public ConsoleUI() {
@@ -40,13 +40,13 @@ public class ConsoleUI {
                     //runProgram();
                     break;
                 case 4:
-                    // displayStatistics();
+                    // displayStatistics(); // TODO - where is the expand?
                     break;
                 case 5:
                     exitSystem();
                     return;
                 default:
-                    System.out.println("בחירה לא תקינה. אנא בחר מספר בין 1-5.");
+                    System.out.println("בחירה לא תקינה. אנא בחר מספר בין 1-5."); // TODO - remove hebrew
             }
 
             System.out.println(); // רווח בין פעולות
@@ -58,7 +58,7 @@ public class ConsoleUI {
         System.out.println("1. Load XML File");
         System.out.println("2. Display Loaded Program");
         System.out.println("3. Run Program");
-        System.out.println("4. Show History/Statistics");
+        System.out.println("4. Show History/Statistics"); // TODO - where is the expand?
         System.out.println("5. Exit System");
         System.out.print("Choose an option (1-5): ");
     }
@@ -79,6 +79,7 @@ public class ConsoleUI {
             return;
         }
 
+        // TODO - change this - no communication with core
         System.out.println("Program Name: " + currentProgram.ProgramName());
         System.out.println("\nArguments:");
         if (currentProgram.arguments().isEmpty()) {
