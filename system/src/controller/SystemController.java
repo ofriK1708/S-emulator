@@ -1,9 +1,9 @@
 package controller;
 
-import core.LabelNotExist;
 import core.ProgramEngine;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
+import exception.LabelNotExist;
 import file.processing.XMLHandler;
 import generated.SProgram;
 import jakarta.xml.bind.JAXBException;
@@ -17,7 +17,7 @@ public class SystemController
     private ProgramEngine engine;
     int maxExpandLevel = 0;
 
-    public SystemController() throws JAXBException
+    public SystemController()
     {
         try
         {
@@ -28,15 +28,9 @@ public class SystemController
         }
     }
 
-    private void createEngine(SProgram program)
+    private void createEngine(SProgram program) throws LabelNotExist
     {
-        try
-        {
-            engine = new ProgramEngine(program);
-        } catch (LabelNotExist e)
-        {
-            throw new RuntimeException(e); // TODO change this to something meaningful
-        }
+        engine = new ProgramEngine(program);
         maxExpandLevel = engine.getMaxExpandLevel();
     }
 
@@ -45,7 +39,7 @@ public class SystemController
         return maxExpandLevel;
     }
 
-    public int LoadProgramFromFile(String xmlFilePath)
+    public void LoadProgramFromFile(String xmlFilePath) throws LabelNotExist
     {
         if (!xmlFilePath.endsWith(".xml"))
         {
@@ -59,7 +53,6 @@ public class SystemController
         {
             throw new RuntimeException("Failed to load S-program from file: " + xmlFilePath + e.getMessage());
         }
-        return maxExpandLevel;
     }
 
     public ProgramDTO runLoadedProgram(int expandLevel, List<Integer> arguments)
