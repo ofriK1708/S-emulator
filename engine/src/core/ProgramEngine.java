@@ -2,6 +2,7 @@ package core;
 
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
+import exception.LabelNotExist;
 import generated.SInstruction;
 import generated.SProgram;
 
