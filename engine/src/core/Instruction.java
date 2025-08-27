@@ -5,10 +5,12 @@ import core.basicCommand.Increase;
 import core.basicCommand.JumpNotZero;
 import core.basicCommand.Neutral;
 import core.syntheticCommand.*;
+import dto.engine.InstructionDTO;
 import generated.SInstruction;
 import generated.SInstructionArguments;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -86,21 +88,50 @@ public abstract class Instruction implements Command
         };
     }
 
-    protected String formatDisplay(int instructionIndex, String commandPart)
-    {
-        String numberPart = "#" + (instructionIndex + 1);
-        String typePart = getType() == CommandType.BASIC ? "(B)" : "(S)";
-        String labelPart = "[ " + String.format("%-4s", label) + "]";
-        String cyclesPart = "(" + getCycles() + ")";
-        String full = String.format("%s %s %s %s %s", numberPart, typePart, labelPart, commandPart, cyclesPart);
-        if (derivedFrom != null)
-        {
-            full += " <<< " + derivedFrom.getDisplayFormat(derivedFromIndex);
-        }
-        return full;
-    }
+    //    protected String formatDisplay(int instructionIndex, String commandPart)
+//    {
+//        String numberPart = "#" + (instructionIndex + 1);
+//        String typePart = getType() == CommandType.BASIC ? "(B)" : "(S)";
+//        String labelPart = "[ " + String.format("%-4s", label) + "]";
+//        String cyclesPart = "(" + getCycles() + ")";
+//        String full = String.format("%s %s %s %s %s", numberPart, typePart, labelPart, commandPart, cyclesPart);
+//        if (derivedFrom != null)
+//        {
+//            full += " <<< " + derivedFrom.getDisplayFormat(derivedFromIndex);
+//        }
+//        return full;
+//    }
     protected void incrementProgramCounter(Map<String, Integer> contextMap)
     {
         contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1);
+    }
+
+    private Map<Instruction, Integer> getDerivedInstructions()
+    {
+        Map<Instruction, Integer> derivedInstructions = new LinkedHashMap<>();
+        Instruction tempDerivedFrom = this.derivedFrom;
+        int tempDerivedFromIndex = this.derivedFromIndex;
+        while (tempDerivedFrom != null)
+        {
+            derivedInstructions.put(tempDerivedFrom, tempDerivedFromIndex);
+            tempDerivedFromIndex = tempDerivedFrom.derivedFromIndex;
+            tempDerivedFrom = tempDerivedFrom.derivedFrom;
+        }
+        return derivedInstructions;
+    }
+
+    public InstructionDTO toDTO()
+    {
+        Map<InstructionDTO, Integer> derivedFromInstructionsDto = new LinkedHashMap<>();
+        getDerivedInstructions().forEach((derivedInstruction, index) ->
+                derivedFromInstructionsDto.put(derivedInstruction.toDTO(), index)
+        );
+        return new InstructionDTO(
+                getType().getSymbol(),
+                label,
+                toString(),
+                getCycles(),
+                derivedFromInstructionsDto
+        );
     }
 }

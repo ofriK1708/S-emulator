@@ -2,7 +2,6 @@ package core.syntheticCommand;
 
 import core.CommandType;
 import core.Instruction;
-import core.ProgramEngine;
 import core.ProgramUtils;
 import core.basicCommand.Decrease;
 import core.basicCommand.JumpNotZero;
@@ -67,7 +66,7 @@ public class JumpEqualConstant extends Instruction
     @Override
     public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
-        List<Instruction> instructions = new ArrayList<Instruction>();
+        List<Instruction> instructions = new ArrayList<>();
         String freeLabelName = ProgramUtils.getNextFreeLabelName(contextMap);
         String freeWorkVariableName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
         String originalLabel = args.get(labelArgumentName);
@@ -87,7 +86,7 @@ public class JumpEqualConstant extends Instruction
                     null, this, originalInstructionIndex));
             instructions.add(new GOTOLabel("", Map.of(GOTOLabel.labelArgumentName, originalLabel),
                     null, this, originalInstructionIndex));
-            instructions.add(new Neutral(ProgramEngine.outputName, null, freeLabelName, this, originalInstructionIndex));
+            instructions.add(new Neutral(ProgramUtils.outputName, null, freeLabelName, this, originalInstructionIndex));
         } catch (NumberFormatException e)
         {
             throw new RuntimeException("Invalid constant value: " + args.get(constantArgumentName));
@@ -102,24 +101,23 @@ public class JumpEqualConstant extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionIndex)
-    {
-        try
-        {
-            String labelName = args.get(labelArgumentName);
-            int checkConstant = Integer.parseInt(args.get(constantArgumentName));
-            String CommandPart = String.format("IF %s == %d GOTO %s", mainVarName, checkConstant, labelName);
-            return formatDisplay(instructionIndex, CommandPart);
-        } catch (NumberFormatException e)
-        {
-            throw new IllegalArgumentException("Invalid constant value: " + args.get(constantArgumentName));
-        }
-    }
-
-    @Override
     public int getExpandLevel()
     {
         return expandLevel;
+    }
+
+    @Override
+    public String toString()
+    {
+        String labelName = args.get(labelArgumentName);
+        int checkConstant = 0;
+        try
+        {
+            checkConstant = Integer.parseInt(args.get(constantArgumentName));
+        } catch (NumberFormatException ignored)
+        {
+        }
+        return String.format("IF %s == %d GOTO %s", mainVarName, checkConstant, labelName);
     }
 
 }

@@ -2,7 +2,6 @@ package core.syntheticCommand;
 
 import core.CommandType;
 import core.Instruction;
-import core.ProgramEngine;
 import core.ProgramUtils;
 import core.basicCommand.JumpNotZero;
 import core.basicCommand.Neutral;
@@ -51,7 +50,7 @@ public class JumpZero extends Instruction
     @Override
     public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
-        List<Instruction> instructions = new ArrayList<Instruction>();
+        List<Instruction> instructions = new ArrayList<>();
         String freeLabelName = ProgramUtils.getNextFreeLabelName(contextMap);
         String labelName = args.get(labelArgumentName);
 
@@ -59,7 +58,7 @@ public class JumpZero extends Instruction
                 Map.of(JumpNotZero.labelArgumentName, freeLabelName), label, this, originalInstructionIndex));
         instructions.add(new GOTOLabel("",
                 Map.of(GOTOLabel.labelArgumentName, labelName), null, this, originalInstructionIndex));
-        instructions.add(new Neutral(ProgramEngine.outputName, null, freeLabelName, this, originalInstructionIndex));
+        instructions.add(new Neutral(ProgramUtils.outputName, null, freeLabelName, this, originalInstructionIndex));
 
         return instructions;
     }
@@ -81,16 +80,15 @@ public class JumpZero extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionIndex)
-    {
-        String labelName = args.get(labelArgumentName);
-        String commandPart = String.format("IF %s == 0 GOTO %s", mainVarName, labelName);
-        return formatDisplay(instructionIndex, commandPart);
-    }
-
-    @Override
     public int getExpandLevel()
     {
         return expandLevel;
+    }
+
+    @Override
+    public String toString()
+    {
+        String labelName = args.get(labelArgumentName);
+        return String.format("IF %s == 0 GOTO %s", mainVarName, labelName);
     }
 }

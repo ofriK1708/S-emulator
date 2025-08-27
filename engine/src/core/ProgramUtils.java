@@ -6,6 +6,9 @@ import java.util.Map;
 
 public class ProgramUtils
 {
+    public static final String EXITLabelName = "EXIT";
+    public static final String outputName = "y";
+
     public static String getNextFreeLabelName(Map<String, Integer> contextMap)
     {
         int labelIndex = 1;
@@ -81,15 +84,6 @@ public class ProgramUtils
         return currentLevel;
     }
 
-    /*private static Map<String, Integer> createDummyContextMap() {
-        Map<String, Integer> dummyContext = new HashMap<>();
-
-        // Add some basic variables that are commonly used
-        dummyContext.put("PC", 0);
-        dummyContext.put("y", 0);
-
-        return dummyContext;
-    }*/
     public static int getMaxExpandLevel(List<Instruction> instructions)
     {
         int maxLevel = 0;

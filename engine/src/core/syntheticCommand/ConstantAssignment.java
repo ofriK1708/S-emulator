@@ -71,21 +71,21 @@ public class ConstantAssignment extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionIndex)
-    {
-        try
-        {
-            int constantValue = Integer.parseInt(args.get(valueArgumentName));
-            String commandPart = String.format("%s <- %d", mainVarName, constantValue);
-            return formatDisplay(instructionIndex, commandPart);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid value for constant assignment: " + args.get(valueArgumentName));
-        }
-    }
-
-    @Override
     public int getExpandLevel()
     {
         return expandLevel;
+    }
+
+    @Override
+    public String toString()
+    {
+        int constantValue = 0;
+        try
+        {
+            constantValue = Integer.parseInt(args.get(valueArgumentName));
+        } catch (NumberFormatException ignored)
+        {
+        }
+        return String.format("%s <- %d", mainVarName, constantValue);
     }
 }
