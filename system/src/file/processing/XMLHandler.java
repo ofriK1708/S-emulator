@@ -10,10 +10,12 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class XMLHandler {
+public class XMLHandler
+{
     private final Unmarshaller unmarshaller;
 
-    public XMLHandler() throws JAXBException {
+    public XMLHandler() throws JAXBException
+    {
 
         final String jaxbGeneratedPackageLoc = "generated";
         JAXBContext jaxbContext = JAXBContext.newInstance(jaxbGeneratedPackageLoc);
@@ -25,13 +27,4 @@ public class XMLHandler {
         InputStream xmlFile = Files.newInputStream(xmlPath);
         return (SProgram) unmarshaller.unmarshal(xmlFile);
     }
-
-//    public boolean validateXMLStructure(Path xmlPath) {
-//        try {
-//            unmarshallForm(xmlPath);
-//            return true;
-//        } catch (JAXBException | IOException e) {
-//            return false;
-//        }
-//    }
 }

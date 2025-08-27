@@ -2,7 +2,6 @@ package core.syntheticCommand;
 
 import core.CommandType;
 import core.Instruction;
-import core.ProgramEngine;
 import core.ProgramUtils;
 import core.basicCommand.Decrease;
 import core.basicCommand.Neutral;
@@ -69,7 +68,7 @@ public class JumpEqualVariable extends Instruction
     public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
 
-        List<Instruction> instructions = new ArrayList<Instruction>();
+        List<Instruction> instructions = new ArrayList<>();
         String originalLabelName = args.get(labelArgumentName);
         String freeLabelName1 = ProgramUtils.getNextFreeLabelName(contextMap);
         String freeLabelName2 = ProgramUtils.getNextFreeLabelName(contextMap);
@@ -91,7 +90,7 @@ public class JumpEqualVariable extends Instruction
                 Map.of(GOTOLabel.labelArgumentName, freeLabelName2), null, this, originalInstructionIndex));
         instructions.add(new JumpZero(freeWorkVariableName2,
                 Map.of(JumpZero.labelArgumentName, originalLabelName), freeLabelName3, this, originalInstructionIndex));
-        instructions.add(new Neutral(ProgramEngine.outputName, null, freeLabelName1, this, originalInstructionIndex));
+        instructions.add(new Neutral(ProgramUtils.outputName, null, freeLabelName1, this, originalInstructionIndex));
         return instructions;
 
 
@@ -104,17 +103,16 @@ public class JumpEqualVariable extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionIndex)
-    {
-        String labelName = args.get(labelArgumentName);
-        String checkConstant = args.get(variableArgumentName);
-        String commandPart = String.format("IF %s == %s GOTO %s", mainVarName, checkConstant, labelName);
-        return formatDisplay(instructionIndex, commandPart);
-    }
-
-    @Override
     public int getExpandLevel()
     {
         return expandLevel;
+    }
+
+    @Override
+    public String toString()
+    {
+        String labelName = args.get(labelArgumentName);
+        String checkConstant = args.get(variableArgumentName);
+        return String.format("IF %s == %s GOTO %s", mainVarName, checkConstant, labelName);
     }
 }

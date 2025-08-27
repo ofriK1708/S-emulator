@@ -1,33 +1,21 @@
 package core;
 
-import java.util.LinkedList;
+import dto.engine.ExecutionStatisticsDTO;
+
+import java.util.List;
 
 public class ExecutionStatistics
 {
-    private int executionNumber = 0;
-    private int levelOfExpansion = 0;
-    private LinkedList<Integer> argumentsValues = new LinkedList<>();
+    private final int executionNumber;
+    private final int levelOfExpansion;
+    private final List<Integer> argumentsValues;
     private int Y = 0;
     private int numOfCycles = 0;
 
-    public ExecutionStatistics(int executionNumber)
+    public ExecutionStatistics(int executionNumber, int levelOfExpansion, List<Integer> argumentsValues)
     {
         this.executionNumber = executionNumber;
-    }
-
-    public ExecutionStatistics(int levelOfExpansion, LinkedList<Integer> argumentsValues)
-    {
         this.levelOfExpansion = levelOfExpansion;
-        this.argumentsValues = argumentsValues;
-    }
-
-    public void setLevelOfExpansion(int levelOfExpansion)
-    {
-        this.levelOfExpansion = levelOfExpansion;
-    }
-
-    public void setArgumentsValues(LinkedList<Integer> argumentsValues)
-    {
         this.argumentsValues = argumentsValues;
     }
 
@@ -36,30 +24,13 @@ public class ExecutionStatistics
         Y = y;
     }
 
-    public void setNumOfCycles(int numOfCycles)
-    {
-        this.numOfCycles = numOfCycles;
-    }
-
     public void incrementCycles(int numOfCycles)
     {
         this.numOfCycles += numOfCycles;
     }
 
-    @Override
-    public String toString()
+    public ExecutionStatisticsDTO toDTO()
     {
-        return "Statistics{" +
-                "executionNumber=" + executionNumber +
-                ", levelOfExpansion=" + levelOfExpansion +
-                ", argumentsValues=" + argumentsValues +
-                ", Y=" + Y +
-                ", numOfCycles=" + numOfCycles +
-                '}';
-    }
-
-    public int getNumOfCycles()
-    {
-        return numOfCycles;
+        return new ExecutionStatisticsDTO(executionNumber, levelOfExpansion, argumentsValues, Y, numOfCycles);
     }
 }

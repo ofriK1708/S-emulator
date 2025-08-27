@@ -74,16 +74,15 @@ public class GOTOLabel extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionIndex)
-    {
-        String labelName = args.get(labelArgumentName);
-        String commandPart = String.format("GOTO %s", labelName);
-        return formatDisplay(instructionIndex, commandPart);
-    }
-
-    @Override
     public int getExpandLevel()
     {
         return expandLevel;
+    }
+
+    @Override
+    public String toString()
+    {
+        String labelName = args.get(labelArgumentName);
+        return String.format("GOTO %s", labelName);
     }
 }

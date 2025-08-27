@@ -70,17 +70,15 @@ public class JumpNotZero extends Instruction
     }
 
     @Override
-    public String getDisplayFormat(int instructionIndex)
-    {
-        String commandPart = String.format("if %s != 0 GOTO %s", mainVarName, args.get(labelArgumentName));
-        return formatDisplay(instructionIndex, commandPart);
-    }
-
-    @Override
     public int getExpandLevel()
     {
         return expandLevel;
     }
 
+    @Override
+    public String toString()
+    {
+        return String.format("if %s != 0 GOTO %s", mainVarName, args.get(labelArgumentName));
+    }
 }
 
