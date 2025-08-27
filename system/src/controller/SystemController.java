@@ -48,7 +48,7 @@ public class SystemController
         {
             SProgram program = xmlHandler.unmarshallFile(Path.of(xmlFilePath));
             createEngine(program);
-        } catch (JAXBException | java.io.IOException e)
+        } catch (Exception e)
         {
             throw new RuntimeException("Failed to load S-program from file: " + xmlFilePath + e.getMessage());
         }
