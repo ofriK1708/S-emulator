@@ -1,6 +1,5 @@
 package consoleUI;
 
-import core.ExecutionStatistics;
 import core.ProgramEngine;
 
 import java.util.ArrayList;
@@ -40,9 +39,12 @@ public class ConsoleUI {
                     //runProgram();
                     break;
                 case 4:
-                    // displayStatistics(); // TODO - where is the expand?
+                    // expandProgram(); // TODO - where is the expand?
                     break;
                 case 5:
+                    // displayStatistics(); // TODO - where is the expand?
+                    break;
+                case 6:
                     exitSystem();
                     return;
                 default:
@@ -58,9 +60,10 @@ public class ConsoleUI {
         System.out.println("1. Load XML File");
         System.out.println("2. Display Loaded Program");
         System.out.println("3. Run Program");
-        System.out.println("4. Show History/Statistics"); // TODO - where is the expand?
-        System.out.println("5. Exit System");
-        System.out.print("Choose an option (1-5): ");
+        System.out.println("4. Expand Program");
+        System.out.println("5. Show History/Statistics"); // TODO - where is the expand?
+        System.out.println("6. Exit System");
+        System.out.print("Choose an option (1-6): ");
     }
 
     private int getUserChoice() {
