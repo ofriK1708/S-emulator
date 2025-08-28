@@ -1,5 +1,7 @@
 package ui.console.utils;
 
+import engine.utils.ProgramUtils;
+
 import java.util.*;
 
 public class UIUtils
@@ -12,10 +14,10 @@ public class UIUtils
     public static void getUserArguments(Set<String> programArgsName, List<Integer> arguments)
     {
         System.out.println("Please enter the program arguments (non-negative numbers separated by commas):");
-        programArgsName.stream()
+        List<String> ProgramArgs = programArgsName.stream()
                 .sorted(programNameComparator)
-                .forEach(argName -> System.out.println(argName + ", "));
-
+                .toList();
+        System.out.println(String.join(", ", ProgramArgs));
         boolean valid = false;
         String userArguments = scanner.nextLine();
         while (!valid)
@@ -47,24 +49,26 @@ public class UIUtils
     {
         map.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(programNameComparator))
-                .forEach(entry -> System.out.println("    " + entry.getKey() + " = " + entry.getValue()));
+                .forEach(entry -> System.out.print(" " + entry.getKey() + " = " + entry.getValue()));
+        System.out.println();
     }
 
     public static void printSortedSet(Set<String> set)
     {
         boolean ExitAppeared = false;
-        if (set.contains("EXIT"))
+        if (set.contains(ProgramUtils.EXITLabelName))
         {
             ExitAppeared = true;
-            set.remove("EXIT");
+            set.remove(ProgramUtils.EXITLabelName);
         }
-        set.stream()
+        List<String> sortedArgs = new ArrayList<>(set.stream()
                 .sorted(programNameComparator)
-                .forEach(argName -> System.out.println(argName + ", "));
+                .toList());
         if (ExitAppeared)
         {
-            System.out.println("EXIT");
+            sortedArgs.addLast(ProgramUtils.EXITLabelName);
         }
+        System.out.println(String.join(", ", sortedArgs));
     }
 
     public static int getUserChoice(int maxOption)

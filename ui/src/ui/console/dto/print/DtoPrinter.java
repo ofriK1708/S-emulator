@@ -15,9 +15,9 @@ public class DtoPrinter
     public static void printProgram(ProgramDTO program)
     {
         System.out.println("Program Name: " + program.ProgramName());
-        System.out.println("Arguments");
+        System.out.print("Arguments: ");
         UIUtils.printSortedSet(program.arguments());
-        System.out.println("\nLabels:");
+        System.out.print("Labels: ");
         if (program.labels().isEmpty())
         {
             System.out.println("No labels in the program.");
@@ -26,7 +26,7 @@ public class DtoPrinter
             UIUtils.printSortedSet(program.labels());
         }
 
-        System.out.println("\nInstructions:");
+        System.out.printf("Instructions:%n");
         List<InstructionDTO> instructions = program.instructions();
         for (int i = 0; i < instructions.size(); i++)
         {
@@ -54,8 +54,8 @@ public class DtoPrinter
     public static void printExecutionResultDTO(ExecutionResultDTO resultDTO)
     {
         System.out.println("=== Execution Result ===");
-        System.out.println("  Result: " + resultDTO.result());
-        System.out.println("  Arguments Values: ");
+        System.out.println("  Result: y = " + resultDTO.result());
+        System.out.print("  Arguments Values: ");
         UIUtils.printSortedMap(resultDTO.argumentsValues());
         System.out.println("  Work Variables Values: ");
         UIUtils.printSortedMap(resultDTO.workVariablesValues());
