@@ -37,20 +37,6 @@ public class ProgramUtils
         return varName;
     }
 
-    public static void updateLabel(Map<String, Integer> contextMap, String labelName, int newLabelValue)
-    {
-        if (!labelName.isEmpty())
-        {
-            if (contextMap.containsKey(labelName))
-            {
-                contextMap.put(labelName, newLabelValue);
-            } else
-            {
-                throw new IllegalArgumentException("No such label: " + labelName);
-            }
-        }
-    }
-
     public static boolean isNumber(String argName)
     {
         try

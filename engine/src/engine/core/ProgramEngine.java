@@ -215,9 +215,11 @@ public class ProgramEngine
     public ProgramDTO toDTO(int expandLevel)
     {
         expand(expandLevel);
+        Map<String, Integer> argsMap = extractArguments(contextMapsByExpandLevel.get(expandLevel));
+        argsMap.putAll(extraArguments);
         return new ProgramDTO(
                 programName,
-                extractArguments(contextMapsByExpandLevel.get(expandLevel)).keySet(),
+                argsMap.keySet(),
                 extractLabels(labelsByExpandLevel, expandLevel),
                 instructionExpansionLevels.get(expandLevel).stream()
                         .map(Instruction::toDTO)
