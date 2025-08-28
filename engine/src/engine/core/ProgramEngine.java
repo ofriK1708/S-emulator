@@ -108,6 +108,7 @@ public class ProgramEngine
 
     public void run(int expandLevel, List<Integer> arguments)
     {
+        clearPreviousRunData();
         ExecutionStatistics exStats = new ExecutionStatistics(executionStatisticsList.size() + 1,
                 expandLevel, arguments);
         insertArguments(arguments);
@@ -131,9 +132,20 @@ public class ProgramEngine
         executionStatisticsList.add(exStats);
     }
 
-    private void insertArguments(List<Integer> arguments)
+    private void clearPreviousRunData()
     {
         extraArguments.clear();
+        contextMapsByExpandLevel.clear();
+        contextMapsByExpandLevel.add(new HashMap<>(originalContextMap));
+        instructionExpansionLevels.clear();
+        instructionExpansionLevels.add(originalInstructions);
+        labelsByExpandLevel.clear();
+        labelsByExpandLevel.add(new HashSet<>(originalLabels));
+    }
+
+
+    private void insertArguments(List<Integer> arguments)
+    {
         int argIndex = 1;
         String argName;
         for (Integer argValue : arguments)
@@ -142,6 +154,7 @@ public class ProgramEngine
             if (originalContextMap.containsKey(argName))
             {
                 originalContextMap.put(argName, argValue);
+                contextMapsByExpandLevel.getFirst().put(argName, argValue);
             } else
             {
                 extraArguments.put(argName, argValue);
@@ -182,9 +195,9 @@ public class ProgramEngine
                 .filter(instr -> !instr.getLabel().isBlank())
                 .forEach(instr -> latestContextMap.put(instr.getLabel(), LatestExpanded.indexOf(instr)));
         // update EXIT label to point to the end of the expanded program
-        if (latestLabels.contains(ProgramUtils.outputName))
+        if (latestLabels.contains(EXITLabelName))
         {
-            latestContextMap.put(ProgramUtils.EXITLabelName, LatestExpanded.size());
+            latestContextMap.put(EXITLabelName, LatestExpanded.size());
         }
         // add any new labels introduced during expansion
         latestContextMap.keySet()

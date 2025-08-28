@@ -3,10 +3,7 @@ package engine.utils;
 import engine.core.CommandType;
 import engine.core.Instruction;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ProgramUtils
 {
@@ -141,7 +138,7 @@ public class ProgramUtils
         {
             throw new IllegalArgumentException("Invalid expand level: " + expandLevel);
         }
-        return labelsByExpandLevel.get(expandLevel);
+        return new HashSet<>(labelsByExpandLevel.get(expandLevel));
     }
 
 }

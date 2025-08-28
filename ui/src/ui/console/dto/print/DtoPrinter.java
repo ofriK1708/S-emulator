@@ -31,13 +31,14 @@ public class DtoPrinter
         for (int i = 0; i < instructions.size(); i++)
         {
             printInstruction(instructions.get(i), i);
+            System.out.println();
         }
     }
 
     private static void printInstruction(InstructionDTO instruction, int i)
     {
         String numberPart = "#" + (i + 1);
-        String typePart = instruction.type();
+        String typePart = "(" + instruction.type() + ")";
         String labelPart = "[ " + String.format("%-4s", instruction.label()) + "]";
         String cyclesPart = "(" + instruction.cycles() + ")";
         String full = String.format("%s %s %s %s %s", numberPart, typePart,
@@ -57,8 +58,14 @@ public class DtoPrinter
         System.out.println("  Result: y = " + resultDTO.result());
         System.out.print("  Arguments Values: ");
         UIUtils.printSortedMap(resultDTO.argumentsValues());
-        System.out.println("  Work Variables Values: ");
-        UIUtils.printSortedMap(resultDTO.workVariablesValues());
+        System.out.print("  Work Variables Values: ");
+        if (resultDTO.workVariablesValues().isEmpty())
+        {
+            System.out.println("No work variables used.");
+        } else
+        {
+            UIUtils.printSortedMap(resultDTO.workVariablesValues());
+        }
         System.out.println("  Number of Cycles: " + resultDTO.numOfCycles());
     }
 
@@ -67,8 +74,9 @@ public class DtoPrinter
         System.out.println("=== Execution Statistics ===");
         System.out.println("  Execution Number: " + statsDTO.executionNumber());
         System.out.println("  Level of Expansion: " + statsDTO.expandLevel());
-        System.out.println("  Arguments Values: " + statsDTO.arguments());
-        System.out.println("  y = " + statsDTO.result());
+        System.out.print("  Arguments Values: ");
+        UIUtils.printSortedMap(statsDTO.arguments());
+        System.out.println("  result:  y = " + statsDTO.result());
         System.out.println("  Number of Cycles: " + statsDTO.cyclesUsed());
 
     }

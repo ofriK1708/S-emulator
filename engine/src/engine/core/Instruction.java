@@ -111,7 +111,7 @@ public abstract class Instruction implements Command
     {
         Map<InstructionDTO, Integer> derivedFromInstructionsDto = new LinkedHashMap<>();
         getDerivedInstructions().forEach((derivedInstruction, index) ->
-                derivedFromInstructionsDto.put(derivedInstruction.toDTO(), index)
+                derivedFromInstructionsDto.put(derivedInstruction.simpleToDTO(), index)
         );
         return new InstructionDTO(
                 getType().getSymbol(),
@@ -119,6 +119,17 @@ public abstract class Instruction implements Command
                 toString(),
                 getCycles(),
                 derivedFromInstructionsDto
+        );
+    }
+
+    private InstructionDTO simpleToDTO()
+    {
+        return new InstructionDTO(
+                getType().getSymbol(),
+                label,
+                toString(),
+                getCycles(),
+                Collections.emptyMap()
         );
     }
 }

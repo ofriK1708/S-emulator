@@ -6,15 +6,12 @@ import dto.engine.ProgramDTO;
 import engine.core.ProgramEngine;
 import engine.exception.LabelNotExist;
 import engine.generated.SProgram;
-import engine.utils.ProgramUtils;
 import jakarta.xml.bind.JAXBException;
 import system.file.file.processing.XMLHandler;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class SystemController
@@ -92,27 +89,6 @@ public class SystemController
         return engine.toExecutionResultDTO(expandLevel);
     }
 
-    private Map<String, Integer> processArguments(List<String> arguments)
-    {
-        Map<String, Integer> argsMap = new HashMap<>();
-        for (int i = 1; i <= arguments.size(); i++)
-        {
-            String argName = ProgramUtils.argPrefix + i;
-            try
-            {
-                int argValue = Integer.parseInt(arguments.get(i - 1));
-                if (argValue < 0)
-                {
-                    throw new IllegalArgumentException("All arguments must be non-negative integers");
-                }
-                argsMap.put(argName, argValue);
-            } catch (NumberFormatException e)
-            {
-                throw new IllegalArgumentException("All arguments must be integers", e);
-            }
-        }
-        return argsMap;
-    }
 
     public ProgramDTO getProgramByExpandLevel(int expandLevel)
     {
