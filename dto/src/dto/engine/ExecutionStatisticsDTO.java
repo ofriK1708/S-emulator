@@ -1,10 +1,10 @@
 package dto.engine;
 
-import java.util.List;
+import java.util.Map;
 
 public record ExecutionStatisticsDTO(int executionNumber,
-                                     int levelOfExpansion,
-                                     List<Integer> arguments,
+                                     int expandLevel,
+                                     Map<String, Integer> arguments,
                                      int result,
                                      int cyclesUsed
 )

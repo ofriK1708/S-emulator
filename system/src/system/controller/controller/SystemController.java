@@ -1,15 +1,20 @@
 package system.controller.controller;
 
+import dto.engine.ExecutionResultDTO;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
 import engine.core.ProgramEngine;
 import engine.exception.LabelNotExist;
 import engine.generated.SProgram;
+import engine.utils.ProgramUtils;
 import jakarta.xml.bind.JAXBException;
 import system.file.file.processing.XMLHandler;
 
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class SystemController
@@ -35,7 +40,7 @@ public class SystemController
         {
             throw new IllegalStateException("Program has not been set");
         }
-        return engine.extractArguments().keySet();
+        return engine.getProgramArgsNames();
     }
 
     private void createEngine(SProgram program) throws LabelNotExist
@@ -53,23 +58,18 @@ public class SystemController
         return maxExpandLevel;
     }
 
-    public void LoadProgramFromFile(String xmlFilePath) throws LabelNotExist
+    public void LoadProgramFromFile(Path xmlFilePath) throws LabelNotExist, JAXBException, IOException
     {
-        if (!xmlFilePath.endsWith(".xml"))
+        if (!xmlFilePath.getFileName().toString().endsWith(".xml"))
         {
             throw new IllegalArgumentException("File must be an XML file");
         }
-        try
-        {
-            SProgram program = xmlHandler.unmarshallFile(Path.of(xmlFilePath));
-            createEngine(program);
-        } catch (Exception e)
-        {
-            throw new RuntimeException("Failed to load S-program from file: " + xmlFilePath + e.getMessage());
-        }
+        SProgram program = xmlHandler.unmarshallFile(xmlFilePath);
+        createEngine(program);
+
     }
 
-    public ProgramDTO runLoadedProgram(int expandLevel, List<Integer> arguments)
+    public ExecutionResultDTO runLoadedProgram(int expandLevel, List<Integer> arguments)
     {
         if (engine == null)
         {
@@ -89,7 +89,29 @@ public class SystemController
             throw new IllegalArgumentException("All arguments must be non-negative integers");
         }
         engine.run(expandLevel, arguments);
-        return getProgramByExpandLevel(expandLevel);
+        return engine.toExecutionResultDTO(expandLevel);
+    }
+
+    private Map<String, Integer> processArguments(List<String> arguments)
+    {
+        Map<String, Integer> argsMap = new HashMap<>();
+        for (int i = 1; i <= arguments.size(); i++)
+        {
+            String argName = ProgramUtils.argPrefix + i;
+            try
+            {
+                int argValue = Integer.parseInt(arguments.get(i - 1));
+                if (argValue < 0)
+                {
+                    throw new IllegalArgumentException("All arguments must be non-negative integers");
+                }
+                argsMap.put(argName, argValue);
+            } catch (NumberFormatException e)
+            {
+                throw new IllegalArgumentException("All arguments must be integers", e);
+            }
+        }
+        return argsMap;
     }
 
     public ProgramDTO getProgramByExpandLevel(int expandLevel)
@@ -110,12 +132,12 @@ public class SystemController
         return getProgramByExpandLevel(0);
     }
 
-    public List<ExecutionStatisticsDTO> getExecutionStatistics()
+    public List<ExecutionStatisticsDTO> getAllExecutionStatistics()
     {
         if (engine == null)
         {
             throw new IllegalStateException("Program has not been set");
         }
-        return engine.getExecutionStatisticsDTOList();
+        return engine.getAllExecutionStatistics();
     }
 }

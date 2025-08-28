@@ -1,13 +1,20 @@
-package engine.core;
+package engine.utils;
+
+import engine.core.CommandType;
+import engine.core.Instruction;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ProgramUtils
 {
     public static final String EXITLabelName = "EXIT";
     public static final String outputName = "y";
+    public static final String argPrefix = "x";
+    public static final String workVarPrefix = "z";
+
 
     public static String getNextFreeLabelName(Map<String, Integer> contextMap)
     {
@@ -92,6 +99,49 @@ public class ProgramUtils
             maxLevel = Math.max(maxLevel, instr.getExpandLevel());
         }
         return maxLevel;
+    }
+
+    public static Map<String, Integer> getArgsMapFromValuesList(List<Integer> argsList)
+    {
+        Map<String, Integer> argsMap = new HashMap<>();
+        for (int i = 0; i < argsList.size(); i++)
+        {
+            String argName = argPrefix + (i + 1);
+            argsMap.put(argName, argsList.get(i));
+        }
+        return argsMap;
+    }
+
+    public static Map<String, Integer> extractWorkVars(Map<String, Integer> contextMap)
+    {
+        return getStringIntegerMap(contextMap, workVarPrefix);
+    }
+
+    public static Map<String, Integer> extractArguments(Map<String, Integer> contextMap)
+    {
+        return getStringIntegerMap(contextMap, argPrefix);
+    }
+
+    private static Map<String, Integer> getStringIntegerMap(Map<String, Integer> contextMap, String argPrefix)
+    {
+        Map<String, Integer> arguments = new HashMap<>();
+        for (Map.Entry<String, Integer> entry : contextMap.entrySet())
+        {
+            if (entry.getKey().startsWith(argPrefix))
+            {
+                arguments.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return arguments;
+    }
+
+    public static Set<String> extractLabels(List<Set<String>> labelsByExpandLevel, int expandLevel)
+    {
+        if (expandLevel < 0 || expandLevel >= labelsByExpandLevel.size())
+        {
+            throw new IllegalArgumentException("Invalid expand level: " + expandLevel);
+        }
+        return labelsByExpandLevel.get(expandLevel);
     }
 
 }

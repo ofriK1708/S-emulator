@@ -5,7 +5,7 @@
         <S-Instruction type="basic" name="JUMP_NOT_ZERO">
             <S-Variable>x1</S-Variable>
             <S-Instruction-Arguments>
-                <S-Instruction-Argument name="JNZLabel" value="A1"/>
+                <S-Instruction-Argument name="JNZLabel" value="L1"/>
             </S-Instruction-Arguments>
         </S-Instruction>
         <S-Instruction type="basic" name="INCREASE">

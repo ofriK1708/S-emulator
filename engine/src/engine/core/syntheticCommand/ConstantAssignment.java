@@ -2,8 +2,8 @@ package engine.core.syntheticCommand;
 
 import engine.core.CommandType;
 import engine.core.Instruction;
-import engine.core.ProgramUtils;
 import engine.core.basicCommand.Increase;
+import engine.utils.ProgramUtils;
 
 import java.util.ArrayList;
 import java.util.List;

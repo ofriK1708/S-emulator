@@ -1,13 +1,17 @@
 package engine.core;
 
+import dto.engine.ExecutionResultDTO;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
 import engine.exception.LabelNotExist;
 import engine.generated.SInstruction;
 import engine.generated.SProgram;
+import engine.utils.ProgramUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static engine.utils.ProgramUtils.*;
 
 public class ProgramEngine
 {
@@ -190,30 +194,6 @@ public class ProgramEngine
         labelsByExpandLevel.add(latestLabels);
     }
 
-    public Map<String, Integer> extractArguments()
-    {
-        Map<String, Integer> arguments = new HashMap<>();
-        for (String varName : originalContextMap.keySet())
-        {
-            if (varName.startsWith("x"))
-            {
-                arguments.put(varName, originalContextMap.get(varName));
-            }
-        }
-        arguments.putAll(extraArguments);
-        return arguments;
-    }
-
-    public Set<String> extractLabels(int expandLevel)
-    {
-        if (expandLevel < 0 || expandLevel >= labelsByExpandLevel.size())
-        {
-            throw new IllegalArgumentException("Invalid expand level: " + expandLevel);
-        }
-        return labelsByExpandLevel.get(expandLevel);
-    }
-
-
     public int getMaxExpandLevel()
     {
         return ProgramUtils.getMaxExpandLevel(originalInstructions);
@@ -224,18 +204,37 @@ public class ProgramEngine
         expand(expandLevel);
         return new ProgramDTO(
                 programName,
-                extractArguments(),
-                extractLabels(expandLevel),
+                extractArguments(contextMapsByExpandLevel.get(expandLevel)).keySet(),
+                extractLabels(labelsByExpandLevel, expandLevel),
                 instructionExpansionLevels.get(expandLevel).stream()
                         .map(Instruction::toDTO)
                         .collect(Collectors.toList())
         );
     }
 
-    public List<ExecutionStatisticsDTO> getExecutionStatisticsDTOList()
+    public ExecutionResultDTO toExecutionResultDTO(int expandLevel)
+    {
+        if (executionStatisticsList.isEmpty())
+        {
+            throw new IllegalStateException("No execution has been run yet.");
+        }
+        ExecutionStatisticsDTO executionStatisticsDTO = executionStatisticsList.getLast().toDTO();
+        return new ExecutionResultDTO(executionStatisticsDTO.result(),
+                executionStatisticsDTO.arguments(),
+                extractWorkVars(contextMapsByExpandLevel.get(expandLevel)),
+                executionStatisticsDTO.cyclesUsed()
+        );
+    }
+
+    public List<ExecutionStatisticsDTO> getAllExecutionStatistics()
     {
         return executionStatisticsList.stream()
                 .map(ExecutionStatistics::toDTO)
                 .toList();
+    }
+
+    public Set<String> getProgramArgsNames()
+    {
+        return extractArguments(originalContextMap).keySet();
     }
 }
