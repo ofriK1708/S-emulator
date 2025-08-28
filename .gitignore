@@ -34,3 +34,6 @@ bin/
 .DS_Store
 /outputs/
 
+### tsti files ###
+/ui/src/ui/console/testingMethods.java
+
