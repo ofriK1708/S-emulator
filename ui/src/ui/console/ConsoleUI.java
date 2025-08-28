@@ -1,36 +1,42 @@
 package ui.console;
 
-import engine.core.ProgramEngine;
+import dto.engine.ExecutionStatisticsDTO;
+import dto.engine.InstructionDTO;
+import dto.engine.ProgramDTO;
+import system.controller.controller.SystemController;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
-public class ConsoleUI {
+public class ConsoleUI
+{
     private final Scanner scanner;
-    private ProgramDTO currentProgram;
-    private ProgramEngine programEngine; // TODO - remove this
-    private ExecutionStatisticsDTO currentStatsProgram;
-    private final boolean programLoaded; // TODO - remove this
-    //private List<ExecutionStatisticsDTO> executionHistory;
+    private ProgramDTO programDTO;
+    private List<ExecutionStatisticsDTO> executionHistory;
+    private final SystemController systemController;
+    private final String invalidChoiceFormat = "Invalid choice. please enter a number between %d and %d.%n";
+    private final Comparator<String> dataNameComparator =
+            Comparator.comparingInt(str -> Integer.parseInt(str.substring(1)));
+    private final boolean programLoaded = false;
 
-    public ConsoleUI() {
-        this.scanner = new Scanner(System.in);
-        this.programLoaded = false;
-        // this.executionHistory = new ArrayList<>();
+    public ConsoleUI()
+    {
+        scanner = new Scanner(System.in);
+        systemController = new SystemController();
     }
 
-    public void start() {
+    public void start()
+    {
         System.out.println("=== S-EMULATOR Console Interface ===");
 
-        while (true) {
+        while (true)
+        {
             displayMenu();
             int choice = getUserChoice();
 
-            switch (choice) {
+            switch (choice)
+            {
                 case 1:
-                    // loadXMLFile();
+                    loadXMLFile();
                     break;
                 case 2:
                     displayLoadedProgram();
@@ -39,137 +45,227 @@ public class ConsoleUI {
                     //runProgram();
                     break;
                 case 4:
-                    // expandProgram(); // TODO - where is the expand?
+                    // expandProgram();
                     break;
                 case 5:
-                    // displayStatistics(); // TODO - where is the expand?
+                    // displayStatistics();
                     break;
                 case 6:
                     exitSystem();
                     return;
-                default:
-                    System.out.println("בחירה לא תקינה. אנא בחר מספר בין 1-5."); // TODO - remove hebrew
             }
 
             System.out.println(); // רווח בין פעולות
         }
     }
 
-    private void displayMenu() {
+    private void displayMenu()
+    {
         System.out.println("\n=== Main Menu ===");
         System.out.println("1. Load XML File");
         System.out.println("2. Display Loaded Program");
         System.out.println("3. Run Program");
         System.out.println("4. Expand Program");
-        System.out.println("5. Show History/Statistics"); // TODO - where is the expand?
+        System.out.println("5. Show History/Statistics");
         System.out.println("6. Exit System");
-        System.out.print("Choose an option (1-6): ");
     }
 
-    private int getUserChoice() {
-        try {
-            return Integer.parseInt(scanner.nextLine().trim());
-        } catch (NumberFormatException e) {
-            return -1; // בחירה לא תקינה
+    private void loadXMLFile()
+    {
+        try
+        {
+            System.out.println("Please enter a full path for the xml file:");
+            String filePath = scanner.nextLine();
+            systemController.LoadProgramFromFile(filePath);
+            System.out.println("The program has been loaded successfully.");
+        } catch (Exception e)
+        {
+            System.out.println("Error loading file " + e.getMessage());
+            System.out.println("Please try fixing the file or choose another file");
+            System.out.println("Returning to main menu...");
+        }
+
+    }
+
+    private int getUserChoice()
+    {
+        while (true)
+        {
+            try
+            {
+                System.out.print("Enter an option (1-6): ");
+                int choice = Integer.parseInt(scanner.nextLine().trim());
+                if (choice >= 1 && choice <= 6)
+                {
+                    return choice;
+                }
+                System.out.printf(invalidChoiceFormat, 1, 6);
+            } catch (IllegalArgumentException e)
+            {
+                System.out.printf(invalidChoiceFormat, 1, 6);
+                displayMenu();
+            }
         }
     }
 
-    private void displayLoadedProgram() {
-        System.out.println("\n=== Display Loaded Program ===");
-
-        if (!programLoaded || currentProgram == null) {
-            System.out.println("No program is currently loaded. Please load an XML file first.");
+    private void displayLoadedProgram()
+    {
+        if (!programLoaded)
+        {
+            printProgramNotLoaded();
             return;
         }
+        System.out.println("=== Display Loaded Program ===");
+        printProgram();
+    }
 
-        // TODO - change this - no communication with core
-        System.out.println("Program Name: " + currentProgram.ProgramName());
-        System.out.println("\nArguments:");
-        if (currentProgram.arguments().isEmpty()) {
-            System.out.println("  No arguments defined");
-        } else {
-            currentProgram.arguments().forEach((name, value) ->
-                    System.out.println("  " + name + " = " + value));
-        }
-
+    private void printProgram()
+    {
+        System.out.println("Program Name: " + programDTO.ProgramName());
+        System.out.println("Arguments");
+        programDTO.arguments().keySet().stream()
+                .sorted(dataNameComparator)
+                .forEach(System.out::println);
         System.out.println("\nLabels:");
-        if (currentProgram.labels().isEmpty()) {
-            System.out.println("  No labels defined");
-        } else {
-            currentProgram.labels().forEach(label ->
-                    System.out.println("  " + label));
+        if (programDTO.labels().isEmpty())
+        {
+            System.out.println("No labels in the program.");
+        } else
+        {
+            programDTO.labels().stream()
+                    .sorted(dataNameComparator)
+                    .forEach(System.out::println);
         }
 
         System.out.println("\nInstructions:");
-        if (currentProgram.instructions().isEmpty()) {
-            System.out.println("  No instructions defined");
-        } else {
-            for (int i = 0; i < currentProgram.instructions().size(); i++) {
-                InstructionDTO instruction = currentProgram.instructions().get(i);
-                System.out.printf("  %d. [%s] %s %s (cycles: %d)%n",
-                        i + 1,
-                        instruction.type(),
-                        instruction.label() != null ? instruction.label() + ":" : "",
-                        instruction.command(),
-                        instruction.cycles());
-            }
+        List<InstructionDTO> instructions = programDTO.instructions();
+        for (int i = 0; i < instructions.size(); i++)
+        {
+            printInstruction(instructions.get(i), i);
         }
     }
 
-    private void runProgram() {
-        System.out.println("\n=== Run Program ===");
+    private void printInstruction(InstructionDTO instruction, int i)
+    {
+        String numberPart = "#" + (i + 1);
+        String typePart = instruction.type();
+        String labelPart = "[ " + String.format("%-4s", instruction.label()) + "]";
+        String cyclesPart = "(" + instruction.cycles() + ")";
+        String full = String.format("%s %s %s %s %s", numberPart, typePart,
+                labelPart, instruction.command(), cyclesPart);
+        System.out.print(full);
+        Map<InstructionDTO, Integer> derivedFrom = instruction.derivedFromInstructions();
+        for (Map.Entry<InstructionDTO, Integer> entry : derivedFrom.entrySet())
+        {
+            System.out.print(" >>> ");
+            printInstruction(entry.getKey(), entry.getValue());
+        }
+    }
 
-        if (!programLoaded || currentProgram == null) {
-            System.out.println("No program is currently loaded. Please load an XML file first.");
+    private void expandProgram()
+    {
+        if (!programLoaded)
+        {
+            printProgramNotLoaded();
             return;
         }
-
-        System.out.println("Running program: " + currentProgram.ProgramName());
-
-        // Get arguments from user if program requires them
-        List<Integer> runtimeArguments = new ArrayList<>();
-        if (!currentProgram.arguments().isEmpty()) {
-            System.out.println("\nProgram arguments required:");
-            for (Map.Entry<String, Integer> arg : currentProgram.arguments().entrySet()) {
-                System.out.print("Enter value for " + arg.getKey() +
-                        " (default: " + arg.getValue() + "): ");
-                String input = scanner.nextLine().trim();
-                if (input.isEmpty()) {
-                    runtimeArguments.add(arg.getValue());
-                } else {
-                    try {
-                        runtimeArguments.add(Integer.parseInt(input));
-                    } catch (NumberFormatException e) {
-                        System.out.println("Invalid input, using default value: " + arg.getValue());
-                        runtimeArguments.add(arg.getValue());
-                    }
-                }
-            }
-        }
-
-        try {
-            System.out.println("\nExecuting program...");
-
-            // Simulate program execution
-            ExecutionStatisticsDTO result = executeProgram(runtimeArguments);
-
-            System.out.println("✓ Program execution completed!");
-            System.out.println("Result: " + result.result());
-            System.out.println("Cycles used: " + result.cyclesUsed());
-            System.out.println("Expansion level: " + result.levelOfExpansion());
-
-            // Add to history
-            executionHistory.add(result);
-
-        } catch (Exception e) {
-            System.out.println("Error during program execution: " + e.getMessage());
+        try
+        {
+            int expandLevel = getExpandLevelChoiceFromUser();
+            programDTO = systemController.getProgramByExpandLevel(expandLevel);
+            printProgram();
+        } catch (Exception e)
+        {
+            System.out.println("Error loading program " + e.getMessage());
+            System.out.println("returning to main menu...");
         }
     }
 
-    private void displayStatistics() {
+    private int getExpandLevelChoiceFromUser()
+    {
+        int maxLevel = systemController.getMaxExpandLevel();
+        System.out.println("Please enter the expand level you would like to expand:");
+        System.out.println("Please enter a number between 0 and " + maxLevel);
+        while (true)
+        {
+            try
+            {
+                int choice = Integer.parseInt(scanner.nextLine());
+                if (choice >= 0 && choice <= maxLevel)
+                {
+                    return choice;
+                }
+                System.out.printf(invalidChoiceFormat, 0, maxLevel);
+            } catch (IllegalArgumentException e)
+            {
+                System.out.printf(invalidChoiceFormat, 0, maxLevel);
+            }
+        }
+    }
+
+    private void runProgram()
+    {
+        if (!programLoaded)
+        {
+            printProgramNotLoaded();
+            return;
+        }
+        int expandLevel = getExpandLevelChoiceFromUser();
+        List<Integer> runtimeArguments = new ArrayList<>();
+        getUserArguments(runtimeArguments);
+        try
+        {
+            System.out.println("\nTrying executing program in expand level " + expandLevel);
+            programDTO = systemController.runLoadedProgram(expandLevel, runtimeArguments);
+            System.out.println("Program finished executing successfully.");
+            printProgram();
+
+        } catch (Exception e)
+        {
+            System.out.println("Error executing program: " + e.getMessage());
+            System.out.println("returning to main menu...");
+        }
+    }
+
+    public void getUserArguments(List<Integer> arguments)
+    {
+        System.out.println("Please enter the program arguments (non-negative numbers separated by commas):");
+        systemController.getProgramArgsNames().stream()
+                .sorted(dataNameComparator)
+                .forEach(arg -> System.out.print(arg + ","));
+        boolean valid = false;
+        String userArguments = scanner.nextLine();
+        while (!valid)
+        {
+            try
+            {
+                arguments.clear();
+                for (String arg : userArguments.split(","))
+                {
+                    int progArg = Integer.parseInt(arg.trim());
+                    arguments.add(progArg);
+                }
+                valid = arguments.stream().allMatch(value -> value >= 0);
+                if (!valid)
+                {
+                    System.out.println("Invalid input! Please enter only non-negative integers separated by commas.");
+                    userArguments = scanner.nextLine();
+                }
+            } catch (NumberFormatException e)
+            {
+                System.out.println("Invalid input! Please enter only non-negative integers separated by commas.");
+                userArguments = scanner.nextLine();
+            }
+        }
+        System.out.println("Arguments loaded successfully.");
+    }
+
+    private void displayStatistics()
+    {
         System.out.println("\n=== Statistics ===");
 
-        if (executionHistory.isEmpty()) {
+        if (executionHistory.isEmpty())
+        {
             System.out.println("No execution history available. Run a program first.");
             return;
         }
@@ -180,7 +276,8 @@ public class ConsoleUI {
         System.out.println("| Exec #  | Level   | Arguments | Result | Cycles |");
         System.out.println("+---------+---------+-----------+--------+--------+");
 
-        for (ExecutionStatisticsDTO stat : executionHistory) {
+        for (ExecutionStatisticsDTO stat : executionHistory)
+        {
             System.out.printf("| %-7d | %-7d | %-9s | %-6d | %-6d |%n",
                     stat.executionNumber(),
                     stat.levelOfExpansion(),
@@ -209,10 +306,17 @@ public class ConsoleUI {
         System.out.println("Total cycles across all executions: " + totalCycles);
     }
 
-    private void exitSystem() {
+    private void exitSystem()
+    {
         System.out.println("Exit From S-EMULATOR");
         scanner.close();
         System.out.println("Success");
+    }
+
+    private void printProgramNotLoaded()
+    {
+        System.out.println("Program is not loaded, please first load a program!");
+        System.out.println("Returning to main menu...");
     }
 }
 

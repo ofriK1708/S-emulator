@@ -10,6 +10,7 @@ import system.file.file.processing.XMLHandler;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 public class SystemController
 {
@@ -28,6 +29,15 @@ public class SystemController
         }
     }
 
+    public Set<String> getProgramArgsNames()
+    {
+        if (engine == null)
+        {
+            throw new IllegalStateException("Program has not been set");
+        }
+        return engine.extractArguments().keySet();
+    }
+
     private void createEngine(SProgram program) throws LabelNotExist
     {
         engine = new ProgramEngine(program);
@@ -36,6 +46,10 @@ public class SystemController
 
     public int getMaxExpandLevel()
     {
+        if (engine == null)
+        {
+            throw new IllegalStateException("Program has not been set");
+        }
         return maxExpandLevel;
     }
 
@@ -59,7 +73,7 @@ public class SystemController
     {
         if (engine == null)
         {
-            throw new IllegalStateException("Program engine has not been initialized");
+            throw new IllegalStateException("Program has not been set");
         }
         if (expandLevel < 0 || expandLevel > maxExpandLevel)
         {
@@ -82,7 +96,7 @@ public class SystemController
     {
         if (engine == null)
         {
-            throw new IllegalStateException("Program engine has not been initialized");
+            throw new IllegalStateException("Program has not been set");
         }
         if (expandLevel < 0 || expandLevel > maxExpandLevel)
         {
@@ -100,7 +114,7 @@ public class SystemController
     {
         if (engine == null)
         {
-            throw new IllegalStateException("Program engine has not been initialized");
+            throw new IllegalStateException("Program has not been set");
         }
         return engine.getExecutionStatisticsDTOList();
     }

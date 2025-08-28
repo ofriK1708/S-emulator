@@ -1,4 +1,4 @@
-package system.controller.controller.test;
+/*package system.controller.controller.test;
 
 import dto.engine.ProgramDTO;
 import jakarta.xml.bind.JAXBException;
@@ -25,4 +25,4 @@ public class TestingMain
             System.out.println("Exception: " + e.getCause().getMessage());
         }
     }
-}
+}*/

@@ -19,7 +19,7 @@ public class ProgramEngine
     private final Set<String> originalLabels;
     private final List<Set<String>> labelsByExpandLevel = new ArrayList<>();
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
-
+    private final Map<String, Integer> extraArguments = new HashMap<>();
     public ProgramEngine(SProgram program) throws LabelNotExist
     {
         this.programName = program.getName();
@@ -129,12 +129,19 @@ public class ProgramEngine
 
     private void insertArguments(List<Integer> arguments)
     {
+        extraArguments.clear();
         int argIndex = 1;
         String argName;
         for (Integer argValue : arguments)
         {
             argName = "x" + argIndex;
-            originalContextMap.put(argName, argValue);
+            if (originalContextMap.containsKey(argName))
+            {
+                originalContextMap.put(argName, argValue);
+            } else
+            {
+                extraArguments.put(argName, argValue);
+            }
             argIndex++;
         }
     }
@@ -193,79 +200,19 @@ public class ProgramEngine
                 arguments.put(varName, originalContextMap.get(varName));
             }
         }
+        arguments.putAll(extraArguments);
         return arguments;
     }
 
-    public List<String> extractLabels(int expandLevel)
+    public Set<String> extractLabels(int expandLevel)
     {
         if (expandLevel < 0 || expandLevel >= labelsByExpandLevel.size())
         {
             throw new IllegalArgumentException("Invalid expand level: " + expandLevel);
         }
-        return new ArrayList<>(labelsByExpandLevel.get(expandLevel));
+        return labelsByExpandLevel.get(expandLevel);
     }
 
-    // TODO - delete this method after testing
-//    public void printProgram(int expandLevel)
-//    {
-//        List<Instruction> instructionsToPrint = instructionExpansionLevels.get(expandLevel);
-//        Map<String, Integer> contextMapToPrint = contextMapsByExpandLevel.get(expandLevel);
-//        Set<String> labelsToPrint = labelsByExpandLevel.get(expandLevel);
-//        System.out.println("Program Name: " + programName);
-//        System.out.println("Instructions:");
-//        for (int i = 0; i < instructionsToPrint.size(); i++)
-//        {
-//            System.out.println(instructionsToPrint.get(i).getDisplayFormat(i));
-//        }
-//        System.out.println("Context Map: " + contextMapToPrint);
-//        System.out.println("Labels: " + labelsToPrint);
-//        if (!executionStatisticsList.isEmpty())
-//        {
-//            System.out.println("num of cycles:" + executionStatisticsList.getLast().getNumOfCycles());
-//        }
-//    }
-
-    // TODO - delete this method after testing
-//    public void printProgramToFile(int expandLevel, String fileName)
-//    {
-//        List<Instruction> instructionsToPrint = instructionExpansionLevels.get(expandLevel);
-//        Map<String, Integer> contextMapToPrint = contextMapsByExpandLevel.get(expandLevel);
-//        Set<String> labelsToPrint = labelsByExpandLevel.get(expandLevel);
-//        String outputDir = "outputs";
-//        String outputPath = outputDir + "/" + fileName;
-//        try
-//        {
-//            Files.createDirectories(Paths.get(outputDir));
-//            try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath)))
-//            {
-//                writer.write("Program Name: " + programName);
-//                writer.newLine();
-//                writer.write("Instructions:");
-//                writer.newLine();
-//                for (int i = 0; i < instructionsToPrint.size(); i++)
-//                {
-//                    writer.write(instructionsToPrint.get(i).getDisplayFormat(i));
-//                    writer.newLine();
-//                }
-//                writer.write("Context Map: ");
-//                writer.newLine();
-//                for (Map.Entry<String, Integer> entry : contextMapToPrint.entrySet())
-//                {
-//                    writer.write(entry.getKey() + " : " + entry.getValue());
-//                    writer.newLine();
-//                }
-//                writer.write("Labels: " + labelsToPrint);
-//                writer.newLine();
-//                if (!executionStatisticsList.isEmpty())
-//                {
-//                    System.out.println("num of cycles:" + executionStatisticsList.getLast().getNumOfCycles());
-//                }
-//            }
-//        } catch (IOException e)
-//        {
-//            throw new RuntimeException("Failed to write program output to file", e);
-//        }
-//    }
 
     public int getMaxExpandLevel()
     {
@@ -274,6 +221,7 @@ public class ProgramEngine
 
     public ProgramDTO toDTO(int expandLevel)
     {
+        expand(expandLevel);
         return new ProgramDTO(
                 programName,
                 extractArguments(),

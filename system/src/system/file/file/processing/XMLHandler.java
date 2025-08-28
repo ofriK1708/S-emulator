@@ -17,7 +17,7 @@ public class XMLHandler
     public XMLHandler() throws JAXBException
     {
 
-        final String jaxbGeneratedPackageLoc = "engine/generated";
+        final String jaxbGeneratedPackageLoc = "engine.generated";
         JAXBContext jaxbContext = JAXBContext.newInstance(jaxbGeneratedPackageLoc);
         this.unmarshaller = jaxbContext.createUnmarshaller();
     }
