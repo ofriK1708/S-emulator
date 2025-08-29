@@ -2,11 +2,14 @@ package engine.core;
 
 import dto.engine.InstructionDTO;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public interface Command
-{
+public interface Command extends Serializable {
+    @Serial
+    static final long serialVersionUID = 1L;
     void execute(Map<String, Integer> contextMap) throws IllegalArgumentException;
     int getCycles();
     CommandType getType();

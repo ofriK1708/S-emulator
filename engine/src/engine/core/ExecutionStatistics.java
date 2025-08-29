@@ -3,10 +3,12 @@ package engine.core;
 import dto.engine.ExecutionStatisticsDTO;
 import engine.utils.ProgramUtils;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class ExecutionStatistics
+public class ExecutionStatistics implements Serializable
 {
+    private static final long serialVersionUID = 1L;
     private final int executionNumber;
     private final int expandLevel;
     private final List<Integer> argumentsValues;

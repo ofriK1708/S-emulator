@@ -9,8 +9,11 @@ import engine.generated.SProgram;
 import jakarta.xml.bind.JAXBException;
 import system.file.file.processing.XMLHandler;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 
@@ -115,5 +118,77 @@ public class SystemController
             throw new IllegalStateException("Program has not been set");
         }
         return engine.getAllExecutionStatistics();
+    }
+    public String saveState(String directoryPath) throws IOException
+    {
+        if (engine == null)
+        {
+            throw new IllegalStateException("No program loaded to save");
+        }
+
+        // יצירת תיקיה אם לא קיימת
+        File directory = new File(directoryPath);
+        if (!directory.exists())
+        {
+            directory.mkdirs();
+        }
+
+        // יצירת שם קובץ עם תאריך ושעה
+        String programName = engine.getProgramName(); // נדרש להוסיף פונקציה זו ב-Engine
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+        String fileName = "bonus_save_" + programName + "_" + timestamp + ".ser";
+        String fullPath = Paths.get(directoryPath, fileName).toString();
+
+        // שמירת המצב המלא
+        StateData stateData = new StateData(engine, maxExpandLevel);
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fullPath)))
+        {
+            oos.writeObject(stateData);
+        }
+        catch (IOException e)
+        {
+            throw new IOException("Failed to save state: " + e.getMessage(), e);
+        }
+
+        return fullPath;
+    }
+    public void loadState(String filePath) throws IOException, ClassNotFoundException
+    {
+        File file = new File(filePath);
+        if (!file.exists())
+        {
+            throw new IOException("State file does not exist: " + filePath);
+        }
+
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath)))
+        {
+            StateData stateData = (StateData) ois.readObject();
+            this.engine = stateData.getEngine();
+            this.maxExpandLevel = stateData.getMaxExpandLevel();
+        }
+        catch (IOException e)
+        {
+            throw new IOException("Failed to load state: " + e.getMessage(), e);
+        }
+        catch (ClassNotFoundException e)
+        {
+            throw new ClassNotFoundException("Invalid state file format: " + e.getMessage(), e);
+        }
+    }
+    private static class StateData implements Serializable
+    {
+        private static final long serialVersionUID = 1L;
+        private final ProgramEngine engine;
+        private final int maxExpandLevel;
+
+        public StateData(ProgramEngine engine, int maxExpandLevel)
+        {
+            this.engine = engine;
+            this.maxExpandLevel = maxExpandLevel;
+        }
+
+        public ProgramEngine getEngine() { return engine; }
+        public int getMaxExpandLevel() { return maxExpandLevel; }
     }
 }

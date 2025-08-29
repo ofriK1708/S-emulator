@@ -8,13 +8,15 @@ import engine.generated.SInstruction;
 import engine.generated.SProgram;
 import engine.utils.ProgramUtils;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static engine.utils.ProgramUtils.*;
 
-public class ProgramEngine
+public class ProgramEngine implements Serializable
 {
+    private static final long serialVersionUID = 1L;
     private final String programName;
     private final Map<String, Integer> originalContextMap = new HashMap<>();
     private final List<Map<String, Integer>> contextMapsByExpandLevel = new ArrayList<>();
@@ -251,5 +253,9 @@ public class ProgramEngine
     public Set<String> getProgramArgsNames()
     {
         return extractArguments(originalContextMap).keySet();
+    }
+
+    public String getProgramName() {
+        return this.programName;
     }
 }
