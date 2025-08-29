@@ -36,4 +36,5 @@ bin/
 
 ### tsti files ###
 /ui/src/ui/console/testingMethods.java
+states/
 

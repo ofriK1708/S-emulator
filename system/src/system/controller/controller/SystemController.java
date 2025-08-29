@@ -10,6 +10,7 @@ import jakarta.xml.bind.JAXBException;
 import system.file.file.processing.XMLHandler;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
@@ -61,10 +62,25 @@ public class SystemController
         {
             throw new IllegalArgumentException("File must be an XML file");
         }
+        validateRegularAndReadableFile(xmlFilePath);
         SProgram program = xmlHandler.unmarshallFile(xmlFilePath);
         createEngine(program);
 
     }
+
+    private void validateRegularAndReadableFile(Path filePath) throws IOException
+    {
+        if (!Files.isRegularFile(filePath))
+        {
+            throw new IOException("File does not exist or is not a regular file");
+        }
+        if (!Files.isReadable(filePath))
+        {
+            throw new IOException("File is not readable");
+        }
+    }
+
+
 
     public ExecutionResultDTO runLoadedProgram(int expandLevel, List<Integer> arguments)
     {
@@ -115,5 +131,25 @@ public class SystemController
             throw new IllegalStateException("Program has not been set");
         }
         return engine.getAllExecutionStatistics();
+    }
+
+    public void saveProgramState(Path filePath) throws IOException
+    {
+        if (engine == null)
+        {
+            throw new IllegalStateException("Program has not been set");
+        }
+        engine.saveState(filePath);
+    }
+
+    public void loadProgramState(Path filePath) throws IOException, ClassNotFoundException
+    {
+        if (!Files.isRegularFile(filePath))
+        {
+            throw new IllegalArgumentException("File does not exist or is not a regular file");
+        }
+        validateRegularAndReadableFile(filePath);
+        engine = ProgramEngine.loadState(filePath);
+        maxExpandLevel = engine.getMaxExpandLevel();
     }
 }

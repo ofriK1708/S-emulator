@@ -3,10 +3,14 @@ package engine.core;
 import dto.engine.ExecutionStatisticsDTO;
 import engine.utils.ProgramUtils;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 
-public class ExecutionStatistics
+public class ExecutionStatistics implements Serializable
 {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private final int executionNumber;
     private final int expandLevel;
     private final List<Integer> argumentsValues;
@@ -23,11 +27,6 @@ public class ExecutionStatistics
     public void setY(int y)
     {
         Y = y;
-    }
-
-    public List<Integer> getArgumentsValues()
-    {
-        return argumentsValues;
     }
 
     public void incrementCycles(int numOfCycles)

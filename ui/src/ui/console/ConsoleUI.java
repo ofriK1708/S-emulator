@@ -8,7 +8,6 @@ import system.controller.controller.SystemController;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Scanner;
 
 import static ui.console.dto.print.DtoPrinter.*;
@@ -34,7 +33,7 @@ public class ConsoleUI
         while (true)
         {
             displayMenu();
-            int numOfMenuOptions = 6;
+            int numOfMenuOptions = 8;
             int choice = getUserChoice(numOfMenuOptions);
 
             switch (choice)
@@ -55,6 +54,12 @@ public class ConsoleUI
                     displayStatistics();
                     break;
                 case 6:
+                    saveProgramState();
+                    break;
+                case 7:
+                    loadProgramState();
+                    break;
+                case 8:
                     exitSystem();
                     return;
             }
@@ -71,7 +76,9 @@ public class ConsoleUI
         System.out.println("3. Run Program");
         System.out.println("4. Expand Program");
         System.out.println("5. Show History/Statistics");
-        System.out.println("6. Exit System");
+        System.out.println("6. save Program State");
+        System.out.println("7. load Program State");
+        System.out.println("8. Exit System");
     }
 
     private void loadXMLFile()
@@ -88,10 +95,7 @@ public class ConsoleUI
 
         } catch (Exception e)
         {
-            System.out.println("Error loading file " + Optional.ofNullable(filePath)
-                    .map(Path::getFileName)
-                    .map(Path::toString)
-                    .orElse("no such file"));
+            System.out.println("Error loading file " + filePath);
             System.out.println(e.getMessage());
             System.out.println("Please try fixing the file or choose another file");
             System.out.println("Returning to main menu...");
@@ -178,6 +182,43 @@ public class ConsoleUI
         {
             printExecutionStatisticsDTO(stats);
             System.out.println();
+        }
+    }
+
+    private void saveProgramState()
+    {
+        if (!programLoaded)
+        {
+            printProgramNotLoaded();
+            return;
+        }
+        try
+        {
+            System.out.println("Please enter a full path to save the program state:");
+            Path filePath = Path.of(scanner.nextLine());
+            controller.saveProgramState(filePath);
+            System.out.println("Program state saved successfully to " + filePath);
+        } catch (Exception e)
+        {
+            System.out.println("Error saving program state: " + e.getMessage());
+            System.out.println("Returning to main menu...");
+        }
+    }
+
+    private void loadProgramState()
+    {
+        try
+        {
+            System.out.println("Please enter a full path of the engine-state to load the program state:");
+            Path filePath = Path.of(scanner.nextLine());
+            controller.loadProgramState(filePath);
+            System.out.println("Program state loaded successfully from " + filePath);
+            programLoaded = true;
+            maxExpandLevel = controller.getMaxExpandLevel();
+        } catch (Exception e)
+        {
+            System.out.println("Error loading program state: " + e.getMessage());
+            System.out.println("Returning to main menu...");
         }
     }
 

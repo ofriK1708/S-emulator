@@ -54,10 +54,20 @@ public class GOTOLabel extends Instruction
     }
 
     @Override
+    public int getExpandLevel()
+    {
+        if (expandLevel == -1)
+        {
+            expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
+        }
+        return expandLevel;
+    }
+
+    @Override
     public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
 
-        List<Instruction> instructions = new ArrayList<Instruction>();
+        List<Instruction> instructions = new ArrayList<>();
         String workVarName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
         String originalLabel = args.get(labelArgumentName);
         instructions.add(new Increase(workVarName, null, label, this, originalInstructionIndex));
@@ -71,12 +81,6 @@ public class GOTOLabel extends Instruction
     public int getNumberOfArgs(Map<String, Integer> contextMap)
     {
         return 0;
-    }
-
-    @Override
-    public int getExpandLevel()
-    {
-        return expandLevel;
     }
 
     @Override

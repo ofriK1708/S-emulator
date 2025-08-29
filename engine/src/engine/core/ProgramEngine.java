@@ -8,13 +8,18 @@ import engine.generated.SInstruction;
 import engine.generated.SProgram;
 import engine.utils.ProgramUtils;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static engine.utils.ProgramUtils.*;
 
-public class ProgramEngine
+public class ProgramEngine implements Serializable
 {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private final String programName;
     private final Map<String, Integer> originalContextMap = new HashMap<>();
     private final List<Map<String, Integer>> contextMapsByExpandLevel = new ArrayList<>();
@@ -24,6 +29,7 @@ public class ProgramEngine
     private final List<Set<String>> labelsByExpandLevel = new ArrayList<>();
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
     private final Map<String, Integer> extraArguments = new HashMap<>();
+
     public ProgramEngine(SProgram program) throws LabelNotExist
     {
         this.programName = program.getName();
@@ -251,5 +257,22 @@ public class ProgramEngine
     public Set<String> getProgramArgsNames()
     {
         return extractArguments(originalContextMap).keySet();
+    }
+
+    // Load the engine state from a file
+    public static ProgramEngine loadState(Path filePath) throws IOException, ClassNotFoundException
+    {
+        try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(filePath)))
+        {
+            return (ProgramEngine) in.readObject();
+        }
+    }
+
+    public void saveState(Path filePath) throws IOException
+    {
+        try (ObjectOutputStream out = new ObjectOutputStream(Files.newOutputStream(filePath)))
+        {
+            out.writeObject(this);
+        }
     }
 }

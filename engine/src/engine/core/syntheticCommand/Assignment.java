@@ -56,9 +56,19 @@ public class Assignment extends Instruction
     }
 
     @Override
+    public int getExpandLevel()
+    {
+        if (expandLevel == -1)
+        {
+            expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
+        }
+        return expandLevel;
+    }
+
+    @Override
     public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
-        List<Instruction> instructions = new ArrayList<Instruction>();
+        List<Instruction> instructions = new ArrayList<>();
         String freeLabel1 = ProgramUtils.getNextFreeLabelName(contextMap);
         String freeLabel2 = ProgramUtils.getNextFreeLabelName(contextMap);
         String freeLabel3 = ProgramUtils.getNextFreeLabelName(contextMap);
@@ -84,12 +94,6 @@ public class Assignment extends Instruction
     public int getNumberOfArgs(Map<String, Integer> contextMap)
     {
         return 1;
-    }
-
-    @Override
-    public int getExpandLevel()
-    {
-        return expandLevel;
     }
 
     @Override
