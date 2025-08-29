@@ -1,0 +1,433 @@
+classDiagram
+
+    %% UI Layer
+
+    class UIController {
+<<interface>>
+
+        +loadXMLFile(String filePath)
+
+        +startExecution()
+
+        +pauseExecution()
+
+        +stepExecution()
+
+        +stopExecution()
+
+        +displayResults(ExecutionResults results)
+
+        +showError(String errorMessage)
+
+    }
+ 
+    %% SYS Layer
+
+    class SystemController {
+
+        -XMLHandler xmlHandler
+
+        -EngineFactory engineFactory
+
+        -List~ENGINE~ activeEngines
+
+        +loadProgram(String xmlPath) ExecutionResults
+
+        +executeProgram(String xmlPath) ExecutionResults
+
+        +getActiveEngines() List~ENGINE~
+
+        +cleanup()
+
+    }
+ 
+    class XMLHandler {
+
+        -XSDValidator validator
+
+        -XMLParser parser
+
+        +validateXML(String xmlPath, String xsdPath) ValidationResult
+
+        +parseXML(String xmlPath) ProgramStructure
+
+        +extractInstructions(ProgramStructure program) List~Instruction~
+
+    }
+ 
+    class EngineFactory {
+
+        -EmulatorConfig config
+
+        +createEngine(ProgramStructure program) ENGINE
+
+        +destroyEngine(ENGINE engine)
+
+        +getActiveEngines() List~ENGINE~
+
+        -initializeComponents(ENGINE engine)
+
+    }
+ 
+    class ValidationResult {
+
+        +boolean isValid
+
+        +List~String~ errors
+
+        +String detailedMessage
+
+    }
+ 
+    class ProgramStructure {
+
+        +String programName
+
+        +List~Instruction~ instructions
+
+        +Map~String, Integer~ labelMap
+
+        +Set~String~ usedVariables
+
+        +int totalInstructions
+
+    }
+ 
+    %% ENGINE Layer
+
+    class ENGINE {
+
+        -InstructionSet instructionSet
+
+        -LabelManager labelManager
+
+        -StatisticsProcessor statisticsProcessor
+
+        -ExecutionContext executionContext
+
+        -List~Instruction~ instructions
+
+        +execute() ExecutionResults
+
+        +step() boolean
+
+        +pause()
+
+        +resume()
+
+        +stop()
+
+        +getExecutionState() ExecutionState
+
+        -executeInstruction(Instruction inst)
+
+    }
+ 
+    class InstructionSet {
+
+        -Map~String, Integer~ commandCycles
+
+        +neutral(ExecutionContext context)
+
+        +increase(String variable, ExecutionContext context)
+
+        +decrease(String variable, ExecutionContext context)
+
+        +jumpNotZero(String variable, String label, ExecutionContext context)
+
+        +zeroVariable(String variable, ExecutionContext context)
+
+        +assignment(String target, String source, ExecutionContext context)
+
+        +gotoLabel(String label, ExecutionContext context)
+
+        +constantAssignment(String variable, int value, ExecutionContext context)
+
+        +jumpZero(String variable, String label, ExecutionContext context)
+
+        +jumpEqualConstant(String variable, int constant, String label, ExecutionContext context)
+
+        +jumpEqualVariable(String var1, String var2, String label, ExecutionContext context)
+
+        +getCommandCycles(String commandName) int
+
+        +isValidCommand(String commandName) boolean
+
+    }
+ 
+    class LabelManager {
+
+        -Map~String, Integer~ labelPositions
+
+        -Set~String~ declaredLabels
+
+        -List~Instruction~ instructions
+
+        +registerLabel(String label, int position)
+
+        +isValidLabel(String label) boolean
+
+        +getLabelPosition(String label) int
+
+        +validateAllLabels(List~Instruction~ instructions) ValidationResult
+
+        +checkLabelIntegrity() ValidationResult
+
+        +extractLabels(List~Instruction~ instructions)
+
+    }
+ 
+    class StatisticsProcessor {
+
+        -Map~String, Integer~ commandCycles
+
+        -Map~String, Integer~ commandExecutionCount
+
+        -int totalCycles
+
+        -long executionStartTime
+
+        -long executionEndTime
+
+        -List~ExecutionStep~ executionTrace
+
+        +recordCommandExecution(String command, int cycles)
+
+        +startExecution()
+
+        +endExecution()
+
+        +getStatistics() ExecutionStatistics
+
+        +reset()
+
+        +addExecutionStep(ExecutionStep step)
+
+    }
+ 
+    class ExecutionContext {
+
+        -Map~String, Integer~ variables
+
+        -int programCounter
+
+        -Stack~Integer~ callStack
+
+        -List~Instruction~ instructions
+
+        -boolean isHalted
+
+        -boolean isPaused
+
+        +getVariable(String name) int
+
+        +setVariable(String name, int value)
+
+        +incrementPC()
+
+        +jumpTo(int position)
+
+        +pushCall(int position)
+
+        +popCall() int
+
+        +isExecutionComplete() boolean
+
+        +getCurrentInstruction() Instruction
+
+        +getAllVariables() Map~String, Integer~
+
+    }
+ 
+    %% Data Models
+
+    class Instruction {
+
+        +String type
+
+        +String name
+
+        +String variable
+
+        +String label
+
+        +List~InstructionArgument~ arguments
+
+        +int position
+
+        +validateInstruction() boolean
+
+    }
+ 
+    class InstructionArgument {
+
+        +String name
+
+        +String value
+
+        +getIntValue() int
+
+        +getStringValue() String
+
+    }
+ 
+    class ExecutionResults {
+
+        +Map~String, Integer~ finalVariableStates
+
+        +ExecutionStatistics statistics
+
+        +List~String~ executionTrace
+
+        +boolean successful
+
+        +String errorMessage
+
+        +long executionTimeMs
+
+    }
+ 
+    class ExecutionStatistics {
+
+        +int totalCycles
+
+        +Map~String, Integer~ cyclesPerCommand
+
+        +Map~String, Integer~ executionCountPerCommand
+
+        +long executionTimeMs
+
+        +int totalInstructions
+
+        +double averageCyclesPerInstruction
+
+        +String getMostUsedCommand()
+
+    }
+ 
+    class ExecutionStep {
+
+        +int stepNumber
+
+        +String commandName
+
+        +String variable
+
+        +int cycles
+
+        +Map~String, Integer~ variableStates
+
+        +long timestamp
+
+    }
+ 
+    class EmulatorConfig {
+
+        +int maxExecutionCycles
+
+        +int maxVariables
+
+        +boolean enableStatistics
+
+        +String defaultXSDPath
+
+        +Map~String, Integer~ customCommandCycles
+
+        +boolean enableExecutionTrace
+
+    }
+ 
+    %% Enums
+
+    class ExecutionState {
+<<enumeration>>
+
+        READY
+
+        RUNNING
+
+        PAUSED
+
+        COMPLETED
+
+        ERROR
+
+        STOPPED
+
+    }
+ 
+    %% Observer Pattern for UI Integration
+
+    class ExecutionObserver {
+<<interface>>
+
+        +onInstructionExecuted(Instruction instruction, ExecutionContext context)
+
+        +onVariableChanged(String variable, int oldValue, int newValue)
+
+        +onLabelJump(String fromLabel, String toLabel)
+
+        +onExecutionComplete(ExecutionResults results)
+
+        +onExecutionError(String error)
+
+    }
+ 
+    %% Relationships
+
+    UIController ..> SystemController : uses
+
+    SystemController --> XMLHandler : contains
+
+    SystemController --> EngineFactory : contains
+
+    SystemController --> ENGINE : manages
+
+    XMLHandler --> ValidationResult : creates
+
+    XMLHandler --> ProgramStructure : creates
+
+    EngineFactory --> ENGINE : creates
+
+    EngineFactory --> EmulatorConfig : uses
+
+    ENGINE --> InstructionSet : contains
+
+    ENGINE --> LabelManager : contains
+
+    ENGINE --> StatisticsProcessor : contains
+
+    ENGINE --> ExecutionContext : contains
+
+    ENGINE --> ExecutionResults : creates
+
+    ENGINE --> ExecutionState : uses
+
+    ENGINE ..> ExecutionObserver : notifies
+
+    InstructionSet --> ExecutionContext : modifies
+
+    LabelManager --> ValidationResult : creates
+
+    StatisticsProcessor --> ExecutionStatistics : creates
+
+    StatisticsProcessor --> ExecutionStep : creates
+
+    ExecutionContext --> Instruction : processes
+
+    ExecutionResults --> ExecutionStatistics : contains
+
+    ProgramStructure --> Instruction : contains
+
+    Instruction --> InstructionArgument : contains
+
+    %% Composition relationships
+
+    ENGINE *-- InstructionSet
+
+    ENGINE *-- LabelManager  
+
+    ENGINE *-- StatisticsProcessor
+
+    ENGINE *-- ExecutionContext
+ 
