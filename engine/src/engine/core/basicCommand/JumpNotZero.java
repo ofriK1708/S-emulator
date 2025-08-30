@@ -46,8 +46,6 @@ public class JumpNotZero extends Instruction
     @Override
     public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
-        // This command does not expand further, it is already in its final form.
-        // It can be used directly in the program.
         return List.of(this);
     }
 

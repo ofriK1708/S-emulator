@@ -11,6 +11,7 @@ public class ProgramUtils
     public static final String outputName = "y";
     public static final String argPrefix = "x";
     public static final String workVarPrefix = "z";
+    public static final String labelPrefix = "L";
 
 
     public static String getNextFreeLabelName(Map<String, Integer> contextMap)
@@ -19,7 +20,7 @@ public class ProgramUtils
         String labelName;
         do
         {
-            labelName = "L" + labelIndex++;
+            labelName = labelPrefix + labelIndex++;
         } while (contextMap.containsKey(labelName));
         contextMap.put(labelName, 0); // Initialize label with a dummy value
         return labelName;
@@ -31,7 +32,7 @@ public class ProgramUtils
         String varName;
         do
         {
-            varName = "z" + varIndex++;
+            varName = workVarPrefix + varIndex++;
         } while (contextMap.containsKey(varName));
         contextMap.put(varName, 0); // Initialize variable with a dummy value
         return varName;
@@ -58,7 +59,7 @@ public class ProgramUtils
                 throw new IllegalArgumentException("Instruction cannot be null");
             }
 
-            // Basic instructions have expand level 0
+            // Basic instructions have an expand level of 0
             if (instruction.getType() == CommandType.BASIC)
             {
                 return 0;
