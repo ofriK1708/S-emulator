@@ -10,6 +10,7 @@ import jakarta.xml.bind.JAXBException;
 import system.file.file.processing.XMLHandler;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -64,10 +65,25 @@ public class SystemController
         {
             throw new IllegalArgumentException("File must be an XML file");
         }
+        validateRegularAndReadableFile(xmlFilePath);
         SProgram program = xmlHandler.unmarshallFile(xmlFilePath);
         createEngine(program);
 
     }
+
+    private void validateRegularAndReadableFile(Path filePath) throws IOException
+    {
+        if (!Files.isRegularFile(filePath))
+        {
+            throw new IOException("File does not exist or is not a regular file");
+        }
+        if (!Files.isReadable(filePath))
+        {
+            throw new IOException("File is not readable");
+        }
+    }
+
+
 
     public ExecutionResultDTO runLoadedProgram(int expandLevel, List<Integer> arguments)
     {

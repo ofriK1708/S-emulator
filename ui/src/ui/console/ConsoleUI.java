@@ -8,7 +8,6 @@ import system.controller.controller.SystemController;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Scanner;
 
 import static ui.console.dto.print.DtoPrinter.*;
@@ -16,7 +15,6 @@ import static ui.console.utils.UIUtils.*;
 
 public class ConsoleUI
 {
-    private static final String DEFAULT_STATE_DIR = "saved_states";
     private final Scanner scanner;
     private final SystemController controller;
     private int maxExpandLevel = 0;
@@ -56,15 +54,14 @@ public class ConsoleUI
                     displayStatistics();
                     break;
                 case 6:
-                    saveState();
+                    saveProgramState();
                     break;
                 case 7:
-                    loadState();
+                    loadProgramState();
                     break;
                 case 8:
                     exitSystem();
                     return;
-
             }
 
             System.out.println();
@@ -79,8 +76,8 @@ public class ConsoleUI
         System.out.println("3. Run Program");
         System.out.println("4. Expand Program");
         System.out.println("5. Show History/Statistics");
-        System.out.println("6. Save State");
-        System.out.println("7. Load State");
+        System.out.println("6. save Program State");
+        System.out.println("7. load Program State");
         System.out.println("8. Exit System");
     }
 
@@ -98,10 +95,7 @@ public class ConsoleUI
 
         } catch (Exception e)
         {
-            System.out.println("Error loading file " + Optional.ofNullable(filePath)
-                    .map(Path::getFileName)
-                    .map(Path::toString)
-                    .orElse("no such file"));
+            System.out.println("Error loading file " + filePath);
             System.out.println(e.getMessage());
             System.out.println("Please try fixing the file or choose another file");
             System.out.println("Returning to main menu...");
@@ -191,6 +185,43 @@ public class ConsoleUI
         }
     }
 
+    private void saveProgramState()
+    {
+        if (!programLoaded)
+        {
+            printProgramNotLoaded();
+            return;
+        }
+        try
+        {
+            System.out.println("Please enter a full path to save the program state:");
+            Path filePath = Path.of(scanner.nextLine());
+            controller.saveProgramState(filePath);
+            System.out.println("Program state saved successfully to " + filePath);
+        } catch (Exception e)
+        {
+            System.out.println("Error saving program state: " + e.getMessage());
+            System.out.println("Returning to main menu...");
+        }
+    }
+
+    private void loadProgramState()
+    {
+        try
+        {
+            System.out.println("Please enter a full path of the engine-state to load the program state:");
+            Path filePath = Path.of(scanner.nextLine());
+            controller.loadProgramState(filePath);
+            System.out.println("Program state loaded successfully from " + filePath);
+            programLoaded = true;
+            maxExpandLevel = controller.getMaxExpandLevel();
+        } catch (Exception e)
+        {
+            System.out.println("Error loading program state: " + e.getMessage());
+            System.out.println("Returning to main menu...");
+        }
+    }
+
     private void exitSystem()
     {
         System.out.println("Exit From S-EMULATOR");
@@ -202,46 +233,6 @@ public class ConsoleUI
     {
         System.out.println("Program is not loaded, please first load a program!");
         System.out.println("Returning to main menu...");
-    }
-    private void saveState()
-    {
-        if (!programLoaded)
-        {
-            printProgramNotLoaded();
-            return;
-        }
-
-        try
-        {
-            System.out.println("Saving state...");
-            String savedPath = controller.saveState(DEFAULT_STATE_DIR);
-            System.out.println("State saved successfully to: " + savedPath);
-        }
-        catch (Exception e)
-        {
-            System.out.println("Error saving state: " + e.getMessage());
-            System.out.println("Returning to main menu...");
-        }
-    }
-
-    private void loadState()
-    {
-        System.out.println("Please enter the full path to the state file:");
-        String statePath = scanner.nextLine();
-
-        try
-        {
-            System.out.println("Loading state...");
-            controller.loadState(statePath);
-            maxExpandLevel = controller.getMaxExpandLevel();
-            programLoaded = true;
-            System.out.println("State loaded successfully.");
-        }
-        catch (Exception e)
-        {
-            System.out.println("Error loading state: " + e.getMessage());
-            System.out.println("Returning to main menu...");
-        }
     }
 }
 

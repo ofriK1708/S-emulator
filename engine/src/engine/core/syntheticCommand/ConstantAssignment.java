@@ -45,10 +45,20 @@ public class ConstantAssignment extends Instruction
     }
 
     @Override
+    public int getExpandLevel()
+    {
+        if (expandLevel == -1)
+        {
+            expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
+        }
+        return expandLevel;
+    }
+
+    @Override
     public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
-        
-        List<Instruction> instructions = new ArrayList<Instruction>();
+
+        List<Instruction> instructions = new ArrayList<>();
         instructions.add(new ZeroVariable(mainVarName, null, label, this, originalInstructionIndex));
         try
         {
@@ -68,12 +78,6 @@ public class ConstantAssignment extends Instruction
     public int getNumberOfArgs(Map<String, Integer> contextMap)
     {
         return 1;
-    }
-
-    @Override
-    public int getExpandLevel()
-    {
-        return expandLevel;
     }
 
     @Override

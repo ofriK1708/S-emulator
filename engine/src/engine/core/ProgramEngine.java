@@ -8,7 +8,9 @@ import engine.generated.SInstruction;
 import engine.generated.SProgram;
 import engine.utils.ProgramUtils;
 
-import java.io.Serializable;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,6 +18,7 @@ import static engine.utils.ProgramUtils.*;
 
 public class ProgramEngine implements Serializable
 {
+    @Serial
     private static final long serialVersionUID = 1L;
     private final String programName;
     private final Map<String, Integer> originalContextMap = new HashMap<>();
@@ -26,6 +29,7 @@ public class ProgramEngine implements Serializable
     private final List<Set<String>> labelsByExpandLevel = new ArrayList<>();
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
     private final Map<String, Integer> extraArguments = new HashMap<>();
+
     public ProgramEngine(SProgram program) throws LabelNotExist
     {
         this.programName = program.getName();

@@ -9,16 +9,19 @@ import engine.core.syntheticCommand.*;
 import engine.generated.SInstruction;
 import engine.generated.SInstructionArguments;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public abstract class Instruction implements Command
+public abstract class Instruction implements Command, Serializable
 {
+    @Serial
+    private static final long serialVersionUID = 1L;
     protected String mainVarName;
-
     protected Map<String, String> args;
     protected String label;
     protected final static String ProgramCounterName = "PC";
@@ -65,7 +68,7 @@ public abstract class Instruction implements Command
                         .collect(Collectors.toMap(
                                 arg -> arg.getName().trim(),
                                 arg -> arg.getValue().trim()
-                )))
+                        )))
                 .orElse(Collections.emptyMap());
         String mainVarName = Optional.of(sInstruction.getSVariable().trim()).orElseThrow(
                 () -> new IllegalArgumentException("Instruction must have main variable!"));

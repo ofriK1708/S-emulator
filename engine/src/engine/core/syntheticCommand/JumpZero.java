@@ -82,6 +82,10 @@ public class JumpZero extends Instruction
     @Override
     public int getExpandLevel()
     {
+        if (expandLevel == -1)
+        {
+            expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
+        }
         return expandLevel;
     }
 
