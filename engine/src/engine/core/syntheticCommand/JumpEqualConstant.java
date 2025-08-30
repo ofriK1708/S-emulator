@@ -95,12 +95,6 @@ public class JumpEqualConstant extends Instruction
     }
 
     @Override
-    public int getNumberOfArgs(Map<String, Integer> contextMap)
-    {
-        return 2;
-    }
-
-    @Override
     public int getExpandLevel()
     {
         if (expandLevel == -1)

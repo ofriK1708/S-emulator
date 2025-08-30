@@ -91,12 +91,6 @@ public class Assignment extends Instruction
     }
 
     @Override
-    public int getNumberOfArgs(Map<String, Integer> contextMap)
-    {
-        return 1;
-    }
-
-    @Override
     public String toString()
     {
         String sourceName = args.get(sourceArgumentName);

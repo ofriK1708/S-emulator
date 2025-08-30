@@ -8,9 +8,8 @@ import engine.generated.SInstruction;
 import engine.generated.SProgram;
 import engine.utils.ProgramUtils;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -259,7 +258,4 @@ public class ProgramEngine implements Serializable
         return extractArguments(originalContextMap).keySet();
     }
 
-    public String getProgramName() {
-        return this.programName;
-    }
 }

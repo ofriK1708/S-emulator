@@ -75,12 +75,6 @@ public class ConstantAssignment extends Instruction
     }
 
     @Override
-    public int getNumberOfArgs(Map<String, Integer> contextMap)
-    {
-        return 1;
-    }
-
-    @Override
     public String toString()
     {
         int constantValue = 0;

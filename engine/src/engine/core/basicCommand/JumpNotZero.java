@@ -64,12 +64,6 @@ public class JumpNotZero extends Instruction
     }
 
     @Override
-    public int getNumberOfArgs(Map<String, Integer> contextMap)
-    {
-        return 0;
-    }
-
-    @Override
     public int getExpandLevel()
     {
         return expandLevel;

@@ -21,9 +21,9 @@ public abstract class Instruction implements Command, Serializable
 {
     @Serial
     private static final long serialVersionUID = 1L;
-    protected String mainVarName;
-    protected Map<String, String> args;
-    protected String label;
+    protected final String mainVarName;
+    protected final Map<String, String> args;
+    protected final String label;
     protected final static String ProgramCounterName = "PC";
     protected Instruction derivedFrom = null;
     protected int derivedFromIndex;
@@ -110,6 +110,7 @@ public abstract class Instruction implements Command, Serializable
         return derivedInstructions;
     }
 
+    @Override
     public InstructionDTO toDTO()
     {
         Map<InstructionDTO, Integer> derivedFromInstructionsDto = new LinkedHashMap<>();

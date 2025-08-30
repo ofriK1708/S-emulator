@@ -78,12 +78,6 @@ public class GOTOLabel extends Instruction
     }
 
     @Override
-    public int getNumberOfArgs(Map<String, Integer> contextMap)
-    {
-        return 0;
-    }
-
-    @Override
     public String toString()
     {
         String labelName = args.get(labelArgumentName);
