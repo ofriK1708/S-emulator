@@ -87,7 +87,7 @@ public class ConsoleUI
         try
         {
             System.out.println("Please enter a full path for the xml file:");
-            filePath = Path.of(scanner.nextLine());
+            filePath = Path.of(scanner.nextLine().toLowerCase());
             controller.LoadProgramFromFile(filePath);
             System.out.println("The program has been loaded successfully.");
             maxExpandLevel = controller.getMaxExpandLevel();
@@ -210,7 +210,7 @@ public class ConsoleUI
         try
         {
             System.out.println("Please enter a full path of the engine-state to load the program state:");
-            Path filePath = Path.of(scanner.nextLine());
+            Path filePath = Path.of(scanner.nextLine().toLowerCase());
             controller.loadProgramState(filePath);
             System.out.println("Program state loaded successfully from " + filePath);
             programLoaded = true;
