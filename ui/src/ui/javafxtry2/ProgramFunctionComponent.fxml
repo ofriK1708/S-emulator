@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!-- Program\function header bar exactly as in the mock -->
+
+<HBox alignment="CENTER_LEFT" spacing="8" styleClass="pf-header" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.semulator.controller.ProgramFunctionController">
+
+    <padding>
+        <Insets bottom="6" left="8" right="8" top="6" />
+    </padding>
+   <Button fx:id="collapseButton1" layoutX="18.0" layoutY="20.0" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleCollapse" styleClass="pill pill-green pf-collapse" text="Program\function selector" />
+
+    <!-- Small green pill: Collapse -->
+    <Button fx:id="collapseButton" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleCollapse" styleClass="pill pill-green pf-collapse" text="Collapse" />
+
+    <!-- Small gray info pill: Current / Maximum degree -->
+    <Label fx:id="degreeInfoLabel" alignment="CENTER" maxHeight="34" minWidth="120" styleClass="pill pill-gray pf-degree" text="Current /&#10;Maximum degree" />
+
+    <!-- Small green pill: Expand -->
+    <Button fx:id="expandButton" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleExpand" styleClass="pill pill-green pf-expand" text="Expand" />
+   <Label fx:id="degreeInfoLabel1" alignment="CENTER" layoutX="276.0" layoutY="16.0" maxHeight="34" minWidth="120" styleClass="pill pill-gray pf-degree" text="Highlight Selection" />
+
+</HBox>
