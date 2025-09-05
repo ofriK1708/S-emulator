@@ -8,8 +8,6 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 
-import static java.lang.System.exit;
-
 public class Main extends Application {
     public static void main(String[] args) {
         Thread.currentThread().setName("Main");
@@ -29,7 +27,6 @@ public class Main extends Application {
             primaryStage.show();
         } else {
             System.out.println("Resource is null");
-            exit(1);
         }
 
     }
