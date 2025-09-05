@@ -1,0 +1,27 @@
+/* Debugger toolbar container */
+.debuger {
+    -fx-padding: 6 6 6 6;
+}
+
+/* Equal-width modern buttons */
+.debuger .button {
+    -fx-background-color: linear-gradient(to bottom, #0d6efd, #0b5ed7);
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px;
+    -fx-padding: 8 16 8 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 6, 0.2, 0, 2);
+
+    /* Ensure uniform width when grid columns are 50/50 */
+    -fx-pref-width: 180px;
+    -fx-max-width: Infinity;
+}
+
+.debuger .button:hover {
+    -fx-background-color: linear-gradient(to bottom, #0b5ed7, #0a58ca);
+}
+
+.debuger .button:pressed {
+    -fx-background-color: #0a58ca;
+}

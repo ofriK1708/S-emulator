@@ -5,8 +5,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.HBox?>
-<HBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER_LEFT" spacing="8" styleClass="pf-header"
-      xmlns="http://javafx.com/javafx/24.0.1" fx:controller="jfx.ProgramFunctionController">
+<HBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER_LEFT" spacing="8" stylesheets="@ProgramFunction.css"
+      xmlns="http://javafx.com/javafx/24.0.1" fx:controller="jfx.program.function.ProgramFunctionController">
 
     <padding>
         <Insets bottom="6" left="8" right="8" top="6" />
