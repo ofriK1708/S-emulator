@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
 <!-- Program\function header bar exactly as in the mock -->
 
-<HBox alignment="CENTER_LEFT" spacing="8" styleClass="pf-header" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.semulator.controller.ProgramFunctionController">
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.HBox?>
+<HBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER_LEFT" spacing="8" styleClass="pf-header"
+      xmlns="http://javafx.com/javafx/24.0.1" fx:controller="jfx.ProgramFunctionController">
 
     <padding>
         <Insets bottom="6" left="8" right="8" top="6" />

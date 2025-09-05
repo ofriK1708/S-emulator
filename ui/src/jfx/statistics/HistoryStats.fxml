@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
 <VBox spacing="8" styleClass="history-stats-component" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.semulator.controller.HistoryStatsController">
 
     <Label prefHeight="18.0" prefWidth="123.0" styleClass="component-title" text="History\Statistics Table">
