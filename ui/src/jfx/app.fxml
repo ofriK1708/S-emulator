@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+            minWidth="-Infinity"
+            prefHeight="500.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/24.0.1"
+            fx:controller="jfx.AppController">
+    <top>
+        <fx:include fx:id="fileHandler" source="fileHandler/fileHandler.fxml"/>
+    </top>
+    <right>
+        <fx:include fx:id="cycles" source="cycles/cycles.fxml"/>
+    </right>
+</BorderPane>
