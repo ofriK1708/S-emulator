@@ -4,17 +4,23 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox spacing="6" styleClass="program-function-component" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ProgramFunctionController">
+<!-- Program\function header bar exactly as in the mock -->
 
-    <HBox alignment="CENTER_LEFT" spacing="8" styleClass="program-function-header">
-        <padding><Insets bottom="6" left="8" right="8" top="6" /></padding>
-        <Button fx:id="expandButton" onAction="#handleExpand" text="Expand" />
-        <Button fx:id="collapseButton" onAction="#handleCollapse" text="Collapse" />
-        <Region HBox.hgrow="ALWAYS" />
-        <Label styleClass="component-title" text="Program\function selector" />
-    </HBox>
+<HBox alignment="CENTER_LEFT" spacing="8" styleClass="pf-header" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.semulator.controller.ProgramFunctionController">
 
-    <!-- Expandable content area – items will be injected later -->
-    <VBox fx:id="programContentContainer" spacing="6" styleClass="program-content-container" />
+    <padding>
+        <Insets bottom="6" left="8" right="8" top="6" />
+    </padding>
+   <Button fx:id="collapseButton1" layoutX="18.0" layoutY="20.0" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleCollapse" styleClass="pill pill-green pf-collapse" text="Program\function selector" />
 
-</VBox>
+    <!-- Small green pill: Collapse -->
+    <Button fx:id="collapseButton" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleCollapse" styleClass="pill pill-green pf-collapse" text="Collapse" />
+
+    <!-- Small gray info pill: Current / Maximum degree -->
+    <Label fx:id="degreeInfoLabel" alignment="CENTER" maxHeight="34" minWidth="120" styleClass="pill pill-gray pf-degree" text="Current /&#10;Maximum degree" />
+
+    <!-- Small green pill: Expand -->
+    <Button fx:id="expandButton" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleExpand" styleClass="pill pill-green pf-expand" text="Expand" />
+   <Label fx:id="degreeInfoLabel1" alignment="CENTER" layoutX="276.0" layoutY="16.0" maxHeight="34" minWidth="120" styleClass="pill pill-gray pf-degree" text="Highlight Selection" />
+
+</HBox>
