@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="8" styleClass="history-stats-component" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.semulator.controller.HistoryStatsController">
+
+    <Label prefHeight="18.0" prefWidth="123.0" styleClass="component-title" text="History\Statistics Table">
+        <VBox.margin><Insets left="8" right="8" top="6" /></VBox.margin>
+    </Label>
+
+    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="stats-control-bar">
+        <padding><Insets bottom="6" left="8" right="8" top="6" /></padding>
+    </HBox>
+
+    <!-- Collapsible statistics table -->
+    <VBox fx:id="statsTableContainer" spacing="6" styleClass="stats-table-container">
+        <TableView fx:id="statisticsTable" prefHeight="160">
+            <columns>
+                <TableColumn fx:id="statNameColumn" prefWidth="180" text="Statistic" />
+                <TableColumn fx:id="statValueColumn" prefWidth="120" text="Value" />
+            </columns>
+        </TableView>
+    </VBox>
+
+    <!-- History log area (DTOs later) -->
+    <VBox fx:id="historyLogContainer" spacing="6" styleClass="history-log-container">
+        <Label styleClass="history-label" text="Execution History:" />
+        <ScrollPane fx:id="historyScrollPane" fitToWidth="true" prefHeight="120" styleClass="history-scroll-pane">
+            <content>
+                <VBox fx:id="historyListContainer" spacing="4" styleClass="history-list-container">
+                    <Label styleClass="placeholder-text" text="Execution history will appear here" />
+                </VBox>
+            </content>
+        </ScrollPane>
+    </VBox>
+
+</VBox>

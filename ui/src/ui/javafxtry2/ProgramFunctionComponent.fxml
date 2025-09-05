@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="6" styleClass="program-function-component" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ProgramFunctionController">
+
+    <HBox alignment="CENTER_LEFT" spacing="8" styleClass="program-function-header">
+        <padding><Insets bottom="6" left="8" right="8" top="6" /></padding>
+        <Button fx:id="expandButton" onAction="#handleExpand" text="Expand" />
+        <Button fx:id="collapseButton" onAction="#handleCollapse" text="Collapse" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Label styleClass="component-title" text="Program\function selector" />
+    </HBox>
+
+    <!-- Expandable content area – items will be injected later -->
+    <VBox fx:id="programContentContainer" spacing="6" styleClass="program-content-container" />
+
+</VBox>
