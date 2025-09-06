@@ -1,0 +1,23 @@
+/* History/Statistics table styling */
+.table-view {
+    -fx-background-color: white;
+    -fx-background-radius: 10px;
+    -fx-padding: 6;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0.1, 0, 3);
+}
+
+.table-view .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, #f1f3f5, #e9ecef);
+    -fx-background-radius: 255px 10px 0 0;
+}
+
+.table-view .column-header,
+.table-view .filler {
+    -fx-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #343a40;
+}
+
+.table-row-cell:filled:selected {
+    -fx-background-color: #e7f1ff;
+}

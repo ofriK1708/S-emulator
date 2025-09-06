@@ -3,7 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<VBox spacing="8" styleClass="history-stats-component" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.semulator.controller.HistoryStatsController">
+<VBox spacing="8" stylesheets="@Statistics.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jfx.statistics.HistoryStatsController">
 
     <Label prefHeight="18.0" prefWidth="123.0" styleClass="component-title" text="History\Statistics Table">
         <VBox.margin><Insets left="8" right="8" top="6" /></VBox.margin>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="jfx.debugger.DebugerController"
+      spacing="16.0"
+      prefWidth="600.0" prefHeight="240.0"
+      stylesheets="@Debugger.css">
+
+    <children>
+        <!-- 3 rows × 2 columns -->
+        <GridPane hgap="12.0" vgap="10.0">
+            <padding>
+                <Insets top="12" right="12" bottom="12" left="12"/>
+            </padding>
+
+            <!-- Row 1 -->
+            <Button fx:id="startRegularExecution" text="Start Regular Execution"
+                    GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <Button fx:id="startDebugExecution" text="Start Debug Execution"
+                    GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+            <!-- Row 2 -->
+            <Button fx:id="stop" text="Stop"
+                    GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <Button fx:id="resume" text="Resume"
+                    GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+            <!-- Row 3 -->
+            <Button fx:id="stepOver" text="Step Over"
+                    GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <Button fx:id="stepBackward" text="Step Backward"
+                    GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+        </GridPane>
+    </children>
+</VBox>

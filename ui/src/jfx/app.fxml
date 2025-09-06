@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
             minWidth="-Infinity"
             prefHeight="500.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/24.0.1"
             fx:controller="jfx.AppController">
     <top>
-        <fx:include fx:id="fileHandler" source="fileHandler/fileHandler.fxml"/>
+        <VBox>
+            <!-- fileHandler = top -->
+            <fx:include fx:id="fileHandler" source="fileHandler/fileHandler.fxml" />
+
+            <!-- ProgramFunction = sub top (secondary) -->
+            <fx:include fx:id="ProgramFunction" source="program/function/ProgramFunction.fxml" />
+        </VBox>
     </top>
     <right>
         <fx:include fx:id="cycles" source="cycles/cycles.fxml"/>
     </right>
+    <left>
+        <fx:include fx:id="HistoryStats" source="statistics/HistoryStats.fxml"/>
+    </left>
 </BorderPane>

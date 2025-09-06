@@ -24,12 +24,14 @@ public class ProgramFunctionController {
 
     @FXML
     void handleCollapse(ActionEvent event) {
-
+        event.consume();
+        collapseButton.setDisable(true);
     }
 
     @FXML
     void handleExpand(ActionEvent event) {
-
+        event.consume();
+        expandButton.setDisable(true);
     }
 
 }
