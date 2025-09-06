@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/24.0.1"
+            fx:controller="jfx.instruction.InstructionTableController">
+    <children>
+        <TableView fx:id="InstructionTable" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                   minWidth="-Infinity" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <columns>
+                <TableColumn fx:id="indexColumn" prefWidth="40.0" text="#"/>
+                <TableColumn fx:id="typeColumn" prefWidth="70.0" text="Type"/>
+                <TableColumn fx:id="labelColumn" prefWidth="70.0" text="Label"/>
+                <TableColumn fx:id="commandColumn" prefWidth="349.0" text="Command"/>
+                <TableColumn fx:id="cyclesColumn" minWidth="0.0" prefWidth="70.0" text="Cycles"/>
+            </columns>
+        </TableView>
+    </children>
+</AnchorPane>
