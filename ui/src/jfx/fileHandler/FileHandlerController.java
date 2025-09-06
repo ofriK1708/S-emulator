@@ -11,13 +11,10 @@ import java.io.File;
 
 public class FileHandlerController {
     private AppController appController;
-    @FXML
-    private Button addFileButton;
-    @FXML
-    private Button clearButton;
 
-    @FXML
-    private TextField filePathField;
+    @FXML private Button addFileButton;
+    @FXML private Button clearButton;
+    @FXML private TextField filePathField;
 
     private File selectedFile = null;
 
@@ -52,7 +49,12 @@ public class FileHandlerController {
             filePathField.setText(file.getAbsolutePath());
 
             // Enable text field for viewing (but keep it non-editable)
-            filePathField.setDisable(true);
+            filePathField.setDisable(false);
+
+            // CRUCIAL FIX: Load the program through AppController
+            if (appController != null) {
+                appController.loadProgramFromFile(file);
+            }
         }
     }
 
@@ -66,11 +68,6 @@ public class FileHandlerController {
         filePathField.setDisable(true);
     }
 
-    /**
-     * Gets the currently selected file
-     *
-     * @return The selected file or null if no file is selected
-     */
     public File getSelectedFile() {
         return selectedFile;
     }

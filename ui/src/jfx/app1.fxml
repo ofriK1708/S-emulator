@@ -28,50 +28,39 @@
                 <Insets top="6" right="12" bottom="6" left="12"/>
             </padding>
             <StackPane prefHeight="420.0">
-                <Label text="Instructions table (placeholder)"/>
+                <Label text="Instructions table (will be implemented next)"/>
             </StackPane>
             <StackPane prefHeight="48.0">
-                <Label text="Summary line (placeholder)"/>
+                <Label text="Summary line (will be implemented next)"/>
             </StackPane>
         </VBox>
     </center>
 
-    <!-- RIGHT: Debugger column -->
+    <!-- RIGHT: Other components (will be implemented next) -->
     <right>
         <VBox spacing="12.0" prefWidth="380.0">
             <padding>
                 <Insets top="6" right="12" bottom="6"/>
             </padding>
 
-            <TitledPane text="Debugger\\Execution" collapsible="false">
-                <content>
-                    <VBox spacing="8.0">
-                        <fx:include fx:id="debugControls" source="debugger/Debugger.fxml"/>
-                    </VBox>
-                </content>
-            </TitledPane>
+            <StackPane prefHeight="200.0">
+                <Label text="Debugger controls (will be implemented next)"/>
+            </StackPane>
 
-            <HBox spacing="12.0">
-                <StackPane VBox.vgrow="ALWAYS" prefHeight="160.0">
-                    <Label text="Variables (placeholder)"/>
-                </StackPane>
-                <StackPane VBox.vgrow="ALWAYS" prefHeight="160.0">
-                    <Label text="Execution Inputs (placeholder)"/>
-                </StackPane>
-            </HBox>
-
-            <StackPane prefHeight="84.0" maxHeight="84.0" VBox.vgrow="NEVER" styleClass="cycles-compact">
+            <StackPane prefHeight="84.0" maxHeight="84.0" VBox.vgrow="NEVER">
                 <fx:include fx:id="cycles" source="cycles/cycles.fxml"/>
             </StackPane>
 
-            <fx:include fx:id="HistoryStats" source="statistics/HistoryStats.fxml"/>
+            <StackPane prefHeight="160.0">
+                <Label text="Statistics (will be implemented next)"/>
+            </StackPane>
         </VBox>
     </right>
 
-    <!-- BOTTOM: selected instruction history chain (placeholder) -->
+    <!-- BOTTOM: selected instruction history chain (will be implemented next) -->
     <bottom>
         <StackPane prefHeight="160.0">
-            <Label text="Selected Instruction history chain (placeholder)"/>
+            <Label text="Selected Instruction history chain (will be implemented next)"/>
         </StackPane>
     </bottom>
 </BorderPane>
