@@ -15,8 +15,7 @@ import java.util.stream.Collectors;
 
 import static engine.utils.ProgramUtils.*;
 
-public class ProgramEngine implements Serializable
-{
+public class ProgramEngine implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
     private final String programName;
@@ -26,11 +25,11 @@ public class ProgramEngine implements Serializable
     private final List<List<Instruction>> instructionExpansionLevels = new ArrayList<>();
     private final Set<String> originalLabels;
     private final List<Set<String>> labelsByExpandLevel = new ArrayList<>();
+    private final List<Integer> cyclesPerExpandLevel = new ArrayList<>();
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
     private final Map<String, Integer> extraArguments = new HashMap<>();
 
-    public ProgramEngine(SProgram program) throws LabelNotExist
-    {
+    public ProgramEngine(SProgram program) throws LabelNotExist {
         this.programName = program.getName();
 
         originalInstructions = program.getSInstructions().getSInstruction().stream()
@@ -48,40 +47,33 @@ public class ProgramEngine implements Serializable
         labelsByExpandLevel.add(originalLabels);
         initializeContextMap();
         contextMapsByExpandLevel.add(new HashMap<>(originalContextMap));
+        cyclesPerExpandLevel.add(calcTotalCycles(0));
 
     }
 
-    private void initializeContextMap() throws LabelNotExist
-    {
+    private void initializeContextMap() throws LabelNotExist {
         originalContextMap.clear();
         originalContextMap.put(ProgramUtils.outputName, 0);
         originalContextMap.put(Instruction.ProgramCounterName, 0); // Program Counter
-        for (int instruction_index = 0; instruction_index < originalInstructions.size(); instruction_index++)
-        {
+        for (int instruction_index = 0; instruction_index < originalInstructions.size(); instruction_index++) {
             Instruction instruction = originalInstructions.get(instruction_index);
             originalContextMap.put(instruction.getMainVarName().trim(), 0);
-            if (!instruction.getLabel().isEmpty())
-            {
+            if (!instruction.getLabel().isEmpty()) {
                 originalContextMap.put(instruction.getLabel().trim(), instruction_index);
             }
-            for (String argName : instruction.getArgs().values())
-            {
-                if (!originalContextMap.containsKey(argName))
-                {
-                    if (isLabelArgument(argName) && !validateLabel(argName))
-                    {
+            for (String argName : instruction.getArgs().values()) {
+                if (!originalContextMap.containsKey(argName)) {
+                    if (isLabelArgument(argName) && !validateLabel(argName)) {
                         throw new LabelNotExist(
                                 instruction.getClass().getSimpleName(),
                                 instruction_index + 1,
                                 argName);
 
-                    } else if (!ProgramUtils.isNumber(argName))
-                    {
+                    } else if (!ProgramUtils.isNumber(argName)) {
                         originalContextMap.put(argName.trim(), 0);
                     }
                 }
-                if (argName.equals(ProgramUtils.EXITLabelName))
-                {
+                if (argName.equals(ProgramUtils.EXITLabelName)) {
                     originalContextMap.put(argName, originalInstructions.size()); // EXIT label is set to the end of the program
                     originalLabels.add(argName);
                 }
@@ -90,29 +82,23 @@ public class ProgramEngine implements Serializable
         fillUnusedLabels();
     }
 
-    private boolean isLabelArgument(String argName)
-    {
+    private boolean isLabelArgument(String argName) {
         return argName.startsWith("L");
     }
 
-    private void fillUnusedLabels()
-    {
-        for (String label : originalLabels)
-        {
-            if (!originalContextMap.containsKey(label))
-            {
+    private void fillUnusedLabels() {
+        for (String label : originalLabels) {
+            if (!originalContextMap.containsKey(label)) {
                 originalContextMap.put(label.trim(), -1); // Initialize unused labels with -1 to indicate they are not used
             }
         }
     }
 
-    private boolean validateLabel(String labelName)
-    {
+    private boolean validateLabel(String labelName) {
         return originalLabels.contains(labelName);
     }
 
-    public void run(int expandLevel, List<Integer> arguments)
-    {
+    public void run(int expandLevel, List<Integer> arguments) {
         clearPreviousRunData();
         ExecutionStatistics exStats = new ExecutionStatistics(executionStatisticsList.size() + 1,
                 expandLevel, arguments);
@@ -120,16 +106,13 @@ public class ProgramEngine implements Serializable
         expand(expandLevel);
         List<Instruction> executedInstructions = instructionExpansionLevels.get(expandLevel);
         Map<String, Integer> executedContextMap = contextMapsByExpandLevel.get(expandLevel);
-        while (executedContextMap.get(Instruction.ProgramCounterName) < executedInstructions.size())
-        {
+        while (executedContextMap.get(Instruction.ProgramCounterName) < executedInstructions.size()) {
             int currentPC = executedContextMap.get(Instruction.ProgramCounterName);
             Instruction instruction = executedInstructions.get(currentPC);
-            try
-            {
+            try {
                 instruction.execute(executedContextMap);
                 exStats.incrementCycles(instruction.getCycles());
-            } catch (IllegalArgumentException e)
-            {
+            } catch (IllegalArgumentException e) {
                 throw new RuntimeException("Error executing instruction at PC=" + currentPC + ": " + e.getMessage(), e);
             }
         }
@@ -137,8 +120,7 @@ public class ProgramEngine implements Serializable
         executionStatisticsList.add(exStats);
     }
 
-    private void clearPreviousRunData()
-    {
+    private void clearPreviousRunData() {
         extraArguments.clear();
         contextMapsByExpandLevel.clear();
         contextMapsByExpandLevel.add(new HashMap<>(originalContextMap));
@@ -149,36 +131,28 @@ public class ProgramEngine implements Serializable
     }
 
 
-    private void insertArguments(List<Integer> arguments)
-    {
+    private void insertArguments(List<Integer> arguments) {
         int argIndex = 1;
         String argName;
-        for (Integer argValue : arguments)
-        {
+        for (Integer argValue : arguments) {
             argName = "x" + argIndex;
-            if (originalContextMap.containsKey(argName))
-            {
+            if (originalContextMap.containsKey(argName)) {
                 originalContextMap.put(argName, argValue);
                 contextMapsByExpandLevel.getFirst().put(argName, argValue);
-            } else
-            {
+            } else {
                 extraArguments.put(argName, argValue);
             }
             argIndex++;
         }
     }
 
-    private void expand(int level)
-    {
-        if (level > 0)
-        {
-            for (int currLevel = instructionExpansionLevels.size(); currLevel <= level; currLevel++)
-            {
+    private void expand(int level) {
+        if (level > 0) {
+            for (int currLevel = instructionExpansionLevels.size(); currLevel <= level; currLevel++) {
                 List<Instruction> tempExpanded = new ArrayList<>();
                 List<Instruction> previouslyExpanded = instructionExpansionLevels.getLast();
                 Map<String, Integer> latestContextMap = new HashMap<>(contextMapsByExpandLevel.getLast());
-                for (int i = 0; i < previouslyExpanded.size(); i++)
-                {
+                for (int i = 0; i < previouslyExpanded.size(); i++) {
                     Instruction instruction = previouslyExpanded.get(i);
                     List<Instruction> furtherExpanded = instruction.expand(latestContextMap, i);
                     tempExpanded.addAll(furtherExpanded);
@@ -186,12 +160,12 @@ public class ProgramEngine implements Serializable
                 instructionExpansionLevels.add(tempExpanded);
                 contextMapsByExpandLevel.add(latestContextMap);
                 updateLabelsAfterExpanding();
+                cyclesPerExpandLevel.add(calcTotalCycles(currLevel));
             }
         }
     }
 
-    private void updateLabelsAfterExpanding()
-    {
+    private void updateLabelsAfterExpanding() {
         List<Instruction> LatestExpanded = instructionExpansionLevels.getLast();
         Map<String, Integer> latestContextMap = contextMapsByExpandLevel.getLast();
         Set<String> latestLabels = new HashSet<>(labelsByExpandLevel.getLast());
@@ -200,8 +174,7 @@ public class ProgramEngine implements Serializable
                 .filter(instr -> !instr.getLabel().isBlank())
                 .forEach(instr -> latestContextMap.put(instr.getLabel(), LatestExpanded.indexOf(instr)));
         // update EXIT label to point to the end of the expanded program
-        if (latestLabels.contains(EXITLabelName))
-        {
+        if (latestLabels.contains(EXITLabelName)) {
             latestContextMap.put(EXITLabelName, LatestExpanded.size());
         }
         // add any new labels introduced during expansion
@@ -212,13 +185,11 @@ public class ProgramEngine implements Serializable
         labelsByExpandLevel.add(latestLabels);
     }
 
-    public int getMaxExpandLevel()
-    {
+    public int getMaxExpandLevel() {
         return ProgramUtils.getMaxExpandLevel(originalInstructions);
     }
 
-    public ProgramDTO toDTO(int expandLevel)
-    {
+    public ProgramDTO toDTO(int expandLevel) {
         expand(expandLevel);
         Map<String, Integer> argsMap = extractArguments(contextMapsByExpandLevel.get(expandLevel));
         argsMap.putAll(extraArguments);
@@ -232,10 +203,8 @@ public class ProgramEngine implements Serializable
         );
     }
 
-    public ExecutionResultDTO toExecutionResultDTO(int expandLevel)
-    {
-        if (executionStatisticsList.isEmpty())
-        {
+    public ExecutionResultDTO toExecutionResultDTO(int expandLevel) {
+        if (executionStatisticsList.isEmpty()) {
             throw new IllegalStateException("No execution has been run yet.");
         }
         ExecutionStatisticsDTO executionStatisticsDTO = executionStatisticsList.getLast().toDTO();
@@ -246,16 +215,26 @@ public class ProgramEngine implements Serializable
         );
     }
 
-    public List<ExecutionStatisticsDTO> getAllExecutionStatistics()
-    {
+    public List<ExecutionStatisticsDTO> getAllExecutionStatistics() {
         return executionStatisticsList.stream()
                 .map(ExecutionStatistics::toDTO)
                 .toList();
     }
 
-    public Set<String> getProgramArgsNames()
-    {
+    public Set<String> getProgramArgsNames() {
         return extractArguments(originalContextMap).keySet();
     }
 
+    private int calcTotalCycles(int expandLevel) {
+        return instructionExpansionLevels.get(expandLevel).stream()
+                .mapToInt(Instruction::getCycles)
+                .sum();
+    }
+
+    public int getTotalCycles(int expandLevel) {
+        if (expandLevel < 0 || expandLevel >= cyclesPerExpandLevel.size()) {
+            throw new IllegalArgumentException("Expand level out of bounds");
+        }
+        return cyclesPerExpandLevel.get(expandLevel);
+    }
 }

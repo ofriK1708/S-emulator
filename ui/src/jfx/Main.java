@@ -17,7 +17,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader fxmlLoader = new FXMLLoader();
-        URL resource = getClass().getResource("app1.fxml");
+        URL resource = getClass().getResource("app.fxml");
         fxmlLoader.setLocation(resource);
         if (resource != null) {
             Parent root = fxmlLoader.load(resource.openStream());

@@ -5,22 +5,37 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.HBox?>
+<?import java.lang.String?>
 <HBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER_LEFT" spacing="8" stylesheets="@ProgramFunction.css"
       xmlns="http://javafx.com/javafx/24.0.1" fx:controller="jfx.program.function.ProgramFunctionController">
 
     <padding>
         <Insets bottom="6" left="8" right="8" top="6" />
     </padding>
-   <Button fx:id="collapseButton1" layoutX="18.0" layoutY="20.0" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleCollapse" styleClass="pill pill-green pf-collapse" text="Program\function selector" />
+    <Button fx:id="collapseButton1" layoutX="18.0" layoutY="20.0" maxHeight="28" minWidth="86" mnemonicParsing="false"
+            onAction="#handleCollapse" text="Program\function selector">
+        <styleClass>
+            <String fx:value="pill-button"/>
+            <String fx:value="pill-green"/>
+        </styleClass>
+    </Button>
 
     <!-- Small green pill: Collapse -->
-    <Button fx:id="collapseButton" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleCollapse" styleClass="pill pill-green pf-collapse" text="Collapse" />
+    <Button fx:id="collapseButton" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleCollapse"
+            styleClass="pill-button, pill-green, pf-collapse" text="Collapse"/>
 
     <!-- Small gray info pill: Current / Maximum degree -->
-    <Label fx:id="degreeInfoLabel" alignment="CENTER" maxHeight="34" minWidth="120" styleClass="pill pill-gray pf-degree" text="Current /&#10;Maximum degree" />
+    <Label fx:id="degreeInfoLabel" alignment="CENTER" maxHeight="50" minWidth="120" styleClass="info-label, pf-degree"
+           text="Current /&#10;Maximum degree"/>
 
     <!-- Small green pill: Expand -->
-    <Button fx:id="expandButton" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleExpand" styleClass="pill pill-green pf-expand" text="Expand" />
-   <Label fx:id="degreeInfoLabel1" alignment="CENTER" layoutX="276.0" layoutY="16.0" maxHeight="34" minWidth="120" styleClass="pill pill-gray pf-degree" text="Highlight Selection" />
+    <Button fx:id="expandButton" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleExpand"
+            styleClass="pill-button, pill-green, pf-expand" text="Expand"/>
+    <Button fx:id="HighSelectionButton" mnemonicParsing="false" text="Highlight Selection">
+        <styleClass>
+            <String fx:value="pill-button"/>
+            <String fx:value="pill-green"/>
+        </styleClass>
+    </Button>
 
 </HBox>

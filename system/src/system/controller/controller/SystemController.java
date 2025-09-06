@@ -20,6 +20,7 @@ public class SystemController
     private final XMLHandler xmlHandler;
     private ProgramEngine engine;
     int maxExpandLevel = 0;
+    int cyclesCount = 0;
 
     public SystemController()
     {
@@ -45,6 +46,7 @@ public class SystemController
     {
         engine = new ProgramEngine(program);
         maxExpandLevel = engine.getMaxExpandLevel();
+        cyclesCount = engine.getTotalCycles(0);
     }
 
     public int getMaxExpandLevel()
@@ -102,9 +104,14 @@ public class SystemController
             throw new IllegalArgumentException("All arguments must be non-negative integers");
         }
         engine.run(expandLevel, arguments);
+        cyclesCount = engine.getTotalCycles(expandLevel);
         return engine.toExecutionResultDTO(expandLevel);
     }
 
+
+    public int getCyclesCount(int expandLevel) {
+        return engine.getTotalCycles(expandLevel);
+    }
 
     public ProgramDTO getProgramByExpandLevel(int expandLevel)
     {
@@ -116,7 +123,9 @@ public class SystemController
         {
             throw new IllegalArgumentException("Expand level must be between 0 and " + maxExpandLevel);
         }
-        return engine.toDTO(expandLevel);
+        ProgramDTO program = engine.toDTO(expandLevel);
+        cyclesCount = engine.getTotalCycles(expandLevel);
+        return program;
     }
 
     public ProgramDTO getBasicProgram()
@@ -131,6 +140,11 @@ public class SystemController
             throw new IllegalStateException("Program has not been set");
         }
         return engine.getAllExecutionStatistics();
+    }
+
+    public void clearLoadedProgram() {
+        engine = null;
+        maxExpandLevel = 0;
     }
 
     public void saveProgramState(Path directoryPath) throws IOException

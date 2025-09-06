@@ -66,6 +66,7 @@ public class FileHandlerController {
         // Clear and disable the text field
         filePathField.clear();
         filePathField.setDisable(true);
+        appController.clearLoadedProgram();
     }
 
     public File getSelectedFile() {

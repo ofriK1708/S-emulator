@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="720.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/24.0.1"
+            fx:controller="jfx.AppController">
+
+    <!-- TOP: file bar + program/function selector row -->
+    <top>
+        <VBox prefHeight="79.0" prefWidth="1200.0" spacing="8.0">
+            <padding>
+                <Insets bottom="8" left="12" right="12" top="8"/>
+            </padding>
+            <children>
+                <Label text="file handler (place holder)">
+                    <font>
+                        <Font size="23.0"/>
+                    </font>
+                </Label>
+                <Label text="program buttons (place holder)">
+                    <font>
+                        <Font size="23.0"/>
+                    </font>
+                </Label>
+            </children>
+        </VBox>
+    </top>
+
+    <!-- CENTER: instructions table + summary line (placeholders for now) -->
+    <center>
+        <GridPane>
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints maxHeight="423.0" minHeight="10.0" prefHeight="423.0" vgrow="SOMETIMES"/>
+                <RowConstraints maxHeight="214.0" minHeight="0.0" prefHeight="58.0" vgrow="SOMETIMES"/>
+                <RowConstraints maxHeight="159.0" minHeight="10.0" prefHeight="159.0" vgrow="SOMETIMES"/>
+            </rowConstraints>
+            <children>
+                <Label text="Summary line (placeholder)" GridPane.rowIndex="1"/>
+                <Label text="Selected Instruction history chain (placeholder)" GridPane.rowIndex="2"/>
+                <AnchorPane>
+                    <children>
+                        <TableView fx:id="InstctionTable" maxHeight="-Infinity" maxWidth="-Infinity"
+                                   minHeight="-Infinity" minWidth="-Infinity" AnchorPane.bottomAnchor="0.0"
+                                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <columns>
+                                <TableColumn fx:id="indexColumn" prefWidth="40.0" text="#"/>
+                                <TableColumn fx:id="typeColumn" prefWidth="70.0" text="Type"/>
+                                <TableColumn fx:id="labelColumn" prefWidth="70.0" text="Label"/>
+                                <TableColumn fx:id="commandColumn" prefWidth="349.0" text="Command"/>
+                                <TableColumn fx:id="cyclesColumn" minWidth="0.0" prefWidth="106.0" text="Cycles"/>
+                            </columns>
+                        </TableView>
+                    </children>
+                </AnchorPane>
+            </children>
+        </GridPane>
+    </center>
+
+    <!-- RIGHT: Debugger column -->
+    <right>
+        <VBox prefWidth="380.0" spacing="12.0">
+            <padding>
+                <Insets bottom="6" right="12" top="6"/>
+            </padding>
+
+            <TitledPane collapsible="false" text="Debugger\\Execution">
+                <content>
+                    <VBox spacing="8.0">
+
+                    </VBox>
+                </content>
+            </TitledPane>
+
+            <HBox spacing="12.0">
+                <StackPane prefHeight="160.0" VBox.vgrow="ALWAYS">
+                    <Label text="Variables (placeholder)"/>
+                </StackPane>
+                <StackPane prefHeight="160.0" VBox.vgrow="ALWAYS">
+                    <Label text="Execution Inputs (placeholder)"/>
+                </StackPane>
+            </HBox>
+
+            <StackPane maxHeight="84.0" prefHeight="84.0" styleClass="cycles-compact" VBox.vgrow="NEVER">
+                <children>
+                    <Label text="cycles (placeholder)"/>
+                </children>
+            </StackPane>
+            <AnchorPane>
+                <VBox.margin>
+                    <Insets left="100.0"/>
+                </VBox.margin>
+                <children>
+                    <Label text="statistics table (placeholder)" AnchorPane.bottomAnchor="0.0"
+                           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                </children>
+            </AnchorPane>
+
+        </VBox>
+    </right>
+</BorderPane>

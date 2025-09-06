@@ -16,8 +16,9 @@ public class ProgramFunctionController {
     @FXML private Button collapseButton;
     @FXML private Button collapseButton1; // Program\function selector
     @FXML private Label degreeInfoLabel;   // Current / Maximum degree
-    @FXML private Label degreeInfoLabel1;  // Highlight Selection
     @FXML private Button expandButton;
+    @FXML
+    private Button HighSelectionButton;
 
     public void setAppController(AppController appController) {
         this.appController = appController;
@@ -93,12 +94,8 @@ public class ProgramFunctionController {
         if (collapseButton1 != null) {
             collapseButton1.setDisable(!programLoaded);
         }
-
-        // Update highlight selection info
-        if (degreeInfoLabel1 != null) {
-            String selectionText = programLoaded ?
-                    "Level " + currentLevel + " Active" : "No Program Loaded";
-            degreeInfoLabel1.setText(selectionText);
+        if (HighSelectionButton != null) {
+            HighSelectionButton.setDisable(!programLoaded);
         }
     }
 

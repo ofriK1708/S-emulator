@@ -6,7 +6,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import jfx.AppController;
 
 import java.util.List;
@@ -36,10 +35,14 @@ public class InstructionTableController {
     @FXML
     public void initialize() {
         // Bind columns
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
-        labelColumn.setCellValueFactory(new PropertyValueFactory<>("label"));
-        commandColumn.setCellValueFactory(new PropertyValueFactory<>("command"));
-        cyclesColumn.setCellValueFactory(new PropertyValueFactory<>("cycles"));
+        typeColumn.setCellValueFactory(cellData ->
+                new ReadOnlyObjectWrapper<>(cellData.getValue().type()));
+        labelColumn.setCellValueFactory(cellData ->
+                new ReadOnlyObjectWrapper<>(cellData.getValue().label()));
+        commandColumn.setCellValueFactory(cellData ->
+                new ReadOnlyObjectWrapper<>(cellData.getValue().command()));
+        cyclesColumn.setCellValueFactory(cellData ->
+                new ReadOnlyObjectWrapper<>(cellData.getValue().cycles()));
 
         // Auto row number
         indexColumn.setCellValueFactory(cellData ->
@@ -53,7 +56,7 @@ public class InstructionTableController {
                 if (!row.isEmpty() && event.getClickCount() == 1) {
                     InstructionDTO clicked = row.getItem();
                     if (appController != null) {
-                        appController.handleDerivedMap(clicked.derivedFromInstructions());
+                        //appController.handleDerivedMap(clicked.derivedFromInstructions());
                     }
                 }
             });
@@ -66,4 +69,7 @@ public class InstructionTableController {
         instructionTable.getItems().setAll(instructions);
     }
 
+    public void clearInstructions() {
+        instructionTable.getItems().clear();
+    }
 }

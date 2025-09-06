@@ -8,6 +8,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import jfx.cycles.CyclesController;
 import jfx.fileHandler.FileHandlerController;
+import jfx.instruction.InstructionTableController;
 import jfx.program.function.ProgramFunctionController;
 import system.controller.controller.SystemController;
 
@@ -21,12 +22,22 @@ public class AppController {
     private boolean programLoaded = false;
     private int maxExpandLevel = 0;
     private int currentExpandLevel = 0;
+    private ProgramDTO loadedProgram = null;
 
-    @FXML private HBox fileHandler;
-    @FXML private FileHandlerController fileHandlerController;
-    @FXML private AnchorPane cycles;
-    @FXML private CyclesController cyclesController;
-    @FXML private ProgramFunctionController ProgramFunctionController;
+    @FXML
+    private HBox fileHandler;
+    @FXML
+    private FileHandlerController fileHandlerController;
+    @FXML
+    private AnchorPane cycles;
+    @FXML
+    private CyclesController cyclesController;
+    @FXML
+    private ProgramFunctionController ProgramFunctionController;
+    @FXML
+    private AnchorPane instructionsTable;
+    @FXML
+    private InstructionTableController instructionsTableController;
 
     public AppController() {
         this.systemController = new SystemController();
@@ -34,19 +45,20 @@ public class AppController {
 
     @FXML
     public void initialize() {
-        System.out.println("AppController initialized");
 
-        if (fileHandlerController != null) {
+        if (fileHandlerController != null && cyclesController != null
+                && ProgramFunctionController != null && instructionsTableController != null) {
             fileHandlerController.setAppController(this);
-        }
-        if (cyclesController != null) {
             cyclesController.setNumOfCycles(0);
-        }
-        if (ProgramFunctionController != null) {
             ProgramFunctionController.setAppController(this);
-            // Initialize with no program loaded state
             ProgramFunctionController.updateProgramState(false, 0, 0);
+            instructionsTableController.setAppController(this);
+            System.out.println("AppController initialized");
+        } else {
+            System.err.println("One or more controllers are not injected properly!");
+            throw new IllegalStateException("FXML injection failed: required controllers are null.");
         }
+
     }
 
     // Load program from file (same logic as console loadXMLFile)
@@ -54,6 +66,9 @@ public class AppController {
         try {
             System.out.println("Loading program from: " + file.getAbsolutePath());
             systemController.LoadProgramFromFile(file.toPath());
+            loadedProgram = systemController.getBasicProgram();
+            instructionsTableController.setInstructions(loadedProgram.instructions());
+            cyclesController.setNumOfCycles(systemController.getCyclesCount(0));
 
             // Update program state (same as console)
             programLoaded = true;
@@ -63,9 +78,8 @@ public class AppController {
             System.out.println("Program loaded successfully. MaxExpandLevel: " + maxExpandLevel);
 
             // Update ProgramFunction component with real data
-            if (ProgramFunctionController != null) {
-                ProgramFunctionController.updateProgramState(true, currentExpandLevel, maxExpandLevel);
-            }
+            ProgramFunctionController.updateProgramState(true, currentExpandLevel, maxExpandLevel);
+
 
             showSuccess("Program loaded successfully from: " + file.getName());
 
@@ -74,6 +88,27 @@ public class AppController {
             e.printStackTrace();
             showError("Error loading file: " + e.getMessage());
         }
+    }
+
+    public void clearLoadedProgram() {
+        programLoaded = false;
+        maxExpandLevel = 0;
+        currentExpandLevel = 0;
+        loadedProgram = null;
+        systemController.clearLoadedProgram();
+
+        // Clear UI components
+
+        ProgramFunctionController.updateProgramState(false, 0, 0);
+
+
+        instructionsTableController.clearInstructions();
+
+
+        cyclesController.setNumOfCycles(0);
+
+
+        showInfo("Loaded program cleared.");
     }
 
     // Expand program to specific level (same logic as console expandProgram)
@@ -97,9 +132,12 @@ public class AppController {
             System.out.println("Program at level " + level + " has " + program.instructions().size() + " instructions");
 
             // Update UI components with new expand level
-            if (ProgramFunctionController != null) {
-                ProgramFunctionController.updateProgramState(true, currentExpandLevel, maxExpandLevel);
-            }
+            ProgramFunctionController.updateProgramState(true, currentExpandLevel, maxExpandLevel);
+
+            // Update instruction table and cycles
+            instructionsTableController.setInstructions(program.instructions());
+            cyclesController.setNumOfCycles(systemController.getCyclesCount(currentExpandLevel));
+
 
             showInfo("Program expanded to level " + level);
 
@@ -147,10 +185,21 @@ public class AppController {
     }
 
     // Getters for other components
-    public boolean isProgramLoaded() { return programLoaded; }
-    public int getCurrentExpandLevel() { return currentExpandLevel; }
-    public int getMaxExpandLevel() { return maxExpandLevel; }
-    public SystemController getSystemController() { return systemController; }
+    public boolean isProgramLoaded() {
+        return programLoaded;
+    }
+
+    public int getCurrentExpandLevel() {
+        return currentExpandLevel;
+    }
+
+    public int getMaxExpandLevel() {
+        return maxExpandLevel;
+    }
+
+    public SystemController getSystemController() {
+        return systemController;
+    }
 
     // Setters for FXML injection
     public void setCyclesController(CyclesController cyclesController) {
