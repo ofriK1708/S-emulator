@@ -38,6 +38,11 @@ public class AppController {
     private AnchorPane instructionsTable;
     @FXML
     private InstructionTableController instructionsTableController;
+    @FXML
+    private AnchorPane derivedInstructionsTable;
+    @FXML
+    private InstructionTableController derivedInstructionsTableController;
+
 
     public AppController() {
         this.systemController = new SystemController();
@@ -47,12 +52,16 @@ public class AppController {
     public void initialize() {
 
         if (fileHandlerController != null && cyclesController != null
-                && ProgramFunctionController != null && instructionsTableController != null) {
+                && ProgramFunctionController != null && instructionsTableController != null &&
+                derivedInstructionsTableController != null) {
             fileHandlerController.setAppController(this);
             cyclesController.setNumOfCycles(0);
             ProgramFunctionController.setAppController(this);
             ProgramFunctionController.updateProgramState(false, 0, 0);
             instructionsTableController.setAppController(this);
+            instructionsTableController.initializeMainInstructionTable();
+            derivedInstructionsTableController.setAppController(this);
+            derivedInstructionsTableController.setDerivedMap(true);
             System.out.println("AppController initialized");
         } else {
             System.err.println("One or more controllers are not injected properly!");
@@ -64,6 +73,9 @@ public class AppController {
     // Load program from file (same logic as console loadXMLFile)
     public void loadProgramFromFile(File file) {
         try {
+            if (programLoaded) {
+                clearLoadedProgram();
+            }
             System.out.println("Loading program from: " + file.getAbsolutePath());
             systemController.LoadProgramFromFile(file.toPath());
             loadedProgram = systemController.getBasicProgram();
@@ -101,9 +113,9 @@ public class AppController {
 
         ProgramFunctionController.updateProgramState(false, 0, 0);
 
-
         instructionsTableController.clearInstructions();
 
+        derivedInstructionsTableController.clearInstructions();
 
         cyclesController.setNumOfCycles(0);
 
@@ -133,6 +145,7 @@ public class AppController {
 
             // Update UI components with new expand level
             ProgramFunctionController.updateProgramState(true, currentExpandLevel, maxExpandLevel);
+            derivedInstructionsTableController.clearInstructions();
 
             // Update instruction table and cycles
             instructionsTableController.setInstructions(program.instructions());
@@ -154,13 +167,6 @@ public class AppController {
             return;
         }
         expandProgramToLevel(0);
-    }
-
-    // MISSING METHOD - Added to fix compilation error
-    public void handleDerivedMap(Map<InstructionDTO, Integer> derivedInstructions) {
-        System.out.println("Derived instructions map received with " +
-                (derivedInstructions != null ? derivedInstructions.size() : 0) + " entries");
-        // For now, just log - will be used later for instruction highlighting
     }
 
     private void showError(String message) {
@@ -208,5 +214,9 @@ public class AppController {
 
     public void setFileHandlerController(FileHandlerController fileHandlerController) {
         this.fileHandlerController = fileHandlerController;
+    }
+
+    public void displayDerivedFromMap(Map<InstructionDTO, Integer> instructionDTOIntegerMap) {
+        derivedInstructionsTableController.setDerivedInstructions(instructionDTOIntegerMap);
     }
 }
