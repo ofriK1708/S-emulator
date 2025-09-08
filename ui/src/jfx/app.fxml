@@ -59,7 +59,7 @@
 
             <HBox spacing="12.0">
                 <StackPane prefHeight="160.0" VBox.vgrow="ALWAYS">
-                    <Label text="Variables (placeholder)"/>
+                    <fx:include fx:id="variables" source="variables/Variables.fxml"/>
                 </StackPane>
                 <StackPane prefHeight="160.0" VBox.vgrow="ALWAYS">
                     <Label text="Execution Inputs (placeholder)"/>
