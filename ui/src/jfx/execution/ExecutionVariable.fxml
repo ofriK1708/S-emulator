@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="jfx.execution.ExecutionVariableController">
+
+    <VBox spacing="6"
+          AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+
+        <Label text="Work-Variable Values:" styleClass="section-title"/>
+
+        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
+            <content>
+                <VBox fx:id="varsBox" spacing="4">
+                    <!--  מרווח פנימי 6px מכל הצדדים  -->
+                    <padding>
+                        <Insets top="6" right="6" bottom="6" left="6"/>
+                    </padding>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </VBox>
+</AnchorPane>

@@ -1,11 +1,17 @@
 package jfx;
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import java.util.HashMap;
+import java.util.Optional;
 
 import dto.engine.ExecutionResultDTO;
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import jfx.cycles.CyclesController;
@@ -15,6 +21,8 @@ import jfx.program.function.ProgramFunctionController;
 import jfx.variables.VariablesController;
 import jfx.debugger.DebuggerController;
 import system.controller.controller.SystemController;
+import jfx.execution.ExecutionVariableController;
+
 
 import java.io.File;
 import java.util.*;
@@ -53,6 +61,10 @@ public class AppController {
     private VariablesController variablesController;
     @FXML
     private DebuggerController debugControlsController;
+    @FXML
+    private AnchorPane executionVariable;
+    @FXML
+    private ExecutionVariableController executionVariableController;
 
     public AppController() {
         this.systemController = new SystemController();
@@ -75,6 +87,8 @@ public class AppController {
             derivedInstructionsTableController.setDerivedMap(true);
             variablesController.clearVariables();
             debugControlsController.setAppController(this);
+            executionVariableController.setAppController(this);
+
 
             System.out.println("AppController initialized");
         } else {
@@ -139,51 +153,148 @@ public class AppController {
                 return;
             }
 
-            boolean allVariablesEntered = true;
+            // Create and show the multi-variable input dialog
+            Map<String, String> collectedVariables = showMultiVariableDialog(requiredArguments);
 
-            for (String varName : requiredArguments) {
-                TextInputDialog dialog = new TextInputDialog("");
-                dialog.setTitle("Program Arguments");
-                dialog.setHeaderText("Enter argument values for program execution");
-                dialog.setContentText(varName + " (integer value):");
+            if (collectedVariables != null && collectedVariables.size() == requiredArguments.size()) {
+                // All variables were entered successfully
+                programVariables.putAll(collectedVariables);
 
-                Optional<String> result = dialog.showAndWait();
-                if (result.isPresent() && !result.get().trim().isEmpty()) {
+                // Convert to runtime arguments (integers)
+                for (String varName : requiredArguments) {
+                    String value = collectedVariables.get(varName);
                     try {
-                        // Convert to integer for SystemController
-                        int value = Integer.parseInt(result.get().trim());
-                        if (value < 0) {
-                            showError("All arguments must be non-negative integers. Got: " + value);
-                            allVariablesEntered = false;
-                            break;
+                        int intValue = Integer.parseInt(value);
+                        if (intValue < 0) {
+                            showError("All arguments must be non-negative integers. Got: " + intValue + " for " + varName);
+                            return;
                         }
-                        programVariables.put(varName, result.get().trim());
-                        runtimeArguments.add(value);
+                        runtimeArguments.add(intValue);
                     } catch (NumberFormatException e) {
-                        showError("Invalid number format for " + varName + ": " + result.get().trim());
-                        allVariablesEntered = false;
-                        break;
+                        showError("Invalid number format for " + varName + ": " + value);
+                        return;
                     }
-                } else {
-                    allVariablesEntered = false;
-                    showError("Variable entry cancelled. All arguments are required for execution.");
-                    break;
                 }
-            }
 
-            if (allVariablesEntered) {
                 variablesEntered = true;
                 // Display success message and show variables
                 variablesController.showSuccess("Arguments entered successfully!");
                 variablesController.setVariables(programVariables);
                 showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() +
                         "\nArguments captured. Ready for execution.");
+            } else {
+                showError("Variable entry cancelled or incomplete. All arguments are required for execution.");
             }
 
         } catch (Exception e) {
             System.err.println("Error getting program arguments: " + e.getMessage());
             showError("Error getting program arguments: " + e.getMessage());
         }
+    }
+
+    private Map<String, String> showMultiVariableDialog(Set<String> requiredArguments) {
+        // Create a custom dialog
+        Dialog<Map<String, String>> dialog = new Dialog<>();
+        dialog.setTitle("Program Arguments");
+        dialog.setHeaderText("Enter all argument values for program execution");
+
+        // Set the button types
+        ButtonType submitButton = new ButtonType("Submit", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().addAll(submitButton, cancelButton);
+
+        // Create the content
+        VBox content = new VBox(10);
+        content.setPadding(new Insets(20));
+
+        // Store text fields for each variable
+        Map<String, TextField> textFields = new HashMap<>();
+
+        // Create input fields for each required argument
+        for (String varName : requiredArguments) {
+            Label label = new Label(varName + " (integer value):");
+            TextField textField = new TextField();
+            textField.setPromptText("Enter integer value...");
+
+            // Add validation styling
+            textField.textProperty().addListener((observable, oldValue, newValue) -> {
+                try {
+                    if (!newValue.trim().isEmpty()) {
+                        Integer.parseInt(newValue.trim());
+                        textField.setStyle(""); // Clear any error styling
+                    }
+                } catch (NumberFormatException e) {
+                    textField.setStyle("-fx-border-color: red;");
+                }
+            });
+
+            textFields.put(varName, textField);
+
+            VBox fieldContainer = new VBox(5);
+            fieldContainer.getChildren().addAll(label, textField);
+            content.getChildren().add(fieldContainer);
+        }
+
+        dialog.getDialogPane().setContent(content);
+
+        // Focus on the first text field
+        if (!textFields.isEmpty()) {
+            Platform.runLater(() -> textFields.values().iterator().next().requestFocus());
+        }
+
+        // Enable/disable submit button based on input validation
+        Node submitButtonNode = dialog.getDialogPane().lookupButton(submitButton);
+        submitButtonNode.setDisable(true);
+
+        // Add listeners to validate all fields
+        for (TextField field : textFields.values()) {
+            field.textProperty().addListener((observable, oldValue, newValue) -> {
+                boolean allValid = textFields.values().stream().allMatch(tf -> {
+                    String text = tf.getText().trim();
+                    if (text.isEmpty()) return false;
+                    try {
+                        int value = Integer.parseInt(text);
+                        return value >= 0;
+                    } catch (NumberFormatException e) {
+                        return false;
+                    }
+                });
+                submitButtonNode.setDisable(!allValid);
+            });
+        }
+
+        // Convert the result when submit is clicked
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == submitButton) {
+                Map<String, String> result = new HashMap<>();
+                boolean allValid = true;
+
+                for (Map.Entry<String, TextField> entry : textFields.entrySet()) {
+                    String value = entry.getValue().getText().trim();
+                    if (value.isEmpty()) {
+                        allValid = false;
+                        break;
+                    }
+                    try {
+                        int intValue = Integer.parseInt(value);
+                        if (intValue < 0) {
+                            allValid = false;
+                            break;
+                        }
+                        result.put(entry.getKey(), value);
+                    } catch (NumberFormatException e) {
+                        allValid = false;
+                        break;
+                    }
+                }
+
+                return allValid ? result : null;
+            }
+            return null;
+        });
+
+        Optional<Map<String, String>> result = dialog.showAndWait();
+        return result.orElse(null);
     }
 
     public void startRegularExecution() {
@@ -233,6 +344,8 @@ public class AppController {
         System.out.println("Total Cycles: " + executionResult.numOfCycles());
         // Update cycles display
         cyclesController.setNumOfCycles(executionResult.numOfCycles());
+        executionVariableController.showWorkVariables(executionResult.workVariablesValues());
+
     }
 
     public void clearLoadedProgram() {
@@ -250,8 +363,7 @@ public class AppController {
         instructionsTableController.clearInstructions();
         derivedInstructionsTableController.clearInstructions();
         cyclesController.setNumOfCycles(0);
-        variablesController.clearVariables();
-
+        executionVariableController.showWorkVariables(null);   // blank panel
         showInfo("Loaded program cleared.");
     }
 
