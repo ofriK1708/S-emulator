@@ -57,14 +57,16 @@
                 </content>
             </TitledPane>
 
+            <!-- excerpt -->
             <HBox spacing="12.0">
                 <StackPane prefHeight="160.0" VBox.vgrow="ALWAYS">
-                    <Label text="Variables (placeholder)"/>
+                    <fx:include fx:id="variables" source="variables/Variables.fxml"/>
                 </StackPane>
                 <StackPane prefHeight="160.0" VBox.vgrow="ALWAYS">
-                    <Label text="Execution Inputs (placeholder)"/>
+                    <fx:include fx:id="executionVariable" source="execution/ExecutionVariable.fxml"/>
                 </StackPane>
             </HBox>
+
 
             <StackPane maxHeight="84.0" prefHeight="84.0" styleClass="cycles-compact" VBox.vgrow="NEVER">
                 <fx:include fx:id="cycles" source="cycles/cycles.fxml"/>
