@@ -4,7 +4,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <HBox xmlns:fx="http://javafx.com/fxml/1" spacing="10" styleClass="hbox" stylesheets="@fileHandler.css"
-      xmlns="http://javafx.com/javafx/24.0.1" fx:controller="jfx.fileHandler.FileHandlerController">
+      xmlns="http://javafx.com/javafx/24.0.1" fx:controller="ui.jfx.fileHandler.FileHandlerController">
     <Button fx:id="addFileButton" minWidth="100" onMousePressed="#onAddFileButtonPressed" styleClass="blue-teal-button"
             text="Add File"/>
     <Button fx:id="clearButton" minWidth="100.0" onMousePressed="#onClearButtonPressed" styleClass="clear-button"

@@ -6,7 +6,7 @@
 <?import javafx.scene.text.Font?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
             prefHeight="720.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/24.0.1"
-            fx:controller="jfx.AppController">
+            fx:controller="ui.jfx.AppController">
 
     <!-- TOP: file bar + program/function selector row -->
     <top>

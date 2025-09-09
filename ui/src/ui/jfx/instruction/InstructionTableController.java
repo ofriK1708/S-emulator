@@ -1,4 +1,4 @@
-package jfx.instruction;
+package ui.jfx.instruction;
 
 import dto.engine.InstructionDTO;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -6,10 +6,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import jfx.AppController;
+import ui.jfx.AppController;
 
 import java.util.List;
-import java.util.Map;
 
 public class InstructionTableController {
 
@@ -42,6 +41,8 @@ public class InstructionTableController {
     @FXML
     public void initialize() {
         // Bind columns
+        indexColumn.setCellValueFactory(callData ->
+                new ReadOnlyObjectWrapper<>(callData.getValue().index() + 1));
         typeColumn.setCellValueFactory(cellData ->
                 new ReadOnlyObjectWrapper<>(cellData.getValue().type()));
         labelColumn.setCellValueFactory(cellData ->
@@ -57,10 +58,7 @@ public class InstructionTableController {
         if (isDerivedMap) {
             throw new IllegalStateException("initializeMainInstructionTable called on derived map table");
         }
-        // Auto row number
-        indexColumn.setCellValueFactory(cellData ->
-                new ReadOnlyObjectWrapper<>(instructionTable.getItems().indexOf(cellData.getValue()) + 1)
-        );
+
         instructionTable.setRowFactory(tv -> {
             TableRow<InstructionDTO> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
@@ -84,23 +82,18 @@ public class InstructionTableController {
         instructionTable.getItems().clear();
     }
 
-    public void setDerivedInstructions(Map<InstructionDTO, Integer> instructionDTOIntegerMap) {
+    public void setDerivedInstructions(List<InstructionDTO> instructionDTOList) {
         if (!isDerivedMap) {
             throw new IllegalStateException("setDerivedInstructions called on non-derived map table");
         }
         // Clear previous data
         instructionTable.getItems().clear();
 
-        if (instructionDTOIntegerMap == null || instructionDTOIntegerMap.isEmpty()) {
+        if (instructionDTOList == null || instructionDTOList.isEmpty()) {
             return;
         }
 
         // Fill the table with the keys
-        instructionTable.getItems().addAll(instructionDTOIntegerMap.keySet());
-
-        // Override index column for derived map mode
-        indexColumn.setCellValueFactory(cellData ->
-                new ReadOnlyObjectWrapper<>(instructionDTOIntegerMap.get(cellData.getValue()) + 1)
-        );
+        instructionTable.getItems().addAll(instructionDTOList);
     }
 }

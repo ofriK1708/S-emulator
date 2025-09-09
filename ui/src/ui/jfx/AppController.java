@@ -1,4 +1,4 @@
-package jfx;
+package ui.jfx;
 
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
@@ -6,14 +6,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import jfx.cycles.CyclesController;
-import jfx.fileHandler.FileHandlerController;
-import jfx.instruction.InstructionTableController;
-import jfx.program.function.ProgramFunctionController;
+import ui.jfx.cycles.CyclesController;
+import ui.jfx.fileHandler.FileHandlerController;
+import ui.jfx.instruction.InstructionTableController;
+import ui.jfx.program.function.ProgramFunctionController;
 import system.controller.controller.SystemController;
 
 import java.io.File;
-import java.util.Map;
+import java.util.List;
 
 public class AppController {
 
@@ -216,7 +216,7 @@ public class AppController {
         this.fileHandlerController = fileHandlerController;
     }
 
-    public void displayDerivedFromMap(Map<InstructionDTO, Integer> instructionDTOIntegerMap) {
+    public void displayDerivedFromMap(List<InstructionDTO> instructionDTOIntegerMap) {
         derivedInstructionsTableController.setDerivedInstructions(instructionDTOIntegerMap);
     }
 }

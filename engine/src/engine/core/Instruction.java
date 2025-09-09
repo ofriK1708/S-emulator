@@ -11,10 +11,7 @@ import engine.generated.SInstructionArguments;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class Instruction implements Command, Serializable
@@ -96,14 +93,14 @@ public abstract class Instruction implements Command, Serializable
         contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1);
     }
 
-    private Map<Instruction, Integer> getDerivedInstructions()
+    private List<InstructionDTO> getDerivedInstructions()
     {
-        Map<Instruction, Integer> derivedInstructions = new LinkedHashMap<>();
+        List<InstructionDTO> derivedInstructions = new LinkedList<>();
         Instruction tempDerivedFrom = this.derivedFrom;
         int tempDerivedFromIndex = this.derivedFromIndex;
         while (tempDerivedFrom != null)
         {
-            derivedInstructions.put(tempDerivedFrom, tempDerivedFromIndex);
+            derivedInstructions.add(tempDerivedFrom.simpleToDTO(tempDerivedFromIndex));
             tempDerivedFromIndex = tempDerivedFrom.derivedFromIndex;
             tempDerivedFrom = tempDerivedFrom.derivedFrom;
         }
@@ -111,29 +108,27 @@ public abstract class Instruction implements Command, Serializable
     }
 
     @Override
-    public InstructionDTO toDTO()
+    public InstructionDTO toDTO(int idx)
     {
-        Map<InstructionDTO, Integer> derivedFromInstructionsDto = new LinkedHashMap<>();
-        getDerivedInstructions().forEach((derivedInstruction, index) ->
-                derivedFromInstructionsDto.put(derivedInstruction.simpleToDTO(), index)
-        );
         return new InstructionDTO(
+                idx,
                 getType().getSymbol(),
                 label,
                 toString(),
                 getCycles(),
-                derivedFromInstructionsDto
+                getDerivedInstructions()
         );
     }
 
-    private InstructionDTO simpleToDTO()
+    private InstructionDTO simpleToDTO(int index)
     {
         return new InstructionDTO(
+                index,
                 getType().getSymbol(),
                 label,
                 toString(),
                 getCycles(),
-                Collections.emptyMap()
+                Collections.emptyList()
         );
     }
 }

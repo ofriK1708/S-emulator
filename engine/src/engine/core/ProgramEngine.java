@@ -2,6 +2,7 @@ package engine.core;
 
 import dto.engine.ExecutionResultDTO;
 import dto.engine.ExecutionStatisticsDTO;
+import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
 import engine.exception.LabelNotExist;
 import engine.generated.SInstruction;
@@ -12,6 +13,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static engine.utils.ProgramUtils.*;
 
@@ -193,13 +195,14 @@ public class ProgramEngine implements Serializable {
         expand(expandLevel);
         Map<String, Integer> argsMap = extractArguments(contextMapsByExpandLevel.get(expandLevel));
         argsMap.putAll(extraArguments);
+        List<Instruction> instructionsAtLevel = instructionExpansionLevels.get(expandLevel);
         return new ProgramDTO(
                 programName,
                 argsMap.keySet(),
                 extractLabels(labelsByExpandLevel, expandLevel),
-                instructionExpansionLevels.get(expandLevel).stream()
-                        .map(Instruction::toDTO)
-                        .collect(Collectors.toList())
+                IntStream.range(0,instructionsAtLevel.size())
+                        .mapToObj(i -> instructionsAtLevel.get(i).toDTO(i))
+                        .toList()
         );
     }
 

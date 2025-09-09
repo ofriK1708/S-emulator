@@ -1,4 +1,4 @@
-package jfx;
+package ui.jfx;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

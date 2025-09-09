@@ -1,11 +1,11 @@
-package jfx.fileHandler;
+package ui.jfx.fileHandler;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
-import jfx.AppController;
+import ui.jfx.AppController;
 
 import java.io.File;
 

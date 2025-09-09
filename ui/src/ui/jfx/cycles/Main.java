@@ -1,4 +1,4 @@
-package jfx.cycles;
+package ui.jfx.cycles;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

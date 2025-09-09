@@ -1,4 +1,4 @@
-package jfx.cycles;
+package ui.jfx.cycles;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/24.0.1"
-            fx:controller="jfx.cycles.CyclesController">
+            fx:controller="ui.jfx.cycles.CyclesController">
     <children>
         <HBox alignment="CENTER" layoutX="10.0" layoutY="6.0" maxHeight="-Infinity" maxWidth="-Infinity"
               minHeight="-Infinity" minWidth="-Infinity" spacing="30.0" styleClass="hbox" stylesheets="@cycles.css">

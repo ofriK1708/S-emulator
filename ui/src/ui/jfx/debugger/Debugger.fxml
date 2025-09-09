@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" prefHeight="240.0" prefWidth="600.0" spacing="16.0"
       stylesheets="@Debugger.css" xmlns="http://javafx.com/javafx/24.0.1"
-      fx:controller="jfx.debugger.DebuggerController">
+      fx:controller="ui.jfx.debugger.DebuggerController">
 
     <children>
         <!-- 3 rows × 2 columns -->

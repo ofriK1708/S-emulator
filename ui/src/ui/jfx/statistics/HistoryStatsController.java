@@ -1,4 +1,4 @@
-package jfx.statistics;
+package ui.jfx.statistics;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.ScrollPane;

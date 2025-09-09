@@ -1,11 +1,11 @@
-package jfx.program.function;
+package ui.jfx.program.function;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
-import jfx.AppController;
+import ui.jfx.AppController;
 
 import java.util.Optional;
 
