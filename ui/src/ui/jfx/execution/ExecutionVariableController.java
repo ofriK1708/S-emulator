@@ -1,9 +1,9 @@
-package jfx.execution;
+package ui.jfx.execution;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-import jfx.AppController;
+import ui.jfx.AppController;
 
 import java.util.Map;
 

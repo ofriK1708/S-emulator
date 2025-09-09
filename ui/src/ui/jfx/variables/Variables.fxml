@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="jfx.variables.VariablesController" spacing="8.0">
+      fx:controller="ui.jfx.variables.VariablesController" spacing="8.0">
     <children>
         <Label fx:id="statusLabel" text="No program loaded" styleClass="status-label"/>
         <ScrollPane fitToWidth="true" maxHeight="120.0" prefHeight="120.0">

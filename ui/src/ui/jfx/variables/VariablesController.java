@@ -1,4 +1,4 @@
-package jfx.variables;
+package ui.jfx.variables;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -22,7 +22,7 @@ public class VariablesController {
         clearVariables();
     }
 
-    public void setVariables(Map<String, String> variables) {
+    public void setVariables(Map<String, Integer> variables) {
         clearVariables();
 
         if (variables == null || variables.isEmpty()) {
@@ -34,8 +34,8 @@ public class VariablesController {
         statusLabel.setText("Program Variables (" + variables.size() + " arguments):");
         statusLabel.getStyleClass().removeAll("success-message", "error-message");
 
-        for (Map.Entry<String, String> entry : variables.entrySet()) {
-            Label variableLabel = new Label(entry.getKey() + ": " + entry.getValue());
+        for (Map.Entry<String, Integer> entry : variables.entrySet()) {
+            Label variableLabel = new Label(entry.getKey() + ": " + entry.getValue().toString());
             variableLabel.getStyleClass().add("variable-item");
             variablesContainer.getChildren().add(variableLabel);
         }

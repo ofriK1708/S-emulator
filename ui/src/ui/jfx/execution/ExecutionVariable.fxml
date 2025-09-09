@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="jfx.execution.ExecutionVariableController">
+            fx:controller="ui.jfx.execution.ExecutionVariableController">
 
     <VBox spacing="6"
           AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
