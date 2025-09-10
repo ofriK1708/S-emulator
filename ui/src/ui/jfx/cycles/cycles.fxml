@@ -1,29 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/24.0.1"
-            fx:controller="ui.jfx.cycles.CyclesController">
-    <children>
-        <HBox alignment="CENTER" layoutX="10.0" layoutY="6.0" maxHeight="-Infinity" maxWidth="-Infinity"
-              minHeight="-Infinity" minWidth="-Infinity" spacing="30.0" styleClass="hbox" stylesheets="@cycles.css">
-            <Label styleClass="cycles-label" text="cycles">
-                <font>
-                    <Font size="30.0"/>
-                </font>
-            </Label>
-            <Label fx:id="numOfCycles" styleClass="value-label" text="0">
-                <font>
-                    <Font size="30.0"/>
-                </font>
-            </Label>
-        </HBox>
-    </children>
-    <padding>
-        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
-    </padding>
-</AnchorPane>
+
+<HBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" spacing="30.0" styleClass="hbox" stylesheets="@cycles.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.jfx.cycles.CyclesController">
+      <Label styleClass="cycles-label" text="cycles" HBox.hgrow="ALWAYS">
+      <font>
+         <Font size="15.0" />
+      </font>
+      </Label>
+      <Label fx:id="numOfCycles" prefHeight="15.0" prefWidth="15.0" styleClass="value-label" text="0" HBox.hgrow="ALWAYS">
+      <font>
+         <Font size="15.0" />
+      </font>
+      </Label>
+  </HBox>

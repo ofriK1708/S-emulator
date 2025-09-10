@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<VBox spacing="8" stylesheets="@Statistics.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.jfx.statistics.HistoryStatsController">
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="8" stylesheets="@Statistics.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.jfx.statistics.HistoryStatsController">
 
     <Label prefHeight="18.0" prefWidth="123.0" styleClass="component-title" text="History\Statistics Table">
         <VBox.margin><Insets left="8" right="8" top="6" /></VBox.margin>
@@ -14,19 +19,22 @@
     </HBox>
 
     <!-- Collapsible statistics table -->
-    <VBox fx:id="statsTableContainer" spacing="6" styleClass="stats-table-container">
-        <TableView fx:id="statisticsTable" prefHeight="160">
+    <VBox fx:id="statsTableContainer" spacing="6" styleClass="stats-table-container" VBox.vgrow="ALWAYS">
+        <TableView fx:id="statisticsTable" prefHeight="160" VBox.vgrow="ALWAYS">
             <columns>
                 <TableColumn fx:id="statNameColumn" prefWidth="180" text="Statistic" />
                 <TableColumn fx:id="statValueColumn" prefWidth="120" text="Value" />
             </columns>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
         </TableView>
     </VBox>
 
     <!-- History log area (DTOs later) -->
-    <VBox fx:id="historyLogContainer" spacing="6" styleClass="history-log-container">
-        <Label styleClass="history-label" text="Execution History:" />
-        <ScrollPane fx:id="historyScrollPane" fitToWidth="true" prefHeight="120" styleClass="history-scroll-pane">
+    <VBox fx:id="historyLogContainer" spacing="6" styleClass="history-log-container" VBox.vgrow="ALWAYS">
+        <Label styleClass="history-label" text="Execution History:" VBox.vgrow="ALWAYS" />
+        <ScrollPane fx:id="historyScrollPane" fitToWidth="true" prefHeight="120" styleClass="history-scroll-pane" VBox.vgrow="ALWAYS">
             <content>
                 <VBox fx:id="historyListContainer" spacing="4" styleClass="history-list-container">
                     <Label styleClass="placeholder-text" text="Execution history will appear here" />

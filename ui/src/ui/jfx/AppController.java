@@ -20,11 +20,15 @@ import ui.jfx.execution.ExecutionVariableController;
 import ui.jfx.fileHandler.FileHandlerController;
 import ui.jfx.instruction.InstructionTableController;
 import ui.jfx.program.function.ProgramFunctionController;
+import ui.jfx.runControls.RunControlsController;
 import ui.jfx.variables.VariablesController;
 import ui.utils.UIUtils;
 
 import java.io.File;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class AppController {
 
@@ -35,14 +39,14 @@ public class AppController {
     private int maxExpandLevel = 0;
     private int currentExpandLevel = 0;
     private ProgramDTO loadedProgram = null;
-    private Map<String, Integer> programVariables = new HashMap<>();
+    private final Map<String, Integer> programVariables = new HashMap<>();
 
     @FXML
     private HBox fileHandler;
     @FXML
     private FileHandlerController fileHandlerController;
     @FXML
-    private AnchorPane cycles;
+    private HBox cycles;
     @FXML
     private CyclesController cyclesController;
     @FXML
@@ -63,6 +67,10 @@ public class AppController {
     private AnchorPane executionVariable;
     @FXML
     private ExecutionVariableController executionVariableController;
+    @FXML
+    private HBox runControls;
+    @FXML
+    private RunControlsController runControlsController;
 
     public AppController() {
         this.systemController = new SystemController();
@@ -73,7 +81,8 @@ public class AppController {
         if (fileHandlerController != null && cyclesController != null
                 && ProgramFunctionController != null && instructionsTableController != null &&
                 derivedInstructionsTableController != null && variablesController != null &&
-                debugControlsController != null) {
+                debugControlsController != null && executionVariableController != null &&
+                runControlsController != null) {
 
             fileHandlerController.setAppController(this);
             cyclesController.setNumOfCycles(0);
@@ -119,12 +128,9 @@ public class AppController {
             ProgramFunctionController.updateProgramState(true, currentExpandLevel, maxExpandLevel);
 
             // Clear any existing UI data
-            instructionsTableController.clearInstructions();
+            instructionsTableController.setInstructions(loadedProgram.instructions());
             derivedInstructionsTableController.clearInstructions();
             cyclesController.setNumOfCycles(0);
-
-            // Prompt for variables after successful load
-            promptForVariables();
 
         } catch (Exception e) {
             System.err.println("Error loading file: " + e.getMessage());
@@ -182,110 +188,6 @@ public class AppController {
             e.printStackTrace();
         }
     }
-//    private Map<String, String> showMultiVariableDialog(Set<String> requiredArguments) {
-//        // Create a custom dialog
-//        Dialog<Map<String, String>> dialog = new Dialog<>();
-//        dialog.setTitle("Program Arguments");
-//        dialog.setHeaderText("Enter all argument values for program execution");
-//
-//        // Set the button types
-//        ButtonType submitButton = new ButtonType("Submit", ButtonBar.ButtonData.OK_DONE);
-//        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-//        dialog.getDialogPane().getButtonTypes().addAll(submitButton, cancelButton);
-//
-//        // Create the content
-//        VBox content = new VBox(10);
-//        content.setPadding(new Insets(20));
-//
-//        // Store text fields for each variable
-//        Map<String, TextField> textFields = new HashMap<>();
-//
-//        // Create input fields for each required argument
-//        for (String varName : requiredArguments) {
-//            Label label = new Label(varName + " (integer value):");
-//            TextField textField = new TextField();
-//            textField.setPromptText("Enter integer value...");
-//
-//            // Add validation styling
-//            textField.textProperty().addListener((observable, oldValue, newValue) -> {
-//                try {
-//                    if (!newValue.trim().isEmpty()) {
-//                        Integer.parseInt(newValue.trim());
-//                        textField.setStyle(""); // Clear any error styling
-//                    }
-//                } catch (NumberFormatException e) {
-//                    textField.setStyle("-fx-border-color: red;");
-//                }
-//            });
-//
-//            textFields.put(varName, textField);
-//
-//            VBox fieldContainer = new VBox(5);
-//            fieldContainer.getChildren().addAll(label, textField);
-//            content.getChildren().add(fieldContainer);
-//        }
-//
-//        dialog.getDialogPane().setContent(content);
-//
-//        // Focus on the first text field
-//        if (!textFields.isEmpty()) {
-//            Platform.runLater(() -> textFields.values().iterator().next().requestFocus());
-//        }
-//
-//        // Enable/disable submit button based on input validation
-//        Node submitButtonNode = dialog.getDialogPane().lookupButton(submitButton);
-//        submitButtonNode.setDisable(true);
-//
-//        // Add listeners to validate all fields
-//        for (TextField field : textFields.values()) {
-//            field.textProperty().addListener((observable, oldValue, newValue) -> {
-//                boolean allValid = textFields.values().stream().allMatch(tf -> {
-//                    String text = tf.getText().trim();
-//                    if (text.isEmpty()) return false;
-//                    try {
-//                        int value = Integer.parseInt(text);
-//                        return value >= 0;
-//                    } catch (NumberFormatException e) {
-//                        return false;
-//                    }
-//                });
-//                submitButtonNode.setDisable(!allValid);
-//            });
-//        }
-//
-//        // Convert the result when submit is clicked
-//        dialog.setResultConverter(dialogButton -> {
-//            if (dialogButton == submitButton) {
-//                Map<String, String> result = new HashMap<>();
-//                boolean allValid = true;
-//
-//                for (Map.Entry<String, TextField> entry : textFields.entrySet()) {
-//                    String value = entry.getValue().getText().trim();
-//                    if (value.isEmpty()) {
-//                        allValid = false;
-//                        break;
-//                    }
-//                    try {
-//                        int intValue = Integer.parseInt(value);
-//                        if (intValue < 0) {
-//                            allValid = false;
-//                            break;
-//                        }
-//                        result.put(entry.getKey(), value);
-//                    } catch (NumberFormatException e) {
-//                        allValid = false;
-//                        break;
-//                    }
-//                }
-//
-//                return allValid ? result : null;
-//            }
-//            return null;
-//        });
-//
-//        Optional<Map<String, String>> result = dialog.showAndWait();
-//        return result.orElse(null);
-//    }
 
     public void startRegularExecution() {
         if (!programLoaded) {
