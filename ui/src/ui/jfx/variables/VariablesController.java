@@ -85,6 +85,7 @@ public class VariablesController {
      */
     public void setVariables(Map<String, Integer> variables) {
         this.currentVariables = variables;
+        refreshTable();
     }
 
     /**
