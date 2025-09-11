@@ -97,12 +97,12 @@ public class ExecutionVariableController {
         }
 
         // Adapt ConsoleUI logic: sort by programNameComparator and populate table
-        workVars.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey(UIUtils.programNameComparator))
-                .forEach(entry -> {
-                    VariableEntry variableEntry = new VariableEntry(entry.getKey(), entry.getValue());
-                    workVariablesData.add(variableEntry);
-                });
+//        workVars.entrySet().stream()
+//                .sorted(Map.Entry.comparingByKey(UIUtils.programNameComparator))
+//                .forEach(entry -> {
+//                    VariableEntry variableEntry = new VariableEntry(entry.getKey(), entry.getValue());
+//                    workVariablesData.add(variableEntry);
+//                });
 
         System.out.println("Work variables displayed in table: " + workVars.size() + " variables");
     }

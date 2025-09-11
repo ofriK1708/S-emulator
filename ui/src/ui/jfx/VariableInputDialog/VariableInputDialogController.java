@@ -26,7 +26,7 @@ public class VariableInputDialogController {
     private final Map<String, TextField> textFields = new HashMap<>();
     private Map<String, Integer> programArguments;
     private Set<String> requiredArguments;
-    private final BooleanProperty allValid = new SimpleBooleanProperty(true);
+    private final BooleanProperty allValid = new SimpleBooleanProperty(false); // Start as false
 
     public void initialiseController(Set<String> requiredArguments, Map<String, Integer> programArguments) {
         this.requiredArguments = requiredArguments;
@@ -42,35 +42,68 @@ public class VariableInputDialogController {
             Label label = new Label(var + " (integer value):");
             TextField field = new TextField();
             field.setPromptText("Enter positive integer value...");
+
+            // Add listener that validates ALL fields when ANY field changes
+            field.textProperty().addListener((obs, oldVal, newVal) -> {
+                // Only allow digits
+                if (!newVal.matches("\\d*")) {
+                    field.setText(oldVal);
+                }
+                validateAllFields(); // Validate ALL fields, not just one
+            });
+
             fieldsContainer.getChildren().add(new VBox(label, field));
             textFields.put(var, field);
-            field.textProperty().addListener((obs, oldVal, newVal) -> validate(newVal));
         }
+        validateAllFields(); // Initial validation
     }
 
-    private void validate(String newVal) {
-        String errorMsg = "Input is not a number or not a positive number";
+    // Fixed validation method - checks each field individually
+    private void validateAllFields() {
+        boolean allFieldsValid = true;
+
         for (TextField tf : textFields.values()) {
-            if (!newVal.isEmpty() && !UIUtils.isValidProgramArgument(newVal)) {
-                if (!tf.getStyleClass().contains("error-field")) {
-                    tf.getStyleClass().add("error-field");
-                }
-                tf.setTooltip(new Tooltip(errorMsg));
-                allValid.set(false);
-            } else {
-                tf.getStyleClass().removeAll("error-field");
-                tf.setTooltip(null);
+            String text = tf.getText(); // Get text from THIS field, not newVal
+
+            // Clear previous styling
+            tf.getStyleClass().removeAll("error-field");
+            tf.setTooltip(null);
+
+            if (text == null || text.trim().isEmpty()) {
+                // Empty field is invalid
+                tf.getStyleClass().add("error-field");
+                tf.setTooltip(new Tooltip("Value required"));
+                allFieldsValid = false;
+            } else if (!UIUtils.isValidProgramArgument(text.trim())) {
+                // Invalid number
+                tf.getStyleClass().add("error-field");
+                tf.setTooltip(new Tooltip("Input is not a number or not a positive number"));
+                allFieldsValid = false;
             }
         }
+
+        allValid.set(allFieldsValid);
     }
 
     @FXML
     private void onAccept() {
+        // Final validation before accepting
+        if (!allValid.get()) {
+            System.out.println("Cannot accept - validation failed");
+            return;
+        }
+
         for (Map.Entry<String, TextField> entry : textFields.entrySet()) {
-            if(entry.getValue().getText().isEmpty()){
+            String text = entry.getValue().getText();
+            if (text == null || text.trim().isEmpty()) {
                 programArguments.put(entry.getKey(), 0);
             } else {
-                programArguments.put(entry.getKey(), Integer.parseInt(entry.getValue().getText()));
+                try {
+                    programArguments.put(entry.getKey(), Integer.parseInt(text.trim()));
+                } catch (NumberFormatException e) {
+                    System.err.println("Error parsing: '" + text + "' for " + entry.getKey());
+                    return; // Don't close if parsing fails
+                }
             }
         }
         close();
