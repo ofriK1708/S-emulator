@@ -94,7 +94,6 @@ public class VariablesController {
     public void refreshTable() {
         variablesData.clear();
 
-
         // Use ConsoleUI sorting logic and populate table
         currentVariables.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(UIUtils.programNameComparator))
@@ -118,7 +117,7 @@ public class VariablesController {
      * Show success message and refresh table
      */
     public void showSuccess(String message) {
-         refreshTable(); // Refresh table when showing success
+
     }
 
     /**

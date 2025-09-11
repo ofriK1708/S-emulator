@@ -466,9 +466,9 @@ public class AppController {
         }
     }
 
-    public void onRunPressed() {
-        if (variablesController != null) {
-            variablesController.onRunPressed();
-        }
-    }
+//    public void onRunPressed() {
+//        if (variablesController != null) {
+//            variablesController.onRunPressed();
+//        }
+//    }
 }

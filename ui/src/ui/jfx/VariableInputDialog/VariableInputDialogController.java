@@ -27,6 +27,7 @@ public class VariableInputDialogController {
     private Map<String, Integer> programArguments;
     private Set<String> requiredArguments;
     private final BooleanProperty allValid = new SimpleBooleanProperty(true);
+    private Map<String, Boolean> validationStates = new HashMap<>();
 
     public void initialiseController(Set<String> requiredArguments, Map<String, Integer> programArguments) {
         this.requiredArguments = requiredArguments;
@@ -38,36 +39,43 @@ public class VariableInputDialogController {
     private void buildFields() {
         fieldsContainer.getChildren().clear();
         textFields.clear();
-        for (String var : requiredArguments) {
-            Label label = new Label(var + " (integer value):");
+        for (String arg : requiredArguments) {
+            Label label = new Label(arg + " (integer value):");
             TextField field = new TextField();
             field.setPromptText("Enter positive integer value...");
+            textFields.put(arg, field);
             fieldsContainer.getChildren().add(new VBox(label, field));
-            textFields.put(var, field);
-            field.textProperty().addListener((obs, oldVal, newVal) -> validate(newVal));
+            field.textProperty().addListener((obs, oldVal, newVal) -> {
+                boolean valid = validate(newVal);
+                validationStates.put(arg, valid);
+                updateFieldValidationStyle(field, valid);
+                allValid.set(!validationStates.containsValue(false));
+
+            });
         }
     }
 
-    private void validate(String newVal) {
+    private boolean validate(String newVal) {
+        return newVal.isEmpty() || UIUtils.isValidProgramArgument(newVal);
+    }
+
+    private void updateFieldValidationStyle(TextField field, boolean valid) {
         String errorMsg = "Input is not a number or not a positive number";
-        for (TextField tf : textFields.values()) {
-            if (!newVal.isEmpty() && !UIUtils.isValidProgramArgument(newVal)) {
-                if (!tf.getStyleClass().contains("error-field")) {
-                    tf.getStyleClass().add("error-field");
-                }
-                tf.setTooltip(new Tooltip(errorMsg));
-                allValid.set(false);
-            } else {
-                tf.getStyleClass().removeAll("error-field");
-                tf.setTooltip(null);
+        if (!valid) {
+            if (!field.getStyleClass().contains("error-field")) {
+                field.getStyleClass().add("error-field");
             }
+            field.setTooltip(new Tooltip(errorMsg));
+        } else {
+            field.getStyleClass().removeAll("error-field");
+            field.setTooltip(null);
         }
     }
 
     @FXML
     private void onAccept() {
         for (Map.Entry<String, TextField> entry : textFields.entrySet()) {
-            if(entry.getValue().getText().isEmpty()){
+            if (entry.getValue().getText().isEmpty()) {
                 programArguments.put(entry.getKey(), 0);
             } else {
                 programArguments.put(entry.getKey(), Integer.parseInt(entry.getValue().getText()));

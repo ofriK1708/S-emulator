@@ -101,18 +101,6 @@ public class ProgramUtils
     {
         return getStringIntegerMap(contextMap, workVarPrefix);
     }
-    public static Map<String,Integer> extractAllVars(Map<String, Integer> contextMap)
-    {
-        Map<String,Integer> allVars = new HashMap<>(contextMap);
-        Map<String,Integer> labels = getStringIntegerMap(contextMap, labelPrefix);
-        for(String label : labels.keySet())
-        {
-            allVars.remove(label);
-        }
-        allVars.remove(EXITLabelName);
-        allVars.remove(pcName);
-        return allVars;
-    }
 
     public static Map<String, Integer> extractArguments(Map<String, Integer> contextMap)
     {
