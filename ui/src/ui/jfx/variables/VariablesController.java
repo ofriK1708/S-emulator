@@ -85,14 +85,22 @@ public class VariablesController {
      */
     public void setVariables(Map<String, Integer> variables) {
         this.currentVariables = variables;
-        refreshTable();
     }
 
     /**
      * Refresh the table with current variables - called by button bindings
      */
+    /**
+     * Refresh the table with current variables - called by button bindings
+     */
     public void refreshTable() {
         variablesData.clear();
+
+        // Add this null check to prevent the error
+        if (currentVariables == null || currentVariables.isEmpty()) {
+            System.out.println("No variables to display or currentVariables is null");
+            return;
+        }
 
         // Use ConsoleUI sorting logic and populate table
         currentVariables.entrySet().stream()
@@ -105,13 +113,14 @@ public class VariablesController {
         System.out.println("Variables table refreshed with " + currentVariables.size() + " variables");
     }
 
+
     /**
      * Clear variables and reset table
      */
     public void clearVariables() {
         variablesData.clear();
         currentVariables = null;
-          }
+    }
 
     /**
      * Show success message and refresh table

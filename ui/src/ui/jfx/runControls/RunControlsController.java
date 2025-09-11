@@ -48,7 +48,6 @@ public class RunControlsController {
 
     }
 
-
     @FXML
     void run(ActionEvent event) {
         runCallback.accept(ProgramRunType.REGULAR);
