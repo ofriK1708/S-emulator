@@ -7,21 +7,18 @@
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="ui.jfx.execution.ExecutionVariableController">
 
-    <VBox spacing="6"
+    <VBox spacing="8"
           AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
           AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        <TableView fx:id="workVariablesTable" VBox.vgrow="ALWAYS" prefHeight="120.0">
+            <columns>
+                <TableColumn fx:id="variableColumn" text="Variables" prefWidth="120.0" />
+                <TableColumn fx:id="valueColumn" text="Value" prefWidth="80.0" />
+            </columns>
+            <placeholder>
+                <Label text="No variables to display" />
+            </placeholder>
+        </TableView>
 
-        <Label text="Work-Variable Values:" styleClass="section-title"/>
-
-        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
-            <content>
-                <VBox fx:id="varsBox" spacing="4">
-                    <!--  מרווח פנימי 6px מכל הצדדים  -->
-                    <padding>
-                        <Insets top="6" right="6" bottom="6" left="6"/>
-                    </padding>
-                </VBox>
-            </content>
-        </ScrollPane>
     </VBox>
 </AnchorPane>

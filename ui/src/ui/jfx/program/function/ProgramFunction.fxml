@@ -12,6 +12,7 @@
     <padding>
         <Insets bottom="6" left="8" right="8" top="6" />
     </padding>
+
     <Button fx:id="collapseButton1" layoutX="18.0" layoutY="20.0" maxHeight="28" minWidth="86" mnemonicParsing="false"
             onAction="#handleCollapse" text="Program\function selector">
         <styleClass>
@@ -20,7 +21,7 @@
         </styleClass>
     </Button>
 
-    <!-- Small green pill: Collapse -->
+    <!-- Small green pill: Collapse (decrements level by 1) -->
     <Button fx:id="collapseButton" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleCollapse"
             styleClass="pill-button, pill-green, pf-collapse" text="Collapse"/>
 
@@ -28,9 +29,14 @@
     <Label fx:id="degreeInfoLabel" alignment="CENTER" maxHeight="50" minWidth="120" styleClass="info-label, pf-degree"
            text="Current /&#10;Maximum degree"/>
 
-    <!-- Small green pill: Expand -->
+    <!-- Small green pill: Expand (increments level by 1) -->
     <Button fx:id="expandButton" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleExpand"
             styleClass="pill-button, pill-green, pf-expand" text="Expand"/>
+
+    <!-- New Change button: Opens dialog for manual level entry -->
+    <Button fx:id="changeButton" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleChange"
+            styleClass="pill-button, pill-green, pf-change" text="Change"/>
+
     <Button fx:id="HighSelectionButton" mnemonicParsing="false" text="Highlight Selection">
         <styleClass>
             <String fx:value="pill-button"/>
