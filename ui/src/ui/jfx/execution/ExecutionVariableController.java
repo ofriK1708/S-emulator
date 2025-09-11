@@ -3,12 +3,9 @@ package ui.jfx.execution;
 import dto.ui.VariableDTO;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import ui.jfx.AppController;
 import ui.utils.UIUtils;
 
 import java.util.ArrayList;
