@@ -2,13 +2,19 @@
 
 .pill-button {
     -fx-background-radius: 20px;
-    -fx-text-fill: white;
     -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
     -fx-font-size: 13px;
     -fx-font-weight: bold;
     -fx-padding: 8px 16px;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 3, 0, 0, 1);
+}
+
+/* Toggle button support */
+.pill-button:selected {
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.3), 3, 0, 0, 2);
+    -fx-border-width: 0 0 0 0;
+    -fx-border-color: white;
 }
 
 .pill-green {
@@ -21,6 +27,12 @@
 }
 .pill-green:pressed {
     -fx-background-color: #1a7a76;
+}
+.pill-green:selected {
+    -fx-background-color: #1a7a76;
+    -fx-border-width: 2;
+    -fx-border-color: white;
+    -fx-border-radius: 20px;
 }
 .pill-green:disabled {
     -fx-background-color: linear-gradient(to bottom, #89c6c3, #7ab8b5);
@@ -39,6 +51,12 @@
 .pill-blue:pressed {
     -fx-background-color: #1565c0;
 }
+.pill-blue:selected {
+    -fx-background-color: #1565c0;
+    -fx-border-width: 2;
+    -fx-border-color: white;
+    -fx-border-radius: 20px;
+}
 .pill-blue:disabled {
     -fx-background-color: linear-gradient(to bottom, #90caf9, #64b5f6);
     -fx-opacity: 0.7;
@@ -56,8 +74,47 @@
 .pill-grey:pressed {
     -fx-background-color: #545b62;
 }
+.pill-grey:selected {
+    -fx-background-color: #545b62;
+    -fx-border-width: 2;
+    -fx-border-color: white;
+    -fx-border-radius: 20px;
+}
 .pill-grey:disabled {
     -fx-background-color: linear-gradient(to bottom, #b0b3b8, #888b90);
     -fx-opacity: 0.7;
     -fx-effect: none;
+}
+
+/* Vibrant green for "Start new run" button */
+.pill-vibrant-green {
+    -fx-background-color: linear-gradient(to bottom, #43ea7a, #1ec94c);
+    -fx-text-fill: #444444;
+}
+.pill-vibrant-green:hover {
+    -fx-background-color: linear-gradient(to bottom, #5fff9a, #2eea6c);
+    -fx-effect: dropshadow(gaussian, rgba(67,234,122,0.18), 4, 0, 0, 2);
+}
+.pill-vibrant-green:pressed {
+    -fx-background-color: #1e9c3a;
+}
+.pill-vibrant-green:selected {
+    -fx-background-color: #1e9c3a;
+    -fx-border-width: 2;
+    -fx-border-color: white;
+    -fx-border-radius: 20px;
+}
+.pill-vibrant-green:disabled {
+    -fx-background-color: linear-gradient(to bottom, #8ff5b4, #69e08b);
+    -fx-opacity: 0.7;
+    -fx-effect: none;
+}
+
+/* Label styling to match buttons */
+.pill-label {
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 1, 0, 0, 1);
 }

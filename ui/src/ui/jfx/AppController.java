@@ -8,8 +8,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import system.controller.controller.SystemController;
@@ -68,9 +70,17 @@ public class AppController {
     @FXML
     private ExecutionVariableController executionVariableController;
     @FXML
-    private HBox runControls;
+    private VBox runControls;
     @FXML
     private RunControlsController runControlsController;
+    @FXML
+    private TitledPane runControlsTitledPane;
+    @FXML
+    private TitledPane debugControlsTitledPane;
+    @FXML
+    private TitledPane variablesTitledPane;
+    @FXML
+    private TitledPane staticsTitledPane;
 
     public AppController() {
         this.systemController = new SystemController();

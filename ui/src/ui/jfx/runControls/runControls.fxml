@@ -3,47 +3,75 @@
 <?import java.lang.String?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" spacing="20.0" stylesheets="@RunControls.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.jfx.runControls.RunControlsController">
+<VBox alignment="CENTER" stylesheets="@RunControls.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.jfx.runControls.RunControlsController">
    <children>
-      <Button fx:id="setRun" mnemonicParsing="false" onAction="#onSetPress" text="set new run  ⚙️" HBox.hgrow="ALWAYS">
-         <styleClass>
-            <String fx:value="pill-button" />
-            <String fx:value="pill-grey" />
-         </styleClass>
-         <font>
-            <Font size="15.0" />
-         </font>
-      </Button>
-      <Button fx:id="run" mnemonicParsing="false" onAction="#onRunPressed" text="▶️" HBox.hgrow="ALWAYS">
-         <styleClass>
-            <String fx:value="pill-button" />
-            <String fx:value="pill-blue" />
-         </styleClass>
-         <tooltip>
-            <Tooltip text="run" />
-         </tooltip>
-         <font>
-            <Font size="15.0" />
-         </font>
-      </Button>
-      <Button fx:id="debug" mnemonicParsing="false" onAction="#onDebugPressed" text="🪲" HBox.hgrow="ALWAYS">
-         <styleClass>
-            <String fx:value="pill-button" />
-            <String fx:value="pill-green" />
-         </styleClass>
-         <tooltip>
-            <Tooltip text="debug" />
-         </tooltip>
-         <font>
-            <Font size="15.0" />
-         </font>
-      </Button>
+      <HBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" spacing="20.0">
+         <children>
+            <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
+               <children>
+                  <Button fx:id="setRun" mnemonicParsing="false" onAction="#onSetPress" text="set new run  ⚙️">
+                     <styleClass>
+                        <String fx:value="pill-button" />
+                        <String fx:value="pill-grey" />
+                     </styleClass>
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets top="5.0" />
+                     </VBox.margin>
+                  </Button>
+               </children>
+            </VBox>
+            <VBox spacing="2.0">
+               <children>
+                  <HBox alignment="CENTER">
+                     <children>
+                        <Label text="Choose run type" styleClass="pill-label">
+                           <HBox.margin>
+                              <Insets bottom="4.0" />
+                           </HBox.margin>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER">
+                     <children>
+                        <ToggleButton fx:id="runType" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="53.0" styleClass="pill-blue" text="▶️">
+                           <toggleGroup>
+                              <ToggleGroup fx:id="runTypes" />
+                           </toggleGroup>
+                        </ToggleButton>
+                        <ToggleButton fx:id="debugType" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="53.0" styleClass="pill-green" text="🪲" toggleGroup="$runTypes" />
+                     </children>
+                  </HBox>
+               </children>
+               <padding>
+                  <Insets bottom="10.0" />
+               </padding>
+            </VBox>
+         </children>
+         <padding>
+            <Insets bottom="6.0" left="8.0" right="8.0" top="8.0" />
+         </padding>
+      </HBox>
+      <HBox alignment="CENTER">
+         <children>
+            <Button fx:id="run" mnemonicParsing="false" text="Run Program ⏩">
+               <styleClass>
+                  <String fx:value="pill-button" />
+                  <String fx:value="pill-vibrant-green" />
+               </styleClass></Button>
+         </children>
+         <VBox.margin>
+            <Insets bottom="10.0" />
+         </VBox.margin>
+      </HBox>
    </children>
-   <padding>
-      <Insets bottom="6.0" left="8.0" right="8.0" top="8.0" />
-   </padding>
-</HBox>
+</VBox>
