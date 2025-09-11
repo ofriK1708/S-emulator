@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import ui.jfx.AppController;
 
 public class RunControlsController {
 
@@ -23,9 +24,43 @@ public class RunControlsController {
     @FXML
     private Button setRun;
 
+    private AppController appController;
+
+    public void setAppController(AppController appController) {
+        this.appController = appController;
+    }
+
     @FXML
     void onSetPress(ActionEvent event) {
+        if (appController != null) {
+            // Trigger the input variables display
+            appController.onSetRunPressed();
+        }
+    }
+    @FXML
+    void onResumePress(ActionEvent event) {
+        if (appController != null) {
+            appController.onResumePressed();
+        }
+    }
 
+    @FXML
+    void onStepOverPress(ActionEvent event) {
+        if (appController != null) {
+            appController.onStepOverPressed();
+        }
+    }
+    @FXML
+    void onStopPress(ActionEvent event) {
+        if (appController != null) {
+            appController.onStopPressed();
+        }
+    }
+    @FXML
+    void onRunPress(ActionEvent event) {
+        if (appController != null) {
+            appController.onRunPressed();
+        }
     }
 
 }

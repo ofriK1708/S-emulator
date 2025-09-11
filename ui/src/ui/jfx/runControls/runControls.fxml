@@ -21,9 +21,9 @@
                         <String fx:value="pill-button" />
                         <String fx:value="pill-grey" />
                      </styleClass>
-                     <font>
-                        <Font size="15.0" />
-                     </font>
+                      <font>
+                          <Font name="Segoe UI Emoji" size="15.0"/>
+                      </font>
                      <VBox.margin>
                         <Insets top="5.0" />
                      </VBox.margin>
@@ -43,12 +43,12 @@
                   </HBox>
                   <HBox alignment="CENTER">
                      <children>
-                        <ToggleButton fx:id="runType" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="53.0" styleClass="pill-blue" text="▶️️">
+                        <ToggleButton fx:id="runType" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="53.0" styleClass="pill-blue" text="RUN">
                            <toggleGroup>
                               <ToggleGroup fx:id="runTypes" />
                            </toggleGroup>
                         </ToggleButton>
-                        <ToggleButton fx:id="debugType" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="53.0" styleClass="pill-green" text="🪲" toggleGroup="$runTypes" />
+                        <ToggleButton fx:id="debugType" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="53.0" styleClass="pill-green" text="DEBUG" toggleGroup="$runTypes" />
                      </children>
                   </HBox>
                </children>

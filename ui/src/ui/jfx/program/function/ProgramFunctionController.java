@@ -17,6 +17,8 @@ public class ProgramFunctionController {
     @FXML private Button collapseButton1; // Program\function selector
     @FXML private Label degreeInfoLabel;   // Current / Maximum degree
     @FXML private Button expandButton;
+    @FXML private Button changeButton;     // New Change button
+
     @FXML
     private Button HighSelectionButton;
 
@@ -34,25 +36,53 @@ public class ProgramFunctionController {
     // Collapse to basic program (level 0) - same as console displayLoadedProgram
     @FXML
     void handleCollapse(ActionEvent event) {
-        System.out.println("Collapse button pressed");
-        if (appController != null) {
-            appController.displayBasicProgram(); // Collapse to level 0
+       // System.out.println("Collapse button pressed");
+        if (appController != null && appController.isProgramLoaded()) {
+            int currentLevel = appController.getCurrentExpandLevel();
+            int newLevel = currentLevel - 1;
+
+            if (newLevel >= 0) {
+                appController.expandProgramToLevel(newLevel);
+            } else {
+                showInvalidChoice(0, appController.getMaxExpandLevel());
+            }
         }
         event.consume();
     }
+
 
     // Expand program - same logic as console expandProgram
     @FXML
     void handleExpand(ActionEvent event) {
         System.out.println("Expand button pressed");
         if (appController != null && appController.isProgramLoaded()) {
-
+            int currentLevel = appController.getCurrentExpandLevel();
             int maxLevel = appController.getMaxExpandLevel();
+            int newLevel = currentLevel + 1;
 
-            // Same logic as console getExpandLevelChoiceFromUser
-            TextInputDialog dialog = new TextInputDialog(String.valueOf(maxLevel));
-            dialog.setTitle("Expand Program");
-            dialog.setHeaderText("Please enter the expand level you would like to expand:");
+            if (newLevel <= maxLevel) {
+                appController.expandProgramToLevel(newLevel);
+            } else {
+                showInvalidChoice(0, maxLevel);
+            }
+        }
+        event.consume();
+    }
+    // Change: open input dialog for manual level entry
+    @FXML
+    void handleChange(ActionEvent event) {
+        System.out.println("Change button pressed");
+        if (changeButton != null) {
+            changeButton.setDisable(!appController.isProgramLoaded());
+        }
+        if (appController != null && appController.isProgramLoaded()) {
+            int maxLevel = appController.getMaxExpandLevel();
+            int currentLevel = appController.getCurrentExpandLevel();
+
+            // Create input dialog for manual level entry
+            TextInputDialog dialog = new TextInputDialog(String.valueOf(currentLevel));
+            dialog.setTitle("Change Program Level");
+            dialog.setHeaderText("Please enter the expand level you would like to change to:");
             dialog.setContentText("Please enter a number between 0 and " + maxLevel + ":");
 
             Optional<String> result = dialog.showAndWait();
@@ -71,6 +101,7 @@ public class ProgramFunctionController {
         }
         event.consume();
     }
+
 
     // Update UI based on program state and current expand level
     public void updateProgramState(boolean programLoaded, int currentLevel, int maxLevel) {
