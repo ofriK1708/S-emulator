@@ -1,26 +1,35 @@
 package ui.jfx.fileHandler;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
-import ui.jfx.AppController;
 
 import java.io.File;
+import java.util.function.Consumer;
 
 public class FileHandlerController {
-    private AppController appController;
+    @FXML
+    private Button addFileButton;
+    @FXML
+    private Button clearButton;
+    @FXML
+    private Label filePathField;
 
-    @FXML private Button addFileButton;
-    @FXML private Button clearButton;
-    @FXML private TextField filePathField;
-
+    private Consumer<File> onFileLoadedCallback;
+    private Runnable onClearFileCallback;
+    private final StringProperty filePath = new SimpleStringProperty();
     private File selectedFile = null;
 
-    public void setAppController(AppController appController) {
-        this.appController = appController;
+    public void initComponent(Consumer<File> onFileLoadedCallback, Runnable onClearFileCallback) {
+        this.onFileLoadedCallback = onFileLoadedCallback;
+        this.onClearFileCallback = onClearFileCallback;
+        filePathField.textProperty().bind(filePath);
     }
+
 
     @FXML
     void onAddFileButtonPressed(MouseEvent event) {
@@ -42,19 +51,13 @@ public class FileHandlerController {
             if (selectedFile != null) {
                 // Any cleanup code for the old file could go here
                 selectedFile = null;
+                filePath.set("");
             }
 
             // Store and display the new file
             selectedFile = file;
-            filePathField.setText(file.getAbsolutePath());
-
-            // Enable text field for viewing (but keep it non-editable)
-            filePathField.setDisable(false);
-
-            // CRUCIAL FIX: Load the program through AppController
-            if (appController != null) {
-                appController.loadProgramFromFile(file);
-            }
+            filePath.set(file.getAbsolutePath());
+            onFileLoadedCallback.accept(selectedFile);
         }
     }
 
@@ -62,14 +65,8 @@ public class FileHandlerController {
     void onClearButtonPressed(MouseEvent event) {
         // Clear the selected file
         selectedFile = null;
-
         // Clear and disable the text field
-        filePathField.clear();
-        filePathField.setDisable(true);
-        appController.clearLoadedProgram();
-    }
-
-    public File getSelectedFile() {
-        return selectedFile;
+        filePath.set("");
+        onClearFileCallback.run();
     }
 }

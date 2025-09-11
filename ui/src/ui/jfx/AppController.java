@@ -3,6 +3,11 @@ package ui.jfx;
 import dto.engine.ExecutionResultDTO;
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -41,7 +46,8 @@ public class AppController {
     private int maxExpandLevel = 0;
     private int currentExpandLevel = 0;
     private ProgramDTO loadedProgram = null;
-    private final Map<String, Integer> programVariables = new HashMap<>();
+    private final Map<String, Integer> programArguments = new HashMap<>();
+    private Map<String, Integer> programVariablesAfterExecution = new HashMap<>();
 
     @FXML
     private HBox fileHandler;
@@ -82,6 +88,17 @@ public class AppController {
     @FXML
     private TitledPane staticsTitledPane;
 
+    private BooleanProperty programLoadedProperty = new SimpleBooleanProperty(false);
+    private BooleanProperty variablesEnteredProperty = new SimpleBooleanProperty(false);
+    private BooleanProperty debugModeProperty = new SimpleBooleanProperty(false);
+    private BooleanProperty canRunProgramProperty = new SimpleBooleanProperty(false);
+    private BooleanProperty programRanAtLeastOnceProperty = new SimpleBooleanProperty(false);
+    private BooleanProperty programRunningProperty = new SimpleBooleanProperty(false);
+    private BooleanProperty programFinishedProperty = new SimpleBooleanProperty(false);
+    private IntegerProperty maxExpandLevelProperty = new SimpleIntegerProperty(0);
+    private IntegerProperty currentExpandLevelProperty = new SimpleIntegerProperty(0);
+    private IntegerProperty currentCyclesProperty = new SimpleIntegerProperty(0);
+
     public AppController() {
         this.systemController = new SystemController();
     }
@@ -94,7 +111,7 @@ public class AppController {
                 debugControlsController != null && executionVariableController != null &&
                 runControlsController != null) {
 
-            fileHandlerController.setAppController(this);
+            fileHandlerController.initComponent(this::loadProgramFromFile, this::clearLoadedProgram);
             cyclesController.setNumOfCycles(0);
             ProgramFunctionController.setAppController(this);
             ProgramFunctionController.updateProgramState(false, 0, 0);
@@ -105,6 +122,7 @@ public class AppController {
             variablesController.clearVariables();
             debugControlsController.setAppController(this);
             executionVariableController.setAppController(this);
+            runControlsController.initComponent(this::RunProgram, this::promptForVariables);
 
 
             System.out.println("AppController initialized");
@@ -112,6 +130,22 @@ public class AppController {
             System.err.println("One or more controllers are not injected properly!");
             throw new IllegalStateException("FXML injection failed: required controllers are null.");
         }
+    }
+
+    private void bindProperties() {
+        // Bind properties to enable/disable UI components based on program state
+        runControlsTitledPane.expandedProperty().bind(
+                Bindings.and(programLoadedProperty, programRunningProperty.not()));
+
+        debugControlsTitledPane.expandedProperty().bind(
+                Bindings.and(programLoadedProperty, Bindings.and(debugModeProperty, programFinishedProperty.not())));
+
+        variablesTitledPane.expandedProperty().bind(
+                Bindings.and(programLoadedProperty, Bindings.or(programFinishedProperty, debugModeProperty)));
+
+        staticsTitledPane.expandedProperty().bind(
+                Bindings.and(programLoadedProperty, Bindings.and(programRunningProperty.not(), programRanAtLeastOnceProperty)));
+
     }
 
     // Load program from file - DO NOT populate UI tables yet
@@ -149,9 +183,33 @@ public class AppController {
         }
     }
 
-    private void promptForVariables() {
+    public void RunProgram(ProgramRunType programRunType) {
+        if (!programLoaded) {
+            showError("No program loaded. Please load a program first.");
+            return;
+        }
+        if (!variablesEntered) {
+            showError("Arguments not entered. Please load a program and enter arguments first.");
+            return;
+        }
+        switch (programRunType) {
+            case REGULAR:
+                startRegularExecution();
+                break;
+            case DEBUG:
+                startDebugExecution();
+                break;
+            default:
+                showError("Unknown run type selected.");
+        }
+    }
+
+    private void startDebugExecution() {
+    }
+
+    public void promptForVariables() {
         // Clear previous variables
-        programVariables.clear();
+        programArguments.clear();
 
         try {
             // Get required program arguments from SystemController
@@ -171,7 +229,7 @@ public class AppController {
             variablesEntered = true;
             // Display success message and show variables
             variablesController.showSuccess("Arguments entered successfully!");
-            variablesController.setVariables(programVariables);
+            variablesController.setVariables(programArguments);
             showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() +
                     "\nArguments captured. Ready for execution.");
 
@@ -186,7 +244,7 @@ public class AppController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/jfx/VariableInputDialog/VariableInputDialog.fxml"));
             Parent root = loader.load();
             VariableInputDialogController controller = loader.getController();
-            controller.initialiseController(requiredArguments, programVariables);
+            controller.initialiseController(requiredArguments, programArguments);
 
             Stage dialogStage = new Stage();
             dialogStage.initModality(Modality.APPLICATION_MODAL);
@@ -200,18 +258,8 @@ public class AppController {
     }
 
     public void startRegularExecution() {
-        if (!programLoaded) {
-            showError("No program loaded. Please load a program first.");
-            return;
-        }
-
-        if (!variablesEntered) {
-            showError("Arguments not entered. Please load a program and enter arguments first.");
-            return;
-        }
-
         try {
-            List<Integer> runtimeArguments = UIUtils.getRuntimeArgument(programVariables);
+            List<Integer> runtimeArguments = UIUtils.getRuntimeArgument(programArguments);
             System.out.println("Starting regular execution with arguments: " + runtimeArguments);
 
             // Execute the program using SystemController
@@ -257,7 +305,7 @@ public class AppController {
         maxExpandLevel = 0;
         currentExpandLevel = 0;
         loadedProgram = null;
-        programVariables.clear();
+        programArguments.clear();
         systemController.clearLoadedProgram();
 
         // Clear UI components

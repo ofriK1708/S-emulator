@@ -8,6 +8,7 @@ import java.util.*;
 public class ProgramUtils
 {
     public static final String EXITLabelName = "EXIT";
+    public static final String pcName = "PC";
     public static final String outputName = "y";
     public static final String argPrefix = "x";
     public static final String workVarPrefix = "z";
@@ -99,6 +100,18 @@ public class ProgramUtils
     public static Map<String, Integer> extractWorkVars(Map<String, Integer> contextMap)
     {
         return getStringIntegerMap(contextMap, workVarPrefix);
+    }
+    public static Map<String,Integer> extractAllVars(Map<String, Integer> contextMap)
+    {
+        Map<String,Integer> allVars = new HashMap<>(contextMap);
+        Map<String,Integer> labels = getStringIntegerMap(contextMap, labelPrefix);
+        for(String label : labels.keySet())
+        {
+            allVars.remove(label);
+        }
+        allVars.remove(EXITLabelName);
+        allVars.remove(pcName);
+        return allVars;
     }
 
     public static Map<String, Integer> extractArguments(Map<String, Integer> contextMap)

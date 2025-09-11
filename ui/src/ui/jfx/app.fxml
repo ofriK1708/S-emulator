@@ -60,14 +60,14 @@
                                     </VBox>
                                 </content>
                             </TitledPane>
-                            <TitledPane minWidth="-Infinity" text="Debug Controls">
+                            <TitledPane fx:id="debugControlsTitledPane" minWidth="-Infinity" text="Debug Controls">
                                 <content>
                                     <HBox alignment="CENTER" minWidth="-Infinity" spacing="8.0">
                                         <fx:include fx:id="debugControls" source="debugger/Debugger.fxml" />
                                     </HBox>
                                 </content>
                             </TitledPane>
-                            <TitledPane maxHeight="-Infinity" minHeight="-Infinity" minWidth="-Infinity" text="args / variables / cycles" VBox.vgrow="ALWAYS">
+                            <TitledPane fx:id="variablesTitledPane" maxHeight="-Infinity" minHeight="-Infinity" minWidth="-Infinity" text="args / variables / cycles" VBox.vgrow="ALWAYS">
                                 <content>
                                     <GridPane minHeight="0.0" minWidth="0.0" VBox.vgrow="ALWAYS">
                                         <columnConstraints>
@@ -87,7 +87,7 @@
                                     </GridPane>
                                 </content>
                             </TitledPane>
-                            <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" text="History Statistics" VBox.vgrow="ALWAYS">
+                            <TitledPane fx:id="staticsTitledPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" text="History Statistics" VBox.vgrow="ALWAYS">
                                 <content>
                                     <ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                                         <content>

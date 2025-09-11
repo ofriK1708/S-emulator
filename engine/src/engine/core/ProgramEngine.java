@@ -213,7 +213,7 @@ public class ProgramEngine implements Serializable {
         ExecutionStatisticsDTO executionStatisticsDTO = executionStatisticsList.getLast().toDTO();
         return new ExecutionResultDTO(executionStatisticsDTO.result(),
                 executionStatisticsDTO.arguments(),
-                extractWorkVars(contextMapsByExpandLevel.get(expandLevel)),
+                extractAllVars(contextMapsByExpandLevel.get(expandLevel)),
                 executionStatisticsDTO.cyclesUsed()
         );
     }

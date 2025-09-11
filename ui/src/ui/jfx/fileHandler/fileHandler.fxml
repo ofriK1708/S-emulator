@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
-<HBox xmlns:fx="http://javafx.com/fxml/1" spacing="10" styleClass="hbox" stylesheets="@fileHandler.css"
-      xmlns="http://javafx.com/javafx/24.0.1" fx:controller="ui.jfx.fileHandler.FileHandlerController">
-    <Button fx:id="addFileButton" minWidth="100" onMousePressed="#onAddFileButtonPressed" styleClass="blue-teal-button"
-            text="Add File"/>
-    <Button fx:id="clearButton" minWidth="100.0" onMousePressed="#onClearButtonPressed" styleClass="clear-button"
-            text="Clear"/>
-    <TextField fx:id="filePathField" disable="true" prefWidth="250.0" promptText="File path"
-               styleClass="text-field-wide" HBox.hgrow="ALWAYS"/>
+
+<HBox spacing="10" styleClass="hbox" stylesheets="@fileHandler.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.jfx.fileHandler.FileHandlerController">
+    <Button fx:id="addFileButton" minWidth="100.0" onMousePressed="#onAddFileButtonPressed" styleClass="blue-teal-button" text="Add File" />
+    <Button fx:id="clearButton" onMousePressed="#onClearButtonPressed" styleClass="clear-button" text="Clear" />
+   <Label fx:id="filePathField" alignment="CENTER" contentDisplay="CENTER" HBox.hgrow="ALWAYS">
+      <HBox.margin>
+         <Insets top="5.0" />
+      </HBox.margin>
+      <styleClass>
+         <String fx:value="text-field" />
+         <String fx:value="text-field-container" />
+         <String fx:value="text-field-wide" />
+      </styleClass>
+   </Label>
 </HBox>

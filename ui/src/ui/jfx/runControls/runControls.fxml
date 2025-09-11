@@ -34,7 +34,7 @@
                <children>
                   <HBox alignment="CENTER">
                      <children>
-                        <Label text="Choose run type" styleClass="pill-label">
+                        <Label styleClass="pill-label" text="Choose run type">
                            <HBox.margin>
                               <Insets bottom="4.0" />
                            </HBox.margin>
@@ -43,12 +43,12 @@
                   </HBox>
                   <HBox alignment="CENTER">
                      <children>
-                        <ToggleButton fx:id="runType" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="53.0" styleClass="pill-blue" text="▶️️">
+                        <ToggleButton fx:id="runType" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onRunChosen" prefHeight="30.0" prefWidth="53.0" styleClass="pill-blue" text="▶️️">
                            <toggleGroup>
                               <ToggleGroup fx:id="runTypes" />
                            </toggleGroup>
                         </ToggleButton>
-                        <ToggleButton fx:id="debugType" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="53.0" styleClass="pill-green" text="🪲" toggleGroup="$runTypes" />
+                        <ToggleButton fx:id="debugType" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onDebugChosen" prefHeight="30.0" prefWidth="53.0" styleClass="pill-green" text="🪲" toggleGroup="$runTypes" />
                      </children>
                   </HBox>
                </children>
@@ -63,7 +63,7 @@
       </HBox>
       <HBox alignment="CENTER">
          <children>
-            <Button fx:id="run" mnemonicParsing="false" text="Run Program ⏩">
+            <Button fx:id="run" mnemonicParsing="false" onAction="#run" text="Run Program ⏩">
                <styleClass>
                   <String fx:value="pill-button" />
                   <String fx:value="pill-vibrant-green" />
