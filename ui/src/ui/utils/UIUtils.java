@@ -1,5 +1,9 @@
 package ui.utils;
 
+import dto.ui.VariableDTO;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -21,5 +25,9 @@ public class UIUtils {
                 .sorted(Map.Entry.comparingByKey(programNameComparator))
                 .map(Map.Entry::getValue)
                 .toList();
+    }
+    public static VariableDTO toVariableDTO(Map.Entry<String, Integer> entry) {
+        return new VariableDTO(new SimpleStringProperty(entry.getKey()),
+                new SimpleIntegerProperty(entry.getValue()));
     }
 }

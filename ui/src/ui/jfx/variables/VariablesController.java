@@ -85,6 +85,7 @@ public class VariablesController {
      */
     public void setVariables(Map<String, Integer> variables) {
         this.currentVariables = variables;
+        refreshTable();
     }
 
     /**
@@ -126,7 +127,7 @@ public class VariablesController {
      * Show success message and refresh table
      */
     public void showSuccess(String message) {
-
+        refreshTable();
     }
 
     /**

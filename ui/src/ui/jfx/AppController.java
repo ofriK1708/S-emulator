@@ -121,7 +121,6 @@ public class AppController {
             derivedInstructionsTableController.setDerivedMap(true);
             variablesController.clearVariables();
             debugControlsController.setAppController(this);
-            executionVariableController.setAppController(this);
             runControlsController.initComponent(this::RunProgram, this::promptForVariables);
 
 
@@ -295,8 +294,10 @@ public class AppController {
         System.out.println("Total Cycles: " + executionResult.numOfCycles());
         // Update cycles display
         cyclesController.setNumOfCycles(executionResult.numOfCycles());
-        executionVariableController.showWorkVariables(executionResult.workVariablesValues());
-        executionVariableController.showWorkVariables(executionResult.workVariablesValues());
+        executionVariableController.showWorkVariables(
+                executionResult.result(),
+                executionResult.argumentsValues(),
+                executionResult.workVariablesValues());
 
     }
 
@@ -314,7 +315,7 @@ public class AppController {
         instructionsTableController.clearInstructions();
         derivedInstructionsTableController.clearInstructions();
         cyclesController.setNumOfCycles(0);
-        executionVariableController.clearWorkVariables(); // עדכון לשם החדש
+        executionVariableController.clearVariables();
         showInfo("Loaded program cleared.");
     }
 
@@ -394,14 +395,6 @@ public class AppController {
         return maxExpandLevel;
     }
 
-    // Setters for FXML injection
-    public void setCyclesController(CyclesController cyclesController) {
-        this.cyclesController = cyclesController;
-    }
-
-    public void setFileHandlerController(FileHandlerController fileHandlerController) {
-        this.fileHandlerController = fileHandlerController;
-    }
 
     public void displayDerivedFromMap(List<InstructionDTO> instructionDTOIntegerMap) {
         derivedInstructionsTableController.setDerivedInstructions(instructionDTOIntegerMap);
@@ -411,64 +404,4 @@ public class AppController {
         return currentExpandLevel;
     }
 
-    public void onSetRunPressed() {
-        if (!programLoaded) {
-            showError("No program loaded. Please load a program first.");
-            return;
-        }
-
-        if (!variablesEntered) {
-            // Prompt for variables first
-            promptForVariables();
-        }
-
-        if (variablesEntered) {
-            // Update variables table
-            variablesController.onSetRunPressed();
-
-            // Show input variables in execution variable controller if needed
-            if (executionVariableController != null) {
-                executionVariableController.showInputVariables(programVariablesAfterExecution);
-            }
-
-            showInfo("Input variables loaded and displayed in table.");
-        }
-    }
-
-    // Add similar binding methods for other controllers
-    public void onResumePressed() {
-        if (variablesController != null) {
-            variablesController.onResumePressed();
-        }
-    }
-
-    public void onStartDebugExecutionPressed() {
-        if (variablesController != null) {
-            variablesController.onStartDebugExecutionPressed();
-        }
-    }
-
-    public void onStepBackwardPressed() {
-        if (variablesController != null) {
-            variablesController.onStepBackwardPressed();
-        }
-    }
-
-    public void onStepOverPressed() {
-        if (variablesController != null) {
-            variablesController.onStepOverPressed();
-        }
-    }
-
-    public void onStopPressed() {
-        if (variablesController != null) {
-            variablesController.onStopPressed();
-        }
-    }
-
-//    public void onRunPressed() {
-//        if (variablesController != null) {
-//            variablesController.onRunPressed();
-//        }
-//    }
 }
