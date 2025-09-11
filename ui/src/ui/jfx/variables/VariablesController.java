@@ -1,76 +1,33 @@
 package ui.jfx.variables;
 
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
+import dto.ui.VariableDTO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import ui.utils.UIUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+/**
+ * Displays input variables in a table format before program execution.
+ */
 public class VariablesController {
 
-    @FXML private TableView<VariableEntry> variablesTable;
-    @FXML private TableColumn<VariableEntry, String> variableColumn;
-    @FXML private TableColumn<VariableEntry, Number> valueColumn;
+    @FXML private TableView<VariableDTO> variablesTable;
+    @FXML private TableColumn<VariableDTO, String> variableColumn;
+    @FXML private TableColumn<VariableDTO, Number> valueColumn;
 
-    private ObservableList<VariableEntry> variablesData = FXCollections.observableArrayList();
     private Map<String, Integer> currentVariables;
 
-    public void onRunPressed() {
-        refreshTable();
-        System.out.println("Variables table updated after run pressed");
-    }
-
-    /**
-     * Data model for TableView entries representing input variables
-     */
-    public static class VariableEntry {
-        private final SimpleStringProperty variableName;
-        private final SimpleIntegerProperty value;
-
-        public VariableEntry(String variableName, Integer value) {
-            this.variableName = new SimpleStringProperty(variableName);
-            this.value = new SimpleIntegerProperty(value);
-        }
-
-        public String getVariableName() {
-            return variableName.get();
-        }
-
-        public SimpleStringProperty variableNameProperty() {
-            return variableName;
-        }
-
-        public void setVariableName(String variableName) {
-            this.variableName.set(variableName);
-        }
-
-        public int getValue() {
-            return value.get();
-        }
-
-        public SimpleIntegerProperty valueProperty() {
-            return value;
-        }
-
-        public void setValue(int value) {
-            this.value.set(value);
-        }
-    }
-
     @FXML
-    public void initialize() {
+    private void initialize() {
         // Initialize table columns
-        variableColumn.setCellValueFactory(cellData -> cellData.getValue().variableNameProperty());
-        valueColumn.setCellValueFactory(cellData -> cellData.getValue().valueProperty());
-
-        // Bind the data to the table
-        variablesTable.setItems(variablesData);
+        variableColumn.setCellValueFactory(cellData -> cellData.getValue().name());
+        valueColumn.setCellValueFactory(cellData -> cellData.getValue().value());
 
         // Set column widths to be responsive
         variableColumn.prefWidthProperty().bind(variablesTable.widthProperty().multiply(0.6));
@@ -89,52 +46,36 @@ public class VariablesController {
     }
 
     /**
-     * Refresh the table with current variables - called by button bindings
+     * Clear variables and reset table
      */
-    /**
-     * Refresh the table with current variables - called by button bindings
-     */
-    public void refreshTable() {
-        variablesData.clear();
+    public void clearVariables() {
+        variablesTable.getItems().clear();
+        currentVariables = null;
+    }
 
-        // Add this null check to prevent the error
+    /**
+     * Refresh the table with current variables
+     */
+    private void refreshTable() {
+        variablesTable.getItems().clear();
+
+        // Add null check to prevent errors
         if (currentVariables == null || currentVariables.isEmpty()) {
             System.out.println("No variables to display or currentVariables is null");
             return;
         }
 
-        // Use ConsoleUI sorting logic and populate table
+        // Create list of VariableDTO objects sorted by name
+        List<VariableDTO> variableDTOS = new ArrayList<>();
         currentVariables.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(UIUtils.programNameComparator))
-                .forEach(entry -> {
-                    VariableEntry variableEntry = new VariableEntry(entry.getKey(), entry.getValue());
-                    variablesData.add(variableEntry);
-                });
+                .map(UIUtils::toVariableDTO)
+                .forEach(variableDTOS::add);
 
+        // Add all variables to table
+        variablesTable.getItems().addAll(variableDTOS);
         System.out.println("Variables table refreshed with " + currentVariables.size() + " variables");
     }
-
-
-    /**
-     * Clear variables and reset table
-     */
-    public void clearVariables() {
-        variablesData.clear();
-        currentVariables = null;
-    }
-
-    /**
-     * Show success message and refresh table
-     */
-    public void showSuccess(String message) {
-        refreshTable();
-    }
-
-    /**
-     * Show error message
-     */
-    public void showError(String message) {
-      }
 
     /**
      * Update specific variable value and refresh table
@@ -153,7 +94,29 @@ public class VariablesController {
         return currentVariables;
     }
 
+    /**
+     * Show success message and refresh table
+     */
+    public void showSuccess(String message) {
+        refreshTable();
+    }
+
+    /**
+     * Show error message
+     */
+    public void showError(String message) {
+        // Error handling implementation if needed
+    }
+
     /* ---------- Button Binding Methods ---------- */
+
+    /**
+     * Called when run button is pressed
+     */
+    public void onRunPressed() {
+        refreshTable();
+        System.out.println("Variables table updated after run pressed");
+    }
 
     /**
      * Called when setRun button is pressed
