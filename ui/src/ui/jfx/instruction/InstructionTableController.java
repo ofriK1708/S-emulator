@@ -17,7 +17,7 @@ public class InstructionTableController {
     @FXML
     private TableView<InstructionDTO> instructionTable;
     @FXML
-    private TableColumn<InstructionDTO, Integer> indexColumn;
+    private TableColumn<InstructionDTO, Number> indexColumn;
     @FXML
     private TableColumn<InstructionDTO, String> typeColumn;
     @FXML
@@ -25,7 +25,7 @@ public class InstructionTableController {
     @FXML
     private TableColumn<InstructionDTO, String> commandColumn;
     @FXML
-    private TableColumn<InstructionDTO, Integer> cyclesColumn;
+    private TableColumn<InstructionDTO, Number> cyclesColumn;
     // Reference to the main controller (set by dependency injection)
 
     private AppController appController;
