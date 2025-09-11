@@ -43,7 +43,7 @@
                   </HBox>
                   <HBox alignment="CENTER">
                      <children>
-                        <ToggleButton fx:id="runType" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="53.0" styleClass="pill-blue" text="▶️">
+                        <ToggleButton fx:id="runType" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="53.0" styleClass="pill-blue" text="▶️️">
                            <toggleGroup>
                               <ToggleGroup fx:id="runTypes" />
                            </toggleGroup>
