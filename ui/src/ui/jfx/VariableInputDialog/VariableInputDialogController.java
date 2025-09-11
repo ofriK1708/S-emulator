@@ -44,15 +44,14 @@ public class VariableInputDialogController {
             field.setPromptText("Enter positive integer value...");
             fieldsContainer.getChildren().add(new VBox(label, field));
             textFields.put(var, field);
-            field.textProperty().addListener((obs, oldVal, newVal) -> validate());
+            field.textProperty().addListener((obs, oldVal, newVal) -> validate(newVal));
         }
     }
 
-    private void validate() {
+    private void validate(String newVal) {
         String errorMsg = "Input is not a number or not a positive number";
         for (TextField tf : textFields.values()) {
-            String text = tf.getText();
-            if (!text.isEmpty() && !UIUtils.isValidProgramArgument(text)) {
+            if (!newVal.isEmpty() && !UIUtils.isValidProgramArgument(newVal)) {
                 if (!tf.getStyleClass().contains("error-field")) {
                     tf.getStyleClass().add("error-field");
                 }

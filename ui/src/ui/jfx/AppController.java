@@ -428,7 +428,7 @@ public class AppController {
 
             // Show input variables in execution variable controller if needed
             if (executionVariableController != null) {
-                executionVariableController.showInputVariables(programVariables);
+                executionVariableController.showInputVariables(programVariablesAfterExecution);
             }
 
             showInfo("Input variables loaded and displayed in table.");
