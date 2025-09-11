@@ -88,7 +88,21 @@
     -fx-padding: 0;
 }
 
-
 .pink-red-clear-button:pressed {
     -fx-background-color: #ad1457;
+}
+
+.file-path-label {
+    -fx-padding: 6 12;
+    -fx-background-color: #e3eaf2;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #b0bec5;
+    -fx-border-width: 1;
+    -fx-font-size: 13px;
+    -fx-text-fill: #333;
+    -fx-min-width: 250;
+    -fx-content-display: LEFT;
+    -fx-alignment: CENTER;
+    -fx-label-padding: 3 5;
 }

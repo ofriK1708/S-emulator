@@ -6,14 +6,15 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.HBox?>
 <?import java.lang.String?>
-<HBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER_LEFT" spacing="8" stylesheets="@ProgramFunction.css"
+<HBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER_LEFT" spacing="8" stylesheets="@programFunction.css"
       xmlns="http://javafx.com/javafx/24.0.1" fx:controller="ui.jfx.program.function.ProgramFunctionController">
 
     <padding>
         <Insets bottom="6" left="8" right="8" top="6" />
     </padding>
 
-    <Button fx:id="collapseButton1" layoutX="18.0" layoutY="20.0" maxHeight="28" minWidth="86" mnemonicParsing="false"
+    <Button fx:id="ProgramFunctionSelect" layoutX="18.0" layoutY="20.0" maxHeight="28" minWidth="86"
+            mnemonicParsing="false"
             onAction="#handleCollapse" text="Program\function selector">
         <styleClass>
             <String fx:value="pill-button"/>
@@ -34,8 +35,9 @@
             styleClass="pill-button, pill-green, pf-expand" text="Expand"/>
 
     <!-- New Change button: Opens dialog for manual level entry -->
-    <Button fx:id="changeButton" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleChange"
-            styleClass="pill-button, pill-green, pf-change" text="Change"/>
+    <Button fx:id="chooseLevelButton" maxHeight="28" minWidth="86" mnemonicParsing="false"
+            onAction="#handleChooseExpandLevel"
+            styleClass="pill-button, pill-green, pf-change" text="Choose expand Level"/>
 
     <Button fx:id="HighSelectionButton" mnemonicParsing="false" text="Highlight Selection">
         <styleClass>
