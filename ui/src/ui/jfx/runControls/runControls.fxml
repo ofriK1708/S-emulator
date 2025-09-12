@@ -43,12 +43,12 @@
                   </HBox>
                   <HBox alignment="CENTER">
                      <children>
-                        <ToggleButton fx:id="runType" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onRunChosen" prefHeight="30.0" prefWidth="53.0" styleClass="pill-blue" text="RUN">
+                        <ToggleButton fx:id="runType" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onRunChosen" prefHeight="30.0" prefWidth="100.0" styleClass="pill-blue" text="RUN">
                            <toggleGroup>
                               <ToggleGroup fx:id="runTypes" />
                            </toggleGroup>
                         </ToggleButton>
-                        <ToggleButton fx:id="debugType" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onDebugChosen" prefHeight="30.0" prefWidth="53.0" styleClass="pill-green" text="DEBUG" toggleGroup="$runTypes" />
+                        <ToggleButton fx:id="debugType" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onDebugChosen" prefHeight="30.0" prefWidth="100.0" styleClass="pill-green" text="DEBUG" toggleGroup="$runTypes" />
                      </children>
                   </HBox>
                </children>

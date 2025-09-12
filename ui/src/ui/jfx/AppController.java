@@ -257,6 +257,7 @@ public class AppController {
             int expandLevel = currentExpandLevel.get();
             List<Integer> runtimeArguments = UIUtils.getRuntimeArgument(programArguments);
             System.out.println("Starting regular execution with arguments: " + runtimeArguments);
+            executionVariableController.clearVariables(); //fix bug 2
             programRunning.set(true);
 
             // Execute the program using SystemController
