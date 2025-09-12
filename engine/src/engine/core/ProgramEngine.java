@@ -54,7 +54,7 @@ public class ProgramEngine implements Serializable {
 
     private void initializeContextMap() throws LabelNotExist {
         originalContextMap.clear();
-        originalContextMap.put(ProgramUtils.outputName, 0);
+        originalContextMap.put(ProgramUtils.OUTPUT_NAME, 0);
         originalContextMap.put(Instruction.ProgramCounterName, 0); // Program Counter
         for (int instruction_index = 0; instruction_index < originalInstructions.size(); instruction_index++) {
             Instruction instruction = originalInstructions.get(instruction_index);
@@ -74,7 +74,7 @@ public class ProgramEngine implements Serializable {
                         originalContextMap.put(argName.trim(), 0);
                     }
                 }
-                if (argName.equals(ProgramUtils.EXITLabelName)) {
+                if (argName.equals(ProgramUtils.EXIT_LABEL_NAME)) {
                     originalContextMap.put(argName, originalInstructions.size()); // EXIT label is set to the end of the program
                     originalLabels.add(argName);
                 }
@@ -117,7 +117,7 @@ public class ProgramEngine implements Serializable {
                 throw new RuntimeException("Error executing instruction at PC=" + currentPC + ": " + e.getMessage(), e);
             }
         }
-        exStats.setY(executedContextMap.get(ProgramUtils.outputName));
+        exStats.setY(executedContextMap.get(ProgramUtils.OUTPUT_NAME));
         executionStatisticsList.add(exStats);
     }
 
@@ -160,8 +160,8 @@ public class ProgramEngine implements Serializable {
                 .filter(instr -> !instr.getLabel().isBlank())
                 .forEach(instr -> latestContextMap.put(instr.getLabel(), LatestExpanded.indexOf(instr)));
         // update EXIT label to point to the end of the expanded program
-        if (latestLabels.contains(EXITLabelName)) {
-            latestContextMap.put(EXITLabelName, LatestExpanded.size());
+        if (latestLabels.contains(EXIT_LABEL_NAME)) {
+            latestContextMap.put(EXIT_LABEL_NAME, LatestExpanded.size());
         }
         // add any new labels introduced during expansion
         latestContextMap.keySet()
@@ -198,7 +198,7 @@ public class ProgramEngine implements Serializable {
         return new ExecutionResultDTO(executionStatisticsDTO.result(),
                 executionStatisticsDTO.arguments(),
                 extractWorkVars(contextMapsByExpandLevel.get(expandLevel)),
-                contextMapsByExpandLevel.get(expandLevel).get(ProgramUtils.outputName),
+                contextMapsByExpandLevel.get(expandLevel).get(ProgramUtils.OUTPUT_NAME),
                 executionStatisticsDTO.cyclesUsed()
         );
     }

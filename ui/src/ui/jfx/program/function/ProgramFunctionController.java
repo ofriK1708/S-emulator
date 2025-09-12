@@ -5,9 +5,8 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
+import ui.utils.UIUtils;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -15,6 +14,8 @@ import java.util.function.Consumer;
 public class ProgramFunctionController {
 
     Consumer<Integer> OnExpandLevelChangeCallback;
+    @FXML
+    public RadioButton autoPaneMode;
     IntegerProperty currentLevel = new SimpleIntegerProperty();
     IntegerProperty maxLevel = new SimpleIntegerProperty();
 
@@ -28,9 +29,13 @@ public class ProgramFunctionController {
     private Button expandButton;
     @FXML
     private Button chooseLevelButton;     // New Change button
-
+    @FXML
+    public ToggleGroup paneMode;
     @FXML
     private Button HighSelectionButton;
+    @FXML
+    public RadioButton manualPaneMode;
+    Consumer<PaneMode> OnPaneModeChangeCallback;
 
     @FXML
     void initialize() {
@@ -38,9 +43,12 @@ public class ProgramFunctionController {
     }
 
     public void initComponent(Consumer<Integer> OnExpandLevelChangeCallback,
+                              Consumer<PaneMode> OnPaneModeChangeCallback,
                               IntegerProperty currentExpandLevelProperty, IntegerProperty MaxExpandLevelProperty,
                               BooleanProperty programLoadedProperty) {
+
         this.OnExpandLevelChangeCallback = OnExpandLevelChangeCallback;
+        this.OnPaneModeChangeCallback = OnPaneModeChangeCallback;
         collapseButton.disableProperty().bind(
                 programLoadedProperty.not()
                         .or(currentExpandLevelProperty.isEqualTo(0)));
@@ -93,19 +101,33 @@ public class ProgramFunctionController {
                 if (choice >= 0 && choice <= maxLevel.get()) {
                     OnExpandLevelChangeCallback.accept(choice);
                 } else {
-                    showInvalidChoice(0, maxLevel.get());
+                    showInvalidChoice(maxLevel.get());
                 }
             } catch (NumberFormatException e) {
-                showInvalidChoice(0, maxLevel.get());
+                showInvalidChoice(maxLevel.get());
             }
         }
     }
 
+    @FXML
+    private void handleAutoModeSelected(ActionEvent event) {
+        if (autoPaneMode.isSelected()) {
+            System.out.println("Auto mode selected");
+            // Notify listener about the mode change
+            OnPaneModeChangeCallback.accept(PaneMode.AUTO);
+        }
+    }
 
-    private void showInvalidChoice(int min, int max) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-        alert.setTitle("Invalid Choice");
-        alert.setContentText("Invalid choice. Please enter a number between " + min + " and " + max + ".");
-        alert.showAndWait();
+    @FXML
+    private void handleManualModeSelected(ActionEvent event) {
+        if (manualPaneMode.isSelected()) {
+            System.out.println("Manual mode selected");
+            // Notify listener about the mode change
+            OnPaneModeChangeCallback.accept(PaneMode.MANUAL);
+        }
+    }
+
+    private void showInvalidChoice(int max) {
+        UIUtils.showError("Please enter a number between " + 0 + " and " + max);
     }
 }

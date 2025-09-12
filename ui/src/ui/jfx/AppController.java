@@ -25,6 +25,7 @@ import ui.jfx.debugger.DebuggerController;
 import ui.jfx.execution.ExecutionVariableController;
 import ui.jfx.fileHandler.FileHandlerController;
 import ui.jfx.instruction.InstructionTableController;
+import ui.jfx.program.function.PaneMode;
 import ui.jfx.program.function.ProgramFunctionController;
 import ui.jfx.runControls.RunControlsController;
 import ui.jfx.variables.VariablesController;
@@ -83,12 +84,10 @@ public class AppController {
     private TitledPane debugControlsTitledPane;
     @FXML
     private TitledPane variablesTitledPane;
-    private final BooleanProperty userOverridePaneExpansion = new SimpleBooleanProperty(false);
 
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
     private final BooleanProperty variablesEntered = new SimpleBooleanProperty(false);
     private final BooleanProperty debugMode = new SimpleBooleanProperty(false);
-    private final BooleanProperty canRunProgram = new SimpleBooleanProperty(false);
     private final BooleanProperty programRanAtLeastOnce = new SimpleBooleanProperty(false);
     private final BooleanProperty programRunning = new SimpleBooleanProperty(false);
     private final BooleanProperty programFinished = new SimpleBooleanProperty(false);
@@ -111,7 +110,7 @@ public class AppController {
                 runControlsController != null) {
 
             fileHandlerController.initComponent(this::loadProgramFromFile, this::clearLoadedProgram);
-            programFunctionController.initComponent(this::expandProgramToLevel,
+            programFunctionController.initComponent(this::expandProgramToLevel, this::setPaneModeChoice,
                     currentExpandLevel, maxExpandLevel, programLoaded);
             runControlsController.initComponent(this::RunProgram, this::promptForVariables, programLoaded, variablesEntered);
             cyclesController.initComponent(currentCycles);
@@ -133,29 +132,37 @@ public class AppController {
 
     private void bindTitlePanesExpansion() {
         // Bind properties to expand/collapse titled panes based on program state
-//        enableTitledPaneManualOverride(runControlsTitledPane, userOverridePaneExpansion);
-//        enableTitledPaneManualOverride(debugControlsTitledPane, userOverridePaneExpansion);
-//        enableTitledPaneManualOverride(variablesTitledPane, userOverridePaneExpansion);
-//        enableTitledPaneManualOverride(staticsTitledPane, userOverridePaneExpansion);
 
         runControlsTitledPane.expandedProperty().bind(
-                Bindings.or(userOverridePaneExpansion,
-                        Bindings.and(programLoaded, programRunning.not()))
-        );
-
+                Bindings.and(programLoaded, programRunning.not()));
 
         debugControlsTitledPane.expandedProperty().bind(
-                Bindings.or(userOverridePaneExpansion,
-                        Bindings.and(programLoaded, Bindings.and(debugMode, programFinished.not()))));
+                Bindings.and(programLoaded,
+                        Bindings.and(debugMode, programFinished.not())));
 
         variablesTitledPane.expandedProperty().bind(
-                Bindings.or(userOverridePaneExpansion,
-                        Bindings.and(programLoaded, Bindings.or(programFinished, debugMode))));
+                Bindings.and(programLoaded,
+                        Bindings.or(programFinished, debugMode)));
 
         statisticsTitledPane.expandedProperty().bind(
-                Bindings.or(userOverridePaneExpansion,
-                        Bindings.and(programLoaded, Bindings.and(programRunning.not(), programRanAtLeastOnce))));
+                Bindings.and(programLoaded,
+                        Bindings.and(programRunning.not(), programRanAtLeastOnce)));
 
+    }
+
+    private void unbindTitlePanesExpansion() {
+        runControlsTitledPane.expandedProperty().unbind();
+        debugControlsTitledPane.expandedProperty().unbind();
+        variablesTitledPane.expandedProperty().unbind();
+        statisticsTitledPane.expandedProperty().unbind();
+    }
+
+    public void setPaneModeChoice(PaneMode paneMode) {
+        if (paneMode == PaneMode.AUTO) {
+            bindTitlePanesExpansion();
+        } else {
+            unbindTitlePanesExpansion();
+        }
     }
 
     // Load program from file - DO NOT populate UI tables yet

@@ -7,12 +7,13 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class ProgramUtils {
-    public static final String EXITLabelName = "EXIT";
-    public static final String pcName = "PC";
-    public static final String outputName = "y";
-    public static final String argPrefix = "x";
-    public static final String workVarPrefix = "z";
-    public static final String labelPrefix = "L";
+    public static final String EXIT_LABEL_NAME = "EXIT";
+    public static final String PC_NAME = "PC";
+    public static final String OUTPUT_NAME = "y";
+    public static final String ARG_PREFIX = "x";
+    public static final String WORK_VAR_PREFIX = "z";
+    public static final String LABEL_PREFIX = "L";
+
 
 
     public static Predicate<String> validArgumentCheck = (arg) ->
@@ -29,7 +30,7 @@ public class ProgramUtils {
         int labelIndex = 1;
         String labelName;
         do {
-            labelName = labelPrefix + labelIndex++;
+            labelName = LABEL_PREFIX + labelIndex++;
         } while (contextMap.containsKey(labelName));
         contextMap.put(labelName, 0); // Initialize label with a dummy value
         return labelName;
@@ -39,7 +40,7 @@ public class ProgramUtils {
         int varIndex = 1;
         String varName;
         do {
-            varName = workVarPrefix + varIndex++;
+            varName = WORK_VAR_PREFIX + varIndex++;
         } while (contextMap.containsKey(varName));
         contextMap.put(varName, 0); // Initialize variable with a dummy value
         return varName;
@@ -86,18 +87,18 @@ public class ProgramUtils {
     public static Map<String, Integer> getArgsMapFromValuesList(List<Integer> argsList) {
         Map<String, Integer> argsMap = new HashMap<>();
         for (int i = 0; i < argsList.size(); i++) {
-            String argName = argPrefix + (i + 1);
+            String argName = ARG_PREFIX + (i + 1);
             argsMap.put(argName, argsList.get(i));
         }
         return argsMap;
     }
 
     public static Map<String, Integer> extractWorkVars(Map<String, Integer> contextMap) {
-        return getStringIntegerMap(contextMap, workVarPrefix);
+        return getStringIntegerMap(contextMap, WORK_VAR_PREFIX);
     }
 
     public static Map<String, Integer> extractArguments(Map<String, Integer> contextMap) {
-        return getStringIntegerMap(contextMap, argPrefix);
+        return getStringIntegerMap(contextMap, ARG_PREFIX);
     }
 
     private static Map<String, Integer> getStringIntegerMap(Map<String, Integer> contextMap, String argPrefix) {

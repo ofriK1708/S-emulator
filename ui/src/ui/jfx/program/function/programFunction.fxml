@@ -5,17 +5,18 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.HBox?>
-<?import java.lang.String?>
-<HBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER_LEFT" spacing="8" stylesheets="@programFunction.css"
-      xmlns="http://javafx.com/javafx/24.0.1" fx:controller="ui.jfx.program.function.ProgramFunctionController">
+<?import javafx.scene.layout.VBox?>
+<?import java.lang.*?>
+<HBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER_LEFT" spacing="8" styleClass="buttons-HBox"
+      stylesheets="@programFunction.css" xmlns="http://javafx.com/javafx/24.0.1"
+      fx:controller="ui.jfx.program.function.ProgramFunctionController">
 
     <padding>
         <Insets bottom="6" left="8" right="8" top="6" />
     </padding>
 
-    <Button fx:id="ProgramFunctionSelect" layoutX="18.0" layoutY="20.0" maxHeight="28" minWidth="86"
-            mnemonicParsing="false"
-            onAction="#handleCollapse" text="Program\function selector">
+    <Button fx:id="ProgramFunctionSelect" layoutX="18.0" layoutY="20.0" maxHeight="28" minWidth="-Infinity"
+            mnemonicParsing="false" onAction="#handleCollapse" text="Program\function selector">
         <styleClass>
             <String fx:value="pill-button"/>
             <String fx:value="pill-green"/>
@@ -23,27 +24,52 @@
     </Button>
 
     <!-- Small green pill: Collapse (decrements level by 1) -->
-    <Button fx:id="collapseButton" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleCollapse"
-            styleClass="pill-button, pill-green, pf-collapse" text="Collapse"/>
+    <Button fx:id="collapseButton" maxHeight="28" minWidth="-Infinity" mnemonicParsing="false"
+            onAction="#handleCollapse" styleClass="pill-button, pill-green, pf-collapse" text="Collapse"/>
 
     <!-- Small gray info pill: Current / Maximum degree -->
-    <Label fx:id="degreeInfoLabel" alignment="CENTER" maxHeight="50" minWidth="120" styleClass="info-label, pf-degree"
-           text="Current /&#10;Maximum degree"/>
+    <Label fx:id="degreeInfoLabel" alignment="CENTER" maxHeight="50" minWidth="-Infinity"
+           styleClass="info-label, pf-degree" text="Current /&#10;Maximum degree"/>
 
     <!-- Small green pill: Expand (increments level by 1) -->
-    <Button fx:id="expandButton" maxHeight="28" minWidth="86" mnemonicParsing="false" onAction="#handleExpand"
+    <Button fx:id="expandButton" maxHeight="28" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleExpand"
             styleClass="pill-button, pill-green, pf-expand" text="Expand"/>
 
     <!-- New Change button: Opens dialog for manual level entry -->
-    <Button fx:id="chooseLevelButton" maxHeight="28" minWidth="86" mnemonicParsing="false"
-            onAction="#handleChooseExpandLevel"
-            styleClass="pill-button, pill-green, pf-change" text="Choose expand Level"/>
+    <Button fx:id="chooseLevelButton" maxHeight="28" minWidth="-Infinity" mnemonicParsing="false"
+            onAction="#handleChooseExpandLevel" styleClass="pill-button, pill-green, pf-change"
+            text="Choose expand Level"/>
 
-    <Button fx:id="HighSelectionButton" mnemonicParsing="false" text="Highlight Selection">
+    <Button fx:id="HighSelectionButton" minWidth="-Infinity" mnemonicParsing="false" text="Highlight Selection">
         <styleClass>
             <String fx:value="pill-button"/>
             <String fx:value="pill-green"/>
         </styleClass>
     </Button>
+    <VBox alignment="CENTER" spacing="5.0">
+        <children>
+            <HBox alignment="CENTER">
+                <children>
+                    <Label styleClass="pane-mode" text="Titled pane mode"/>
+                </children>
+            </HBox>
+            <HBox spacing="10.0">
+                <children>
+                    <RadioButton fx:id="autoPaneMode" mnemonicParsing="false" onAction="#handleAutoModeSelected"
+                                 selected="true" style="-fx-text-fill: white;" styleClass="pane-mode" text="Auto">
+                        <toggleGroup>
+                            <ToggleGroup fx:id="paneMode"/>
+                        </toggleGroup>
+                    </RadioButton>
+                    <RadioButton fx:id="manualPaneMode" mnemonicParsing="false" onAction="#handleManualModeSelected"
+                                 styleClass="pane-mode" text="Manual" toggleGroup="$paneMode"/>
+                </children>
+            </HBox>
+        </children>
+        <styleClass>
+            <String fx:value="info-label"/>
+            <String fx:value="pf-degree"/>
+        </styleClass>
+    </VBox>
 
 </HBox>

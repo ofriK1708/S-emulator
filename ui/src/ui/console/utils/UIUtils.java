@@ -56,17 +56,17 @@ public class UIUtils
     public static void printSortedSet(Set<String> set)
     {
         boolean ExitAppeared = false;
-        if (set.contains(ProgramUtils.EXITLabelName))
+        if (set.contains(ProgramUtils.EXIT_LABEL_NAME))
         {
             ExitAppeared = true;
-            set.remove(ProgramUtils.EXITLabelName);
+            set.remove(ProgramUtils.EXIT_LABEL_NAME);
         }
         List<String> sortedArgs = new ArrayList<>(set.stream()
                 .sorted(programNameComparator)
                 .toList());
         if (ExitAppeared)
         {
-            sortedArgs.addLast(ProgramUtils.EXITLabelName);
+            sortedArgs.addLast(ProgramUtils.EXIT_LABEL_NAME);
         }
         System.out.println(String.join(", ", sortedArgs));
     }

@@ -86,7 +86,7 @@ public class JumpEqualConstant extends Instruction
                     null, this, originalInstructionIndex));
             instructions.add(new GOTOLabel("", Map.of(GOTOLabel.labelArgumentName, originalLabel),
                     null, this, originalInstructionIndex));
-            instructions.add(new Neutral(ProgramUtils.outputName, null, freeLabelName, this, originalInstructionIndex));
+            instructions.add(new Neutral(ProgramUtils.OUTPUT_NAME, null, freeLabelName, this, originalInstructionIndex));
         } catch (NumberFormatException e)
         {
             throw new RuntimeException("Invalid constant value: " + args.get(constantArgumentName));

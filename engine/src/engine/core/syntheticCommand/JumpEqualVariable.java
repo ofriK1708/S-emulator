@@ -90,7 +90,7 @@ public class JumpEqualVariable extends Instruction
                 Map.of(GOTOLabel.labelArgumentName, freeLabelName2), null, this, originalInstructionIndex));
         instructions.add(new JumpZero(freeWorkVariableName2,
                 Map.of(JumpZero.labelArgumentName, originalLabelName), freeLabelName3, this, originalInstructionIndex));
-        instructions.add(new Neutral(ProgramUtils.outputName, null, freeLabelName1, this, originalInstructionIndex));
+        instructions.add(new Neutral(ProgramUtils.OUTPUT_NAME, null, freeLabelName1, this, originalInstructionIndex));
         return instructions;
 
 

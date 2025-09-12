@@ -1,7 +1,7 @@
 /* Modern Program/function selector styling with blue-teal color scheme */
 
 /* Base container styling */
-.root HBox {
+.buttons-HBox {
     -fx-background-color: linear-gradient(to bottom right, #f8f9fa, #e9ecef);
     -fx-background-radius: 8px;
     -fx-padding: 10px 12px;
@@ -95,4 +95,10 @@
 .root .program-function .button:hover,
 .root .function-bar .button:hover {
     -fx-background-color: linear-gradient(to bottom, #5a6268, #545b62);
+}
+
+.pane-mode {
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
 }
