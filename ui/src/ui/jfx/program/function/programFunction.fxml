@@ -39,11 +39,12 @@
             onAction="#handleChooseExpandLevel"
             styleClass="pill-button, pill-green, pf-change" text="Choose expand Level"/>
 
-    <Button fx:id="HighSelectionButton" mnemonicParsing="false" text="Highlight Selection">
+    <!-- UPDATED: Changed from Button to MenuButton for variable selection dropdown -->
+    <MenuButton fx:id="HighSelectionButton" mnemonicParsing="false" text="Highlight Variable" maxHeight="28" minWidth="130">
         <styleClass>
             <String fx:value="pill-button"/>
             <String fx:value="pill-green"/>
         </styleClass>
-    </Button>
+    </MenuButton>
 
 </HBox>

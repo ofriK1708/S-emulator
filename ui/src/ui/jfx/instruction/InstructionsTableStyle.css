@@ -25,7 +25,6 @@
 }
 
 .table-view .column-header, .table-view .filler {
-    /*-fx-size: 40px;*/
     -fx-border-width: 0 1 0 1;
     -fx-border-color: transparent #c5e1e0 transparent #c5e1e0;
     -fx-background-color: transparent;
@@ -62,7 +61,7 @@
     -fx-background-color: #e7f2f5;
 }
 
-/*!* Hover effect *!*/
+/* Hover effect */
 .table-row-cell:hover {
     -fx-background-color: #d4f0ee;
     -fx-text-background-color: #1a7a76;
@@ -74,7 +73,33 @@
     -fx-text-background-color: white;
 }
 
-/*!* Keep the focus style while showing grid lines *!*/
+/* NEW: Highlighted row styling for variable highlighting */
+.table-row-cell.highlighted-row {
+    -fx-background-color: #fff3cd !important;
+    -fx-border-color: #ffeaa7;
+    -fx-border-width: 2px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.table-row-cell.highlighted-row:odd {
+    -fx-background-color: #fff3cd !important;
+}
+
+.table-row-cell.highlighted-row:even {
+    -fx-background-color: #fff3cd !important;
+}
+
+.table-row-cell.highlighted-row:hover {
+    -fx-background-color: #ffeaa7 !important;
+}
+
+.table-row-cell.highlighted-row:selected {
+    -fx-background-color: #f39c12 !important;
+    -fx-text-background-color: white;
+}
+
+/* Keep the focus style while showing grid lines */
 .table-view:focused {
     -fx-background-color: transparent;
     -fx-focus-color: #25a5a0;
@@ -95,4 +120,10 @@
 .table-view .scroll-bar:horizontal .thumb:hover,
 .table-view .scroll-bar:vertical .thumb:hover {
     -fx-background-color: #25a5a0;
+}
+
+/* NEW: Additional styling for better highlighting visibility */
+.table-row-cell.highlighted-row .table-cell {
+    -fx-text-fill: #856404 !important;
+    -fx-font-weight: bold;
 }

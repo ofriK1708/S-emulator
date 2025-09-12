@@ -1,5 +1,5 @@
 package ui.jfx;
-
+import dto.ui.VariableDTO;
 import dto.engine.ExecutionResultDTO;
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
@@ -121,7 +121,8 @@ public class AppController {
 
             fileHandlerController.initComponent(this::loadProgramFromFile, this::clearLoadedProgram);
             programFunctionController.initComponent(this::expandProgramToLevel,
-                    currentExpandLevel, maxExpandLevel, programLoaded);
+                    currentExpandLevel, maxExpandLevel, programLoaded,
+                    programRanAtLeastOnce, this::handleVariableSelection); // NEW: Add these parameters
             cyclesController.setNumOfCycles(0);
             instructionsTableController.setAppController(this);
             instructionsTableController.initializeMainInstructionTable();
@@ -314,6 +315,7 @@ public class AppController {
                 executionResult.argumentsValues(),
                 executionResult.workVariablesValues());
         updateExecutionStatistics(executionResult);
+        updateVariableDropdown();
 
 
     }
@@ -355,7 +357,30 @@ public class AppController {
         derivedInstructionsTableController.clearInstructions();
         cyclesController.setNumOfCycles(0);
         executionVariableController.clearVariables();
+        instructionsTableController.highlightVariable(null);
+        derivedInstructionsTableController.highlightVariable(null);
+
         showInfo("Loaded program cleared.");
+    }
+    /**
+     * NEW: Updates the variable dropdown with current execution variables
+     */
+    private void updateVariableDropdown() {
+        List<VariableDTO> currentVariables = executionVariableController.getCurrentVariables();
+        programFunctionController.updateVariableDropdown(currentVariables);
+    }
+    private void handleVariableSelection(String variableName) {
+        // Highlight the variable in the main instruction table
+        instructionsTableController.highlightVariable(variableName);
+
+        // Also highlight in derived instructions table if it has content
+        derivedInstructionsTableController.highlightVariable(variableName);
+
+        if (variableName != null) {
+            System.out.println("Highlighting variable '" + variableName + "' in all instruction tables");
+        } else {
+            System.out.println("Clearing variable highlighting in all instruction tables");
+        }
     }
 
     // Expand program to specific level (same logic as console expandProgram)
