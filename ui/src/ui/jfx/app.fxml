@@ -78,7 +78,10 @@
                                     </GridPane>
                                 </content>
                             </TitledPane>
-                            <TitledPane fx:id="staticsTitledPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" text="History Statistics" VBox.vgrow="ALWAYS">
+                            <TitledPane fx:id="statisticsTitledPane" maxHeight="1.7976931348623157E308"
+                                        maxWidth="1.7976931348623157E308" minWidth="-Infinity"
+                                        onMouseClicked="#titledPaneManualOverride" text="History Statistics"
+                                        VBox.vgrow="ALWAYS">
                                 <content>
                                     <ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                                         <content>

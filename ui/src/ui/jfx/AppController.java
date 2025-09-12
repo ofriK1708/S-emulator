@@ -12,7 +12,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -35,6 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static ui.utils.UIUtils.*;
 
 public class AppController {
 
@@ -82,8 +83,7 @@ public class AppController {
     private TitledPane debugControlsTitledPane;
     @FXML
     private TitledPane variablesTitledPane;
-    @FXML
-    private TitledPane staticsTitledPane;
+    private final BooleanProperty userOverridePaneExpansion = new SimpleBooleanProperty(false);
 
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
     private final BooleanProperty variablesEntered = new SimpleBooleanProperty(false);
@@ -92,6 +92,8 @@ public class AppController {
     private final BooleanProperty programRanAtLeastOnce = new SimpleBooleanProperty(false);
     private final BooleanProperty programRunning = new SimpleBooleanProperty(false);
     private final BooleanProperty programFinished = new SimpleBooleanProperty(false);
+    @FXML
+    private TitledPane statisticsTitledPane;
     private final IntegerProperty maxExpandLevel = new SimpleIntegerProperty(0);
     private final IntegerProperty currentExpandLevel = new SimpleIntegerProperty(0);
     private final IntegerProperty currentCycles = new SimpleIntegerProperty(0);
@@ -111,15 +113,15 @@ public class AppController {
             fileHandlerController.initComponent(this::loadProgramFromFile, this::clearLoadedProgram);
             programFunctionController.initComponent(this::expandProgramToLevel,
                     currentExpandLevel, maxExpandLevel, programLoaded);
-            cyclesController.setNumOfCycles(0);
+            runControlsController.initComponent(this::RunProgram, this::promptForVariables, programLoaded, variablesEntered);
+            cyclesController.initComponent(currentCycles);
             instructionsTableController.setAppController(this);
             instructionsTableController.initializeMainInstructionTable();
             derivedInstructionsTableController.setAppController(this);
             derivedInstructionsTableController.setDerivedMap(true);
             variablesController.clearVariables();
             debugControlsController.setAppController(this);
-            runControlsController.initComponent(this::RunProgram, this::promptForVariables);
-            bindProperties();
+            bindTitlePanesExpansion();
 
 
             System.out.println("AppController initialized");
@@ -129,19 +131,30 @@ public class AppController {
         }
     }
 
-    private void bindProperties() {
-        // Bind properties to enable/disable UI components based on program state
+    private void bindTitlePanesExpansion() {
+        // Bind properties to expand/collapse titled panes based on program state
+//        enableTitledPaneManualOverride(runControlsTitledPane, userOverridePaneExpansion);
+//        enableTitledPaneManualOverride(debugControlsTitledPane, userOverridePaneExpansion);
+//        enableTitledPaneManualOverride(variablesTitledPane, userOverridePaneExpansion);
+//        enableTitledPaneManualOverride(staticsTitledPane, userOverridePaneExpansion);
+
         runControlsTitledPane.expandedProperty().bind(
-                Bindings.and(programLoaded, programRunning.not()));
+                Bindings.or(userOverridePaneExpansion,
+                        Bindings.and(programLoaded, programRunning.not()))
+        );
+
 
         debugControlsTitledPane.expandedProperty().bind(
-                Bindings.and(programLoaded, Bindings.and(debugMode, programFinished.not())));
+                Bindings.or(userOverridePaneExpansion,
+                        Bindings.and(programLoaded, Bindings.and(debugMode, programFinished.not()))));
 
         variablesTitledPane.expandedProperty().bind(
-                Bindings.and(programLoaded, Bindings.or(programFinished, debugMode)));
+                Bindings.or(userOverridePaneExpansion,
+                        Bindings.and(programLoaded, Bindings.or(programFinished, debugMode))));
 
-        staticsTitledPane.expandedProperty().bind(
-                Bindings.and(programLoaded, Bindings.and(programRunning.not(), programRanAtLeastOnce)));
+        statisticsTitledPane.expandedProperty().bind(
+                Bindings.or(userOverridePaneExpansion,
+                        Bindings.and(programLoaded, Bindings.and(programRunning.not(), programRanAtLeastOnce))));
 
     }
 
@@ -168,37 +181,13 @@ public class AppController {
             // Clear any existing UI data
             instructionsTableController.setInstructions(loadedProgram.instructions());
             derivedInstructionsTableController.clearInstructions();
-            cyclesController.setNumOfCycles(0); // TODO bind to property
+            currentCycles.set(0);
 
         } catch (Exception e) {
             System.err.println("Error loading file: " + e.getMessage());
             e.printStackTrace();
             showError("Error loading file: " + e.getMessage());
         }
-    }
-
-    public void RunProgram(ProgramRunType programRunType) {
-        if (!programLoaded.get()) {
-            showError("No program loaded. Please load a program first.");
-            return;
-        }
-        if (!variablesEntered.get()) {
-            showError("Arguments not entered. Please load a program and enter arguments first.");
-            return;
-        }
-        switch (programRunType) {
-            case REGULAR:
-                startRegularExecution();
-                break;
-            case DEBUG:
-                startDebugExecution();
-                break;
-            default:
-                showError("Unknown run type selected.");
-        }
-    }
-
-    private void startDebugExecution() {
     }
 
     public void promptForVariables() {
@@ -235,7 +224,7 @@ public class AppController {
 
     public void showMultiVariableDialog(Set<String> requiredArguments) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/jfx/VariableInputDialog/VariableInputDialog.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(ArgumentResourcePath));
             Parent root = loader.load();
             VariableInputDialogController controller = loader.getController();
             controller.initialiseController(requiredArguments, programArguments);
@@ -248,6 +237,27 @@ public class AppController {
 
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public void RunProgram(ProgramRunType programRunType) {
+        if (!programLoaded.get()) {
+            showError("No program loaded. Please load a program first.");
+            return;
+        }
+        if (!variablesEntered.get()) {
+            showError("Arguments not entered. Please load a program and enter arguments first.");
+            return;
+        }
+        switch (programRunType) {
+            case REGULAR:
+                startRegularExecution();
+                break;
+            case DEBUG:
+                startDebugExecution();
+                break;
+            default:
+                showError("Unknown run type selected.");
         }
     }
 
@@ -265,7 +275,7 @@ public class AppController {
 
             // Update UI components with execution results
             instructionsTableController.setInstructions(executedProgram.instructions());
-            cyclesController.setNumOfCycles(engineController.getCyclesCount(expandLevel));
+            currentCycles.set(engineController.getCyclesCount(expandLevel));
 
             // Show execution results
             showExecutionResults(executionResult);
@@ -283,41 +293,9 @@ public class AppController {
         }
     }
 
-    private void showExecutionResults(ExecutionResultDTO executionResult) {
-        // You can create a dedicated component to show execution results
-        // For now, we'll update the cycles and show basic info
-        programRunning.set(false);
-        programFinished.set(true);
-        programRanAtLeastOnce.set(true);
-        System.out.println("=== Execution Results ===");
-        System.out.println("Total Cycles: " + executionResult.numOfCycles());
-        // Update cycles display
-        cyclesController.setNumOfCycles(executionResult.numOfCycles());
-        executionVariableController.showWorkVariables(
-                executionResult.result(),
-                executionResult.argumentsValues(),
-                executionResult.workVariablesValues());
-
+    private void startDebugExecution() {
     }
 
-    public void clearLoadedProgram() {
-        programLoaded.set(false);
-        variablesEntered.set(false);
-        maxExpandLevel.set(0);
-        currentExpandLevel.set(0);
-        loadedProgram = null;
-        programArguments.clear();
-        engineController.clearLoadedProgram();
-
-        // Clear UI components
-        instructionsTableController.clearInstructions();
-        derivedInstructionsTableController.clearInstructions();
-        cyclesController.setNumOfCycles(0);
-        executionVariableController.clearVariables();
-        showInfo("Loaded program cleared.");
-    }
-
-    // Expand program to specific level (same logic as console expandProgram)
     public void expandProgramToLevel(int level) {
         if (!programLoaded.get()) {
             showError("No program loaded. Please load a program first.");
@@ -343,7 +321,7 @@ public class AppController {
             // Only update instruction table if program has been executed
             // or if user explicitly wants to see the expanded program structure
             instructionsTableController.setInstructions(program.instructions());
-            cyclesController.setNumOfCycles(engineController.getCyclesCount(level));
+            currentCycles.set(engineController.getCyclesCount(level));
 
             showInfo("Program expanded to level " + level);
 
@@ -353,35 +331,40 @@ public class AppController {
         }
     }
 
-    // Get basic program (expand level 0)
-    public void displayBasicProgram() {
-        if (!programLoaded.get()) {
-            showError("No program loaded. Please load a program first.");
-            return;
-        }
-        expandProgramToLevel(0);
+    private void showExecutionResults(ExecutionResultDTO executionResult) {
+        // You can create a dedicated component to show execution results
+        // For now, we'll update the cycles and show basic info
+        programRunning.set(false);
+        programFinished.set(true);
+        programRanAtLeastOnce.set(true);
+        System.out.println("=== Execution Results ===");
+        System.out.println("Total Cycles: " + executionResult.numOfCycles());
+        // Update cycles display
+        currentCycles.set(executionResult.numOfCycles());
+        executionVariableController.showWorkVariables(
+                executionResult.result(),
+                executionResult.argumentsValues(),
+                executionResult.workVariablesValues());
+
     }
 
-    private void showError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
+    public void clearLoadedProgram() {
+        programLoaded.set(false);
+        variablesEntered.set(false);
+        maxExpandLevel.set(0);
+        currentExpandLevel.set(0);
+        loadedProgram = null;
+        programArguments.clear();
+        engineController.clearLoadedProgram();
 
-    private void showSuccess(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Success");
-        alert.setContentText(message);
-        alert.showAndWait();
+        // Clear UI components
+        instructionsTableController.clearInstructions();
+        derivedInstructionsTableController.clearInstructions();
+        currentCycles.set(0);
+        executionVariableController.clearVariables();
+        showInfo("Loaded program cleared.");
     }
-
-    private void showInfo(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Information");
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
+    // Expand program to specific level (same logic as console expandProgram)
 
     public void displayDerivedFromMap(List<InstructionDTO> instructionDTOIntegerMap) {
         derivedInstructionsTableController.setDerivedInstructions(instructionDTOIntegerMap);
