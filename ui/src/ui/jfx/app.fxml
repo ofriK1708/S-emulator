@@ -34,7 +34,7 @@
                     </rowConstraints>
                     <children>
                         <fx:include fx:id="instructionsTable" source="instruction/InstructionsTable.fxml" />
-                        <Label text="Summary line (placeholder)" GridPane.rowIndex="1" />
+                        <fx:include fx:id="summaryLine" source="summaryLine/summaryline.fxml" GridPane.rowIndex="1" />
                         <fx:include fx:id="derivedInstructionsTable" source="instruction/InstructionsTable.fxml" GridPane.rowIndex="2" />
                     </children>
                 </GridPane>

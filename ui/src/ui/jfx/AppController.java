@@ -31,6 +31,7 @@ import ui.jfx.program.function.ProgramFunctionController;
 import ui.jfx.runControls.RunControlsController;
 import ui.jfx.variables.VariablesController;
 import ui.jfx.statistics.HistoryStatsController;
+import ui.jfx.summaryLine.SummaryLineController;
 import ui.utils.UIUtils;
 
 import java.io.File;
@@ -89,6 +90,9 @@ public class AppController {
     private TitledPane staticsTitledPane;
     @FXML
     private HistoryStatsController historyStatsController;
+    @FXML
+    private SummaryLineController summaryLineController;
+
 
     private int executionCounter = 0;
 
@@ -176,6 +180,8 @@ public class AppController {
             instructionsTableController.setInstructions(loadedProgram.instructions());
             derivedInstructionsTableController.clearInstructions();
             cyclesController.setNumOfCycles(0); // TODO bind to property
+            summaryLineController.updateCounts(loadedProgram.instructions()); // NEW: Update summary
+
 
         } catch (Exception e) {
             System.err.println("Error loading file: " + e.getMessage());
@@ -274,6 +280,7 @@ public class AppController {
 
             // Update UI components with execution results
             instructionsTableController.setInstructions(executedProgram.instructions());
+            summaryLineController.updateCounts(executedProgram.instructions()); // NEW: Update summary
             cyclesController.setNumOfCycles(systemController.getCyclesCount(expandLevel));
 
             // Show execution results
@@ -344,6 +351,7 @@ public class AppController {
 
         // Clear UI components
         instructionsTableController.clearInstructions();
+        summaryLineController.clearCounts(); // NEW: Clear summary
         derivedInstructionsTableController.clearInstructions();
         cyclesController.setNumOfCycles(0);
         executionVariableController.clearVariables();
@@ -377,6 +385,7 @@ public class AppController {
             // or if user explicitly wants to see the expanded program structure
             instructionsTableController.setInstructions(program.instructions());
           //  cyclesController.setNumOfCycles(systemController.getCyclesCount(level)); FIX BUG 1
+            summaryLineController.updateCounts(program.instructions()); // NEW: Update summary
 
             showInfo("Program expanded to level " + level);
 

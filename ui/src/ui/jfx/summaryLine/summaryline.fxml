@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+<HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="summary-line" stylesheets="@SummaryLine.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.jfx.summaryLine.SummaryLineController">
+    <padding>
+        <Insets bottom="8.0" left="12.0" right="12.0" top="8.0" />
+    </padding>
+    <children>
+        <Label styleClass="summary-label" text="Synthetic Instructions:">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Label>
+        <Label fx:id="syntheticCountLabel" styleClass="count-label" text="0">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Label>
+        <Label styleClass="summary-label" text="Basic Instructions:">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Label>
+        <Label fx:id="basicCountLabel" styleClass="count-label" text="0">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Label>
+    </children>
+</HBox>

@@ -1,0 +1,17 @@
+.summary-line {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.summary-label {
+    -fx-text-fill: #495057;
+    -fx-font-weight: normal;
+}
+
+.count-label {
+    -fx-text-fill: #007bff;
+    -fx-font-weight: bold;
+}
