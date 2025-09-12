@@ -4,8 +4,6 @@ import dto.engine.ExecutionStatisticsDTO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
@@ -15,31 +13,32 @@ import java.util.Map;
 public class HistoryStatsController {
 
     @FXML
-    private VBox historyListContainer;
+    private TableColumn<ExecutionRow, String> executionNumberColumn;
     @FXML
-    private VBox historyLogContainer;
+    private TableColumn<ExecutionRow, String> expandLevelColumn;
     @FXML
-    private ScrollPane historyScrollPane;
+    private TableColumn<ExecutionRow, String> resultColumn;
     @FXML
-    public TableColumn<StatRow, String> statNameColumn;
+    private TableColumn<ExecutionRow, String> cyclesUsedColumn;
     @FXML
-    public TableColumn<StatRow, String> statValueColumn;
+    private TableColumn<ExecutionRow, String> argumentColumn;
     @FXML
-    private TableView<StatRow> statisticsTable;
+    private TableView<ExecutionRow> statisticsTable;
     @FXML
     private VBox statsTableContainer;
 
-    private final ObservableList<StatRow> statisticsData = FXCollections.observableArrayList();
+    private final ObservableList<ExecutionRow> statisticsData = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
-        // Initialize table columns
-        statNameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        statValueColumn.setCellValueFactory(cellData -> cellData.getValue().valueProperty());
-        statisticsTable.setItems(statisticsData);
+        // Initialize table columns with proper bindings
+        executionNumberColumn.setCellValueFactory(cellData -> cellData.getValue().executionNumberProperty());
+        expandLevelColumn.setCellValueFactory(cellData -> cellData.getValue().expandLevelProperty());
+        resultColumn.setCellValueFactory(cellData -> cellData.getValue().resultProperty());
+        cyclesUsedColumn.setCellValueFactory(cellData -> cellData.getValue().cyclesUsedProperty());
+        argumentColumn.setCellValueFactory(cellData -> cellData.getValue().argumentProperty());
 
-        // Clear placeholder text from history container
-        historyListContainer.getChildren().clear();
+        statisticsTable.setItems(statisticsData);
     }
 
     /**
@@ -47,26 +46,16 @@ public class HistoryStatsController {
      * @param executionStats The execution statistics DTO containing the latest run data
      */
     public void updateStatistics(ExecutionStatisticsDTO executionStats) {
-        // Update statistics table with latest execution details
+        // Only update statistics table since we removed execution history
         updateStatisticsTable(executionStats);
-
-        // Add new entry to execution history
-        addToExecutionHistory(executionStats);
     }
 
     /**
      * Updates the statistics table with details from the latest execution
      */
     private void updateStatisticsTable(ExecutionStatisticsDTO executionStats) {
-        statisticsData.clear();
-
-        // Add execution details to statistics table
-        statisticsData.add(new StatRow("Execution Number", String.valueOf(executionStats.executionNumber())));
-        statisticsData.add(new StatRow("Expand Level", String.valueOf(executionStats.expandLevel())));
-        statisticsData.add(new StatRow("Result", String.valueOf(executionStats.result())));
-        statisticsData.add(new StatRow("Cycles Used", String.valueOf(executionStats.cyclesUsed())));
-
-        // Add arguments to statistics table
+        // Format arguments string
+        String argumentsStr;
         if (!executionStats.arguments().isEmpty()) {
             StringBuilder argsBuilder = new StringBuilder();
             for (Map.Entry<String, Integer> entry : executionStats.arguments().entrySet()) {
@@ -75,70 +64,80 @@ public class HistoryStatsController {
                 }
                 argsBuilder.append(entry.getKey()).append("=").append(entry.getValue());
             }
-            statisticsData.add(new StatRow("Arguments", argsBuilder.toString()));
+            argumentsStr = argsBuilder.toString();
         } else {
-            statisticsData.add(new StatRow("Arguments", "None"));
+            argumentsStr = "None";
         }
+
+        // Add new ExecutionRow to the table (keeping all executions, not clearing)
+        ExecutionRow row = new ExecutionRow(
+                String.valueOf(executionStats.executionNumber()),
+                String.valueOf(executionStats.expandLevel()),
+                String.valueOf(executionStats.result()),
+                String.valueOf(executionStats.cyclesUsed()),
+                argumentsStr
+        );
+
+        statisticsData.add(row);
     }
 
-    /**
-     * Adds a summary entry to the execution history log
-     */
-    private void addToExecutionHistory(ExecutionStatisticsDTO executionStats) {
-        // Create summary text for this execution
-        String summaryText = String.format("Execution #%d: result=%d, cycles=%d",
-                executionStats.executionNumber(),
-                executionStats.result(),
-                executionStats.cyclesUsed());
-
-        // Create a label for this execution entry
-        Label historyEntry = new Label(summaryText);
-        historyEntry.getStyleClass().add("history-entry");
-
-        // Add to history container
-        historyListContainer.getChildren().add(historyEntry);
-
-        // Auto-scroll to bottom to show latest execution
-        historyScrollPane.layout();
-        historyScrollPane.setVvalue(1.0);
-    }
-
-    /**
-     * Clears both the statistics table and execution history
-     */
     public void clearHistory() {
         statisticsData.clear();
-        historyListContainer.getChildren().clear();
-
-        // Add placeholder text back
-        Label placeholder = new Label("Execution history will appear here");
-        placeholder.getStyleClass().add("placeholder-text");
-        historyListContainer.getChildren().add(placeholder);
     }
 
-    public static class StatRow {
-        private final javafx.beans.property.SimpleStringProperty name;
-        private final javafx.beans.property.SimpleStringProperty value;
+    public static class ExecutionRow {
+        private final javafx.beans.property.SimpleStringProperty executionNumber;
+        private final javafx.beans.property.SimpleStringProperty expandLevel;
+        private final javafx.beans.property.SimpleStringProperty result;
+        private final javafx.beans.property.SimpleStringProperty cyclesUsed;
+        private final javafx.beans.property.SimpleStringProperty argument;
 
-        public StatRow(String name, String value) {
-            this.name = new javafx.beans.property.SimpleStringProperty(name);
-            this.value = new javafx.beans.property.SimpleStringProperty(value);
+        public ExecutionRow(String executionNumber, String expandLevel, String result, String cyclesUsed, String argument) {
+            this.executionNumber = new javafx.beans.property.SimpleStringProperty(executionNumber);
+            this.expandLevel = new javafx.beans.property.SimpleStringProperty(expandLevel);
+            this.result = new javafx.beans.property.SimpleStringProperty(result);
+            this.cyclesUsed = new javafx.beans.property.SimpleStringProperty(cyclesUsed);
+            this.argument = new javafx.beans.property.SimpleStringProperty(argument);
         }
 
-        public String getName() {
-            return name.get();
+        public String getExecutionNumber() {
+            return executionNumber.get();
         }
 
-        public javafx.beans.property.StringProperty nameProperty() {
-            return name;
+        public javafx.beans.property.StringProperty executionNumberProperty() {
+            return executionNumber;
         }
 
-        public String getValue() {
-            return value.get();
+        public String getExpandLevel() {
+            return expandLevel.get();
         }
 
-        public javafx.beans.property.StringProperty valueProperty() {
-            return value;
+        public javafx.beans.property.StringProperty expandLevelProperty() {
+            return expandLevel;
+        }
+
+        public String getResult() {
+            return result.get();
+        }
+
+        public javafx.beans.property.StringProperty resultProperty() {
+            return result;
+        }
+
+        public String getCyclesUsed() {
+            return cyclesUsed.get();
+        }
+
+        public javafx.beans.property.StringProperty cyclesUsedProperty() {
+            return cyclesUsed;
+        }
+
+        public String getArgument() {
+            return argument.get();
+        }
+
+        public javafx.beans.property.StringProperty argumentProperty() {
+            return argument;
         }
     }
 }

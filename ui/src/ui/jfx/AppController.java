@@ -348,12 +348,10 @@ public class AppController {
         loadedProgram = null;
         programArguments.clear();
         systemController.clearLoadedProgram();
-
-        executionCounter = 0;
-
         // Clear UI components
         instructionsTableController.clearInstructions();
         summaryLineController.clearCounts(); // NEW: Clear summary
+        variablesController.clearVariables();
         derivedInstructionsTableController.clearInstructions();
         cyclesController.setNumOfCycles(0);
         executionVariableController.clearVariables();
