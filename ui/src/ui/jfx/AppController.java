@@ -24,11 +24,13 @@ import ui.jfx.cycles.CyclesController;
 import ui.jfx.debugger.DebuggerController;
 import ui.jfx.execution.ExecutionVariableController;
 import ui.jfx.fileHandler.FileHandlerController;
+import ui.jfx.fileLoader.FileLoaderController;
 import ui.jfx.instruction.InstructionTableController;
 import ui.jfx.program.function.PaneMode;
 import ui.jfx.program.function.ProgramFunctionController;
 import ui.jfx.runControls.RunControlsController;
 import ui.jfx.variables.VariablesController;
+import ui.utils.UIUtils;
 
 import java.io.File;
 import java.util.HashMap;
@@ -168,28 +170,35 @@ public class AppController {
     // Load program from file - DO NOT populate UI tables yet
     public void loadProgramFromFile(File file) {
         try {
-            if (programLoaded.get()) {
-                clearLoadedProgram();
-            }
-            System.out.println("Loading program from: " + file.getAbsolutePath());
-            engineController.LoadProgramFromFile(file.toPath());
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("fileLoader/fileLoader.fxml"));
+            Parent root = loader.load();
+            FileLoaderController fileLoaderController = loader.getController();
 
-            // Get basic program info but don't display instructions yet
-            loadedProgram = engineController.getBasicProgram();
+            Stage loadingStage = new Stage();
+            loadingStage.initModality(Modality.APPLICATION_MODAL);
+            loadingStage.setTitle("Loading File");
+            loadingStage.setScene(new Scene(root, 1000, 183));
 
-            // Update program state
-            programLoaded.set(true);
-            variablesEntered.set(false);
-            maxExpandLevel.set(engineController.getMaxExpandLevel());
-            currentExpandLevel.set(0);
-
-            System.out.println("Program loaded successfully. MaxExpandLevel: " + maxExpandLevel.get());
-
-            // Clear any existing UI data
-            instructionsTableController.setInstructions(loadedProgram.instructions());
-            derivedInstructionsTableController.clearInstructions();
-            currentCycles.set(0);
-
+            loadingStage.setOnShown(event -> {
+                fileLoaderController.initializeAndRunFileLoaderTaskThread(
+                        file.getAbsolutePath(), programLoaded::set, variablesEntered::set,
+                        maxExpandLevel::set, currentExpandLevel::set, currentCycles::set,
+                        () -> {
+                            loadingStage.close();
+                            try {
+                                engineController.LoadProgramFromFile(file.toPath());
+                                loadedProgram = engineController.getProgramByExpandLevel(0);
+//                                showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() +
+//                                        "\nPlease press set new run button :)");
+                                maxExpandLevel.set(engineController.getMaxExpandLevel());
+                                instructionsTableController.setInstructions(loadedProgram.instructions());
+                                derivedInstructionsTableController.clearInstructions();
+                            } catch (Exception e) {
+                                UIUtils.showError(e.getMessage());
+                            }
+                        });
+            });
+            loadingStage.show();
         } catch (Exception e) {
             System.err.println("Error loading file: " + e.getMessage());
             e.printStackTrace();

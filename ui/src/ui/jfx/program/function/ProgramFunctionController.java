@@ -89,10 +89,10 @@ public class ProgramFunctionController {
         System.out.println("Change button pressed");
 
         // Create input dialog for manual level entry
-        TextInputDialog dialog = new TextInputDialog(String.valueOf(currentLevel));
+        TextInputDialog dialog = new TextInputDialog("current level: " + currentLevel.get());
         dialog.setTitle("Change Program Level");
         dialog.setHeaderText("Please enter the expand level you would like to change to:");
-        dialog.setContentText("Please enter a number between 0 and " + maxLevel + ":");
+        dialog.setContentText("Please enter a number between 0 and " + maxLevel.get() + ":");
 
         Optional<String> result = dialog.showAndWait();
         if (result.isPresent()) {

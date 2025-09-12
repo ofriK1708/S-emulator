@@ -24,7 +24,6 @@ public class EngineController
     private ProgramEngine engine;
     public static Predicate<String> validArgumentValueCheck = ProgramUtils.validArgumentCheck;
     private int maxExpandLevel = 0;
-    private int cyclesCount = 0;
 
     public EngineController()
     {
@@ -50,7 +49,6 @@ public class EngineController
     {
         engine = new ProgramEngine(program);
         maxExpandLevel = engine.getMaxExpandLevel();
-        cyclesCount = engine.getTotalCycles(0);
     }
 
     public int getMaxExpandLevel()
@@ -116,9 +114,7 @@ public class EngineController
         {
             throw new IllegalArgumentException("Expand level must be between 0 and " + maxExpandLevel);
         }
-        ProgramDTO program = engine.toDTO(expandLevel);
-        cyclesCount = engine.getTotalCycles(expandLevel);
-        return program;
+        return engine.toDTO(expandLevel);
     }
 
     public ProgramDTO getBasicProgram()

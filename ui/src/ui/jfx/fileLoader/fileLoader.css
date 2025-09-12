@@ -1,0 +1,59 @@
+/* Modern file loading scene styling with blue-teal color scheme */
+
+.root {
+    -fx-background-color: linear-gradient(to bottom right, #e0f7fa, #b2ebf2);
+    -fx-background-radius: 12px;
+    -fx-padding: 24px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.10), 8, 0, 0, 2);
+}
+
+.label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #222;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+}
+
+.file-name-label {
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-font-size: 16px;
+    -fx-font-weight: normal;
+    -fx-text-fill: #1976d2;
+    -fx-background-color: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+    -fx-background-radius: 6px;
+    -fx-padding: 6px 12px;
+    -fx-effect: dropshadow(gaussian, rgba(25, 118, 210, 0.08), 2, 0, 0, 1);
+}
+
+.loading-separator {
+    -fx-background-color: #008080
+}
+
+.percent-label {
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1976d2;
+    -fx-min-width: 50px;
+}
+
+.loading-progress-bar {
+    -fx-pref-height: 20px;
+    -fx-background-radius: 10px;
+}
+
+.loading-progress-bar .bar {
+    -fx-background-color: linear-gradient(to bottom, #25a5a0, #1e8883);
+    -fx-background-radius: 10px;
+    -fx-background-insets: 0;
+    -fx-effect: dropshadow(gaussian, rgba(37, 165, 160, 0.15), 2, 0, 0, 1);
+}
+
+.loading-progress-bar .track {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10px;
+    -fx-background-insets: 0;
+    -fx-border-color: #25a5a0;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 10px;
+}

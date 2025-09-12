@@ -44,4 +44,12 @@ public class UIUtils {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    public static void sleep(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException ignored) {
+
+        }
+    }
 }
