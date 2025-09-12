@@ -19,7 +19,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import system.controller.controller.SystemController;
+import system.controller.controller.EngineController;
 import ui.jfx.VariableInputDialog.VariableInputDialogController;
 import ui.jfx.cycles.CyclesController;
 import ui.jfx.debugger.DebuggerController;
@@ -29,7 +29,6 @@ import ui.jfx.instruction.InstructionTableController;
 import ui.jfx.program.function.ProgramFunctionController;
 import ui.jfx.runControls.RunControlsController;
 import ui.jfx.variables.VariablesController;
-import ui.utils.UIUtils;
 
 import java.io.File;
 import java.util.HashMap;
@@ -40,7 +39,7 @@ import java.util.Set;
 public class AppController {
 
     // Core system controller - same as console version
-    private final SystemController systemController;
+    private final EngineController engineController;
     private ProgramDTO loadedProgram = null;
     private final Map<String, Integer> programArguments = new HashMap<>();
     private final Map<String, Integer> programVariablesAfterExecution = new HashMap<>();
@@ -98,7 +97,7 @@ public class AppController {
     private final IntegerProperty currentCycles = new SimpleIntegerProperty(0);
 
     public AppController() {
-        this.systemController = new SystemController();
+        this.engineController = new EngineController();
     }
 
     @FXML
@@ -153,15 +152,15 @@ public class AppController {
                 clearLoadedProgram();
             }
             System.out.println("Loading program from: " + file.getAbsolutePath());
-            systemController.LoadProgramFromFile(file.toPath());
+            engineController.LoadProgramFromFile(file.toPath());
 
             // Get basic program info but don't display instructions yet
-            loadedProgram = systemController.getBasicProgram();
+            loadedProgram = engineController.getBasicProgram();
 
             // Update program state
             programLoaded.set(true);
             variablesEntered.set(false);
-            maxExpandLevel.set(systemController.getMaxExpandLevel());
+            maxExpandLevel.set(engineController.getMaxExpandLevel());
             currentExpandLevel.set(0);
 
             System.out.println("Program loaded successfully. MaxExpandLevel: " + maxExpandLevel.get());
@@ -208,7 +207,7 @@ public class AppController {
 
         try {
             // Get required program arguments from SystemController
-            Set<String> requiredArguments = systemController.getProgramArgsNames();
+            Set<String> requiredArguments = engineController.getProgramArgsNames();
 
             if (requiredArguments.isEmpty()) {
                 // No arguments needed, mark as entered
@@ -255,19 +254,18 @@ public class AppController {
     public void startRegularExecution() {
         try {
             int expandLevel = currentExpandLevel.get();
-            List<Integer> runtimeArguments = UIUtils.getRuntimeArgument(programArguments);
-            System.out.println("Starting regular execution with arguments: " + runtimeArguments);
+            System.out.println("Starting regular execution with arguments: " + programArguments);
             programRunning.set(true);
 
             // Execute the program using SystemController
-            ExecutionResultDTO executionResult = systemController.runLoadedProgram(expandLevel, runtimeArguments);
+            ExecutionResultDTO executionResult = engineController.runLoadedProgram(expandLevel, programArguments);
 
             // Get the updated program state after execution
-            ProgramDTO executedProgram = systemController.getProgramByExpandLevel(expandLevel);
+            ProgramDTO executedProgram = engineController.getProgramByExpandLevel(expandLevel);
 
             // Update UI components with execution results
             instructionsTableController.setInstructions(executedProgram.instructions());
-            cyclesController.setNumOfCycles(systemController.getCyclesCount(expandLevel));
+            cyclesController.setNumOfCycles(engineController.getCyclesCount(expandLevel));
 
             // Show execution results
             showExecutionResults(executionResult);
@@ -309,7 +307,7 @@ public class AppController {
         currentExpandLevel.set(0);
         loadedProgram = null;
         programArguments.clear();
-        systemController.clearLoadedProgram();
+        engineController.clearLoadedProgram();
 
         // Clear UI components
         instructionsTableController.clearInstructions();
@@ -336,7 +334,7 @@ public class AppController {
             System.out.println("Program expanded to level: " + level);
 
             // Get the program at this expand level (same as console)
-            ProgramDTO program = systemController.getProgramByExpandLevel(level);
+            ProgramDTO program = engineController.getProgramByExpandLevel(level);
             System.out.println("Program at level " + level + " has " + program.instructions().size() + " instructions");
 
             // Update UI components with new expand level
@@ -345,7 +343,7 @@ public class AppController {
             // Only update instruction table if program has been executed
             // or if user explicitly wants to see the expanded program structure
             instructionsTableController.setInstructions(program.instructions());
-            cyclesController.setNumOfCycles(systemController.getCyclesCount(level));
+            cyclesController.setNumOfCycles(engineController.getCyclesCount(level));
 
             showInfo("Program expanded to level " + level);
 

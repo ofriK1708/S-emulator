@@ -2,7 +2,6 @@ package engine.core;
 
 import dto.engine.ExecutionResultDTO;
 import dto.engine.ExecutionStatisticsDTO;
-import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
 import engine.exception.LabelNotExist;
 import engine.generated.SInstruction;
@@ -100,11 +99,11 @@ public class ProgramEngine implements Serializable {
         return originalLabels.contains(labelName);
     }
 
-    public void run(int expandLevel, List<Integer> arguments) {
+    public void run(int expandLevel, Map<String, Integer> arguments) {
         clearPreviousRunData();
         ExecutionStatistics exStats = new ExecutionStatistics(executionStatisticsList.size() + 1,
                 expandLevel, arguments);
-        insertArguments(arguments);
+        originalContextMap.putAll(arguments);
         expand(expandLevel);
         List<Instruction> executedInstructions = instructionExpansionLevels.get(expandLevel);
         Map<String, Integer> executedContextMap = contextMapsByExpandLevel.get(expandLevel);
@@ -132,21 +131,6 @@ public class ProgramEngine implements Serializable {
         labelsByExpandLevel.add(new HashSet<>(originalLabels));
     }
 
-
-    private void insertArguments(List<Integer> arguments) {
-        int argIndex = 1;
-        String argName;
-        for (Integer argValue : arguments) {
-            argName = "x" + argIndex;
-            if (originalContextMap.containsKey(argName)) {
-                originalContextMap.put(argName, argValue);
-                contextMapsByExpandLevel.getFirst().put(argName, argValue);
-            } else {
-                extraArguments.put(argName, argValue);
-            }
-            argIndex++;
-        }
-    }
 
     private void expand(int level) {
         if (level > 0) {

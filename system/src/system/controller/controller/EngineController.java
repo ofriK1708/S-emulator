@@ -6,6 +6,7 @@ import dto.engine.ProgramDTO;
 import engine.core.ProgramEngine;
 import engine.exception.LabelNotExist;
 import engine.generated.SProgram;
+import engine.utils.ProgramUtils;
 import jakarta.xml.bind.JAXBException;
 import system.file.file.processing.XMLHandler;
 
@@ -13,16 +14,19 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
-public class SystemController
+public class EngineController
 {
     private final XMLHandler xmlHandler;
     private ProgramEngine engine;
-    int maxExpandLevel = 0;
-    int cyclesCount = 0;
+    public static Predicate<String> validArgumentValueCheck = ProgramUtils.validArgumentCheck;
+    private int maxExpandLevel = 0;
+    private int cyclesCount = 0;
 
-    public SystemController()
+    public EngineController()
     {
         try
         {
@@ -83,8 +87,7 @@ public class SystemController
     }
 
 
-
-    public ExecutionResultDTO runLoadedProgram(int expandLevel, List<Integer> arguments)
+    public ExecutionResultDTO runLoadedProgram(int expandLevel, Map<String, Integer> arguments)
     {
         if (engine == null)
         {
@@ -98,13 +101,7 @@ public class SystemController
         {
             throw new IllegalArgumentException("Arguments list must not be null or empty");
         }
-        if (arguments.stream()
-                .anyMatch(arg -> arg < 0))
-        {
-            throw new IllegalArgumentException("All arguments must be non-negative integers");
-        }
         engine.run(expandLevel, arguments);
-        cyclesCount = engine.getTotalCycles(expandLevel);
         return engine.toExecutionResultDTO(expandLevel);
     }
 

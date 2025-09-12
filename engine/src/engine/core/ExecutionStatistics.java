@@ -1,11 +1,10 @@
 package engine.core;
 
 import dto.engine.ExecutionStatisticsDTO;
-import engine.utils.ProgramUtils;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.List;
+import java.util.Map;
 
 public class ExecutionStatistics implements Serializable
 {
@@ -13,15 +12,16 @@ public class ExecutionStatistics implements Serializable
     private static final long serialVersionUID = 1L;
     private final int executionNumber;
     private final int expandLevel;
-    private final List<Integer> argumentsValues;
+    private final Map<String, Integer> arguments;
     private int Y = 0;
     private int numOfCycles = 0;
 
-    public ExecutionStatistics(int executionNumber, int expandLevel, List<Integer> argumentsValues)
+
+    public ExecutionStatistics(int executionNumber, int expandLevel, Map<String, Integer> arguments)
     {
         this.executionNumber = executionNumber;
         this.expandLevel = expandLevel;
-        this.argumentsValues = argumentsValues;
+        this.arguments = arguments;
     }
 
     public void setY(int y)
@@ -38,7 +38,7 @@ public class ExecutionStatistics implements Serializable
     {
         return new ExecutionStatisticsDTO(executionNumber,
                 expandLevel,
-                ProgramUtils.getArgsMapFromValuesList(argumentsValues),
+                arguments,
                 Y,
                 numOfCycles);
     }
