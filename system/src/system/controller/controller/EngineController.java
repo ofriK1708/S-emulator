@@ -97,10 +97,6 @@ public class EngineController
         {
             throw new IllegalArgumentException("Expand level must be between 0 and " + maxExpandLevel);
         }
-        if (arguments == null || arguments.isEmpty())
-        {
-            throw new IllegalArgumentException("Arguments list must not be null or empty");
-        }
         engine.run(expandLevel, arguments);
         return engine.toExecutionResultDTO(expandLevel);
     }
