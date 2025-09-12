@@ -345,7 +345,7 @@ public class AppController {
             // Only update instruction table if program has been executed
             // or if user explicitly wants to see the expanded program structure
             instructionsTableController.setInstructions(program.instructions());
-            cyclesController.setNumOfCycles(systemController.getCyclesCount(level));
+          //  cyclesController.setNumOfCycles(systemController.getCyclesCount(level)); FIX BUG 1
 
             showInfo("Program expanded to level " + level);
 
