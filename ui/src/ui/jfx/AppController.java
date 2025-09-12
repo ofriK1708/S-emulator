@@ -3,6 +3,7 @@ package ui.jfx;
 import dto.engine.ExecutionResultDTO;
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
+import dto.engine.ExecutionStatisticsDTO;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -29,6 +30,7 @@ import ui.jfx.instruction.InstructionTableController;
 import ui.jfx.program.function.ProgramFunctionController;
 import ui.jfx.runControls.RunControlsController;
 import ui.jfx.variables.VariablesController;
+import ui.jfx.statistics.HistoryStatsController;
 import ui.utils.UIUtils;
 
 import java.io.File;
@@ -85,6 +87,10 @@ public class AppController {
     private TitledPane variablesTitledPane;
     @FXML
     private TitledPane staticsTitledPane;
+    @FXML
+    private HistoryStatsController historyStatsController;
+
+    private int executionCounter = 0;
 
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
     private final BooleanProperty variablesEntered = new SimpleBooleanProperty(false);
@@ -300,8 +306,30 @@ public class AppController {
                 executionResult.result(),
                 executionResult.argumentsValues(),
                 executionResult.workVariablesValues());
+        updateExecutionStatistics(executionResult);
+
 
     }
+    private void updateExecutionStatistics(ExecutionResultDTO executionResult) {
+        // Increment execution counter
+        executionCounter++;
+
+        // Create ExecutionStatisticsDTO with current execution data
+        ExecutionStatisticsDTO executionStats = new ExecutionStatisticsDTO(
+                executionCounter,                           // executionNumber
+                currentExpandLevel.get(),                   // expandLevel
+                new HashMap<>(programArguments),            // arguments (copy)
+                executionResult.result(),                   // result
+                executionResult.numOfCycles()              // cyclesUsed
+        );
+
+        // Update the statistics component
+        historyStatsController.updateStatistics(executionStats);
+
+        System.out.println("Updated execution statistics: Execution #" + executionCounter);
+    }
+
+
 
     public void clearLoadedProgram() {
         programLoaded.set(false);
@@ -311,6 +339,8 @@ public class AppController {
         loadedProgram = null;
         programArguments.clear();
         systemController.clearLoadedProgram();
+
+        executionCounter = 0;
 
         // Clear UI components
         instructionsTableController.clearInstructions();
