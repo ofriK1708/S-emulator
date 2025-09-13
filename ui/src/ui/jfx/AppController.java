@@ -181,16 +181,14 @@ public class AppController {
 
             loadingStage.setOnShown(event -> {
                 fileLoaderController.initializeAndRunFileLoaderTaskThread(
-                        file.getAbsolutePath(), programLoaded::set, variablesEntered::set,
+                        file.toPath(), engineController, programLoaded::set, variablesEntered::set,
                         maxExpandLevel::set, currentExpandLevel::set, currentCycles::set,
                         () -> {
                             loadingStage.close();
                             try {
-                                engineController.LoadProgramFromFile(file.toPath());
                                 loadedProgram = engineController.getProgramByExpandLevel(0);
 //                                showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() +
 //                                        "\nPlease press set new run button :)");
-                                maxExpandLevel.set(engineController.getMaxExpandLevel());
                                 instructionsTableController.setInstructions(loadedProgram.instructions());
                                 derivedInstructionsTableController.clearInstructions();
                             } catch (Exception e) {
