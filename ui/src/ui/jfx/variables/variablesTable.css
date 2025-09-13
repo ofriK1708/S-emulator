@@ -1,4 +1,4 @@
-/* Modern Statistics/History TableView styling with blue-green-teal color scheme */
+/* Modern Variables TableView styling with blue-green-teal color scheme */
 
 /* Font imports for modern look */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap');
@@ -102,4 +102,22 @@
     -fx-font-size: 14px;
     -fx-text-fill: #666666;
     -fx-font-style: italic;
+}
+
+/* Legacy styles for compatibility */
+.status-label {
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-font-family: "Roboto", "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+.success-message {
+    -fx-text-fill: #25a5a0;
+    -fx-font-weight: bold;
+}
+
+.variable-item {
+    -fx-font-size: 11px;
+    -fx-padding: 2 0 2 0;
+    -fx-font-family: "Roboto", "Segoe UI", "Helvetica Neue", sans-serif;
 }

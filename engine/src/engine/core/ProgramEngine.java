@@ -227,10 +227,24 @@ public class ProgramEngine implements Serializable {
         return cyclesPerExpandLevel.get(expandLevel);
     }
 
-    public List<String> getAllVariablesNamesAndLabels(int expandLevel) {
+    public Set<String> getAllVariablesNamesAndLabels(int expandLevel) {
         if (expandLevel < 0 || expandLevel >= labelsByExpandLevel.size()) {
             throw new IllegalArgumentException("Expand level out of bounds");
         }
         return extractAllVariableAndLabelNames(contextMapsByExpandLevel.get(expandLevel));
+    }
+
+    public Map<String, Integer> getArguments(int expandLevel) {
+        if (expandLevel < 0 || expandLevel >= contextMapsByExpandLevel.size()) {
+            throw new IllegalArgumentException("Expand level out of bounds");
+        }
+        return extractArguments(contextMapsByExpandLevel.get(expandLevel));
+    }
+
+    public Map<String, Integer> getWorkVars(int expandLevel) {
+        if (expandLevel < 0 || expandLevel >= contextMapsByExpandLevel.size()) {
+            throw new IllegalArgumentException("Expand level out of bounds");
+        }
+        return extractWorkVars(contextMapsByExpandLevel.get(expandLevel));
     }
 }

@@ -13,7 +13,6 @@ import system.file.file.processing.XMLHandler;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -122,15 +121,6 @@ public class EngineController
         return getProgramByExpandLevel(0);
     }
 
-    public List<ExecutionStatisticsDTO> getAllExecutionStatistics()
-    {
-        if (engine == null)
-        {
-            throw new IllegalStateException("Program has not been set");
-        }
-        return engine.getAllExecutionStatistics();
-    }
-
     public void clearLoadedProgram() {
         engine = null;
         maxExpandLevel = 0;
@@ -143,11 +133,18 @@ public class EngineController
         return engine.getAllExecutionStatistics().getLast();
     }
 
-    public List<String> getAllVariablesAndLabelsNames(int expandLevel) {
+    public Set<String> getAllVariablesAndLabelsNames(int expandLevel) {
         if (engine == null) {
             throw new IllegalStateException("Program has not been set");
         }
         return engine.getAllVariablesNamesAndLabels(expandLevel);
+    }
+
+    public Map<String, Integer> getArguments(int expandLevel) {
+        if (engine == null) {
+            throw new IllegalStateException("Program has not been set");
+        }
+        return engine.getArguments(expandLevel);
     }
 
     public void saveProgramState(Path directoryPath) throws IOException
@@ -186,6 +183,20 @@ public class EngineController
         {
             throw new ClassNotFoundException("Invalid state file format: " + e.getMessage(), e);
         }
+    }
+
+    public Integer getProgramResult() {
+        if (engine == null) {
+            throw new IllegalStateException("No program loaded");
+        }
+        return engine.getAllExecutionStatistics().getLast().result();
+    }
+
+    public Map<String, Integer> getWorkVars(int expandLevel) {
+        if (engine == null) {
+            throw new IllegalStateException("Program has not been set");
+        }
+        return engine.getWorkVars(expandLevel);
     }
 
     private record StateData(ProgramEngine engine, int maxExpandLevel) implements Serializable

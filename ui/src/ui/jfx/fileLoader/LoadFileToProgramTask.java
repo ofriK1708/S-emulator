@@ -7,6 +7,7 @@ import system.controller.controller.EngineController;
 import ui.utils.UIUtils;
 
 import java.nio.file.Path;
+import java.util.List;
 
 public class LoadFileToProgramTask extends Task<ProgramDTO> {
     private final EngineController engineController;
@@ -26,6 +27,8 @@ public class LoadFileToProgramTask extends Task<ProgramDTO> {
         int SLEEP_TIME = 750;
         engineController.LoadProgramFromFile(filePath);
         ProgramDTO program = engineController.getBasicProgram();
+        List<String> allVars = UIUtils.sortAllProgramNames(
+                engineController.getAllVariablesAndLabelsNames(0));
         UIUtils.sleep(SLEEP_TIME);
         updateProgress(1, 4);
         UIUtils.sleep(SLEEP_TIME);
@@ -33,7 +36,7 @@ public class LoadFileToProgramTask extends Task<ProgramDTO> {
         Platform.runLater(() -> {
             uiAdapter.programLoadedDelegate.accept(true);
             uiAdapter.variablesEnteredDelegate.accept(false);
-            uiAdapter.variablesAndLabelsNamesDelegate.accept(engineController.getAllVariablesAndLabelsNames(0));
+            uiAdapter.variablesAndLabelsNamesDelegate.accept(allVars);
             uiAdapter.programInstructionsDelegate.accept(program.instructions());
             uiAdapter.clearDerivedInstructionsDelegate.run();
             uiAdapter.summaryLineDelegate.accept(program.instructions());

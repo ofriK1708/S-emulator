@@ -1,30 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.VBox?>
 
-<VBox spacing="8" stylesheets="@Statistics.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.jfx.statistics.HistoryStatsController">
-
-    <Label text="History &amp; Statistics Table" styleClass="component-title">
-        <VBox.margin><Insets left="8" right="8" top="6" /></VBox.margin>
-    </Label>
-
-    <VBox fx:id="statsTableContainer" spacing="6" styleClass="stats-table-container" VBox.vgrow="ALWAYS">
-        <TableView fx:id="statisticsTable" prefHeight="250" VBox.vgrow="ALWAYS">
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/24.0.1"
+            fx:controller="ui.jfx.statistics.HistoryStatsController">
+    <children>
+        <TableView fx:id="statisticsTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" stylesheets="@Statistics.css"
+                   styleClass="table-view">
             <columns>
-                <TableColumn fx:id="executionNumberColumn" prefWidth="100" text="Execution Number" />
-                <TableColumn fx:id="expandLevelColumn" prefWidth="100" text="Expand Level" />
-                <TableColumn fx:id="resultColumn" prefWidth="100" text="Result (Y)" />
-                <TableColumn fx:id="cyclesUsedColumn" prefWidth="100" text="Cycles Used" />
-                <TableColumn fx:id="argumentColumn" prefWidth="150" text="Argument" />
+                <TableColumn fx:id="executionNumberColumn" prefWidth="63.0" text="#" styleClass="table-column"/>
+                <TableColumn fx:id="expandLevelColumn" prefWidth="114.0" text="Expand Level" styleClass="table-column"/>
+                <TableColumn fx:id="resultColumn" prefWidth="106.0" text="Result (Y)" styleClass="table-column"/>
+                <TableColumn fx:id="cyclesUsedColumn" prefWidth="117.0" text="Cycles Used" styleClass="table-column"/>
+                <TableColumn fx:id="argumentColumn" prefWidth="150" text="Arguments" styleClass="table-column"/>
             </columns>
             <columnResizePolicy>
-                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
             </columnResizePolicy>
         </TableView>
-    </VBox>
-
-</VBox>
+    </children>
+</AnchorPane>

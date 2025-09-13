@@ -83,10 +83,10 @@ public class ProgramUtils {
         return maxLevel;
     }
 
-    public static List<String> extractAllVariableAndLabelNames(Map<String, Integer> contextMap) {
+    public static Set<String> extractAllVariableAndLabelNames(Map<String, Integer> contextMap) {
         contextMap.remove(EXIT_LABEL_NAME);
         contextMap.remove(PC_NAME);
-        return new ArrayList<>(contextMap.keySet());
+        return new HashSet<>(contextMap.keySet());
     }
 
     public static Map<String, Integer> extractWorkVars(Map<String, Integer> contextMap) {

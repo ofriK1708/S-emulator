@@ -1,13 +1,13 @@
 package ui.utils;
 
 import dto.ui.VariableDTO;
+import engine.utils.ProgramUtils;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.Alert;
 import system.controller.controller.EngineController;
 
-import java.util.Comparator;
-import java.util.Map;
+import java.util.*;
 
 public class UIUtils {
     public static final String ArgumentResourcePath = "/ui/jfx/VariableInputDialog/VariableInputDialog.fxml";
@@ -22,6 +22,11 @@ public class UIUtils {
     public static VariableDTO toVariableDTO(Map.Entry<String, Integer> entry) {
         return new VariableDTO(new SimpleStringProperty(entry.getKey()),
                 new SimpleIntegerProperty(entry.getValue()));
+    }
+
+    public static VariableDTO toVariableDTO(String variableName, Integer result) {
+        return new VariableDTO(new SimpleStringProperty(variableName),
+                new SimpleIntegerProperty(result));
     }
 
     public static void showError(String message) {
@@ -51,5 +56,53 @@ public class UIUtils {
         } catch (InterruptedException ignored) {
 
         }
+    }
+
+    public static List<VariableDTO> getAllVariablesSorted(EngineController engineController, int expandLevel) {
+        List<VariableDTO> variablesSorted = new ArrayList<>();
+
+        variablesSorted.add(toVariableDTO(ProgramUtils.OUTPUT_NAME, engineController.getProgramResult()));
+        engineController.getArguments(expandLevel).entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(UIUtils.programNameComparator))
+                .map(UIUtils::toVariableDTO)
+                .forEach(variablesSorted::add);
+
+        engineController.getWorkVars(expandLevel).entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(UIUtils.programNameComparator))
+                .map(UIUtils::toVariableDTO)
+                .forEach(variablesSorted::add);
+
+        return variablesSorted;
+    }
+
+    public static List<VariableDTO> extractArguments(Map<String, Integer> arguments) {
+        return arguments.entrySet().stream()
+                .map(UIUtils::toVariableDTO)
+                .toList();
+
+    }
+
+    public static List<String> sortAllProgramNames(Set<String> programNames) {
+        List<String> sortedProgramNames = new ArrayList<>();
+        List<String> sortedLabels = new ArrayList<>();
+        List<String> sortedArguments = new ArrayList<>();
+        List<String> sortedWorkVars = new ArrayList<>();
+        for (String name : programNames) {
+            if (name.startsWith(ProgramUtils.LABEL_PREFIX)) {
+                sortedLabels.add(name);
+            } else if (name.startsWith(ProgramUtils.ARG_PREFIX)) {
+                sortedArguments.add(name);
+            } else if (name.startsWith(ProgramUtils.WORK_VAR_PREFIX)) {
+                sortedWorkVars.add(name);
+            }
+        }
+        sortedLabels.sort(programNameComparator);
+        sortedArguments.sort(programNameComparator);
+        sortedWorkVars.sort(programNameComparator);
+        sortedProgramNames.add(ProgramUtils.OUTPUT_NAME);
+        sortedProgramNames.addAll(sortedArguments);
+        sortedProgramNames.addAll(sortedWorkVars);
+        sortedProgramNames.addAll(sortedLabels);
+        return sortedProgramNames;
     }
 }

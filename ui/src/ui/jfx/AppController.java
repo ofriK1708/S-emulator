@@ -4,6 +4,7 @@ import dto.engine.ExecutionResultDTO;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
+import dto.ui.VariableDTO;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -21,7 +22,6 @@ import system.controller.controller.EngineController;
 import ui.jfx.VariableInputDialog.VariableInputDialogController;
 import ui.jfx.cycles.CyclesController;
 import ui.jfx.debugger.DebuggerController;
-import ui.jfx.execution.ExecutionVariableController;
 import ui.jfx.fileHandler.FileHandlerController;
 import ui.jfx.fileLoader.FileLoaderController;
 import ui.jfx.fileLoader.UIAdapterLoadFileTask;
@@ -31,7 +31,8 @@ import ui.jfx.program.function.ProgramFunctionController;
 import ui.jfx.runControls.RunControlsController;
 import ui.jfx.statistics.HistoryStatsController;
 import ui.jfx.summaryLine.SummaryLineController;
-import ui.jfx.variables.VariablesController;
+import ui.jfx.variables.VariablesTableController;
+import ui.utils.UIUtils;
 
 import java.io.File;
 import java.util.HashMap;
@@ -62,14 +63,15 @@ public class AppController {
     private AnchorPane derivedInstructionsTable;
     @FXML
     private InstructionTableController derivedInstructionsTableController;
+    private final ListProperty<VariableDTO> allVariablesDTO =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<VariableDTO> argumentsDTO =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final BooleanProperty argumentsLoaded = new SimpleBooleanProperty(false);
     @FXML
-    private VariablesController variablesController;
+    private AnchorPane argumentsTable;
     @FXML
-    private DebuggerController debugControlsController;
-    @FXML
-    private AnchorPane executionVariable;
-    @FXML
-    private ExecutionVariableController executionVariableController;
+    private VariablesTableController argumentsTableController;
     @FXML
     private VBox runControls;
     @FXML
@@ -83,7 +85,7 @@ public class AppController {
     @FXML
     private TitledPane staticsTitledPane;
     @FXML
-    private VBox historyStats;
+    private AnchorPane allVarsTable;
     @FXML
     private HistoryStatsController historyStatsController;
     @FXML
@@ -101,12 +103,17 @@ public class AppController {
 
     private final ListProperty<String> programVariablesNamesAndLabels =
             new SimpleListProperty<>(FXCollections.observableArrayList());
+    @FXML
+    private VariablesTableController allVarsTableController;
+    @FXML
+    private DebuggerController debugControlsController;
 
     private final EngineController engineController;
     private ProgramDTO loadedProgram = null;
     private final Map<String, Integer> programArguments = new HashMap<>();
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
-    private final BooleanProperty variablesEntered = new SimpleBooleanProperty(false);
+    @FXML
+    private AnchorPane historyStats;
     private final BooleanProperty debugMode = new SimpleBooleanProperty(false);
     private final BooleanProperty programRanAtLeastOnce = new SimpleBooleanProperty(false);
     private final BooleanProperty programRunning = new SimpleBooleanProperty(false);
@@ -126,20 +133,21 @@ public class AppController {
     public void initialize() {
         if (fileHandlerController != null && cyclesController != null
                 && programFunctionController != null && instructionsTableController != null &&
-                derivedInstructionsTableController != null && variablesController != null &&
-                debugControlsController != null && executionVariableController != null &&
+                derivedInstructionsTableController != null && argumentsTableController != null &&
+                allVarsTableController != null && debugControlsController != null &&
                 runControlsController != null && historyStatsController != null && summaryLineController != null) {
 
             fileHandlerController.initComponent(this::loadProgramFromFile, this::clearLoadedProgram);
             programFunctionController.initComponent(this::expandProgramToLevel, this::setPaneMode,
                     currentExpandLevel, maxExpandLevel, programLoaded, this::handleVariableSelection,
                     programVariablesNamesAndLabels);
-            runControlsController.initComponent(this::RunProgram, this::promptForVariables, programLoaded, variablesEntered);
+            runControlsController.initComponent(this::RunProgram, this::promptForVariables, programLoaded, argumentsLoaded);
             cyclesController.initComponent(currentCycles);
             instructionsTableController.initializeMainInstructionTable(programInstructions, derivedInstructions);
             derivedInstructionsTableController.markAsDerivedInstructionsTable();
             derivedInstructionsTableController.setDerivedInstructionsTable(derivedInstructions);
-            variablesController.clearVariables();
+            argumentsTableController.initArgsTable(argumentsDTO);
+            allVarsTableController.initAllVarsTable(allVariablesDTO);
             debugControlsController.setAppController(this);
             historyStatsController.initComponent(executionStatistics);
             bindTitlePanesExpansion();
@@ -197,7 +205,7 @@ public class AppController {
             loadingStage.setTitle("Loading File");
             loadingStage.setScene(new Scene(root, 1000, 183));
             UIAdapterLoadFileTask uiAdapter = new UIAdapterLoadFileTask(programLoaded::set,
-                    variablesEntered::set,
+                    argumentsLoaded::set,
                     programVariablesNamesAndLabels::setAll,
                     programInstructions::setAll,
                     derivedInstructions::clear,
@@ -222,6 +230,8 @@ public class AppController {
     public void promptForVariables() {
         // Clear previous variables
         programArguments.clear();
+        allVariablesDTO.clear();
+        argumentsDTO.clear();
 
         try {
             // Get required program arguments from SystemController
@@ -229,8 +239,7 @@ public class AppController {
 
             if (requiredArguments.isEmpty()) {
                 // No arguments needed, mark as entered
-                variablesEntered.set(true);
-                variablesController.showSuccess("No variables required for this program");
+                argumentsLoaded.set(true);
                 showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() +
                         "\nNo variables required. Ready for execution.");
                 return;
@@ -238,10 +247,9 @@ public class AppController {
 
             // Create and show the multi-variable input dialog
             showMultiVariableDialog(requiredArguments);
-            variablesEntered.set(true);
+            argumentsLoaded.set(true);
+            argumentsDTO.setAll(UIUtils.extractArguments(programArguments));
             // Display success message and show variables
-            variablesController.showSuccess("Arguments entered successfully!");
-            variablesController.setVariables(programArguments);
             showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() +
                     "\nArguments captured. Ready for execution.");
 
@@ -274,7 +282,7 @@ public class AppController {
             showError("No program loaded. Please load a program first.");
             return;
         }
-        if (!variablesEntered.get()) {
+        if (!argumentsLoaded.get()) {
             showError("Arguments not entered. Please load a program and enter arguments first.");
             return;
         }
@@ -294,11 +302,11 @@ public class AppController {
         try {
             int expandLevel = currentExpandLevel.get();
             System.out.println("Starting regular execution with arguments: " + programArguments);
-            executionVariableController.clearVariables(); //fix bug 2
             programRunning.set(true);
 
             // Execute the program using SystemController
             ExecutionResultDTO executionResult = engineController.runLoadedProgram(expandLevel, programArguments);
+            allVariablesDTO.setAll(UIUtils.getAllVariablesSorted(engineController, expandLevel));
             executionStatistics.add(engineController.getLastExecutionStatistics());
 
             // Get the updated program state after execution
@@ -309,7 +317,7 @@ public class AppController {
             summaryLineController.updateCounts(executedProgram.instructions());
 
             // Show execution results
-            showExecutionResults(executionResult);
+            updateProperties();
 
             showSuccess("Program executed successfully!\n" +
                     "Cycles: " + executionResult.numOfCycles() + "\n" +
@@ -347,6 +355,8 @@ public class AppController {
             derivedInstructions.clear();
             programInstructions.setAll(program.instructions());
             currentCycles.set(engineController.getCyclesCount(expandLevel));
+            allVariablesDTO.clear();
+            argumentsDTO.clear();
             summaryLineController.updateCounts(program.instructions()); // NEW: Update summary
             programVariablesNamesAndLabels.setAll(engineController.getAllVariablesAndLabelsNames(expandLevel));
 
@@ -358,24 +368,15 @@ public class AppController {
         }
     }
 
-    private void showExecutionResults(ExecutionResultDTO executionResult) {
-        // You can create a dedicated component to show execution results
-        // For now, we'll update the cycles and show basic info
+    private void updateProperties() {
         programRunning.set(false);
         programFinished.set(true);
         programRanAtLeastOnce.set(true);
-        System.out.println("=== Execution Results ===");
-        System.out.println("Total Cycles: " + executionResult.numOfCycles());
-        // Update cycles display
-        executionVariableController.showWorkVariables(
-                executionResult.result(),
-                executionResult.argumentsValues(),
-                executionResult.workVariablesValues());
     }
 
     public void clearLoadedProgram() {
         programLoaded.set(false);
-        variablesEntered.set(false);
+        argumentsLoaded.set(false);
         maxExpandLevel.set(0);
         currentExpandLevel.set(0);
         loadedProgram = null;
@@ -385,10 +386,10 @@ public class AppController {
         // Clear UI components
         instructionsTableController.clearInstructions();
         summaryLineController.clearCounts(); // NEW: Clear summary
-        variablesController.clearVariables();
+        allVariablesDTO.clear();
+        argumentsDTO.clear();
         derivedInstructionsTableController.clearInstructions();
         currentCycles.set(0);
-        executionVariableController.clearVariables();
         instructionsTableController.highlightVariable(null);
         derivedInstructionsTableController.highlightVariable(null);
 
