@@ -1,10 +1,11 @@
 package dto.engine;
 
+import engine.utils.CommandType;
+
 import java.util.List;
-import java.util.Map;
 
 public record InstructionDTO(int index,
-                             String type,
+                             CommandType type,
                              String label,
                              String command,
                              int cycles,

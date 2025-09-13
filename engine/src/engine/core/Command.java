@@ -1,6 +1,7 @@
 package engine.core;
 
 import dto.engine.InstructionDTO;
+import engine.utils.CommandType;
 
 import java.io.Serializable;
 import java.util.List;

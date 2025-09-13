@@ -1,7 +1,7 @@
 package engine.core.basicCommand;
 
-import engine.core.CommandType;
 import engine.core.Instruction;
+import engine.utils.CommandType;
 
 import java.util.List;
 import java.util.Map;

@@ -1,6 +1,7 @@
 package ui.jfx.summaryLine;
 
 import dto.engine.InstructionDTO;
+import engine.utils.CommandType;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
@@ -45,10 +46,9 @@ public class SummaryLineController {
 
         // Count instructions by type
         for (InstructionDTO instruction : instructions) {
-            String type = instruction.type();
-            if ("S".equals(type)) {
+            if (instruction.type() == CommandType.SYNTHETIC) {
                 syntheticInstructions++;
-            } else if ("B".equals(type)) {
+            } else if (instruction.type() == CommandType.BASIC) {
                 basicInstructions++;
             }
         }

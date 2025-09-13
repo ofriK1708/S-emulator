@@ -1,9 +1,9 @@
 package engine.core.syntheticCommand;
 
-import engine.core.CommandType;
 import engine.core.Instruction;
 import engine.core.basicCommand.Increase;
 import engine.core.basicCommand.JumpNotZero;
+import engine.utils.CommandType;
 import engine.utils.ProgramUtils;
 
 import java.util.ArrayList;

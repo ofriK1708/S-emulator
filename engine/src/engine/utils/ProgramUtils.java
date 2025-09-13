@@ -1,6 +1,5 @@
 package engine.utils;
 
-import engine.core.CommandType;
 import engine.core.Instruction;
 
 import java.util.*;

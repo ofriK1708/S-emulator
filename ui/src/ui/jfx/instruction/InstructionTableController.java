@@ -44,7 +44,7 @@ public class InstructionTableController {
         indexColumn.setCellValueFactory(callData ->
                 new ReadOnlyObjectWrapper<>(callData.getValue().index() + 1));
         typeColumn.setCellValueFactory(cellData ->
-                new ReadOnlyObjectWrapper<>(cellData.getValue().type()));
+                new ReadOnlyObjectWrapper<>(cellData.getValue().type().getSymbol()));
         labelColumn.setCellValueFactory(cellData ->
                 new ReadOnlyObjectWrapper<>(cellData.getValue().label()));
         commandColumn.setCellValueFactory(cellData ->
@@ -169,11 +169,7 @@ public class InstructionTableController {
 
         // Check in the label field as well
         String label = instruction.label();
-        if (label != null && label.contains(variableName)) {
-            return true;
-        }
-
-        return false;
+        return label != null && label.contains(variableName);
     }
 
     // helper method to add instructions

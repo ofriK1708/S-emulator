@@ -1,9 +1,10 @@
 package ui.jfx;
-import dto.ui.VariableDTO;
+
 import dto.engine.ExecutionResultDTO;
+import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
-import dto.engine.ExecutionStatisticsDTO;
+import dto.ui.VariableDTO;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -30,9 +31,9 @@ import ui.jfx.instruction.InstructionTableController;
 import ui.jfx.program.function.PaneMode;
 import ui.jfx.program.function.ProgramFunctionController;
 import ui.jfx.runControls.RunControlsController;
-import ui.jfx.variables.VariablesController;
 import ui.jfx.statistics.HistoryStatsController;
 import ui.jfx.summaryLine.SummaryLineController;
+import ui.jfx.variables.VariablesController;
 import ui.utils.UIUtils;
 
 import java.io.File;
@@ -49,7 +50,6 @@ public class AppController {
     private final EngineController engineController;
     private ProgramDTO loadedProgram = null;
     private final Map<String, Integer> programArguments = new HashMap<>();
-    private final Map<String, Integer> programVariablesAfterExecution = new HashMap<>();
 
     @FXML
     private HBox fileHandler;
@@ -125,12 +125,9 @@ public class AppController {
 
             fileHandlerController.initComponent(this::loadProgramFromFile, this::clearLoadedProgram);
             programFunctionController.initComponent(this::expandProgramToLevel, this::setPaneModeChoice,
-                    currentExpandLevel, maxExpandLevel, programLoaded);
+                    currentExpandLevel, maxExpandLevel, programLoaded, programRanAtLeastOnce, this::handleVariableSelection);
             runControlsController.initComponent(this::RunProgram, this::promptForVariables, programLoaded, variablesEntered);
             cyclesController.initComponent(currentCycles);
-//            programFunctionController.initComponent(this::expandProgramToLevel,
-//                    currentExpandLevel, maxExpandLevel, programLoaded,
-//                    programRanAtLeastOnce, this::handleVariableSelection); // NEW: Add these parameters
             instructionsTableController.setAppController(this);
             instructionsTableController.initializeMainInstructionTable();
             derivedInstructionsTableController.setAppController(this);
@@ -194,23 +191,20 @@ public class AppController {
             loadingStage.setTitle("Loading File");
             loadingStage.setScene(new Scene(root, 1000, 183));
 
-            loadingStage.setOnShown(event -> {
-                fileLoaderController.initializeAndRunFileLoaderTaskThread(
-                        file.toPath(), engineController, programLoaded::set, variablesEntered::set,
-                        maxExpandLevel::set, currentExpandLevel::set, currentCycles::set,
-                        (program) -> {
-                            loadingStage.close();
-                            try {
-                                loadedProgram = program;
-//                                showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() +
-//                                        "\nPlease press set new run button :)");
-                                instructionsTableController.setInstructions(loadedProgram.instructions());
-                                derivedInstructionsTableController.clearInstructions();
-                            } catch (Exception e) {
-                                UIUtils.showError(e.getMessage());
-                            }
-                        });
-            });
+            loadingStage.setOnShown(event -> fileLoaderController.initializeAndRunFileLoaderTaskThread(
+                    file.toPath(), engineController, programLoaded::set, variablesEntered::set,
+                    maxExpandLevel::set, currentExpandLevel::set, currentCycles::set,
+                    (program) -> {
+                        loadingStage.close();
+                        try {
+                            loadedProgram = program;
+                            instructionsTableController.setInstructions(loadedProgram.instructions());
+                            derivedInstructionsTableController.clearInstructions();
+                            summaryLineController.updateCounts(loadedProgram.instructions());
+                        } catch (Exception e) {
+                            UIUtils.showError(e.getMessage());
+                        }
+                    }));
             loadingStage.show();
         } catch (Exception e) {
             System.err.println("Error loading file: " + e.getMessage());
@@ -353,6 +347,7 @@ public class AppController {
             // or if user explicitly wants to see the expanded program structure
             instructionsTableController.setInstructions(program.instructions());
             currentCycles.set(engineController.getCyclesCount(level));
+            summaryLineController.updateCounts(program.instructions()); // NEW: Update summary
 
             showInfo("Program expanded to level " + level);
 
@@ -381,6 +376,7 @@ public class AppController {
 
 
     }
+
     private void updateExecutionStatistics(ExecutionResultDTO executionResult) {
         // Increment execution counter
         executionCounter++;
@@ -399,7 +395,6 @@ public class AppController {
 
         System.out.println("Updated execution statistics: Execution #" + executionCounter);
     }
-
 
 
     public void clearLoadedProgram() {
@@ -422,6 +417,7 @@ public class AppController {
 
         showInfo("Loaded program cleared.");
     }
+
     /**
      * NEW: Updates the variable dropdown with current execution variables
      */
@@ -429,6 +425,7 @@ public class AppController {
         List<VariableDTO> currentVariables = executionVariableController.getCurrentVariables();
         programFunctionController.updateVariableDropdown(currentVariables);
     }
+
     private void handleVariableSelection(String variableName) {
         // Highlight the variable in the main instruction table
         instructionsTableController.highlightVariable(variableName);
@@ -441,52 +438,6 @@ public class AppController {
         } else {
             System.out.println("Clearing variable highlighting in all instruction tables");
         }
-    }
-
-    // Expand program to specific level (same logic as console expandProgram)
-    public void expandProgramToLevel(int level) {
-        if (!programLoaded.get()) {
-            showError("No program loaded. Please load a program first.");
-            return;
-        }
-
-        if (level < 0 || level > maxExpandLevel.get()) {
-            showError("Invalid expand level. Must be between 0 and " + maxExpandLevel.get());
-            return;
-        }
-
-        try {
-            currentExpandLevel.set(level);
-            System.out.println("Program expanded to level: " + level);
-
-            // Get the program at this expand level (same as console)
-            ProgramDTO program = systemController.getProgramByExpandLevel(level);
-            System.out.println("Program at level " + level + " has " + program.instructions().size() + " instructions");
-
-            // Update UI components with new expand level
-            derivedInstructionsTableController.clearInstructions();
-
-            // Only update instruction table if program has been executed
-            // or if user explicitly wants to see the expanded program structure
-            instructionsTableController.setInstructions(program.instructions());
-          //  cyclesController.setNumOfCycles(systemController.getCyclesCount(level)); FIX BUG 1
-            summaryLineController.updateCounts(program.instructions()); // NEW: Update summary
-
-            showInfo("Program expanded to level " + level);
-
-        } catch (Exception e) {
-            System.err.println("Error expanding program: " + e.getMessage());
-            showError("Error expanding program: " + e.getMessage());
-        }
-    }
-
-    // Get basic program (expand level 0)
-    public void displayBasicProgram() {
-        if (!programLoaded.get()) {
-            showError("No program loaded. Please load a program first.");
-            return;
-        }
-        expandProgramToLevel(0);
     }
 
     public void displayDerivedFromMap(List<InstructionDTO> instructionDTOIntegerMap) {

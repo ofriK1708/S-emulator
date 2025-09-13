@@ -112,7 +112,7 @@ public abstract class Instruction implements Command, Serializable
     {
         return new InstructionDTO(
                 idx,
-                getType().getSymbol(),
+                getType(),
                 label,
                 toString(),
                 getCycles(),
@@ -124,7 +124,7 @@ public abstract class Instruction implements Command, Serializable
     {
         return new InstructionDTO(
                 index,
-                getType().getSymbol(),
+                getType(),
                 label,
                 toString(),
                 getCycles(),
