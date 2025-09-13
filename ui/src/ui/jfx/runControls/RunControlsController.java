@@ -22,7 +22,7 @@ public class RunControlsController {
     private ToggleButton debugType;
 
     @FXML
-    private Button run;
+    public Button run;
 
     @FXML
     private ToggleButton runType;

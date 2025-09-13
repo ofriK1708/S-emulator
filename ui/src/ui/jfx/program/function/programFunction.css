@@ -56,6 +56,11 @@
     -fx-cursor: default; /* Regular cursor, not a hand */
 }
 
+/* HighSelectionButton text color */
+.menu-button > .label {
+    -fx-text-fill: white;
+}
+
 /* Program selector button (special styling) */
 .pf-collapse {
     -fx-min-width: 120px;
