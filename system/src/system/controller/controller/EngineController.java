@@ -143,6 +143,13 @@ public class EngineController
         return engine.getAllExecutionStatistics().getLast();
     }
 
+    public List<String> getAllVariablesAndLabelsNames(int expandLevel) {
+        if (engine == null) {
+            throw new IllegalStateException("Program has not been set");
+        }
+        return engine.getAllVariablesNamesAndLabels(expandLevel);
+    }
+
     public void saveProgramState(Path directoryPath) throws IOException
     {
         if (engine == null)

@@ -74,7 +74,7 @@ public class InstructionTableController {
         instructionTable.itemsProperty().bind(instructions);
     }
 
-    public void initializeDerivedInstructionsTable(ListProperty<InstructionDTO> derivedInstructions) {
+    public void setDerivedInstructionsTable(ListProperty<InstructionDTO> derivedInstructions) {
         if (!isDerivedMap) {
             throw new IllegalStateException("setDerivedInstructions called on non-derived map table");
         }

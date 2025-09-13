@@ -41,8 +41,8 @@
             text="Choose expand Level"/>
 
     <!-- UPDATED: Changed from Button to MenuButton for variable selection dropdown -->
-    <MenuButton fx:id="HighSelectionButton" mnemonicParsing="false" text="Highlight Variable" maxHeight="28"
-                minWidth="130">
+    <MenuButton fx:id="highlightSelectionButton" maxHeight="28" minWidth="130" mnemonicParsing="false"
+                text="Highlight Variable / Label">
         <styleClass>
             <String fx:value="pill-button"/>
             <String fx:value="pill-green"/>

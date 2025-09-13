@@ -24,18 +24,14 @@ public class FileLoaderController {
     private ProgressBar progressBar;
 
     public void initializeAndRunFileLoaderTaskThread(Path filePath, EngineController engineController,
-                                                     Consumer<Boolean> programLoadedDelegate, Consumer<Boolean> VariablesEnteredDelegate,
-                                                     Consumer<Integer> maxExpandLevelDelegate, Consumer<Integer> currentExpandLevelDelegate,
-                                                     Consumer<Integer> cyclesDelegate, Consumer<ProgramDTO> onFinish) {
+                                                     UIAdapterLoadFileTask uiAdapter) {
         fileNameLabel.setText(filePath.toString());
         percentLabel.setText("0%");
         progressBar.setProgress(0);
         LoadFileToProgramTask loadFileToProgramTask = new LoadFileToProgramTask(
-                engineController, filePath, programLoadedDelegate,
-                VariablesEnteredDelegate, maxExpandLevelDelegate,
-                currentExpandLevelDelegate, cyclesDelegate
+                engineController, filePath, uiAdapter
         );
-        bindTaskToUIComponents(loadFileToProgramTask, onFinish);
+        bindTaskToUIComponents(loadFileToProgramTask, uiAdapter.onFinish);
         Thread thread = new Thread(loadFileToProgramTask, "FileLoaderTaskThread");
         thread.start();
     }

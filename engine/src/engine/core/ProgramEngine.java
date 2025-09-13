@@ -104,6 +104,7 @@ public class ProgramEngine implements Serializable {
         ExecutionStatistics exStats = new ExecutionStatistics(executionStatisticsList.size() + 1,
                 expandLevel, arguments);
         originalContextMap.putAll(arguments);
+        contextMapsByExpandLevel.getFirst().putAll(arguments);
         expand(expandLevel);
         List<Instruction> executedInstructions = instructionExpansionLevels.get(expandLevel);
         Map<String, Integer> executedContextMap = contextMapsByExpandLevel.get(expandLevel);
@@ -224,5 +225,12 @@ public class ProgramEngine implements Serializable {
             throw new IllegalArgumentException("Expand level out of bounds");
         }
         return cyclesPerExpandLevel.get(expandLevel);
+    }
+
+    public List<String> getAllVariablesNamesAndLabels(int expandLevel) {
+        if (expandLevel < 0 || expandLevel >= labelsByExpandLevel.size()) {
+            throw new IllegalArgumentException("Expand level out of bounds");
+        }
+        return extractAllVariableAndLabelNames(contextMapsByExpandLevel.get(expandLevel));
     }
 }

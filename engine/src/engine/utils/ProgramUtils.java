@@ -83,13 +83,10 @@ public class ProgramUtils {
         return maxLevel;
     }
 
-    public static Map<String, Integer> getArgsMapFromValuesList(List<Integer> argsList) {
-        Map<String, Integer> argsMap = new HashMap<>();
-        for (int i = 0; i < argsList.size(); i++) {
-            String argName = ARG_PREFIX + (i + 1);
-            argsMap.put(argName, argsList.get(i));
-        }
-        return argsMap;
+    public static List<String> extractAllVariableAndLabelNames(Map<String, Integer> contextMap) {
+        contextMap.remove(EXIT_LABEL_NAME);
+        contextMap.remove(PC_NAME);
+        return new ArrayList<>(contextMap.keySet());
     }
 
     public static Map<String, Integer> extractWorkVars(Map<String, Integer> contextMap) {

@@ -1,14 +1,13 @@
 package ui.jfx.program.function;
 
-import dto.ui.VariableDTO;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import ui.utils.UIUtils;
-import javafx.scene.control.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +35,7 @@ public class ProgramFunctionController {
     @FXML
     public ToggleGroup paneMode;
     @FXML
-    public MenuButton HighSelectionButton; // Changed from Button to MenuButton
+    public MenuButton highlightSelectionButton; // Changed from Button to MenuButton
     @FXML
     public RadioButton manualPaneMode;
 
@@ -45,18 +44,14 @@ public class ProgramFunctionController {
     @FXML
     void initialize() {
         System.out.println("ProgramFunctionController initialized");
-
-        // Initialize the MenuButton
-        HighSelectionButton.setText("Highlight Variable");
-        HighSelectionButton.getItems().clear();
     }
 
     public void initComponent(Consumer<Integer> OnExpandLevelChangeCallback,
                               Consumer<PaneMode> OnPaneModeChangeCallback,
                               IntegerProperty currentExpandLevelProperty, IntegerProperty MaxExpandLevelProperty,
                               BooleanProperty programLoadedProperty,
-                              BooleanProperty programRanAtLeastOnceProperty, // NEW: Add this parameter
-                              Consumer<String> OnVariableSelectionCallback) { // NEW: Add variable selection callback
+                              Consumer<String> OnVariableSelectionCallback,
+                              ListProperty<String> programVariables) { // NEW: Add variable selection callback
         this.OnExpandLevelChangeCallback = OnExpandLevelChangeCallback;
         this.OnVariableSelectionCallback = OnVariableSelectionCallback;
 
@@ -73,9 +68,8 @@ public class ProgramFunctionController {
                 programLoadedProperty.not());
 
         // NEW: Bind HighSelectionButton to programRanAtLeastOnce
-        HighSelectionButton.disableProperty().bind(
-                programLoadedProperty.not()
-                        .or(programRanAtLeastOnceProperty.not()));
+        highlightSelectionButton.disableProperty().bind(
+                programLoadedProperty.not());
 
         degreeInfoLabel.textProperty().bind(
                 currentExpandLevelProperty.asString("Current: %d")
@@ -84,60 +78,56 @@ public class ProgramFunctionController {
         );
         currentLevel.bind(currentExpandLevelProperty);
         maxLevel.bind(MaxExpandLevelProperty);
+        programVariables.addListener((obs,
+                                      oldList, newList) ->
+                updateVariableDropdown(newList)
+        );
     }
 
 
     /**
      * Updates the dropdown menu with available execution variables
+     *
      * @param variables List of VariableDTO objects from ExecutionVariableController
      */
-    public void updateVariableDropdown(List<VariableDTO> variables) {
-        HighSelectionButton.getItems().clear();
+    public void updateVariableDropdown(List<String> variables) {
+        highlightSelectionButton.getItems().clear();
 
         if (variables == null || variables.isEmpty()) {
             MenuItem noVariablesItem = new MenuItem("No variables available");
             noVariablesItem.setDisable(true);
-            HighSelectionButton.getItems().add(noVariablesItem);
+            highlightSelectionButton.getItems().add(noVariablesItem);
             return;
         }
 
         // Add "Clear Highlighting" option
         MenuItem clearItem = new MenuItem("Clear Highlighting");
-        clearItem.setOnAction(e -> {
-            if (OnVariableSelectionCallback != null) {
-                OnVariableSelectionCallback.accept(null); // null means clear highlighting
-            }
-        });
-        HighSelectionButton.getItems().add(clearItem);
-        HighSelectionButton.getItems().add(new SeparatorMenuItem());
+        clearItem.setOnAction(e -> OnVariableSelectionCallback.accept(null)); // null means clear highlighting});
+
+        highlightSelectionButton.getItems().add(clearItem);
+        highlightSelectionButton.getItems().add(new SeparatorMenuItem());
 
         // Add each variable as a menu item
-        for (VariableDTO variable : variables) {
-            String variableName = variable.name().get();
-            // CHANGED: Remove "= value" display, show only variable name
+        for (String variableName : variables) {
             MenuItem variableItem = new MenuItem(variableName);
             variableItem.setOnAction(e -> {
-                if (OnVariableSelectionCallback != null) {
-                    OnVariableSelectionCallback.accept(variableName);
-                    System.out.println("Variable selected for highlighting: " + variableName);
-                }
+                OnVariableSelectionCallback.accept(variableName);
+                System.out.println("Variable selected for highlighting: " + variableName);
             });
-            HighSelectionButton.getItems().add(variableItem);
+            highlightSelectionButton.getItems().add(variableItem);
         }
     }
-    // Collapse to basic program (level 0)
+
     @FXML
     void handleCollapse(ActionEvent event) {
         OnExpandLevelChangeCallback.accept(currentLevel.get() - 1);
     }
 
-    // Expand program
     @FXML
     void handleExpand(ActionEvent event) {
         OnExpandLevelChangeCallback.accept(currentLevel.get() + 1);
     }
 
-    // Change: open input dialog for manual level entry
     @FXML
     void handleChooseExpandLevel(ActionEvent event) {
         System.out.println("Change button pressed");
@@ -150,14 +140,9 @@ public class ProgramFunctionController {
 
         Optional<String> result = dialog.showAndWait();
         if (result.isPresent()) {
-            try {
-                int choice = Integer.parseInt(result.get().trim());
-                if (choice >= 0 && choice <= maxLevel.get()) {
-                    OnExpandLevelChangeCallback.accept(choice);
-                } else {
-                    showInvalidChoice(maxLevel.get());
-                }
-            } catch (NumberFormatException e) {
+            if (UIUtils.isValidProgramArgument(result.get())) {
+                OnExpandLevelChangeCallback.accept(Integer.parseInt(result.get().trim()));
+            } else {
                 showInvalidChoice(maxLevel.get());
             }
         }

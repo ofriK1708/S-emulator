@@ -4,7 +4,6 @@ import dto.engine.ExecutionResultDTO;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
-import dto.ui.VariableDTO;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -25,6 +24,7 @@ import ui.jfx.debugger.DebuggerController;
 import ui.jfx.execution.ExecutionVariableController;
 import ui.jfx.fileHandler.FileHandlerController;
 import ui.jfx.fileLoader.FileLoaderController;
+import ui.jfx.fileLoader.UIAdapterLoadFileTask;
 import ui.jfx.instruction.InstructionTableController;
 import ui.jfx.program.function.PaneMode;
 import ui.jfx.program.function.ProgramFunctionController;
@@ -32,11 +32,9 @@ import ui.jfx.runControls.RunControlsController;
 import ui.jfx.statistics.HistoryStatsController;
 import ui.jfx.summaryLine.SummaryLineController;
 import ui.jfx.variables.VariablesController;
-import ui.utils.UIUtils;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,13 +42,6 @@ import static ui.utils.UIUtils.*;
 
 public class AppController {
 
-
-    private final ListProperty<InstructionDTO> programInstructions =
-            new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final ListProperty<InstructionDTO> derivedInstructions =
-            new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final ListProperty<ExecutionStatisticsDTO> executionStatistics =
-            new SimpleListProperty<>(FXCollections.observableArrayList());
     @FXML
     private HBox fileHandler;
     @FXML
@@ -91,11 +82,6 @@ public class AppController {
     private TitledPane variablesTitledPane;
     @FXML
     private TitledPane staticsTitledPane;
-
-
-    // Core system controller - same as console version
-    private final EngineController engineController;
-    private ProgramDTO loadedProgram = null;
     @FXML
     private VBox historyStats;
     @FXML
@@ -103,8 +89,22 @@ public class AppController {
     @FXML
     private SummaryLineController summaryLineController;
 
+    // Core system controller - same as console version
+    private final ListProperty<InstructionDTO> programInstructions =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+
+    private final ListProperty<InstructionDTO> derivedInstructions =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+
+    private final ListProperty<ExecutionStatisticsDTO> executionStatistics =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+
+    private final ListProperty<String> programVariablesNamesAndLabels =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+
+    private final EngineController engineController;
+    private ProgramDTO loadedProgram = null;
     private final Map<String, Integer> programArguments = new HashMap<>();
-    private final int executionCounter = 0;
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
     private final BooleanProperty variablesEntered = new SimpleBooleanProperty(false);
     private final BooleanProperty debugMode = new SimpleBooleanProperty(false);
@@ -131,20 +131,18 @@ public class AppController {
                 runControlsController != null && historyStatsController != null && summaryLineController != null) {
 
             fileHandlerController.initComponent(this::loadProgramFromFile, this::clearLoadedProgram);
-            programFunctionController.initComponent(this::expandProgramToLevel, this::setPaneModeChoice,
-                    currentExpandLevel, maxExpandLevel, programLoaded, programRanAtLeastOnce, this::handleVariableSelection);
+            programFunctionController.initComponent(this::expandProgramToLevel, this::setPaneMode,
+                    currentExpandLevel, maxExpandLevel, programLoaded, this::handleVariableSelection,
+                    programVariablesNamesAndLabels);
             runControlsController.initComponent(this::RunProgram, this::promptForVariables, programLoaded, variablesEntered);
             cyclesController.initComponent(currentCycles);
             instructionsTableController.initializeMainInstructionTable(programInstructions, derivedInstructions);
             derivedInstructionsTableController.markAsDerivedInstructionsTable();
-            derivedInstructionsTableController.initializeDerivedInstructionsTable(derivedInstructions);
+            derivedInstructionsTableController.setDerivedInstructionsTable(derivedInstructions);
             variablesController.clearVariables();
             debugControlsController.setAppController(this);
             historyStatsController.initComponent(executionStatistics);
             bindTitlePanesExpansion();
-            programFunctionController.HighSelectionButton.disableProperty().bind(
-                    runControlsController.run.disableProperty());
-
 
             System.out.println("AppController initialized");
         } else {
@@ -180,7 +178,7 @@ public class AppController {
         statisticsTitledPane.expandedProperty().unbind();
     }
 
-    public void setPaneModeChoice(PaneMode paneMode) {
+    public void setPaneMode(PaneMode paneMode) {
         if (paneMode == PaneMode.AUTO) {
             bindTitlePanesExpansion();
         } else {
@@ -188,7 +186,6 @@ public class AppController {
         }
     }
 
-    // Load program from file - DO NOT populate UI tables yet
     public void loadProgramFromFile(File file) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("fileLoader/fileLoader.fxml"));
@@ -199,22 +196,21 @@ public class AppController {
             loadingStage.initModality(Modality.APPLICATION_MODAL);
             loadingStage.setTitle("Loading File");
             loadingStage.setScene(new Scene(root, 1000, 183));
-
-            loadingStage.setOnShown(event -> fileLoaderController.initializeAndRunFileLoaderTaskThread(
-                    file.toPath(), engineController, programLoaded::set, variablesEntered::set,
-                    maxExpandLevel::set, currentExpandLevel::set, currentCycles::set,
+            UIAdapterLoadFileTask uiAdapter = new UIAdapterLoadFileTask(programLoaded::set,
+                    variablesEntered::set,
+                    programVariablesNamesAndLabels::setAll,
+                    programInstructions::setAll,
+                    derivedInstructions::clear,
+                    summaryLineController::updateCounts,
+                    maxExpandLevel::set,
+                    currentExpandLevel::set,
+                    currentCycles::set,
                     (program) -> {
+                        loadedProgram = program;
                         loadingStage.close();
-                        try {
-                            loadedProgram = program;
-                            programInstructions.setAll(loadedProgram.instructions());
-                            derivedInstructions.clear();
-                            executionStatistics.clear();
-                            summaryLineController.updateCounts(loadedProgram.instructions());
-                        } catch (Exception e) {
-                            UIUtils.showError(e.getMessage());
-                        }
-                    }));
+                    });
+            loadingStage.setOnShown(event -> fileLoaderController.initializeAndRunFileLoaderTaskThread(
+                    file.toPath(), engineController, uiAdapter));
             loadingStage.show();
         } catch (Exception e) {
             System.err.println("Error loading file: " + e.getMessage());
@@ -331,36 +327,30 @@ public class AppController {
     private void startDebugExecution() {
     }
 
-    public void expandProgramToLevel(int level) {
+    public void expandProgramToLevel(int expandLevel) {
         if (!programLoaded.get()) {
             showError("No program loaded. Please load a program first.");
             return;
         }
 
-        if (level < 0 || level > maxExpandLevel.get()) {
+        if (expandLevel < 0 || expandLevel > maxExpandLevel.get()) {
             showError("Invalid expand level. Must be between 0 and " + maxExpandLevel.get());
             return;
         }
 
         try {
-            currentExpandLevel.set(level);
-            System.out.println("Program expanded to level: " + level);
+            currentExpandLevel.set(expandLevel);
+            System.out.println("Program expanded to level: " + expandLevel);
 
-            // Get the program at this expand level (same as console)
-            ProgramDTO program = engineController.getProgramByExpandLevel(level);
-            System.out.println("Program at level " + level + " has " + program.instructions().size() + " instructions");
-
-            // Update UI components with new expand level
-            derivedInstructionsTableController.clearInstructions();
-
-            // Only update instruction table if program has been executed
-            // or if user explicitly wants to see the expanded program structure
+            ProgramDTO program = engineController.getProgramByExpandLevel(expandLevel);
+            System.out.println("Program at level " + expandLevel + " has " + program.instructions().size() + " instructions");
+            derivedInstructions.clear();
             programInstructions.setAll(program.instructions());
-            currentCycles.set(engineController.getCyclesCount(level));
+            currentCycles.set(engineController.getCyclesCount(expandLevel));
             summaryLineController.updateCounts(program.instructions()); // NEW: Update summary
-            executionStatistics.add(engineController.getLastExecutionStatistics());
+            programVariablesNamesAndLabels.setAll(engineController.getAllVariablesAndLabelsNames(expandLevel));
 
-            showInfo("Program expanded to level " + level);
+            showInfo("Program expanded to level " + expandLevel);
 
         } catch (Exception e) {
             System.err.println("Error expanding program: " + e.getMessage());
@@ -381,7 +371,6 @@ public class AppController {
                 executionResult.result(),
                 executionResult.argumentsValues(),
                 executionResult.workVariablesValues());
-        updateVariableDropdown();
     }
 
     public void clearLoadedProgram() {
@@ -404,14 +393,6 @@ public class AppController {
         derivedInstructionsTableController.highlightVariable(null);
 
         showInfo("Loaded program cleared.");
-    }
-
-    /**
-     * NEW: Updates the variable dropdown with current execution variables
-     */
-    private void updateVariableDropdown() {
-        List<VariableDTO> currentVariables = executionVariableController.getCurrentVariables();
-        programFunctionController.updateVariableDropdown(currentVariables);
     }
 
     private void handleVariableSelection(String variableName) {
