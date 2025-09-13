@@ -1,5 +1,6 @@
 package ui.jfx.fileLoader;
 
+import dto.engine.ProgramDTO;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import system.controller.controller.EngineController;
@@ -8,7 +9,7 @@ import ui.utils.UIUtils;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
-public class LoadFileToProgramTask extends Task<Void> {
+public class LoadFileToProgramTask extends Task<ProgramDTO> {
     private final EngineController engineController;
     private final Consumer<Integer> cyclesDelegate;
     private final Path filePath;
@@ -31,11 +32,12 @@ public class LoadFileToProgramTask extends Task<Void> {
     }
 
     @Override
-    protected Void call() throws Exception {
+    protected ProgramDTO call() throws Exception {
         updateMessage("Loading file...");
         updateProgress(0, 4);
         int SLEEP_TIME = 750;
         engineController.LoadProgramFromFile(filePath);
+        ProgramDTO program = engineController.getBasicProgram();
         UIUtils.sleep(SLEEP_TIME);
         updateProgress(1, 4);
         UIUtils.sleep(SLEEP_TIME);
@@ -61,6 +63,6 @@ public class LoadFileToProgramTask extends Task<Void> {
         updateMessage("File loaded successfully");
         UIUtils.sleep(SLEEP_TIME);
 
-        return null;
+        return program;
     }
 }

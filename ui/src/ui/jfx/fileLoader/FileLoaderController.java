@@ -1,5 +1,6 @@
 package ui.jfx.fileLoader;
 
+import dto.engine.ProgramDTO;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -25,7 +26,7 @@ public class FileLoaderController {
     public void initializeAndRunFileLoaderTaskThread(Path filePath, EngineController engineController,
                                                      Consumer<Boolean> programLoadedDelegate, Consumer<Boolean> VariablesEnteredDelegate,
                                                      Consumer<Integer> maxExpandLevelDelegate, Consumer<Integer> currentExpandLevelDelegate,
-                                                     Consumer<Integer> cyclesDelegate, Runnable onFinish) {
+                                                     Consumer<Integer> cyclesDelegate, Consumer<ProgramDTO> onFinish) {
         fileNameLabel.setText(filePath.toString());
         percentLabel.setText("0%");
         progressBar.setProgress(0);
@@ -39,7 +40,7 @@ public class FileLoaderController {
         thread.start();
     }
 
-    private void bindTaskToUIComponents(LoadFileToProgramTask task, Runnable onFinish) {
+    private void bindTaskToUIComponents(LoadFileToProgramTask task, Consumer<ProgramDTO> onFinish) {
         progressBar.progressProperty().bind(task.progressProperty());
         taskMessage.textProperty().bind(task.messageProperty());
         percentLabel.textProperty().bind(Bindings.concat(
@@ -50,12 +51,9 @@ public class FileLoaderController {
                                 100)),
                 " %"));
 
-        task.setOnSucceeded(e -> {
-            System.out.println(Thread.currentThread().getName());
-            onFinish.run();
-        });
-        task.setOnCancelled(e -> onFinish.run());
-        task.setOnFailed(e -> onFinish.run());
+        task.setOnSucceeded(e -> onFinish.accept(task.getValue()));
+        task.setOnCancelled(e -> onFinish.accept(task.getValue()));
+        task.setOnFailed(e -> onFinish.accept(task.getValue()));
     }
 
 }

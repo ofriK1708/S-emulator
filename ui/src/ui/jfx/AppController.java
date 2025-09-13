@@ -183,10 +183,10 @@ public class AppController {
                 fileLoaderController.initializeAndRunFileLoaderTaskThread(
                         file.toPath(), engineController, programLoaded::set, variablesEntered::set,
                         maxExpandLevel::set, currentExpandLevel::set, currentCycles::set,
-                        () -> {
+                        (program) -> {
                             loadingStage.close();
                             try {
-                                loadedProgram = engineController.getProgramByExpandLevel(0);
+                                loadedProgram = program;
 //                                showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() +
 //                                        "\nPlease press set new run button :)");
                                 instructionsTableController.setInstructions(loadedProgram.instructions());
