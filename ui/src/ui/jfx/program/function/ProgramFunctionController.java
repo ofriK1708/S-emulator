@@ -36,7 +36,7 @@ public class ProgramFunctionController {
     @FXML
     public ToggleGroup paneMode;
     @FXML
-    private MenuButton HighSelectionButton; // Changed from Button to MenuButton
+    public MenuButton HighSelectionButton; // Changed from Button to MenuButton
     @FXML
     public RadioButton manualPaneMode;
 
@@ -86,6 +86,7 @@ public class ProgramFunctionController {
         maxLevel.bind(MaxExpandLevelProperty);
     }
 
+
     /**
      * Updates the dropdown menu with available execution variables
      * @param variables List of VariableDTO objects from ExecutionVariableController
@@ -113,9 +114,8 @@ public class ProgramFunctionController {
         // Add each variable as a menu item
         for (VariableDTO variable : variables) {
             String variableName = variable.name().get();
-            int variableValue = variable.value().get();
-
-            MenuItem variableItem = new MenuItem(variableName + " = " + variableValue);
+            // CHANGED: Remove "= value" display, show only variable name
+            MenuItem variableItem = new MenuItem(variableName);
             variableItem.setOnAction(e -> {
                 if (OnVariableSelectionCallback != null) {
                     OnVariableSelectionCallback.accept(variableName);
@@ -125,7 +125,6 @@ public class ProgramFunctionController {
             HighSelectionButton.getItems().add(variableItem);
         }
     }
-
     // Collapse to basic program (level 0)
     @FXML
     void handleCollapse(ActionEvent event) {

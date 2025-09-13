@@ -135,6 +135,8 @@ public class AppController {
             variablesController.clearVariables();
             debugControlsController.setAppController(this);
             bindTitlePanesExpansion();
+            programFunctionController.HighSelectionButton.disableProperty().bind(
+                    runControlsController.run.disableProperty());
 
 
             System.out.println("AppController initialized");
