@@ -47,11 +47,20 @@ public class ExecutionVariableController {
         System.out.println("Work variables displayed in table: " + workVars.size() + " variables");
         setVariables(variableDTOS);
     }
+
     private void setVariables(List<VariableDTO> variableDTOS) {
         workVariablesTable.getItems().addAll(variableDTOS);
     }
 
     public void clearVariables() {
         workVariablesTable.getItems().clear();
+    }
+
+    /**
+     * NEW: Gets the current list of variables in the table
+     * @return List of VariableDTO objects currently displayed
+     */
+    public List<VariableDTO> getCurrentVariables() {
+        return new ArrayList<>(workVariablesTable.getItems());
     }
 }
