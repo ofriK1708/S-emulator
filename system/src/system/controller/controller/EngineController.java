@@ -136,6 +136,13 @@ public class EngineController
         maxExpandLevel = 0;
     }
 
+    public ExecutionStatisticsDTO getLastExecutionStatistics() {
+        if (engine == null) {
+            throw new IllegalStateException("Program has not been set");
+        }
+        return engine.getAllExecutionStatistics().getLast();
+    }
+
     public void saveProgramState(Path directoryPath) throws IOException
     {
         if (engine == null)

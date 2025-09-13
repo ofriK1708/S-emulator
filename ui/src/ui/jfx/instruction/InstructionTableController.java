@@ -1,12 +1,12 @@
 package ui.jfx.instruction;
 
 import dto.engine.InstructionDTO;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import ui.jfx.AppController;
 
 import java.util.List;
 
@@ -28,14 +28,8 @@ public class InstructionTableController {
     @FXML
     private TableColumn<InstructionDTO, Number> cyclesColumn;
 
-    private AppController appController;
-
-    public void setAppController(AppController appController) {
-        this.appController = appController;
-    }
-
-    public void setDerivedMap(boolean derivedMap) {
-        isDerivedMap = derivedMap;
+    public void markAsDerivedInstructionsTable() {
+        isDerivedMap = true;
     }
 
     @FXML
@@ -53,7 +47,8 @@ public class InstructionTableController {
                 new ReadOnlyObjectWrapper<>(cellData.getValue().cycles()));
     }
 
-    public void initializeMainInstructionTable() {
+    public void initializeMainInstructionTable(ListProperty<InstructionDTO> instructions,
+                                               ListProperty<InstructionDTO> derivedInstructions) {
         if (isDerivedMap) {
             throw new IllegalStateException("initializeMainInstructionTable called on derived map table");
         }
@@ -71,23 +66,21 @@ public class InstructionTableController {
                 if (!row.isEmpty() && event.getClickCount() == 1) {
                     System.out.println("Row clicked: " + row.getItem());
                     InstructionDTO clicked = row.getItem();
-                    if (appController != null) {
-                        appController.displayDerivedFromMap(clicked.derivedFromInstructions());
-                    }
+                    derivedInstructions.setAll(clicked.derivedFromInstructions());
                 }
             });
             return row;
         });
+        instructionTable.itemsProperty().bind(instructions);
     }
 
-    /**
-     * Highlights instructions that contain the specified variable
-     * @param variableName The variable name to highlight, or null to clear highlighting
-     */
-    /**
-     * Highlights instructions that contain the specified variable
-     * @param variableName The variable name to highlight, or null to clear highlighting
-     */
+    public void initializeDerivedInstructionsTable(ListProperty<InstructionDTO> derivedInstructions) {
+        if (!isDerivedMap) {
+            throw new IllegalStateException("setDerivedInstructions called on non-derived map table");
+        }
+        instructionTable.itemsProperty().bind(derivedInstructions);
+    }
+
     /**
      * Highlights instructions that contain the specified variable
      * @param variableName The variable name to highlight, or null to clear highlighting
@@ -172,28 +165,8 @@ public class InstructionTableController {
         return label != null && label.contains(variableName);
     }
 
-    // helper method to add instructions
-    public void setInstructions(List<InstructionDTO> instructions) {
-        instructionTable.getItems().setAll(instructions);
-    }
-
     public void clearInstructions() {
         instructionTable.getItems().clear();
         currentHighlightedVariable = null; // Clear highlighting when clearing instructions
-    }
-
-    public void setDerivedInstructions(List<InstructionDTO> instructionDTOList) {
-        if (!isDerivedMap) {
-            throw new IllegalStateException("setDerivedInstructions called on non-derived map table");
-        }
-        // Clear previous data
-        instructionTable.getItems().clear();
-
-        if (instructionDTOList == null || instructionDTOList.isEmpty()) {
-            return;
-        }
-
-        // Fill the table with the keys
-        instructionTable.getItems().addAll(instructionDTOList);
     }
 }

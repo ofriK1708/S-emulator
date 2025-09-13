@@ -6,10 +6,8 @@ import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
 import dto.ui.VariableDTO;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.*;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -46,11 +44,13 @@ import static ui.utils.UIUtils.*;
 
 public class AppController {
 
-    // Core system controller - same as console version
-    private final EngineController engineController;
-    private ProgramDTO loadedProgram = null;
-    private final Map<String, Integer> programArguments = new HashMap<>();
 
+    private final ListProperty<InstructionDTO> programInstructions =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<InstructionDTO> derivedInstructions =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<ExecutionStatisticsDTO> executionStatistics =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
     @FXML
     private HBox fileHandler;
     @FXML
@@ -91,14 +91,20 @@ public class AppController {
     private TitledPane variablesTitledPane;
     @FXML
     private TitledPane staticsTitledPane;
+
+
+    // Core system controller - same as console version
+    private final EngineController engineController;
+    private ProgramDTO loadedProgram = null;
+    @FXML
+    private VBox historyStats;
     @FXML
     private HistoryStatsController historyStatsController;
     @FXML
     private SummaryLineController summaryLineController;
 
-
-    private int executionCounter = 0;
-
+    private final Map<String, Integer> programArguments = new HashMap<>();
+    private final int executionCounter = 0;
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
     private final BooleanProperty variablesEntered = new SimpleBooleanProperty(false);
     private final BooleanProperty debugMode = new SimpleBooleanProperty(false);
@@ -113,6 +119,7 @@ public class AppController {
 
     public AppController() {
         this.engineController = new EngineController();
+
     }
 
     @FXML
@@ -121,19 +128,19 @@ public class AppController {
                 && programFunctionController != null && instructionsTableController != null &&
                 derivedInstructionsTableController != null && variablesController != null &&
                 debugControlsController != null && executionVariableController != null &&
-                runControlsController != null) {
+                runControlsController != null && historyStatsController != null && summaryLineController != null) {
 
             fileHandlerController.initComponent(this::loadProgramFromFile, this::clearLoadedProgram);
             programFunctionController.initComponent(this::expandProgramToLevel, this::setPaneModeChoice,
                     currentExpandLevel, maxExpandLevel, programLoaded, programRanAtLeastOnce, this::handleVariableSelection);
             runControlsController.initComponent(this::RunProgram, this::promptForVariables, programLoaded, variablesEntered);
             cyclesController.initComponent(currentCycles);
-            instructionsTableController.setAppController(this);
-            instructionsTableController.initializeMainInstructionTable();
-            derivedInstructionsTableController.setAppController(this);
-            derivedInstructionsTableController.setDerivedMap(true);
+            instructionsTableController.initializeMainInstructionTable(programInstructions, derivedInstructions);
+            derivedInstructionsTableController.markAsDerivedInstructionsTable();
+            derivedInstructionsTableController.initializeDerivedInstructionsTable(derivedInstructions);
             variablesController.clearVariables();
             debugControlsController.setAppController(this);
+            historyStatsController.initComponent(executionStatistics);
             bindTitlePanesExpansion();
 
 
@@ -198,8 +205,9 @@ public class AppController {
                         loadingStage.close();
                         try {
                             loadedProgram = program;
-                            instructionsTableController.setInstructions(loadedProgram.instructions());
-                            derivedInstructionsTableController.clearInstructions();
+                            programInstructions.setAll(loadedProgram.instructions());
+                            derivedInstructions.clear();
+                            executionStatistics.clear();
                             summaryLineController.updateCounts(loadedProgram.instructions());
                         } catch (Exception e) {
                             UIUtils.showError(e.getMessage());
@@ -293,14 +301,14 @@ public class AppController {
 
             // Execute the program using SystemController
             ExecutionResultDTO executionResult = engineController.runLoadedProgram(expandLevel, programArguments);
+            executionStatistics.add(engineController.getLastExecutionStatistics());
 
             // Get the updated program state after execution
             ProgramDTO executedProgram = engineController.getProgramByExpandLevel(expandLevel);
-
-            // Update UI components with execution results
-            instructionsTableController.setInstructions(executedProgram.instructions());
-            currentCycles.set(engineController.getCyclesCount(expandLevel));
-            summaryLineController.updateCounts(executedProgram.instructions()); // NEW: Update summary
+            programInstructions.setAll(executedProgram.instructions());
+            derivedInstructions.clear();
+            currentCycles.set(executionResult.numOfCycles());
+            summaryLineController.updateCounts(executedProgram.instructions());
 
             // Show execution results
             showExecutionResults(executionResult);
@@ -345,9 +353,10 @@ public class AppController {
 
             // Only update instruction table if program has been executed
             // or if user explicitly wants to see the expanded program structure
-            instructionsTableController.setInstructions(program.instructions());
+            programInstructions.setAll(program.instructions());
             currentCycles.set(engineController.getCyclesCount(level));
             summaryLineController.updateCounts(program.instructions()); // NEW: Update summary
+            executionStatistics.add(engineController.getLastExecutionStatistics());
 
             showInfo("Program expanded to level " + level);
 
@@ -366,36 +375,12 @@ public class AppController {
         System.out.println("=== Execution Results ===");
         System.out.println("Total Cycles: " + executionResult.numOfCycles());
         // Update cycles display
-        currentCycles.set(executionResult.numOfCycles());
         executionVariableController.showWorkVariables(
                 executionResult.result(),
                 executionResult.argumentsValues(),
                 executionResult.workVariablesValues());
-        updateExecutionStatistics(executionResult);
         updateVariableDropdown();
-
-
     }
-
-    private void updateExecutionStatistics(ExecutionResultDTO executionResult) {
-        // Increment execution counter
-        executionCounter++;
-
-        // Create ExecutionStatisticsDTO with current execution data
-        ExecutionStatisticsDTO executionStats = new ExecutionStatisticsDTO(
-                executionCounter,                           // executionNumber
-                currentExpandLevel.get(),                   // expandLevel
-                new HashMap<>(programArguments),            // arguments (copy)
-                executionResult.result(),                   // result
-                executionResult.numOfCycles()              // cyclesUsed
-        );
-
-        // Update the statistics component
-        historyStatsController.updateStatistics(executionStats);
-
-        System.out.println("Updated execution statistics: Execution #" + executionCounter);
-    }
-
 
     public void clearLoadedProgram() {
         programLoaded.set(false);
@@ -405,6 +390,7 @@ public class AppController {
         loadedProgram = null;
         programArguments.clear();
         engineController.clearLoadedProgram();
+        executionStatistics.clear();
         // Clear UI components
         instructionsTableController.clearInstructions();
         summaryLineController.clearCounts(); // NEW: Clear summary
@@ -438,10 +424,6 @@ public class AppController {
         } else {
             System.out.println("Clearing variable highlighting in all instruction tables");
         }
-    }
-
-    public void displayDerivedFromMap(List<InstructionDTO> instructionDTOIntegerMap) {
-        derivedInstructionsTableController.setDerivedInstructions(instructionDTOIntegerMap);
     }
 
     public boolean isProgramLoaded() {
