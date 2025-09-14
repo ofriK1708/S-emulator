@@ -1,7 +1,6 @@
 package ui.jfx.fileLoader;
 
 import dto.engine.ProgramDTO;
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import system.controller.controller.EngineController;
 import ui.utils.UIUtils;
@@ -33,15 +32,7 @@ public class LoadFileToProgramTask extends Task<ProgramDTO> {
         updateProgress(1, 4);
         UIUtils.sleep(SLEEP_TIME);
         // update titledPanes in the UI
-        Platform.runLater(() -> {
-            uiAdapter.programLoadedDelegate.accept(true);
-            uiAdapter.variablesEnteredDelegate.accept(false);
-            uiAdapter.variablesAndLabelsNamesDelegate.accept(allVars);
-            uiAdapter.programInstructionsDelegate.accept(program.instructions());
-            uiAdapter.clearDerivedInstructionsDelegate.run();
-            uiAdapter.summaryLineDelegate.accept(program.instructions());
-        });
-
+        uiAdapter.variablesAndInstructionsHandler(program, allVars);
         updateMessage("Setting program...");
         updateProgress(2, 4);
         UIUtils.sleep(SLEEP_TIME);
@@ -49,11 +40,7 @@ public class LoadFileToProgramTask extends Task<ProgramDTO> {
         updateMessage("Eating cookies and milk...");
         UIUtils.sleep(SLEEP_TIME);
         // update expand levels on UI
-        Platform.runLater(() -> {
-            uiAdapter.maxExpandLevelDelegate.accept(engineController.getMaxExpandLevel());
-            uiAdapter.currentExpandLevelDelegate.accept(0);
-            uiAdapter.cyclesDelegate.accept(0);
-        });
+        uiAdapter.expandLevelsAndCyclesHandler(engineController.getMaxExpandLevel());
         updateProgress(4, 4);
         updateMessage("File loaded successfully");
         UIUtils.sleep(SLEEP_TIME);
