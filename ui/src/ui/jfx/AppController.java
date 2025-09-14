@@ -63,11 +63,9 @@ public class AppController {
     private AnchorPane derivedInstructionsTable;
     @FXML
     private InstructionTableController derivedInstructionsTableController;
+    // Arguments and variables Lists
     private final ListProperty<VariableDTO> allVariablesDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final ListProperty<VariableDTO> argumentsDTO =
-            new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final BooleanProperty argumentsLoaded = new SimpleBooleanProperty(false);
     @FXML
     private AnchorPane argumentsTable;
     @FXML
@@ -90,6 +88,17 @@ public class AppController {
     private HistoryStatsController historyStatsController;
     @FXML
     private SummaryLineController summaryLineController;
+    @FXML
+    private VariablesTableController allVarsTableController;
+    @FXML
+    private DebuggerController debugControlsController;
+    @FXML
+    private TitledPane statisticsTitledPane;
+    @FXML
+    private AnchorPane historyStats;
+    private final ListProperty<VariableDTO> argumentsDTO =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final BooleanProperty argumentsLoaded = new SimpleBooleanProperty(false);
 
     // Core system controller - same as console version
     private final ListProperty<InstructionDTO> programInstructions =
@@ -103,23 +112,15 @@ public class AppController {
 
     private final ListProperty<String> programVariablesNamesAndLabels =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-    @FXML
-    private VariablesTableController allVarsTableController;
-    @FXML
-    private DebuggerController debugControlsController;
 
     private final EngineController engineController;
     private ProgramDTO loadedProgram = null;
     private final Map<String, Integer> programArguments = new HashMap<>();
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
-    @FXML
-    private AnchorPane historyStats;
     private final BooleanProperty debugMode = new SimpleBooleanProperty(false);
     private final BooleanProperty programRanAtLeastOnce = new SimpleBooleanProperty(false);
     private final BooleanProperty programRunning = new SimpleBooleanProperty(false);
     private final BooleanProperty programFinished = new SimpleBooleanProperty(false);
-    @FXML
-    private TitledPane statisticsTitledPane;
     private final IntegerProperty maxExpandLevel = new SimpleIntegerProperty(0);
     private final IntegerProperty currentExpandLevel = new SimpleIntegerProperty(0);
     private final IntegerProperty currentCycles = new SimpleIntegerProperty(0);
@@ -171,7 +172,8 @@ public class AppController {
 
         variablesTitledPane.expandedProperty().bind(
                 Bindings.and(programLoaded,
-                        Bindings.or(programFinished, debugMode)));
+                        Bindings.or(argumentsLoaded,
+                                Bindings.or(programFinished, debugMode))));
 
         statisticsTitledPane.expandedProperty().bind(
                 Bindings.and(programLoaded,

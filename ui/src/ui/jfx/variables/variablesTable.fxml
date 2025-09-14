@@ -2,14 +2,14 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/24.0.1"
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12"
             fx:controller="ui.jfx.variables.VariablesTableController">
     <children>
         <TableView fx:id="variablesTable" layoutX="10.0" layoutY="5.0" styleClass="table-view"
                    stylesheets="@variablesTable.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                    AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <columns>
-                <TableColumn fx:id="variableColumn" prefWidth="124.0" text="Arguments"/>
+                <TableColumn fx:id="variableColumn" prefWidth="124.0" text="Variabels"/>
                 <TableColumn fx:id="valueColumn" prefWidth="124.0" text="Value"/>
             </columns>
             <placeholder>

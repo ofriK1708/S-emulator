@@ -27,10 +27,11 @@ public class VariablesTableController {
 
     public void initAllVarsTable(ListProperty<VariableDTO> variables) {
         variablesTable.itemsProperty().bind(variables);
-        valueColumn.setText("Variables");
+
     }
 
     public void initArgsTable(ListProperty<VariableDTO> args) {
         variablesTable.itemsProperty().bind(args);
+        variableColumn.setText("Arguments");
     }
 }
