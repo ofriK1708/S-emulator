@@ -52,19 +52,19 @@
         <children>
             <HBox alignment="CENTER">
                 <children>
-                    <Label styleClass="pane-mode" text="Titled pane mode"/>
+                    <Label styleClass="pane-mode" text="Expand / Collapse Mode"/>
                 </children>
             </HBox>
             <HBox spacing="10.0">
                 <children>
                     <RadioButton fx:id="autoPaneMode" mnemonicParsing="false" onAction="#handleAutoModeSelected"
-                                 selected="true" style="-fx-text-fill: white;" styleClass="pane-mode" text="Auto">
+                                 style="-fx-text-fill: white;" styleClass="pane-mode" text="Auto">
                         <toggleGroup>
                             <ToggleGroup fx:id="paneMode"/>
                         </toggleGroup>
                     </RadioButton>
                     <RadioButton fx:id="manualPaneMode" mnemonicParsing="false" onAction="#handleManualModeSelected"
-                                 styleClass="pane-mode" text="Manual" toggleGroup="$paneMode"/>
+                                 selected="true" styleClass="pane-mode" text="Manual" toggleGroup="$paneMode"/>
                 </children>
             </HBox>
         </children>

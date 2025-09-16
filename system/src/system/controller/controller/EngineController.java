@@ -140,50 +140,14 @@ public class EngineController
         return engine.getAllVariablesNamesAndLabels(expandLevel);
     }
 
-    public Map<String, Integer> getArguments(int expandLevel) {
+    public Map<String, Integer> getArguments() {
         if (engine == null) {
             throw new IllegalStateException("Program has not been set");
         }
-        return engine.getArguments(expandLevel);
+        return engine.getArguments();
     }
 
-    public void saveProgramState(Path directoryPath) throws IOException
-    {
-        if (engine == null)
-        {
-            throw new IllegalStateException("No program loaded to save");
-        }
 
-        StateData stateData = new StateData(engine, maxExpandLevel);
-
-        try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(directoryPath)))
-        {
-            oos.writeObject(stateData);
-        }
-        catch (IOException e)
-        {
-            throw new IOException("Failed to save state: " + e.getMessage(), e);
-        }
-    }
-
-    public void loadProgramState(Path filePath) throws IOException, ClassNotFoundException
-    {
-        validateFileExistRegularAndReadable(filePath);
-        try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(filePath)))
-        {
-            StateData stateData = (StateData) ois.readObject();
-            this.engine = stateData.engine();
-            this.maxExpandLevel = stateData.maxExpandLevel();
-        }
-        catch (IOException e)
-        {
-            throw new IOException("Failed to load state: " + e.getMessage(), e);
-        }
-        catch (ClassNotFoundException e)
-        {
-            throw new ClassNotFoundException("Invalid state file format: " + e.getMessage(), e);
-        }
-    }
 
     public Integer getProgramResult() {
         if (engine == null) {
@@ -203,5 +167,34 @@ public class EngineController
     {
         @Serial
         private static final long serialVersionUID = 1L;
+    }
+
+
+    // legacy code
+    public void saveProgramState(Path directoryPath) throws IOException {
+        if (engine == null) {
+            throw new IllegalStateException("No program loaded to save");
+        }
+
+        StateData stateData = new StateData(engine, maxExpandLevel);
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(directoryPath))) {
+            oos.writeObject(stateData);
+        } catch (IOException e) {
+            throw new IOException("Failed to save state: " + e.getMessage(), e);
+        }
+    }
+
+    public void loadProgramState(Path filePath) throws IOException, ClassNotFoundException {
+        validateFileExistRegularAndReadable(filePath);
+        try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(filePath))) {
+            StateData stateData = (StateData) ois.readObject();
+            this.engine = stateData.engine();
+            this.maxExpandLevel = stateData.maxExpandLevel();
+        } catch (IOException e) {
+            throw new IOException("Failed to load state: " + e.getMessage(), e);
+        } catch (ClassNotFoundException e) {
+            throw new ClassNotFoundException("Invalid state file format: " + e.getMessage(), e);
+        }
     }
 }

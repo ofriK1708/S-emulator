@@ -62,7 +62,7 @@ public class UIUtils {
         List<VariableDTO> variablesSorted = new ArrayList<>();
 
         variablesSorted.add(toVariableDTO(ProgramUtils.OUTPUT_NAME, engineController.getProgramResult()));
-        engineController.getArguments(expandLevel).entrySet().stream()
+        engineController.getArguments().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(UIUtils.programNameComparator))
                 .map(UIUtils::toVariableDTO)
                 .forEach(variablesSorted::add);

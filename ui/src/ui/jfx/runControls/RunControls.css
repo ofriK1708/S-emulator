@@ -118,3 +118,67 @@
     -fx-text-fill: #333333;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 1, 0, 0, 1);
 }
+
+.button-green-black {
+    -fx-background-color: black;
+    -fx-text-fill: #00f800;
+}
+
+.button-green-black:hover {
+    -fx-background-color: #111; /* slightly lighter black */
+    -fx-text-fill: #39ff14; /* brighter green */
+    -fx-effect: dropshadow(gaussian, #00f80088, 6, 0, 0, 2);
+}
+
+.button-green-black:pressed,
+.button-green-black:selected {
+    -fx-background-color: #222;
+    -fx-text-fill: #00f800;
+    -fx-border-width: 2;
+    -fx-border-color: #00f800;
+    -fx-border-radius: 20px;
+}
+
+.button-green-black:disabled {
+    -fx-background-color: #444;
+    -fx-text-fill: #7aff7a;
+    -fx-opacity: 0.5;
+    -fx-effect: none;
+}
+
+/* Black-green variant: green background, black text */
+.button-black-green {
+    -fx-background-color: #00f800;
+    -fx-text-fill: black;
+}
+
+.button-black-green:hover {
+    -fx-background-color: #39ff14;
+    -fx-text-fill: black;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 8, 0.8, 0, 2);
+}
+
+.button-black-green:pressed,
+.button-black-green:selected {
+    -fx-background-color: #00c000;
+    -fx-text-fill: black;
+    -fx-border-width: 2;
+    -fx-border-color: black;
+    -fx-border-radius: 20px;
+}
+
+.button-black-green:disabled {
+    -fx-background-color: #7aff7a;
+    -fx-text-fill: #222;
+    -fx-opacity: 0.5;
+    -fx-effect: none;
+}
+
+.green-text {
+    -fx-text-fill: #00f800;
+}
+
+.black-text {
+    -fx-text-fill: black;
+}
+

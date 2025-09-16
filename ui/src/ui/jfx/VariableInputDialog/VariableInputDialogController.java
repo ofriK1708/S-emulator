@@ -13,7 +13,6 @@ import ui.utils.UIUtils;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class VariableInputDialogController {
     @FXML
@@ -25,12 +24,10 @@ public class VariableInputDialogController {
 
     private final Map<String, TextField> textFields = new HashMap<>();
     private Map<String, Integer> programArguments;
-    private Set<String> requiredArguments;
     private final BooleanProperty allValid = new SimpleBooleanProperty(true);
-    private Map<String, Boolean> validationStates = new HashMap<>();
+    private final Map<String, Boolean> validationStates = new HashMap<>();
 
-    public void initialiseController(Set<String> requiredArguments, Map<String, Integer> programArguments) {
-        this.requiredArguments = requiredArguments;
+    public void initialiseController(Map<String, Integer> programArguments) {
         this.programArguments = programArguments;
         acceptButton.disableProperty().bind(allValid.not());
         buildFields();
@@ -39,15 +36,15 @@ public class VariableInputDialogController {
     private void buildFields() {
         fieldsContainer.getChildren().clear();
         textFields.clear();
-        for (String arg : requiredArguments) {
-            Label label = new Label(arg + " (integer value):");
+        for (Map.Entry<String, Integer> entry : programArguments.entrySet()) {
+            Label label = new Label(entry.getKey() + " (integer value):");
             TextField field = new TextField();
-            field.setPromptText("Enter positive integer value...");
-            textFields.put(arg, field);
+            field.setPromptText("Enter positive integer value, current value is: {" + entry.getValue() + "}");
+            textFields.put(entry.getKey(), field);
             fieldsContainer.getChildren().add(new VBox(label, field));
             field.textProperty().addListener((obs, oldVal, newVal) -> {
                 boolean valid = validate(newVal);
-                validationStates.put(arg, valid);
+                validationStates.put(entry.getKey(), valid);
                 updateFieldValidationStyle(field, valid);
                 allValid.set(!validationStates.containsValue(false));
 

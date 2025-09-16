@@ -234,11 +234,8 @@ public class ProgramEngine implements Serializable {
         return extractAllVariableAndLabelNames(contextMapsByExpandLevel.get(expandLevel));
     }
 
-    public Map<String, Integer> getArguments(int expandLevel) {
-        if (expandLevel < 0 || expandLevel >= contextMapsByExpandLevel.size()) {
-            throw new IllegalArgumentException("Expand level out of bounds");
-        }
-        return extractArguments(contextMapsByExpandLevel.get(expandLevel));
+    public Map<String, Integer> getArguments() {
+        return extractArguments(originalContextMap);
     }
 
     public Map<String, Integer> getWorkVars(int expandLevel) {

@@ -37,7 +37,6 @@ import ui.utils.UIUtils;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static ui.utils.UIUtils.*;
 
@@ -142,7 +141,7 @@ public class AppController {
             programFunctionController.initComponent(this::expandProgramToLevel, this::setPaneMode,
                     currentExpandLevel, maxExpandLevel, programLoaded, this::handleVariableSelection,
                     programVariablesNamesAndLabels);
-            runControlsController.initComponent(this::RunProgram, this::promptForVariables, programLoaded, argumentsLoaded);
+            runControlsController.initComponent(this::RunProgram, this::prepareForTakingArguments, programLoaded, argumentsLoaded);
             cyclesController.initComponent(currentCycles);
             instructionsTableController.initializeMainInstructionTable(programInstructions, derivedInstructions);
             derivedInstructionsTableController.markAsDerivedInstructionsTable();
@@ -151,8 +150,6 @@ public class AppController {
             allVarsTableController.initAllVarsTable(allVariablesDTO);
             debugControlsController.setAppController(this);
             historyStatsController.initComponent(executionStatistics);
-            bindTitlePanesExpansion();
-
             System.out.println("AppController initialized");
         } else {
             System.err.println("One or more controllers are not injected properly!");
@@ -229,17 +226,19 @@ public class AppController {
         }
     }
 
-    public void promptForVariables() {
+    public void prepareForTakingArguments() {
         // Clear previous variables
-        programArguments.clear();
-        allVariablesDTO.clear();
-        argumentsDTO.clear();
+        //programArguments.clear();
+        //allVariablesDTO.clear();
+        //argumentsDTO.clear();
 
         try {
             // Get required program arguments from SystemController
-            Set<String> requiredArguments = engineController.getProgramArgsNames();
+            if (programArguments.isEmpty()) {
+                programArguments.putAll(engineController.getArguments());
+            }
 
-            if (requiredArguments.isEmpty()) {
+            if (programArguments.isEmpty()) {
                 // No arguments needed, mark as entered
                 argumentsLoaded.set(true);
                 showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() +
@@ -248,7 +247,7 @@ public class AppController {
             }
 
             // Create and show the multi-variable input dialog
-            showMultiVariableDialog(requiredArguments);
+            getArgumentsFromUser();
             argumentsLoaded.set(true);
             argumentsDTO.setAll(UIUtils.extractArguments(programArguments));
             // Display success message and show variables
@@ -261,12 +260,12 @@ public class AppController {
         }
     }
 
-    public void showMultiVariableDialog(Set<String> requiredArguments) {
+    public void getArgumentsFromUser() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(ArgumentResourcePath));
             Parent root = loader.load();
             VariableInputDialogController controller = loader.getController();
-            controller.initialiseController(requiredArguments, programArguments);
+            controller.initialiseController(programArguments);
 
             Stage dialogStage = new Stage();
             dialogStage.initModality(Modality.APPLICATION_MODAL);
