@@ -78,7 +78,7 @@ public class GOTOLabel extends Instruction
     }
 
     @Override
-    public String toString()
+    public String getStringRepresentation()
     {
         String labelName = args.get(labelArgumentName);
         return String.format("GOTO %s", labelName);

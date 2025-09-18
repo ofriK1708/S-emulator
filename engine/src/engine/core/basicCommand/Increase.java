@@ -58,7 +58,7 @@ public class Increase extends Instruction
     }
 
     @Override
-    public String toString()
+    public String getStringRepresentation()
     {
         return String.format("%s <- %s + 1", mainVarName, mainVarName);
     }

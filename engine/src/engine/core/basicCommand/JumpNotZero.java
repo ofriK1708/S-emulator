@@ -68,7 +68,7 @@ public class JumpNotZero extends Instruction
     }
 
     @Override
-    public String toString()
+    public String getStringRepresentation()
     {
         return String.format("if %s != 0 GOTO %s", mainVarName, args.get(labelArgumentName));
     }

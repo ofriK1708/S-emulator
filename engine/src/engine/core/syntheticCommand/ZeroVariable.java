@@ -69,7 +69,7 @@ public class ZeroVariable extends Instruction
     }
 
     @Override
-    public String toString()
+    public String getStringRepresentation()
     {
         return String.format("%s <- 0", mainVarName);
     }

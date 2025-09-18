@@ -107,7 +107,7 @@ public class JumpEqualVariable extends Instruction
     }
 
     @Override
-    public String toString()
+    public String getStringRepresentation()
     {
         String labelName = args.get(labelArgumentName);
         String checkConstant = args.get(variableArgumentName);

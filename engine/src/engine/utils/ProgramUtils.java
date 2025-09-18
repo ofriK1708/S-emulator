@@ -45,13 +45,17 @@ public class ProgramUtils {
         return varName;
     }
 
-    public static boolean isNumber(String argName) {
+    private static boolean isNumber(String argName) {
         try {
             Integer.parseInt(argName);
             return true;
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    public static boolean isSingleValidArgument(String argName) {
+        return argName.equals(OUTPUT_NAME) || argName.startsWith(ARG_PREFIX) || argName.startsWith(WORK_VAR_PREFIX);
     }
 
     public static int calculateExpandedLevel(Instruction instruction, int currentLevel) {
@@ -73,6 +77,10 @@ public class ProgramUtils {
             return 1 + maxSubLevel;
         }
         return currentLevel;
+    }
+
+    public static int calculateExpandedLevel(Instruction instruction) {
+        return calculateExpandedLevel(instruction, -1);
     }
 
     public static int getMaxExpandLevel(List<Instruction> instructions) {

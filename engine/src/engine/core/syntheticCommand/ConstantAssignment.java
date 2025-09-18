@@ -75,7 +75,7 @@ public class ConstantAssignment extends Instruction
     }
 
     @Override
-    public String toString()
+    public String getStringRepresentation()
     {
         int constantValue = 0;
         try

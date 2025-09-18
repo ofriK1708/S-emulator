@@ -4,8 +4,10 @@ import dto.engine.ExecutionResultDTO;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
 import engine.exception.LabelNotExist;
-import engine.generated.SInstruction;
-import engine.generated.SProgram;
+import engine.generated_2.SFunction;
+import engine.generated_2.SInstruction;
+import engine.generated_2.SInstructions;
+import engine.generated_2.SProgram;
 import engine.utils.ProgramUtils;
 
 import java.io.Serial;
@@ -28,29 +30,97 @@ public class ProgramEngine implements Serializable {
     private final List<Set<String>> labelsByExpandLevel = new ArrayList<>();
     private final List<Integer> cyclesPerExpandLevel = new ArrayList<>();
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
-    private final Map<String, Integer> extraArguments = new HashMap<>();
+    private Map<String, ProgramEngine> functions;
+
+    private String funcName;
 
     public ProgramEngine(SProgram program) throws LabelNotExist {
         this.programName = program.getName();
 
-        originalInstructions = program.getSInstructions().getSInstruction().stream()
-                .map(Instruction::createInstruction)
-                .collect(Collectors.toList());
+        functions = buildFunctions(program);
 
-        originalLabels = program.getSInstructions().getSInstruction().stream()
+        functions.forEach((name, function) -> {
+            function.setFunctions(functions);
+        });
+
+        SInstructions sInstructions = program.getSInstructions();
+
+        originalInstructions = buildInstructions(sInstructions);
+
+        originalLabels = buildLabels(sInstructions);
+
+        finishInitialization();
+
+    }
+
+    public ProgramEngine(SFunction function) throws LabelNotExist {
+        this.programName = function.getName();
+
+        funcName = function.getUserString();
+
+        SInstructions sInstructions = function.getSInstructions();
+
+        originalInstructions = buildInstructions(sInstructions);
+
+        originalLabels = buildLabels(sInstructions);
+
+        finishInitialization();
+    }
+
+    private static Map<String, ProgramEngine> buildFunctions(SProgram program) {
+        return program.getSFunctions().getSFunction().stream()
+                .map(func -> {
+                    try {
+                        return new ProgramEngine(func);
+                    } catch (LabelNotExist e) {
+                        throw new RuntimeException("Error initializing function: " + func.getName(), e);
+                    }
+                })
+                .collect(Collectors.toMap(ProgramEngine::getProgramName, funcEngine -> funcEngine));
+    }
+
+    private static Set<String> buildLabels(SInstructions sInstructions) {
+        return sInstructions.getSInstruction().stream()
                 .map(SInstruction::getSLabel)
                 .filter(Objects::nonNull)
                 .filter(label -> !label.isBlank())
                 .map(String::trim)
                 .filter(label -> label.startsWith("L"))
                 .collect(Collectors.toSet());
+    }
+
+    public String getProgramName() {
+        return programName;
+    }
+
+    public Map<String, ProgramEngine> getFunctions() {
+        return functions;
+    }
+
+    protected void setFunctions(Map<String, ProgramEngine> functions) {
+        this.functions = functions.entrySet().stream()
+                .filter(entry -> !entry.getKey().equals(programName))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private List<Instruction> buildInstructions(SInstructions sInstructions) {
+        return sInstructions.getSInstruction().stream()
+                .map(sInstruction -> Instruction.createInstruction(sInstruction, this))
+                .collect(Collectors.toList());
+    }
+
+    public Integer getOutput() {
+        return contextMapsByExpandLevel.getFirst().get(ProgramUtils.OUTPUT_NAME);
+    }
+
+    private void finishInitialization() throws LabelNotExist {
         instructionExpansionLevels.add(originalInstructions);
         labelsByExpandLevel.add(originalLabels);
         initializeContextMap();
         contextMapsByExpandLevel.add(new HashMap<>(originalContextMap));
         cyclesPerExpandLevel.add(calcTotalCycles(0));
-
     }
+
 
     private void initializeContextMap() throws LabelNotExist {
         originalContextMap.clear();
@@ -70,7 +140,7 @@ public class ProgramEngine implements Serializable {
                                 instruction_index + 1,
                                 argName);
 
-                    } else if (!ProgramUtils.isNumber(argName)) {
+                    } else if (ProgramUtils.isSingleValidArgument(argName)) {
                         originalContextMap.put(argName.trim(), 0);
                     }
                 }
@@ -122,8 +192,11 @@ public class ProgramEngine implements Serializable {
         executionStatisticsList.add(exStats);
     }
 
+    public void run(Map<String, Integer> arguments) {
+        run(0, arguments);
+    }
+
     private void clearPreviousRunData() {
-        extraArguments.clear();
         contextMapsByExpandLevel.clear();
         contextMapsByExpandLevel.add(new HashMap<>(originalContextMap));
         instructionExpansionLevels.clear();
@@ -179,7 +252,6 @@ public class ProgramEngine implements Serializable {
     public ProgramDTO toDTO(int expandLevel) {
         expand(expandLevel);
         Map<String, Integer> argsMap = extractArguments(contextMapsByExpandLevel.get(expandLevel));
-        argsMap.putAll(extraArguments);
         List<Instruction> instructionsAtLevel = instructionExpansionLevels.get(expandLevel);
         return new ProgramDTO(
                 programName,
@@ -227,6 +299,10 @@ public class ProgramEngine implements Serializable {
         return cyclesPerExpandLevel.get(expandLevel);
     }
 
+    public int getTotalCycles() {
+        return calcTotalCycles(0);
+    }
+
     public Set<String> getAllVariablesNamesAndLabels(int expandLevel) {
         if (expandLevel < 0 || expandLevel >= labelsByExpandLevel.size()) {
             throw new IllegalArgumentException("Expand level out of bounds");
@@ -243,5 +319,9 @@ public class ProgramEngine implements Serializable {
             throw new IllegalArgumentException("Expand level out of bounds");
         }
         return extractWorkVars(contextMapsByExpandLevel.get(expandLevel));
+    }
+
+    public String getFuncName() {
+        return funcName;
     }
 }

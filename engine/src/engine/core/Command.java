@@ -14,4 +14,6 @@ public interface Command extends Serializable {
     int getExpandLevel();
     List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex);
     InstructionDTO toDTO(int idx);
+
+    String getStringRepresentation();
 }

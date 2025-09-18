@@ -50,7 +50,7 @@ public class Neutral extends Instruction
     }
 
     @Override
-    public String toString()
+    public String getStringRepresentation()
     {
         return String.format("%s <- %s", mainVarName, mainVarName);
     }

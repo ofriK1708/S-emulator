@@ -6,8 +6,8 @@ import engine.core.basicCommand.Increase;
 import engine.core.basicCommand.JumpNotZero;
 import engine.core.basicCommand.Neutral;
 import engine.core.syntheticCommand.*;
-import engine.generated.SInstruction;
-import engine.generated.SInstructionArguments;
+import engine.generated_2.SInstruction;
+import engine.generated_2.SInstructionArguments;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -56,7 +56,7 @@ public abstract class Instruction implements Command, Serializable
         return args;
     }
 
-    public static Instruction createInstruction(SInstruction sInstruction)
+    public static Instruction createInstruction(SInstruction sInstruction, ProgramEngine engine)
     {
 
         Map<String, String> args = Optional.ofNullable(sInstruction.getSInstructionArguments())
@@ -84,6 +84,8 @@ public abstract class Instruction implements Command, Serializable
             case "JUMP_ZERO" -> new JumpZero(mainVarName, args, labelName);
             case "JUMP_EQUAL_CONSTANT" -> new JumpEqualConstant(mainVarName, args, labelName);
             case "JUMP_EQUAL_VARIABLE" -> new JumpEqualVariable(mainVarName, args, labelName);
+            case "QUOTE" ->
+                    new Quote(mainVarName, args, labelName, engine);
             default -> throw new IllegalArgumentException("Unknown instruction type: " + sInstruction.getName());
         };
     }
@@ -114,7 +116,7 @@ public abstract class Instruction implements Command, Serializable
                 idx,
                 getType(),
                 label,
-                toString(),
+                getStringRepresentation(),
                 getCycles(),
                 getDerivedInstructions()
         );
@@ -126,7 +128,7 @@ public abstract class Instruction implements Command, Serializable
                 index,
                 getType(),
                 label,
-                toString(),
+                getStringRepresentation(),
                 getCycles(),
                 Collections.emptyList()
         );

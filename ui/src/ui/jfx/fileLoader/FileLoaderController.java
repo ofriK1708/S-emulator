@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import system.controller.controller.EngineController;
+import ui.utils.UIUtils;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -49,7 +50,11 @@ public class FileLoaderController {
 
         task.setOnSucceeded(e -> onFinish.accept(task.getValue()));
         task.setOnCancelled(e -> onFinish.accept(task.getValue()));
-        task.setOnFailed(e -> onFinish.accept(task.getValue()));
+        task.setOnFailed(e -> {
+            UIUtils.showError("Failed to load the file: " + task.getException().getMessage())
+            ;
+            onFinish.accept(null);
+        });
     }
 
 }

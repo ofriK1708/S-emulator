@@ -5,7 +5,7 @@ import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
 import engine.core.ProgramEngine;
 import engine.exception.LabelNotExist;
-import engine.generated.SProgram;
+import engine.generated_2.SProgram;
 import engine.utils.ProgramUtils;
 import jakarta.xml.bind.JAXBException;
 import system.file.file.processing.XMLHandler;

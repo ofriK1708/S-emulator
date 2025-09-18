@@ -105,7 +105,7 @@ public class JumpEqualConstant extends Instruction
     }
 
     @Override
-    public String toString()
+    public String getStringRepresentation()
     {
         String labelName = args.get(labelArgumentName);
         int checkConstant = 0;

@@ -91,7 +91,7 @@ public class Assignment extends Instruction
     }
 
     @Override
-    public String toString()
+    public String getStringRepresentation()
     {
         String sourceName = args.get(sourceArgumentName);
         return String.format("%s <- %s", mainVarName, sourceName);
