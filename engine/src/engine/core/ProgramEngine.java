@@ -41,7 +41,7 @@ public class ProgramEngine implements Serializable {
     private final List<Integer> debugCyclesHistory = new ArrayList<>(); // NEW: Track cycles per step
     private List<Instruction> currentDebugInstructions;
     private Map<String, Integer> currentDebugContext;
-    private Map<String, Integer> debugArguments = new HashMap<>(); // NEW: Store debug arguments
+    private final Map<String, Integer> debugArguments = new HashMap<>(); // NEW: Store debug arguments
     private int debugExpandLevel = 0;
     private int totalDebugCycles = 0; // NEW: Monotonic cycle counter
 
@@ -78,7 +78,7 @@ public class ProgramEngine implements Serializable {
         finishInitialization();
     }
 
-    private static Map<String, ProgramEngine> buildFunctions(SProgram program) {
+    private Map<String, ProgramEngine> buildFunctions(SProgram program) {
         return program.getSFunctions().getSFunction().stream()
                 .map(func -> {
                     try {
@@ -267,7 +267,7 @@ public class ProgramEngine implements Serializable {
                 programName,
                 argsMap.keySet(),
                 extractLabels(labelsByExpandLevel, expandLevel),
-                IntStream.range(0,instructionsAtLevel.size())
+                IntStream.range(0, instructionsAtLevel.size())
                         .mapToObj(i -> instructionsAtLevel.get(i).toDTO(i))
                         .toList()
         );
@@ -334,7 +334,6 @@ public class ProgramEngine implements Serializable {
     public String getFuncName() {
         return funcName;
     }
-}
 
     // FIXED: Enhanced debugger methods with proper state management
 

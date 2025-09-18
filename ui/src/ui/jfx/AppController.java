@@ -42,13 +42,6 @@ import static ui.utils.UIUtils.*;
 
 public class AppController {
 
-    // Core system controller - same as console version
-    private final EngineController engineController;
-    private ProgramDTO loadedProgram = null;
-    private final Map<String, Integer> programArguments = new HashMap<>();
-    //Add to implement Debugger:
-    private boolean inDebugSession = false;
-
     @FXML
     private HBox fileHandler;
     @FXML
@@ -102,6 +95,7 @@ public class AppController {
     private TitledPane statisticsTitledPane;
     @FXML
     private AnchorPane historyStats;
+
     private final ListProperty<VariableDTO> argumentsDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
     private final BooleanProperty argumentsLoaded = new SimpleBooleanProperty(false);
@@ -130,6 +124,7 @@ public class AppController {
     private final IntegerProperty maxExpandLevel = new SimpleIntegerProperty(0);
     private final IntegerProperty currentExpandLevel = new SimpleIntegerProperty(0);
     private final IntegerProperty currentCycles = new SimpleIntegerProperty(0);
+    private boolean inDebugSession = false;
 
     public AppController() {
         this.engineController = new EngineController();
@@ -426,7 +421,6 @@ public class AppController {
             int expandLevel = currentExpandLevel.get();
             System.out.println("Starting debug execution with arguments: " + programArguments);
 
-            executionVariableController.clearVariables();
             programRunning.set(true);
             debugMode.set(true);
             if (debugControlsController != null) {
@@ -439,7 +433,6 @@ public class AppController {
 
             // Get the program at this expand level for UI display
             ProgramDTO program = engineController.getProgramByExpandLevel(expandLevel);
-            instructionsTableController.setInstructions(program.instructions());
 
             // Show initial debug state
             showInitialDebugState();
@@ -463,11 +456,7 @@ public class AppController {
             int currentPC = engineController.getCurrentDebugPC();
 
             // Show initial variable state with arguments applied
-            executionVariableController.showWorkVariables(
-                    0, // Initial output
-                    programArguments, // Arguments
-                    new HashMap<>() // Empty work variables initially
-            );
+
 
             // Update cycles (should be 0 initially)
             currentCycles.set(0);
@@ -576,8 +565,8 @@ public class AppController {
             programFinished.set(true);
             programRanAtLeastOnce.set(true);
             currentCycles.set(finalResult.numOfCycles());
-            updateExecutionStatistics(finalResult);
-            updateVariableDropdown();
+            // updateExecutionStatistics(finalResult);
+            // updateVariableDropdown();
         }
 
         // Clear instruction highlighting
@@ -592,13 +581,6 @@ public class AppController {
     }
 
     private void showDebugState(ExecutionResultDTO result) {
-        // Update execution variables display
-        executionVariableController.clearVariables();
-        executionVariableController.showWorkVariables(
-                result.result(),
-                result.argumentsValues(), // Now properly shows the original arguments
-                result.workVariablesValues());
-
         // Update cycles with monotonic counter
         currentCycles.set(result.numOfCycles());
     }
