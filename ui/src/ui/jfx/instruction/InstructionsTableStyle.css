@@ -127,3 +127,16 @@
     -fx-text-fill: #856404 !important;
     -fx-font-weight: bold;
 }
+.table-row-cell:selected {
+    -fx-background-color: #0096C9;
+    -fx-text-fill: white;
+}
+
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: white;
+}
+
+.highlighted-row {
+    -fx-background-color: #FFEB3B;
+    -fx-text-fill: black;
+}

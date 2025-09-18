@@ -4,7 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import ui.jfx.AppController;
-
+import ui.utils.UIUtils;
 
 
 public class DebuggerController {
@@ -16,16 +16,18 @@ public class DebuggerController {
     @FXML private Button stepBackward;
     @FXML private Button stepOver;
     @FXML private Button stop;
-
-    public void setAppController(AppController appController) {
-        this.appController = appController;
-    }
+    private boolean debugSessionActive = false;
 
     @FXML
     private void initialize() {
         System.out.println("DebuggerController initialized.");
         updateExecutionState(false, false);
     }
+
+    public void setAppController(AppController appController) {
+        this.appController = appController;
+    }
+
 
     // Start regular execution (populate instructions and cycles now)
     @FXML
@@ -44,38 +46,57 @@ public class DebuggerController {
         updateExecutionState(true, true);
     }
 
-    // Start debug execution (reserved for future use)
+    // Start debug execution
+
     @FXML
     private void handleStartDebugExecution() {
-        // Not implemented in this change set
-    }
+        if (appController == null) {
+            return;
+        }
+        if (!appController.isProgramLoaded()) {
+            showErrorAlert();
+            return;
+        }
 
+        appController.startDebugExecution();
+    }
+    //start step over
+    @FXML
+    private void handleStepOver() {
+        if (appController == null || !debugSessionActive) {
+            return;
+        }
+        appController.debugStep();
+    }
+    //start step backward
+    @FXML
+    private void handleStepBackward() {
+        if (appController == null || !debugSessionActive) {
+            return;
+        }
+        appController.debugStepBackward();
+    }
+    // Resume normal execution
+    @FXML
+    private void handleResume() {
+        if (appController == null || !debugSessionActive) {
+            return;
+        }
+        appController.debugResume();
+        debugSessionActive = false;
+        updateExecutionState(false, true);
+    }
     // Stop execution
     @FXML
     private void handleStop() {
-        // Not implemented in this change set
-        updateExecutionState(false, appController != null && appController.isProgramLoaded());
+        if (appController == null || !debugSessionActive) {
+            return;
+        }
+        appController.stopDebugSession();
+        debugSessionActive = false;
+        updateExecutionState(false, true);
     }
 
-    // Resume execution (for future step debugging)
-    @FXML
-    private void handleResume() {
-        // Not implemented in this change set
-    }
-
-    // Step over (for future step debugging)
-    @FXML
-    private void handleStepOver() {
-        // Not implemented in this change set
-    }
-
-    // Step backward (for future step debugging)
-    @FXML
-    private void handleStepBackward() {
-        // Not implemented in this change set
-    }
-
-    // Update button states based on execution state
     public void updateExecutionState(boolean isExecuting, boolean programLoaded) {
         // Start buttons enabled only when not executing and program is loaded
         if (startRegularExecution != null) {
@@ -84,24 +105,37 @@ public class DebuggerController {
         if (startDebugExecution != null) {
             startDebugExecution.setDisable(!programLoaded || isExecuting);
         }
-        // Stop enabled only when executing
+        // Debug controls enabled only when debug session is active
         if (stop != null) {
-            stop.setDisable(!isExecuting);
+            stop.setDisable(!debugSessionActive);
         }
-        // Step/Resume enabled only when executing (placeholders)
         if (resume != null) {
-            resume.setDisable(!isExecuting);
+            resume.setDisable(!debugSessionActive);
         }
         if (stepOver != null) {
-            stepOver.setDisable(!isExecuting);
+            stepOver.setDisable(!debugSessionActive);
         }
         if (stepBackward != null) {
-            stepBackward.setDisable(!isExecuting);
+            stepBackward.setDisable(!debugSessionActive);
         }
+    }
+
+    private void showErrorAlert() {
+        UIUtils.showError("No program loaded. Please load a program first.");
     }
 
     // Get arguments from user (same logic as console getUserArguments) - placeholder
     private void getArgumentsFromUser() {
         // Not implemented in this change set
     }
+    // Add this method to debugger controller to notify when debug session start and end
+    public void notifyDebugSessionEnded() {
+        debugSessionActive = false;
+        updateExecutionState(false, appController != null && appController.isProgramLoaded());
+    }
+    public void notifyDebugSessionStarted() {
+        debugSessionActive = true;
+        updateExecutionState(true, true);
+    }
+
 }

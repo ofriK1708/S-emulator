@@ -15,12 +15,12 @@
                <children>
                
                                           <!-- Row 2 -->
-                     <Button fx:id="stop" text="Stop">
+                     <Button fx:id="stop" text="Stop" onAction="#handleStop">
                      <FlowPane.margin>
                         <Insets left="15.0" />
                      </FlowPane.margin>
                   </Button>
-                     <Button fx:id="resume" text="Resume" />
+                     <Button fx:id="resume" text="resume" onAction="#handleResume" />
                </children>
             </FlowPane>
          </children>
@@ -31,8 +31,8 @@
                <children>
                
                                           <!-- Row 3 -->
-                     <Button fx:id="stepOver" text="Step Over" />
-                     <Button fx:id="stepBackward" text="Step Backward" />
+                     <Button fx:id="stepOver" text="Step Over" onAction="#handleStepOver"/>
+                     <Button fx:id="stepBackward" text="Step Backward" onAction="#handleStepBackward"/>
                </children>
             </FlowPane>
          </children>

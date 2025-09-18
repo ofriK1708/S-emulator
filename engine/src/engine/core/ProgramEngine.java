@@ -34,6 +34,17 @@ public class ProgramEngine implements Serializable {
 
     private String funcName;
 
+    // Enhanced debugger fields with proper state management:
+    private boolean debugMode = false;
+    private int currentDebugPC = 0;
+    private final List<Map<String, Integer>> debugStateHistory = new ArrayList<>();
+    private final List<Integer> debugCyclesHistory = new ArrayList<>(); // NEW: Track cycles per step
+    private List<Instruction> currentDebugInstructions;
+    private Map<String, Integer> currentDebugContext;
+    private Map<String, Integer> debugArguments = new HashMap<>(); // NEW: Store debug arguments
+    private int debugExpandLevel = 0;
+    private int totalDebugCycles = 0; // NEW: Monotonic cycle counter
+
     public ProgramEngine(SProgram program) throws LabelNotExist {
         this.programName = program.getName();
 
@@ -205,7 +216,6 @@ public class ProgramEngine implements Serializable {
         labelsByExpandLevel.add(new HashSet<>(originalLabels));
     }
 
-
     private void expand(int level) {
         if (level > 0) {
             for (int currLevel = instructionExpansionLevels.size(); currLevel <= level; currLevel++) {
@@ -323,5 +333,155 @@ public class ProgramEngine implements Serializable {
 
     public String getFuncName() {
         return funcName;
+    }
+}
+
+    // FIXED: Enhanced debugger methods with proper state management
+
+    public void startDebugSession(int expandLevel, Map<String, Integer> arguments) {
+        clearPreviousRunData();
+        resetDebugState();
+
+        debugMode = true;
+        debugExpandLevel = expandLevel;
+        currentDebugPC = 0;
+        totalDebugCycles = 0;
+
+        // Store arguments for persistent access
+        debugArguments.clear();
+        debugArguments.putAll(arguments);
+
+        // Apply arguments to original context first
+        originalContextMap.putAll(arguments);
+
+        // Expand to required level - this preserves the arguments
+        expand(expandLevel);
+
+        // Setup debug context with arguments properly applied
+        currentDebugInstructions = new ArrayList<>(instructionExpansionLevels.get(expandLevel));
+        currentDebugContext = new HashMap<>(contextMapsByExpandLevel.get(expandLevel));
+
+        // Ensure arguments are preserved in debug context
+        currentDebugContext.putAll(debugArguments);
+        currentDebugContext.put(Instruction.ProgramCounterName, 0);
+
+        // Save initial state with zero cycles
+        debugStateHistory.add(new HashMap<>(currentDebugContext));
+        debugCyclesHistory.add(0);
+
+        System.out.println("Debug session started at expand level " + expandLevel);
+        System.out.println("Debug arguments applied: " + debugArguments);
+    }
+
+    private void resetDebugState() {
+        debugStateHistory.clear();
+        debugCyclesHistory.clear();
+        debugArguments.clear();
+        currentDebugInstructions = null;
+        currentDebugContext = null;
+        totalDebugCycles = 0;
+        currentDebugPC = 0;
+    }
+
+    public ExecutionResultDTO debugStep() {
+        if (!debugMode) {
+            throw new IllegalStateException("Debug session not started");
+        }
+
+        if (currentDebugPC >= currentDebugInstructions.size()) {
+            return getCurrentDebugState(); // Program finished
+        }
+
+        // Execute current instruction
+        Instruction currentInstruction = currentDebugInstructions.get(currentDebugPC);
+        System.out.println("Executing debug step " + currentDebugPC + ": " + currentInstruction);
+
+        try {
+            // Execute instruction
+            currentInstruction.execute(currentDebugContext);
+
+            // Add cycles from this instruction to total (monotonic increment)
+            int instructionCycles = currentInstruction.getCycles();
+            totalDebugCycles += instructionCycles;
+
+            // Update PC from context
+            currentDebugPC = currentDebugContext.get(Instruction.ProgramCounterName);
+
+            // Save state after execution with accumulated cycles
+            debugStateHistory.add(new HashMap<>(currentDebugContext));
+            debugCyclesHistory.add(totalDebugCycles);
+
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Error executing debug instruction at PC=" + currentDebugPC + ": " + e.getMessage(), e);
+        }
+
+        return getCurrentDebugState();
+    }
+
+    public ExecutionResultDTO debugStepBackward() {
+        if (!debugMode) {
+            throw new IllegalStateException("Debug session not started");
+        }
+
+        if (debugStateHistory.size() <= 1) {
+            // Can't go back further than initial state
+            return getCurrentDebugState();
+        }
+
+        // Remove current state and restore previous
+        debugStateHistory.removeLast();
+        debugCyclesHistory.removeLast();
+
+        // Restore previous state
+        currentDebugContext = new HashMap<>(debugStateHistory.get(debugStateHistory.size() - 1));
+        currentDebugPC = currentDebugContext.get(Instruction.ProgramCounterName);
+
+
+        System.out.println("Debug stepped backward to PC=" + currentDebugPC +
+                ", total cycles remain at: " + totalDebugCycles);
+        return getCurrentDebugState();
+    }
+
+    public ExecutionResultDTO debugResume() {
+        if (!debugMode) {
+            throw new IllegalStateException("Debug session not started");
+        }
+
+        // Execute remaining instructions
+        while (currentDebugPC < currentDebugInstructions.size()) {
+            debugStep();
+        }
+
+        return getCurrentDebugState();
+    }
+
+    public void stopDebugSession() {
+        debugMode = false;
+        resetDebugState();
+        System.out.println("Debug session stopped");
+    }
+
+    public int getCurrentDebugPC() {
+        return debugMode ? currentDebugPC : -1;
+    }
+
+    public boolean isInDebugMode() {
+        return debugMode;
+    }
+
+    public boolean isDebugFinished() {
+        return debugMode && currentDebugPC >= currentDebugInstructions.size();
+    }
+
+    private ExecutionResultDTO getCurrentDebugState() {
+        if (!debugMode || currentDebugContext == null) {
+            throw new IllegalStateException("No debug session active");
+        }
+
+        int result = currentDebugContext.get(ProgramUtils.OUTPUT_NAME);
+        Map<String, Integer> arguments = new HashMap<>(debugArguments); // Use stored debug arguments
+        Map<String, Integer> workVars = ProgramUtils.extractWorkVars(currentDebugContext);
+
+        return new ExecutionResultDTO(result, arguments, workVars, result, totalDebugCycles);
     }
 }

@@ -169,4 +169,22 @@ public class InstructionTableController {
         instructionTable.getItems().clear();
         currentHighlightedVariable = null; // Clear highlighting when clearing instructions
     }
+    /**
+     * Highlights the current instruction being executed in debug mode
+     * @param instructionIndex The index of the instruction to highlight (0-based)
+     */
+    public void highlightCurrentInstruction(int instructionIndex) {
+        javafx.application.Platform.runLater(() -> {
+            // Clear previous selections
+            instructionTable.getSelectionModel().clearSelection();
+
+            // Select and scroll to the current instruction
+            if (instructionIndex >= 0 && instructionIndex < instructionTable.getItems().size()) {
+                instructionTable.getSelectionModel().select(instructionIndex);
+                instructionTable.scrollTo(Math.max(0, instructionIndex - 2)); // Position near top
+
+                System.out.println("Highlighted instruction at index: " + instructionIndex);
+            }
+        });
+    }
 }
