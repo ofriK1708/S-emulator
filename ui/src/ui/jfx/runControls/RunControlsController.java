@@ -17,6 +17,8 @@ public class RunControlsController {
     private Runnable setCallback;
     BooleanProperty runTypeChosen = new SimpleBooleanProperty(false);
     ProgramRunType programRunType;
+    private BooleanProperty debugModeActive = new SimpleBooleanProperty(false);
+
 
     @FXML
     private ToggleButton debugType;
@@ -33,10 +35,11 @@ public class RunControlsController {
     @FXML
     private Button setRun;
 
-    public void initComponent(Consumer<ProgramRunType> runCallback, Runnable setCallback, BooleanProperty programLoaded,
-                              BooleanProperty variablesEntered) {
+    public void initComponent(Consumer<ProgramRunType> runCallback, Runnable setCallback,
+                              BooleanProperty programLoaded, BooleanProperty variablesEntered) {
         this.runCallback = runCallback;
         this.setCallback = setCallback;
+
         setRun.disableProperty().bind(programLoaded.not());
         runType.disableProperty().bind(programLoaded.not().or(variablesEntered.not()));
         debugType.disableProperty().bind(programLoaded.not().or(variablesEntered.not()));
@@ -48,16 +51,20 @@ public class RunControlsController {
         setCallback.run();
     }
 
+    // Change debug chosen handler:
     @FXML
     void onDebugChosen(ActionEvent event) {
         if (debugType.isSelected()) {
             runTypeChosen.set(true);
             programRunType = ProgramRunType.DEBUG;
+            debugModeActive.set(true);
         } else {
             runTypeChosen.set(false);
             programRunType = null;
+            debugModeActive.set(false);
         }
     }
+
 
     @FXML
     void onRunChosen(ActionEvent event) {

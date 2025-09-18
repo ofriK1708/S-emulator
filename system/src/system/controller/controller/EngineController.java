@@ -25,6 +25,10 @@ public class EngineController
     public static Predicate<String> validArgumentValueCheck = ProgramUtils.validArgumentCheck;
     private int maxExpandLevel = 0;
 
+    // Add these fields to Debuger:
+    private boolean inDebugSession = false;
+
+
     public EngineController()
     {
         try
@@ -179,4 +183,63 @@ public class EngineController
         @Serial
         private static final long serialVersionUID = 1L;
     }
+    // Add these methods to implement debugging functionality:
+
+    public void startDebugSession(int expandLevel, Map<String, Integer> arguments) {
+        if (engine == null) {
+            throw new IllegalStateException("Program has not been set");
+        }
+        if (expandLevel < 0 || expandLevel > maxExpandLevel) {
+            throw new IllegalArgumentException("Expand level must be between 0 and " + maxExpandLevel);
+        }
+
+        engine.startDebugSession(expandLevel, arguments);
+        inDebugSession = true;
+    }
+
+    public ExecutionResultDTO debugStep() {
+        if (engine == null || !inDebugSession) {
+            throw new IllegalStateException("Debug session not active");
+        }
+        return engine.debugStep();
+    }
+
+    public ExecutionResultDTO debugStepBackward() {
+        if (engine == null || !inDebugSession) {
+            throw new IllegalStateException("Debug session not active");
+        }
+        return engine.debugStepBackward();
+    }
+
+    public ExecutionResultDTO debugResume() {
+        if (engine == null || !inDebugSession) {
+            throw new IllegalStateException("Debug session not active");
+        }
+        ExecutionResultDTO result = engine.debugResume();
+        inDebugSession = false; // Session ends after resume
+        return result;
+    }
+
+    public void stopDebugSession() {
+        if (engine != null && inDebugSession) {
+            engine.stopDebugSession();
+            inDebugSession = false;
+        }
+    }
+
+    public int getCurrentDebugPC() {
+        if (engine == null || !inDebugSession) {
+            return -1;
+        }
+        return engine.getCurrentDebugPC();
+    }
+
+    public boolean isInDebugSession() {
+        return inDebugSession && engine != null && engine.isInDebugMode();
+    }
+
+    public boolean isDebugFinished() {
+        return engine != null && engine.isDebugFinished();
+    }
+
 }
