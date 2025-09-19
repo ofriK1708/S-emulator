@@ -83,38 +83,30 @@ public class InstructionTableController {
 
     /**
      * Highlights instructions that contain the specified variable
+     *
      * @param variableName The variable name to highlight, or null to clear highlighting
      */
     public void highlightVariable(String variableName) {
         currentHighlightedVariable = variableName;
 
         // Refresh the table to update row highlighting
-        instructionTable.refresh();
+//        instructionTable.refresh();
 
         if (variableName != null) {
             System.out.println("Highlighting variable: " + variableName + " in instruction table");
 
             // Find first matching row and scroll to TOP
             List<InstructionDTO> items = instructionTable.getItems();
-            for (int i = 0; i < items.size(); i++) {
-                if (instructionContainsVariable(items.get(i), variableName)) {
-                    final int targetIndex = i;
-                    javafx.application.Platform.runLater(() -> {
-                        // Calculate visible rows to position at top
-                        double tableHeight = instructionTable.getHeight();
-                        double estimatedRowHeight = 28.0; // Typical row height
-                        int visibleRows = (int) (tableHeight / estimatedRowHeight);
+            for (int targetIndex = 0; targetIndex < items.size(); targetIndex++) {
+                if (instructionContainsVariable(items.get(targetIndex), variableName)) {
+                    // Scroll to position target row at top
+                    int scrollToIndex = Math.max(0, targetIndex - 2); // -2 for header padding
+                    instructionTable.scrollTo(scrollToIndex);
 
-                        // Scroll to position target row at top
-                        int scrollToIndex = Math.max(0, targetIndex - 2); // -2 for header padding
-                        instructionTable.scrollTo(scrollToIndex);
+                    // Alternative: Force selection then clear to ensure top positioning
+                    instructionTable.getSelectionModel().clearSelection();
 
-                        // Alternative: Force selection then clear to ensure top positioning
-                        instructionTable.getSelectionModel().select(targetIndex);
-                        javafx.application.Platform.runLater(() -> {
-                            instructionTable.getSelectionModel().clearSelection();
-                        });
-                    });
+                    instructionTable.getSelectionModel().select(targetIndex);
                     break;
                 }
             }
@@ -165,26 +157,21 @@ public class InstructionTableController {
         return label != null && label.contains(variableName);
     }
 
-    public void clearInstructions() {
-        instructionTable.getItems().clear();
-        currentHighlightedVariable = null; // Clear highlighting when clearing instructions
-    }
     /**
      * Highlights the current instruction being executed in debug mode
+     *
      * @param instructionIndex The index of the instruction to highlight (0-based)
      */
     public void highlightCurrentInstruction(int instructionIndex) {
-        javafx.application.Platform.runLater(() -> {
-            // Clear previous selections
-            instructionTable.getSelectionModel().clearSelection();
+        // Clear previous selections
+        instructionTable.getSelectionModel().clearSelection();
 
-            // Select and scroll to the current instruction
-            if (instructionIndex >= 0 && instructionIndex < instructionTable.getItems().size()) {
-                instructionTable.getSelectionModel().select(instructionIndex);
-                instructionTable.scrollTo(Math.max(0, instructionIndex - 2)); // Position near top
+        // Select and scroll to the current instruction
+        if (instructionIndex >= 0 && instructionIndex < instructionTable.getItems().size()) {
+            instructionTable.getSelectionModel().select(instructionIndex);
+            instructionTable.scrollTo(Math.max(0, instructionIndex - 2)); // Position near top
 
-                System.out.println("Highlighted instruction at index: " + instructionIndex);
-            }
-        });
+            System.out.println("Highlighted instruction at index: " + instructionIndex);
+        }
     }
 }

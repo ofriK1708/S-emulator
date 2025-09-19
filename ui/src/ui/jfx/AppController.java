@@ -384,11 +384,11 @@ public class AppController {
         engineController.clearLoadedProgram();
         executionStatistics.clear();
         // Clear UI components
-        instructionsTableController.clearInstructions();
+        programInstructions.clear();
         summaryLineController.clearCounts(); // NEW: Clear summary
         allVariablesDTO.clear();
         argumentsDTO.clear();
-        derivedInstructionsTableController.clearInstructions();
+        derivedInstructions.clear();
         currentCycles.set(0);
         instructionsTableController.highlightVariable(null);
         derivedInstructionsTableController.highlightVariable(null);

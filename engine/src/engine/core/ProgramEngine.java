@@ -84,7 +84,7 @@ public class ProgramEngine implements Serializable {
                     try {
                         return new ProgramEngine(func);
                     } catch (LabelNotExist e) {
-                        throw new RuntimeException("Error initializing function: " + func.getName(), e);
+                        throw new RuntimeException("Error initializing function: " + func.getName(), e); // TODO - better error handling
                     }
                 })
                 .collect(Collectors.toMap(ProgramEngine::getProgramName, funcEngine -> funcEngine));

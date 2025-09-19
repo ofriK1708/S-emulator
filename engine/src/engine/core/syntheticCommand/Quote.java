@@ -10,7 +10,7 @@ import java.util.Map;
 public class Quote extends Instruction {
     private final ProgramEngine mainFunction;
     private ProgramEngine functionToRun;
-    private String funcArgsStr;
+    private String allArgsString;
     private Map<String, ProgramEngine> functions;
     private List<String> funcArgsNames;
 
@@ -29,7 +29,7 @@ public class Quote extends Instruction {
     @Override
     public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException {
 
-        List<Integer> arguments = getArguments(contextMap, funcArgsNames);
+        List<Integer> arguments = getArgumentsValues(contextMap, funcArgsNames);
         Map<String, Integer> functionToRunArguments = functionToRun.getArguments();
         validateArgumentsForFunctionToRun(arguments, functionToRunArguments);
         prepareArguments(functionToRunArguments, arguments);
@@ -38,7 +38,7 @@ public class Quote extends Instruction {
         incrementProgramCounter(contextMap);
     }
 
-    private List<Integer> getArguments(Map<String, Integer> contextMap, List<String> funcArgsName) {
+    private List<Integer> getArgumentsValues(Map<String, Integer> contextMap, List<String> funcArgsName) {
         return funcArgsName.stream()
                 .map(String::trim)
                 .map(contextMap::get)
@@ -53,6 +53,7 @@ public class Quote extends Instruction {
         }
     }
 
+    // TODO - change this to padding in zeroes if needed
     private void validateArgumentsForFunctionToRun(List<Integer> arguments, Map<String, Integer> functionToRunArguments) {
         if (arguments.size() != functionToRunArguments.size()) {
             throw new IllegalArgumentException("Number of arguments does not match number of program arguments");
@@ -61,9 +62,9 @@ public class Quote extends Instruction {
 
     private void initAndValidateQuote() {
         String funcName = args.get("functionName");
-        funcArgsStr = args.get("functionArguments");
+        allArgsString = args.get("functionArguments");
         functions = mainFunction.getFunctions();
-        funcArgsNames = funcArgsStr.isBlank() ? List.of() : List.of(funcArgsStr.split(","));
+        funcArgsNames = allArgsString.isBlank() ? List.of() : List.of(allArgsString.split(","));
 
         if (!functions.containsKey(funcName) && !mainFunction.getProgramName().equals(funcName)) {
             throw new IllegalArgumentException("No such function: " + funcName); // TODO: custom exception
@@ -96,7 +97,7 @@ public class Quote extends Instruction {
 
     @Override
     public String getStringRepresentation() {
-        String argsNames = funcArgsStr.isEmpty() ? "" : "," + funcArgsStr;
+        String argsNames = allArgsString.isEmpty() ? "" : "," + allArgsString;
         return String.format("%s <- (%s%s)", mainVarName, functionToRun.getFuncName(), argsNames);
     }
 }
