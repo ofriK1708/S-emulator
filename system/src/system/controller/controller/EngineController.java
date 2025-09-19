@@ -99,6 +99,9 @@ public class EngineController
 
 
     public int getCyclesCount(int expandLevel) {
+        if (engine == null) {
+            throw new IllegalStateException("Program has not been set");
+        }
         return engine.getTotalCycles(expandLevel);
     }
 

@@ -28,7 +28,7 @@ public abstract class Instruction implements Command, Serializable
     protected @Nullable Instruction derivedFrom = null;
     protected int derivedFromIndex;
 
-    protected Instruction(String mainVarName, Map<String, String> args, @Nullable String label, Instruction derivedFrom, int derivedFromIndex)
+    protected Instruction(String mainVarName, Map<String, String> args, @Nullable String label, @NotNull Instruction derivedFrom, int derivedFromIndex)
     {
         this.mainVarName = mainVarName;
         this.args = args;

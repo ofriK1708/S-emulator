@@ -52,9 +52,7 @@ public class ProgramEngine implements Serializable {
 
         functions = buildFunctions(program);
 
-        functions.forEach((name, function) -> {
-            function.setFunctions(functions);
-        });
+        functions.forEach((name, function) -> function.setFunctions(functions));
 
         SInstructions sInstructions = program.getSInstructions();
 
