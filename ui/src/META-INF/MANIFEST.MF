@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Main-Class: ui.jfx.Main
-Class-Path: javafx-swt.jar javafx.web.jar javafx.base.jar javafx.fxml.ja
- r javafx.media.jar javafx.swing.jar javafx.controls.jar javafx.graphics
- .jar jaxb-jxc.jar jaxb-xjc.jar jaxb-core.jar jaxb-impl.jar angus-activa
- tion.jar jakarta.xml.bind-api.jar jakarta.activation-api.jar annotation
- s-26.0.2.jar
+Class-Path: lib/JAXB/javafx-swt.jar lib/JAXB/javafx.web.jar lib/JAXB/javafx.base.jar lib/JAXB/javafx.fxml.ja
+ r lib/JAXB/javafx.media.jar lib/JAXB/javafx.swing.jar lib/JAXB/javafx.controls.jar lib/JAXB/javafx.graphics
+ .jar lib/JAXB/jaxb-jxc.jar lib/JAXB/jaxb-xjc.jar lib/JAXB/jaxb-core.jar lib/JAXB/jaxb-impl.jar lib/JAXB/angus-activa
+ tion.jar lib/JAXB/jakarta.xml.bind-api.jar lib/JAXB/jakarta.activation-api.jar lib/JetBrainsAnnotation/annotation
+ s-26.0.2.jar engine.jar system.jar dto.jar
 

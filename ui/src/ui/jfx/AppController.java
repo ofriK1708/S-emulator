@@ -20,7 +20,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import system.controller.controller.EngineController;
+import system.controller.EngineController;
 import ui.jfx.VariableInputDialog.VariableInputDialogController;
 import ui.jfx.cycles.CyclesController;
 import ui.jfx.debugger.DebuggerController;
@@ -64,9 +64,6 @@ public class AppController {
     private AnchorPane derivedInstructionsTable;
     @FXML
     private InstructionTableController derivedInstructionsTableController;
-    // Arguments and variables Lists
-    private final ListProperty<VariableDTO> allVariablesDTO =
-            new SimpleListProperty<>(FXCollections.observableArrayList());
     @FXML
     private AnchorPane argumentsTable;
     @FXML
@@ -97,6 +94,10 @@ public class AppController {
     private TitledPane statisticsTitledPane;
     @FXML
     private AnchorPane historyStats;
+
+    // Arguments and variables Lists
+    private final ListProperty<VariableDTO> allVariablesDTO =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
 
     private final ListProperty<VariableDTO> argumentsDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());

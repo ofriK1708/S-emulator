@@ -6,7 +6,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.Alert;
 import org.jetbrains.annotations.NotNull;
-import system.controller.controller.EngineController;
+import system.controller.EngineController;
 
 import java.util.*;
 

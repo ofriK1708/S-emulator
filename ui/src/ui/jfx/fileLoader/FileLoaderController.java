@@ -6,7 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import org.jetbrains.annotations.NotNull;
-import system.controller.controller.EngineController;
+import system.controller.EngineController;
 import ui.utils.UIUtils;
 
 import java.nio.file.Path;

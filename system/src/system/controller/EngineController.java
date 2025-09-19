@@ -1,4 +1,4 @@
-package system.controller.controller;
+package system.controller;
 
 import dto.engine.ExecutionResultDTO;
 import dto.engine.ExecutionStatisticsDTO;
