@@ -7,6 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.function.Consumer;
@@ -22,7 +23,7 @@ public class FileHandlerController {
     private Consumer<File> onFileLoadedCallback;
     private Runnable onClearFileCallback;
     private final StringProperty filePath = new SimpleStringProperty();
-    private File selectedFile = null;
+    private @Nullable File selectedFile = null;
 
     public void initComponent(Consumer<File> onFileLoadedCallback, Runnable onClearFileCallback) {
         this.onFileLoadedCallback = onFileLoadedCallback;

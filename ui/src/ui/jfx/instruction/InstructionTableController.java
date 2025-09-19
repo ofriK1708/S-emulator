@@ -7,13 +7,15 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class InstructionTableController {
 
     private boolean isDerivedMap = false;
-    private String currentHighlightedVariable = null; // Track currently highlighted variable
+    private @Nullable String currentHighlightedVariable = null; // Track currently highlighted variable
 
     @FXML
     private TableView<InstructionDTO> instructionTable;
@@ -48,13 +50,13 @@ public class InstructionTableController {
     }
 
     public void initializeMainInstructionTable(ListProperty<InstructionDTO> instructions,
-                                               ListProperty<InstructionDTO> derivedInstructions) {
+                                               @NotNull ListProperty<InstructionDTO> derivedInstructions) {
         if (isDerivedMap) {
             throw new IllegalStateException("initializeMainInstructionTable called on derived map table");
         }
 
         instructionTable.setRowFactory(tv -> {
-            TableRow<InstructionDTO> row = new TableRow<InstructionDTO>() {
+            TableRow<InstructionDTO> row = new TableRow<>() {
                 @Override
                 protected void updateItem(InstructionDTO item, boolean empty) {
                     super.updateItem(item, empty);
@@ -86,7 +88,7 @@ public class InstructionTableController {
      *
      * @param variableName The variable name to highlight, or null to clear highlighting
      */
-    public void highlightVariable(String variableName) {
+    public void highlightVariable(@Nullable String variableName) {
         currentHighlightedVariable = variableName;
 
         // Refresh the table to update row highlighting
@@ -119,7 +121,7 @@ public class InstructionTableController {
     /**
      * Updates the highlighting for a specific row based on the current highlighted variable
      */
-    private void updateRowHighlighting(TableRow<InstructionDTO> row, InstructionDTO item) {
+    private void updateRowHighlighting(@NotNull TableRow<InstructionDTO> row, @Nullable InstructionDTO item) {
         if (item == null || currentHighlightedVariable == null) {
             // Clear highlighting
             row.getStyleClass().removeAll("highlighted-row");
@@ -141,7 +143,7 @@ public class InstructionTableController {
     /**
      * Determines if an instruction contains a reference to the specified variable
      */
-    private boolean instructionContainsVariable(InstructionDTO instruction, String variableName) {
+    private boolean instructionContainsVariable(@Nullable InstructionDTO instruction, @Nullable String variableName) {
         if (instruction == null || variableName == null) {
             return false;
         }

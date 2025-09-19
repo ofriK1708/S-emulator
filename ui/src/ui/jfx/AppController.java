@@ -18,6 +18,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import system.controller.controller.EngineController;
 import ui.jfx.VariableInputDialog.VariableInputDialogController;
 import ui.jfx.cycles.CyclesController;
@@ -113,8 +115,8 @@ public class AppController {
     private final ListProperty<String> programVariablesNamesAndLabels =
             new SimpleListProperty<>(FXCollections.observableArrayList());
 
-    private final EngineController engineController;
-    private ProgramDTO loadedProgram = null;
+    private final @NotNull EngineController engineController;
+    private @Nullable ProgramDTO loadedProgram = null;
     private final Map<String, Integer> programArguments = new HashMap<>();
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
     private final BooleanProperty debugMode = new SimpleBooleanProperty(false);
@@ -195,7 +197,7 @@ public class AppController {
         }
     }
 
-    public void loadProgramFromFile(File file) {
+    public void loadProgramFromFile(@NotNull File file) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("fileLoader/fileLoader.fxml"));
             Parent root = loader.load();
@@ -229,6 +231,10 @@ public class AppController {
     }
 
     public void prepareForTakingArguments() {
+        if (loadedProgram == null) {
+            showError("No program loaded. Please load a program first.");
+            return;
+        }
         try {
             // Get required program arguments from SystemController
             if (programArguments.isEmpty()) {
@@ -275,7 +281,7 @@ public class AppController {
         }
     }
 
-    public void RunProgram(ProgramRunType programRunType) {
+    public void RunProgram(@NotNull ProgramRunType programRunType) {
         if (!programLoaded.get()) {
             showError("No program loaded. Please load a program first.");
             return;
@@ -391,7 +397,7 @@ public class AppController {
         showInfo("Loaded program cleared.");
     }
 
-    private void handleVariableSelection(String variableName) {
+    private void handleVariableSelection(@Nullable String variableName) {
         // Highlight the variable in the main instruction table
         instructionsTableController.highlightVariable(variableName);
 
@@ -445,6 +451,7 @@ public class AppController {
             inDebugSession = false;
         }
     }
+
     private void showInitialDebugState() {
         try {
             // Get initial state without executing any instruction
@@ -547,7 +554,7 @@ public class AppController {
         }
     }
 
-    private void endDebugSession(ExecutionResultDTO finalResult) {
+    private void endDebugSession(@Nullable ExecutionResultDTO finalResult) {
         inDebugSession = false;
         debugMode.set(false);
         programRunning.set(false);
@@ -569,13 +576,10 @@ public class AppController {
     }
 
     private void highlightCurrentInstruction(int instructionIndex) {
-        // Scroll to and highlight current instruction
-        javafx.application.Platform.runLater(() -> {
-            instructionsTableController.highlightCurrentInstruction(instructionIndex);
-        });
+        instructionsTableController.highlightCurrentInstruction(instructionIndex);
     }
 
-    private void showDebugState(ExecutionResultDTO result) {
+    private void showDebugState(@NotNull ExecutionResultDTO result) {
         // Update cycles with monotonic counter
         currentCycles.set(result.numOfCycles());
     }

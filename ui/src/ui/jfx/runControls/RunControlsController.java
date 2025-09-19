@@ -7,6 +7,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ui.jfx.ProgramRunType;
 
 import java.util.function.Consumer;
@@ -15,9 +17,9 @@ public class RunControlsController {
 
     private Consumer<ProgramRunType> runCallback;
     private Runnable setCallback;
-    BooleanProperty runTypeChosen = new SimpleBooleanProperty(false);
-    ProgramRunType programRunType;
-    private BooleanProperty debugModeActive = new SimpleBooleanProperty(false);
+    final BooleanProperty runTypeChosen = new SimpleBooleanProperty(false);
+    private final @NotNull BooleanProperty debugModeActive = new SimpleBooleanProperty(false);
+    @Nullable ProgramRunType programRunType;
 
 
     @FXML
@@ -36,7 +38,7 @@ public class RunControlsController {
     private Button setRun;
 
     public void initComponent(Consumer<ProgramRunType> runCallback, Runnable setCallback,
-                              BooleanProperty programLoaded, BooleanProperty variablesEntered) {
+                              @NotNull BooleanProperty programLoaded, @NotNull BooleanProperty variablesEntered) {
         this.runCallback = runCallback;
         this.setCallback = setCallback;
 

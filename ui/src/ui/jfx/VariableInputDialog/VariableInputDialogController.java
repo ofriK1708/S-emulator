@@ -9,6 +9,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.jetbrains.annotations.NotNull;
 import ui.utils.UIUtils;
 
 import java.util.HashMap;
@@ -52,11 +53,11 @@ public class VariableInputDialogController {
         }
     }
 
-    private boolean validate(String newVal) {
+    private boolean validate(@NotNull String newVal) {
         return newVal.isEmpty() || UIUtils.isValidProgramArgument(newVal);
     }
 
-    private void updateFieldValidationStyle(TextField field, boolean valid) {
+    private void updateFieldValidationStyle(@NotNull TextField field, boolean valid) {
         String errorMsg = "Input is not a number or not a positive number";
         if (!valid) {
             if (!field.getStyleClass().contains("error-field")) {

@@ -3,6 +3,7 @@ package ui.jfx.fileLoader;
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
 import javafx.application.Platform;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -18,7 +19,7 @@ public record UIAdapterLoadFileTask(
         Consumer<Integer> currentExpandLevelDelegate,
         Consumer<Integer> cyclesDelegate, Consumer<ProgramDTO> onFinish) {
 
-    public void variablesAndInstructionsHandler(ProgramDTO program, List<String> allVars) {
+    public void variablesAndInstructionsHandler(@NotNull ProgramDTO program, List<String> allVars) {
         Platform.runLater(() -> {
             programLoadedDelegate.accept(true);
             variablesEnteredDelegate.accept(false);

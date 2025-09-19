@@ -6,6 +6,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -34,7 +35,7 @@ public class SummaryLineController {
      * Updates the instruction counts based on the provided instruction list
      * @param instructions List of InstructionDTO objects to analyze
      */
-    public void updateCounts(List<InstructionDTO> instructions) {
+    public void updateCounts(@Nullable List<InstructionDTO> instructions) {
         if (instructions == null || instructions.isEmpty()) {
             syntheticCount.set(0);
             basicCount.set(0);
@@ -67,14 +68,5 @@ public class SummaryLineController {
     public void clearCounts() {
         syntheticCount.set(0);
         basicCount.set(0);
-    }
-
-    // Getter methods for the properties (if needed for binding elsewhere)
-    public IntegerProperty syntheticCountProperty() {
-        return syntheticCount;
-    }
-
-    public IntegerProperty basicCountProperty() {
-        return basicCount;
     }
 }

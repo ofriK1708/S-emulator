@@ -7,6 +7,8 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ui.utils.UIUtils;
 
 import java.util.List;
@@ -19,8 +21,8 @@ public class ProgramFunctionController {
     @FXML
     public RadioButton autoPaneMode;
     Consumer<String> OnVariableSelectionCallback; // NEW: Callback for variable selection
-    IntegerProperty currentLevel = new SimpleIntegerProperty();
-    IntegerProperty maxLevel = new SimpleIntegerProperty();
+    final IntegerProperty currentLevel = new SimpleIntegerProperty();
+    final IntegerProperty maxLevel = new SimpleIntegerProperty();
 
     @FXML
     private Button collapseButton;
@@ -48,10 +50,10 @@ public class ProgramFunctionController {
 
     public void initComponent(Consumer<Integer> OnExpandLevelChangeCallback,
                               Consumer<PaneMode> OnPaneModeChangeCallback,
-                              IntegerProperty currentExpandLevelProperty, IntegerProperty MaxExpandLevelProperty,
-                              BooleanProperty programLoadedProperty,
+                              @NotNull IntegerProperty currentExpandLevelProperty, @NotNull IntegerProperty MaxExpandLevelProperty,
+                              @NotNull BooleanProperty programLoadedProperty,
                               Consumer<String> OnVariableSelectionCallback,
-                              ListProperty<String> programVariables) { // NEW: Add variable selection callback
+                              @NotNull ListProperty<String> programVariables) { // NEW: Add variable selection callback
         this.OnExpandLevelChangeCallback = OnExpandLevelChangeCallback;
         this.OnVariableSelectionCallback = OnVariableSelectionCallback;
 
@@ -90,7 +92,7 @@ public class ProgramFunctionController {
      *
      * @param variables List of VariableDTO objects from ExecutionVariableController
      */
-    public void updateVariableDropdown(List<String> variables) {
+    public void updateVariableDropdown(@Nullable List<String> variables) {
         highlightSelectionButton.getItems().clear();
 
         if (variables == null || variables.isEmpty()) {

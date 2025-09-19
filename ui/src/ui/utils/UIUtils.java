@@ -5,6 +5,7 @@ import engine.utils.ProgramUtils;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.Alert;
+import org.jetbrains.annotations.NotNull;
 import system.controller.controller.EngineController;
 
 import java.util.*;
@@ -19,12 +20,12 @@ public class UIUtils {
         return EngineController.validArgumentValueCheck.test(arg);
     }
 
-    public static VariableDTO toVariableDTO(Map.Entry<String, Integer> entry) {
+    public static @NotNull VariableDTO toVariableDTO(Map.@NotNull Entry<String, Integer> entry) {
         return new VariableDTO(new SimpleStringProperty(entry.getKey()),
                 new SimpleIntegerProperty(entry.getValue()));
     }
 
-    public static VariableDTO toVariableDTO(String variableName, Integer result) {
+    public static @NotNull VariableDTO toVariableDTO(String variableName, Integer result) {
         return new VariableDTO(new SimpleStringProperty(variableName),
                 new SimpleIntegerProperty(result));
     }
@@ -58,7 +59,7 @@ public class UIUtils {
         }
     }
 
-    public static List<VariableDTO> getAllVariablesSorted(EngineController engineController, int expandLevel) {
+    public static @NotNull List<VariableDTO> getAllVariablesSorted(@NotNull EngineController engineController, int expandLevel) {
         List<VariableDTO> variablesSorted = new ArrayList<>();
 
         variablesSorted.add(toVariableDTO(ProgramUtils.OUTPUT_NAME, engineController.getProgramResult()));
@@ -73,14 +74,14 @@ public class UIUtils {
         return variablesSorted;
     }
 
-    public static List<VariableDTO> extractArguments(Map<String, Integer> arguments) {
+    public static @NotNull List<VariableDTO> extractArguments(@NotNull Map<String, Integer> arguments) {
         return arguments.entrySet().stream()
                 .map(UIUtils::toVariableDTO)
                 .toList();
 
     }
 
-    public static List<String> sortAllProgramNames(Set<String> programNames) {
+    public static @NotNull List<String> sortAllProgramNames(@NotNull Set<String> programNames) {
         List<String> sortedProgramNames = new ArrayList<>();
         List<String> sortedLabels = new ArrayList<>();
         List<String> sortedArguments = new ArrayList<>();

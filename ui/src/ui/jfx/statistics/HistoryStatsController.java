@@ -6,6 +6,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -43,7 +44,7 @@ public class HistoryStatsController {
         statisticsTable.itemsProperty().bind(statisticsData);
     }
 
-    private String formatArguments(Map<String, Integer> arguments) {
+    private @NotNull String formatArguments(@NotNull Map<String, Integer> arguments) {
         if (arguments.isEmpty()) {
             return "None";
         }
