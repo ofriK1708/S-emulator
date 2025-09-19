@@ -146,11 +146,11 @@ public class EngineController
         return engine.getAllVariablesNamesAndLabels(expandLevel);
     }
 
-    public Map<String, Integer> getArguments() {
+    public Map<String, Integer> getSortedArguments() {
         if (engine == null) {
             throw new IllegalStateException("Program has not been set");
         }
-        return engine.getArguments();
+        return engine.getSortedArguments();
     }
 
 
@@ -166,7 +166,7 @@ public class EngineController
         if (engine == null) {
             throw new IllegalStateException("Program has not been set");
         }
-        return engine.getWorkVars(expandLevel);
+        return engine.getSortedWorkVars(expandLevel);
     }
 
     private record StateData(ProgramEngine engine, int maxExpandLevel) implements Serializable

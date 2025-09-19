@@ -1,6 +1,7 @@
 package engine.core;
 
 import dto.engine.ExecutionStatisticsDTO;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -34,7 +35,7 @@ public class ExecutionStatistics implements Serializable
         this.numOfCycles += numOfCycles;
     }
 
-    public ExecutionStatisticsDTO toDTO()
+    public @NotNull ExecutionStatisticsDTO toDTO()
     {
         return new ExecutionStatisticsDTO(executionNumber,
                 expandLevel,

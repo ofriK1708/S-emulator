@@ -32,7 +32,7 @@ public class FileLoaderController {
         LoadFileToProgramTask loadFileToProgramTask = new LoadFileToProgramTask(
                 engineController, filePath, uiAdapter
         );
-        bindTaskToUIComponents(loadFileToProgramTask, uiAdapter.getOnFinish());
+        bindTaskToUIComponents(loadFileToProgramTask, uiAdapter.onFinish());
         Thread thread = new Thread(loadFileToProgramTask, "FileLoaderTaskThread");
         thread.start();
     }

@@ -2,6 +2,7 @@
 package engine.generated_2;
 
 import jakarta.xml.bind.annotation.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +60,7 @@ public class SFunctions {
      *
      * @return The value of the sFunction property.
      */
-    public List<SFunction> getSFunction() {
+    public @NotNull List<SFunction> getSFunction() {
         if (sFunction == null) {
             sFunction = new ArrayList<>();
         }

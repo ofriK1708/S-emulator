@@ -6,6 +6,7 @@ import engine.core.basicCommand.JumpNotZero;
 import engine.core.basicCommand.Neutral;
 import engine.utils.CommandType;
 import engine.utils.ProgramUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class ZeroVariable extends Instruction
     }
 
     @Override
-    public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
+    public void execute(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException
     {
         contextMap.put(mainVarName, 0);
         incrementProgramCounter(contextMap);
@@ -41,13 +42,13 @@ public class ZeroVariable extends Instruction
     }
 
     @Override
-    public CommandType getType()
+    public @NotNull CommandType getType()
     {
         return CommandType.SYNTHETIC;
     }
 
     @Override
-    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
+    public @NotNull List<Instruction> expand(@NotNull Map<String, Integer> contextMap, int originalInstructionIndex)
     {
         List<Instruction> expanded = new LinkedList<>();
         String freeLabelName = ProgramUtils.getNextFreeLabelName(contextMap);
@@ -69,7 +70,7 @@ public class ZeroVariable extends Instruction
     }
 
     @Override
-    public String getStringRepresentation()
+    public @NotNull String getStringRepresentation()
     {
         return String.format("%s <- 0", mainVarName);
     }

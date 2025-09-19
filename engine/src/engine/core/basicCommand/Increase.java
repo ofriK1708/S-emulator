@@ -2,6 +2,7 @@ package engine.core.basicCommand;
 
 import engine.core.Instruction;
 import engine.utils.CommandType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +23,7 @@ public class Increase extends Instruction
     }
 
     @Override
-    public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
+    public void execute(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException
     {
         try
         {
@@ -36,7 +37,7 @@ public class Increase extends Instruction
     }
 
     @Override
-    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
+    public @NotNull List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
         return new LinkedList<>(List.of(this));
     }
@@ -47,7 +48,7 @@ public class Increase extends Instruction
     }
 
     @Override
-    public CommandType getType() {
+    public @NotNull CommandType getType() {
         return CommandType.BASIC;
     }
 
@@ -58,7 +59,7 @@ public class Increase extends Instruction
     }
 
     @Override
-    public String getStringRepresentation()
+    public @NotNull String getStringRepresentation()
     {
         return String.format("%s <- %s + 1", mainVarName, mainVarName);
     }

@@ -8,6 +8,9 @@ import engine.core.basicCommand.Neutral;
 import engine.core.syntheticCommand.*;
 import engine.generated_2.SInstruction;
 import engine.generated_2.SInstructionArguments;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -20,12 +23,12 @@ public abstract class Instruction implements Command, Serializable
     private static final long serialVersionUID = 1L;
     protected final String mainVarName;
     protected final Map<String, String> args;
-    protected final String label;
+    protected final @NotNull String label;
     protected final static String ProgramCounterName = "PC";
-    protected Instruction derivedFrom = null;
+    protected @Nullable Instruction derivedFrom = null;
     protected int derivedFromIndex;
 
-    protected Instruction(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
+    protected Instruction(String mainVarName, Map<String, String> args, @Nullable String label, Instruction derivedFrom, int derivedFromIndex)
     {
         this.mainVarName = mainVarName;
         this.args = args;
@@ -34,29 +37,14 @@ public abstract class Instruction implements Command, Serializable
         this.derivedFromIndex = derivedFromIndex;
     }
 
-    protected Instruction(String mainVarName, Map<String, String> args, String label)
+    protected Instruction(String mainVarName, Map<String, String> args, @Nullable String label)
     {
         this.mainVarName = mainVarName;
         this.args = args;
         this.label = label == null ? "" : label;
     }
 
-    public String getLabel()
-    {
-        return label;
-    }
-
-    public String getMainVarName()
-    {
-        return mainVarName;
-    }
-
-    public Map<String, String> getArgs()
-    {
-        return args;
-    }
-
-    public static Instruction createInstruction(SInstruction sInstruction, ProgramEngine engine)
+    public static @NotNull Instruction createInstruction(@NotNull SInstruction sInstruction, @NotNull ProgramEngine engine)
     {
 
         Map<String, String> args = Optional.ofNullable(sInstruction.getSInstructionArguments())
@@ -86,16 +74,33 @@ public abstract class Instruction implements Command, Serializable
             case "JUMP_EQUAL_VARIABLE" -> new JumpEqualVariable(mainVarName, args, labelName);
             case "QUOTE" ->
                     new Quote(mainVarName, args, labelName, engine);
+            case "JUMP_EQUAL_FUNCTION" ->
+                    new JumpEqualFunction(mainVarName, args, labelName, engine);
             default -> throw new IllegalArgumentException("Unknown instruction type: " + sInstruction.getName());
         };
     }
 
-    protected void incrementProgramCounter(Map<String, Integer> contextMap)
+    public String getMainVarName()
+    {
+        return mainVarName;
+    }
+
+    public Map<String, String> getArgs()
+    {
+        return args;
+    }
+
+    public @NotNull String getLabel()
+    {
+        return label;
+    }
+
+    protected void incrementProgramCounter(@NotNull Map<String, Integer> contextMap)
     {
         contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1);
     }
 
-    private List<InstructionDTO> getDerivedInstructions()
+    private @NotNull List<InstructionDTO> getDerivedInstructions()
     {
         List<InstructionDTO> derivedInstructions = new LinkedList<>();
         Instruction tempDerivedFrom = this.derivedFrom;
@@ -110,7 +115,7 @@ public abstract class Instruction implements Command, Serializable
     }
 
     @Override
-    public InstructionDTO toDTO(int idx)
+    public @NotNull InstructionDTO toDTO(int idx)
     {
         return new InstructionDTO(
                 idx,
@@ -122,7 +127,8 @@ public abstract class Instruction implements Command, Serializable
         );
     }
 
-    private InstructionDTO simpleToDTO(int index)
+    @Contract("_ -> new")
+    private @NotNull InstructionDTO simpleToDTO(int index)
     {
         return new InstructionDTO(
                 index,

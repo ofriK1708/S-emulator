@@ -5,6 +5,7 @@ import engine.core.basicCommand.Increase;
 import engine.core.basicCommand.JumpNotZero;
 import engine.utils.CommandType;
 import engine.utils.ProgramUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class GOTOLabel extends Instruction
     }
 
     @Override
-    public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
+    public void execute(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException
     {
         String labelName = args.get(labelArgumentName);
         if (contextMap.containsKey(labelName))
@@ -48,7 +49,7 @@ public class GOTOLabel extends Instruction
     }
 
     @Override
-    public CommandType getType()
+    public @NotNull CommandType getType()
     {
         return CommandType.SYNTHETIC;
     }
@@ -64,7 +65,7 @@ public class GOTOLabel extends Instruction
     }
 
     @Override
-    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
+    public @NotNull List<Instruction> expand(@NotNull Map<String, Integer> contextMap, int originalInstructionIndex)
     {
 
         List<Instruction> instructions = new ArrayList<>();
@@ -78,7 +79,7 @@ public class GOTOLabel extends Instruction
     }
 
     @Override
-    public String getStringRepresentation()
+    public @NotNull String getStringRepresentation()
     {
         String labelName = args.get(labelArgumentName);
         return String.format("GOTO %s", labelName);

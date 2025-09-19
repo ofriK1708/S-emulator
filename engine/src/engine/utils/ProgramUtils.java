@@ -1,6 +1,7 @@
 package engine.utils;
 
 import engine.core.Instruction;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -14,8 +15,7 @@ public class ProgramUtils {
     public static final String LABEL_PREFIX = "L";
 
 
-
-    public static Predicate<String> validArgumentCheck = (arg) ->
+    public static @NotNull Predicate<String> validArgumentCheck = (arg) ->
     {
         try {
             int value = Integer.parseInt(arg);
@@ -25,7 +25,7 @@ public class ProgramUtils {
         }
     };
 
-    public static String getNextFreeLabelName(Map<String, Integer> contextMap) {
+    public static @NotNull String getNextFreeLabelName(@NotNull Map<String, Integer> contextMap) {
         int labelIndex = 1;
         String labelName;
         do {
@@ -35,7 +35,7 @@ public class ProgramUtils {
         return labelName;
     }
 
-    public static String getNextFreeWorkVariableName(Map<String, Integer> contextMap) {
+    public static @NotNull String getNextFreeWorkVariableName(@NotNull Map<String, Integer> contextMap) {
         int varIndex = 1;
         String varName;
         do {
@@ -45,7 +45,7 @@ public class ProgramUtils {
         return varName;
     }
 
-    private static boolean isNumber(String argName) {
+    private static boolean isNumber(@NotNull String argName) {
         try {
             Integer.parseInt(argName);
             return true;
@@ -54,15 +54,12 @@ public class ProgramUtils {
         }
     }
 
-    public static boolean isSingleValidArgument(String argName) {
+    public static boolean isSingleValidArgument(@NotNull String argName) {
         return argName.equals(OUTPUT_NAME) || argName.startsWith(ARG_PREFIX) || argName.startsWith(WORK_VAR_PREFIX);
     }
 
-    public static int calculateExpandedLevel(Instruction instruction, int currentLevel) {
+    public static int calculateExpandedLevel(@NotNull Instruction instruction, int currentLevel) {
         if (currentLevel == -1) {
-            if (instruction == null) {
-                throw new IllegalArgumentException("Instruction cannot be null");
-            }
 
             // Basic instructions have an expand level of 0
             if (instruction.getType() == CommandType.BASIC) {
@@ -79,11 +76,11 @@ public class ProgramUtils {
         return currentLevel;
     }
 
-    public static int calculateExpandedLevel(Instruction instruction) {
+    public static int calculateExpandedLevel(@NotNull Instruction instruction) {
         return calculateExpandedLevel(instruction, -1);
     }
 
-    public static int getMaxExpandLevel(List<Instruction> instructions) {
+    public static int getMaxExpandLevel(@NotNull List<Instruction> instructions) {
         int maxLevel = 0;
         for (Instruction instr : instructions) {
             maxLevel = Math.max(maxLevel, instr.getExpandLevel());
@@ -91,31 +88,30 @@ public class ProgramUtils {
         return maxLevel;
     }
 
-    public static Set<String> extractAllVariableAndLabelNames(Map<String, Integer> contextMap) {
+    public static @NotNull Set<String> extractAllVariableAndLabelNamesUnsorted(@NotNull Map<String, Integer> contextMap) {
         contextMap.remove(EXIT_LABEL_NAME);
         contextMap.remove(PC_NAME);
         return new HashSet<>(contextMap.keySet());
     }
 
-    public static Map<String, Integer> extractWorkVars(Map<String, Integer> contextMap) {
+    public static @NotNull Map<String, Integer> extractSortedWorkVars(@NotNull Map<String, Integer> contextMap) {
         return getStringIntegerMap(contextMap, WORK_VAR_PREFIX);
     }
 
-    public static Map<String, Integer> extractArguments(Map<String, Integer> contextMap) {
+    public static @NotNull Map<String, Integer> extractSortedArguments(@NotNull Map<String, Integer> contextMap) {
         return getStringIntegerMap(contextMap, ARG_PREFIX);
     }
 
-    private static Map<String, Integer> getStringIntegerMap(Map<String, Integer> contextMap, String argPrefix) {
-        Map<String, Integer> arguments = new HashMap<>();
-        for (Map.Entry<String, Integer> entry : contextMap.entrySet()) {
-            if (entry.getKey().startsWith(argPrefix)) {
-                arguments.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return arguments;
+    private static @NotNull Map<String, Integer> getStringIntegerMap(@NotNull Map<String, Integer> contextMap, @NotNull String argPrefix) {
+        Map<String, Integer> sortedArguments = new LinkedHashMap<>();
+        contextMap.entrySet().stream()
+                .filter(e -> e.getKey().startsWith(argPrefix))
+                .sorted(Map.Entry.comparingByKey(Comparator.comparingInt(str -> Integer.parseInt(str.substring(1)))))
+                .forEach(e -> sortedArguments.put(e.getKey(), e.getValue()));
+        return sortedArguments;
     }
 
-    public static Set<String> extractLabels(List<Set<String>> labelsByExpandLevel, int expandLevel) {
+    public static @NotNull Set<String> extractLabels(@NotNull List<Set<String>> labelsByExpandLevel, int expandLevel) {
         if (expandLevel < 0 || expandLevel >= labelsByExpandLevel.size()) {
             throw new IllegalArgumentException("Invalid expand level: " + expandLevel);
         }

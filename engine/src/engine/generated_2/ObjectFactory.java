@@ -4,6 +4,7 @@ package engine.generated_2;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.annotation.XmlElementDecl;
 import jakarta.xml.bind.annotation.XmlRegistry;
+import org.jetbrains.annotations.NotNull;
 
 import javax.xml.namespace.QName;
 
@@ -40,7 +41,7 @@ public class ObjectFactory {
      *
      * @return the new instance of {@link SFunctions }
      */
-    public SFunctions createSFunctions() {
+    public @NotNull SFunctions createSFunctions() {
         return new SFunctions();
     }
 
@@ -49,7 +50,7 @@ public class ObjectFactory {
      *
      * @return the new instance of {@link SFunction }
      */
-    public SFunction createSFunction() {
+    public @NotNull SFunction createSFunction() {
         return new SFunction();
     }
 
@@ -58,7 +59,7 @@ public class ObjectFactory {
      *
      * @return the new instance of {@link SInstructions }
      */
-    public SInstructions createSInstructions() {
+    public @NotNull SInstructions createSInstructions() {
         return new SInstructions();
     }
 
@@ -67,7 +68,7 @@ public class ObjectFactory {
      *
      * @return the new instance of {@link SInstruction }
      */
-    public SInstruction createSInstruction() {
+    public @NotNull SInstruction createSInstruction() {
         return new SInstruction();
     }
 
@@ -76,7 +77,7 @@ public class ObjectFactory {
      *
      * @return the new instance of {@link SInstructionArguments }
      */
-    public SInstructionArguments createSInstructionArguments() {
+    public @NotNull SInstructionArguments createSInstructionArguments() {
         return new SInstructionArguments();
     }
 
@@ -85,7 +86,7 @@ public class ObjectFactory {
      *
      * @return the new instance of {@link SInstructionArgument }
      */
-    public SInstructionArgument createSInstructionArgument() {
+    public @NotNull SInstructionArgument createSInstructionArgument() {
         return new SInstructionArgument();
     }
 
@@ -94,7 +95,7 @@ public class ObjectFactory {
      *
      * @return the new instance of {@link SProgram }
      */
-    public SProgram createSProgram() {
+    public @NotNull SProgram createSProgram() {
         return new SProgram();
     }
 
@@ -105,7 +106,7 @@ public class ObjectFactory {
      * @return the new instance of {@link JAXBElement }{@code <}{@link String }{@code >}
      */
     @XmlElementDecl(namespace = "", name = "S-Variable")
-    public JAXBElement<String> createSVariable(String value) {
+    public @NotNull JAXBElement<String> createSVariable(String value) {
         return new JAXBElement<>(_SVariable_QNAME, String.class, null, value);
     }
 
@@ -116,7 +117,7 @@ public class ObjectFactory {
      * @return the new instance of {@link JAXBElement }{@code <}{@link String }{@code >}
      */
     @XmlElementDecl(namespace = "", name = "S-Label")
-    public JAXBElement<String> createSLabel(String value) {
+    public @NotNull JAXBElement<String> createSLabel(String value) {
         return new JAXBElement<>(_SLabel_QNAME, String.class, null, value);
     }
 

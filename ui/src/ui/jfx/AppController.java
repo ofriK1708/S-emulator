@@ -229,15 +229,10 @@ public class AppController {
     }
 
     public void prepareForTakingArguments() {
-        // Clear previous variables
-        //programArguments.clear();
-        //allVariablesDTO.clear();
-        //argumentsDTO.clear();
-
         try {
             // Get required program arguments from SystemController
             if (programArguments.isEmpty()) {
-                programArguments.putAll(engineController.getArguments());
+                programArguments.putAll(engineController.getSortedArguments());
             }
 
             if (programArguments.isEmpty()) {

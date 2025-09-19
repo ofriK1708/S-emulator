@@ -2,6 +2,7 @@
 package engine.generated_2;
 
 import jakarta.xml.bind.annotation.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +60,7 @@ public class SInstructions {
      *
      * @return The value of the sInstruction property.
      */
-    public List<SInstruction> getSInstruction() {
+    public @NotNull List<SInstruction> getSInstruction() {
         if (sInstruction == null) {
             sInstruction = new ArrayList<>();
         }

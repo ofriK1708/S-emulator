@@ -9,6 +9,8 @@ import engine.generated_2.SInstruction;
 import engine.generated_2.SInstructions;
 import engine.generated_2.SProgram;
 import engine.utils.ProgramUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -24,9 +26,9 @@ public class ProgramEngine implements Serializable {
     private final String programName;
     private final Map<String, Integer> originalContextMap = new HashMap<>();
     private final List<Map<String, Integer>> contextMapsByExpandLevel = new ArrayList<>();
-    private final List<Instruction> originalInstructions;
+    private final @NotNull List<Instruction> originalInstructions;
     private final List<List<Instruction>> instructionExpansionLevels = new ArrayList<>();
-    private final Set<String> originalLabels;
+    private final @NotNull Set<String> originalLabels;
     private final List<Set<String>> labelsByExpandLevel = new ArrayList<>();
     private final List<Integer> cyclesPerExpandLevel = new ArrayList<>();
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
@@ -39,13 +41,13 @@ public class ProgramEngine implements Serializable {
     private int currentDebugPC = 0;
     private final List<Map<String, Integer>> debugStateHistory = new ArrayList<>();
     private final List<Integer> debugCyclesHistory = new ArrayList<>(); // NEW: Track cycles per step
-    private List<Instruction> currentDebugInstructions;
-    private Map<String, Integer> currentDebugContext;
+    private @Nullable List<Instruction> currentDebugInstructions;
+    private @Nullable Map<String, Integer> currentDebugContext;
     private final Map<String, Integer> debugArguments = new HashMap<>(); // NEW: Store debug arguments
     private int debugExpandLevel = 0;
     private int totalDebugCycles = 0; // NEW: Monotonic cycle counter
 
-    public ProgramEngine(SProgram program) throws LabelNotExist {
+    public ProgramEngine(@NotNull SProgram program) throws LabelNotExist {
         this.programName = program.getName();
 
         functions = buildFunctions(program);
@@ -64,7 +66,7 @@ public class ProgramEngine implements Serializable {
 
     }
 
-    public ProgramEngine(SFunction function) throws LabelNotExist {
+    public ProgramEngine(@NotNull SFunction function) throws LabelNotExist {
         this.programName = function.getName();
 
         funcName = function.getUserString();
@@ -78,7 +80,17 @@ public class ProgramEngine implements Serializable {
         finishInitialization();
     }
 
-    private Map<String, ProgramEngine> buildFunctions(SProgram program) {
+    private static @NotNull Set<String> buildLabels(@NotNull SInstructions sInstructions) {
+        return sInstructions.getSInstruction().stream()
+                .map(SInstruction::getSLabel)
+                .filter(Objects::nonNull)
+                .filter(label -> !label.isBlank())
+                .map(String::trim)
+                .filter(label -> label.startsWith("L"))
+                .collect(Collectors.toSet());
+    }
+
+    private @NotNull Map<String, ProgramEngine> buildFunctions(@NotNull SProgram program) {
         return program.getSFunctions().getSFunction().stream()
                 .map(func -> {
                     try {
@@ -90,16 +102,6 @@ public class ProgramEngine implements Serializable {
                 .collect(Collectors.toMap(ProgramEngine::getProgramName, funcEngine -> funcEngine));
     }
 
-    private static Set<String> buildLabels(SInstructions sInstructions) {
-        return sInstructions.getSInstruction().stream()
-                .map(SInstruction::getSLabel)
-                .filter(Objects::nonNull)
-                .filter(label -> !label.isBlank())
-                .map(String::trim)
-                .filter(label -> label.startsWith("L"))
-                .collect(Collectors.toSet());
-    }
-
     public String getProgramName() {
         return programName;
     }
@@ -108,13 +110,13 @@ public class ProgramEngine implements Serializable {
         return functions;
     }
 
-    protected void setFunctions(Map<String, ProgramEngine> functions) {
+    protected void setFunctions(@NotNull Map<String, ProgramEngine> functions) {
         this.functions = functions.entrySet().stream()
                 .filter(entry -> !entry.getKey().equals(programName))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private List<Instruction> buildInstructions(SInstructions sInstructions) {
+    private @NotNull List<Instruction> buildInstructions(@NotNull SInstructions sInstructions) {
         return sInstructions.getSInstruction().stream()
                 .map(sInstruction -> Instruction.createInstruction(sInstruction, this))
                 .collect(Collectors.toList());
@@ -164,7 +166,7 @@ public class ProgramEngine implements Serializable {
         fillUnusedLabels();
     }
 
-    private boolean isLabelArgument(String argName) {
+    private boolean isLabelArgument(@NotNull String argName) {
         return argName.startsWith("L");
     }
 
@@ -180,7 +182,7 @@ public class ProgramEngine implements Serializable {
         return originalLabels.contains(labelName);
     }
 
-    public void run(int expandLevel, Map<String, Integer> arguments) {
+    public void run(int expandLevel, @NotNull Map<String, Integer> arguments) {
         clearPreviousRunData();
         ExecutionStatistics exStats = new ExecutionStatistics(executionStatisticsList.size() + 1,
                 expandLevel, arguments);
@@ -203,7 +205,7 @@ public class ProgramEngine implements Serializable {
         executionStatisticsList.add(exStats);
     }
 
-    public void run(Map<String, Integer> arguments) {
+    public void run(@NotNull Map<String, Integer> arguments) {
         run(0, arguments);
     }
 
@@ -259,9 +261,9 @@ public class ProgramEngine implements Serializable {
         return ProgramUtils.getMaxExpandLevel(originalInstructions);
     }
 
-    public ProgramDTO toDTO(int expandLevel) {
+    public @NotNull ProgramDTO toDTO(int expandLevel) {
         expand(expandLevel);
-        Map<String, Integer> argsMap = extractArguments(contextMapsByExpandLevel.get(expandLevel));
+        Map<String, Integer> argsMap = ProgramUtils.extractSortedArguments(contextMapsByExpandLevel.get(expandLevel));
         List<Instruction> instructionsAtLevel = instructionExpansionLevels.get(expandLevel);
         return new ProgramDTO(
                 programName,
@@ -273,27 +275,27 @@ public class ProgramEngine implements Serializable {
         );
     }
 
-    public ExecutionResultDTO toExecutionResultDTO(int expandLevel) {
+    public @NotNull ExecutionResultDTO toExecutionResultDTO(int expandLevel) {
         if (executionStatisticsList.isEmpty()) {
             throw new IllegalStateException("No execution has been run yet.");
         }
         ExecutionStatisticsDTO executionStatisticsDTO = executionStatisticsList.getLast().toDTO();
         return new ExecutionResultDTO(executionStatisticsDTO.result(),
                 executionStatisticsDTO.arguments(),
-                extractWorkVars(contextMapsByExpandLevel.get(expandLevel)),
+                extractSortedWorkVars(contextMapsByExpandLevel.get(expandLevel)),
                 contextMapsByExpandLevel.get(expandLevel).get(ProgramUtils.OUTPUT_NAME),
                 executionStatisticsDTO.cyclesUsed()
         );
     }
 
-    public List<ExecutionStatisticsDTO> getAllExecutionStatistics() {
+    public @NotNull List<ExecutionStatisticsDTO> getAllExecutionStatistics() {
         return executionStatisticsList.stream()
                 .map(ExecutionStatistics::toDTO)
                 .toList();
     }
 
-    public Set<String> getProgramArgsNames() {
-        return extractArguments(originalContextMap).keySet();
+    public @NotNull Set<String> getProgramArgsNames() {
+        return ProgramUtils.extractSortedArguments(originalContextMap).keySet();
     }
 
     private int calcTotalCycles(int expandLevel) {
@@ -313,22 +315,22 @@ public class ProgramEngine implements Serializable {
         return calcTotalCycles(0);
     }
 
-    public Set<String> getAllVariablesNamesAndLabels(int expandLevel) {
+    public @NotNull Set<String> getAllVariablesNamesAndLabels(int expandLevel) {
         if (expandLevel < 0 || expandLevel >= labelsByExpandLevel.size()) {
             throw new IllegalArgumentException("Expand level out of bounds");
         }
-        return extractAllVariableAndLabelNames(contextMapsByExpandLevel.get(expandLevel));
+        return extractAllVariableAndLabelNamesUnsorted(contextMapsByExpandLevel.get(expandLevel));
     }
 
-    public Map<String, Integer> getArguments() {
-        return extractArguments(originalContextMap);
+    public @NotNull Map<String, Integer> getSortedArguments() {
+        return ProgramUtils.extractSortedArguments(originalContextMap);
     }
 
-    public Map<String, Integer> getWorkVars(int expandLevel) {
+    public @NotNull Map<String, Integer> getSortedWorkVars(int expandLevel) {
         if (expandLevel < 0 || expandLevel >= contextMapsByExpandLevel.size()) {
             throw new IllegalArgumentException("Expand level out of bounds");
         }
-        return extractWorkVars(contextMapsByExpandLevel.get(expandLevel));
+        return ProgramUtils.extractSortedWorkVars(contextMapsByExpandLevel.get(expandLevel));
     }
 
     public String getFuncName() {
@@ -337,7 +339,7 @@ public class ProgramEngine implements Serializable {
 
     // FIXED: Enhanced debugger methods with proper state management
 
-    public void startDebugSession(int expandLevel, Map<String, Integer> arguments) {
+    public void startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments) {
         clearPreviousRunData();
         resetDebugState();
 
@@ -382,7 +384,7 @@ public class ProgramEngine implements Serializable {
         currentDebugPC = 0;
     }
 
-    public ExecutionResultDTO debugStep() {
+    public @NotNull ExecutionResultDTO debugStep() {
         if (!debugMode) {
             throw new IllegalStateException("Debug session not started");
         }
@@ -417,7 +419,7 @@ public class ProgramEngine implements Serializable {
         return getCurrentDebugState();
     }
 
-    public ExecutionResultDTO debugStepBackward() {
+    public @NotNull ExecutionResultDTO debugStepBackward() {
         if (!debugMode) {
             throw new IllegalStateException("Debug session not started");
         }
@@ -441,7 +443,7 @@ public class ProgramEngine implements Serializable {
         return getCurrentDebugState();
     }
 
-    public ExecutionResultDTO debugResume() {
+    public @NotNull ExecutionResultDTO debugResume() {
         if (!debugMode) {
             throw new IllegalStateException("Debug session not started");
         }
@@ -472,14 +474,14 @@ public class ProgramEngine implements Serializable {
         return debugMode && currentDebugPC >= currentDebugInstructions.size();
     }
 
-    private ExecutionResultDTO getCurrentDebugState() {
+    private @NotNull ExecutionResultDTO getCurrentDebugState() {
         if (!debugMode || currentDebugContext == null) {
             throw new IllegalStateException("No debug session active");
         }
 
         int result = currentDebugContext.get(ProgramUtils.OUTPUT_NAME);
         Map<String, Integer> arguments = new HashMap<>(debugArguments); // Use stored debug arguments
-        Map<String, Integer> workVars = ProgramUtils.extractWorkVars(currentDebugContext);
+        Map<String, Integer> workVars = ProgramUtils.extractSortedWorkVars(currentDebugContext);
 
         return new ExecutionResultDTO(result, arguments, workVars, result, totalDebugCycles);
     }

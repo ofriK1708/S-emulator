@@ -6,6 +6,7 @@ import engine.core.basicCommand.JumpNotZero;
 import engine.core.basicCommand.Neutral;
 import engine.utils.CommandType;
 import engine.utils.ProgramUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ public class JumpEqualConstant extends Instruction
     }
 
     @Override
-    public void execute(Map<String, Integer> contextMap) throws IllegalArgumentException
+    public void execute(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException
     {
         try
         {
@@ -58,13 +59,13 @@ public class JumpEqualConstant extends Instruction
     }
 
     @Override
-    public CommandType getType()
+    public @NotNull CommandType getType()
     {
         return CommandType.SYNTHETIC;
     }
 
     @Override
-    public List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
+    public @NotNull List<Instruction> expand(@NotNull Map<String, Integer> contextMap, int originalInstructionIndex)
     {
         List<Instruction> instructions = new ArrayList<>();
         String freeLabelName = ProgramUtils.getNextFreeLabelName(contextMap);
@@ -105,7 +106,7 @@ public class JumpEqualConstant extends Instruction
     }
 
     @Override
-    public String getStringRepresentation()
+    public @NotNull String getStringRepresentation()
     {
         String labelName = args.get(labelArgumentName);
         int checkConstant = 0;
