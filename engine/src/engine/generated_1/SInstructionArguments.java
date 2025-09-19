@@ -2,7 +2,6 @@
 package engine.generated_1;
 
 import jakarta.xml.bind.annotation.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +58,7 @@ public class SInstructionArguments {
      * 
      * 
      */
-    public @NotNull List<SInstructionArgument> getSInstructionArgument() {
+    public List<SInstructionArgument> getSInstructionArgument() {
         if (sInstructionArgument == null) {
             sInstructionArgument = new ArrayList<SInstructionArgument>();
         }

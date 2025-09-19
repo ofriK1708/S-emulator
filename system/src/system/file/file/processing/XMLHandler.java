@@ -4,6 +4,7 @@ import engine.generated_2.SProgram;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +23,7 @@ public class XMLHandler
         this.unmarshaller = jaxbContext.createUnmarshaller();
     }
 
-    public SProgram unmarshallFile(Path xmlPath) throws JAXBException, IOException
+    public SProgram unmarshallFile(@NotNull Path xmlPath) throws JAXBException, IOException
     {
         InputStream xmlFile = Files.newInputStream(xmlPath);
         return (SProgram) unmarshaller.unmarshal(xmlFile);

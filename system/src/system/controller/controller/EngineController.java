@@ -8,6 +8,8 @@ import engine.exception.LabelNotExist;
 import engine.generated_2.SProgram;
 import engine.utils.ProgramUtils;
 import jakarta.xml.bind.JAXBException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import system.file.file.processing.XMLHandler;
 
 import java.io.IOException;
@@ -21,9 +23,9 @@ import java.util.function.Predicate;
 
 public class EngineController
 {
-    private final XMLHandler xmlHandler;
-    private ProgramEngine engine;
-    public static Predicate<String> validArgumentValueCheck = ProgramUtils.validArgumentCheck;
+    public static @NotNull Predicate<String> validArgumentValueCheck = ProgramUtils.validArgumentCheck;
+    private final @NotNull XMLHandler xmlHandler;
+    private @Nullable ProgramEngine engine;
     private int maxExpandLevel = 0;
 
     // Add these fields to Debuger:
@@ -41,16 +43,7 @@ public class EngineController
         }
     }
 
-    public Set<String> getProgramArgsNames()
-    {
-        if (engine == null)
-        {
-            throw new IllegalStateException("Program has not been set");
-        }
-        return engine.getProgramArgsNames();
-    }
-
-    private void createEngine(SProgram program) throws LabelNotExist
+    private void createEngine(@NotNull SProgram program) throws LabelNotExist
     {
         engine = new ProgramEngine(program);
         maxExpandLevel = engine.getMaxExpandLevel();
@@ -65,7 +58,7 @@ public class EngineController
         return maxExpandLevel;
     }
 
-    public void LoadProgramFromFile(Path xmlFilePath) throws LabelNotExist, JAXBException, IOException
+    public void LoadProgramFromFile(@NotNull Path xmlFilePath) throws LabelNotExist, JAXBException, IOException
     {
         if (!xmlFilePath.getFileName().toString().endsWith(".xml"))
         {
@@ -77,7 +70,7 @@ public class EngineController
 
     }
 
-    private void validateFileExistRegularAndReadable(Path filePath) throws IOException
+    private void validateFileExistRegularAndReadable(@NotNull Path filePath) throws IOException
     {
         if (!Files.isRegularFile(filePath))
         {
@@ -90,7 +83,7 @@ public class EngineController
     }
 
 
-    public ExecutionResultDTO runLoadedProgram(int expandLevel, Map<String, Integer> arguments)
+    public @NotNull ExecutionResultDTO runLoadedProgram(int expandLevel, @NotNull Map<String, Integer> arguments)
     {
         if (engine == null)
         {
@@ -109,7 +102,7 @@ public class EngineController
         return engine.getTotalCycles(expandLevel);
     }
 
-    public ProgramDTO getProgramByExpandLevel(int expandLevel)
+    public @NotNull ProgramDTO getProgramByExpandLevel(int expandLevel)
     {
         if (engine == null)
         {
@@ -139,14 +132,14 @@ public class EngineController
         return engine.getAllExecutionStatistics().getLast();
     }
 
-    public Set<String> getAllVariablesAndLabelsNames(int expandLevel) {
+    public @NotNull Set<String> getAllVariablesAndLabelsNames(int expandLevel) {
         if (engine == null) {
             throw new IllegalStateException("Program has not been set");
         }
         return engine.getAllVariablesNamesAndLabels(expandLevel);
     }
 
-    public Map<String, Integer> getSortedArguments() {
+    public @NotNull Map<String, Integer> getSortedArguments() {
         if (engine == null) {
             throw new IllegalStateException("Program has not been set");
         }
@@ -154,15 +147,14 @@ public class EngineController
     }
 
 
-
-    public Integer getProgramResult() {
+    public @NotNull Integer getProgramResult() {
         if (engine == null) {
             throw new IllegalStateException("No program loaded");
         }
         return engine.getAllExecutionStatistics().getLast().result();
     }
 
-    public Map<String, Integer> getWorkVars(int expandLevel) {
+    public @NotNull Map<String, Integer> getWorkVars(int expandLevel) {
         if (engine == null) {
             throw new IllegalStateException("Program has not been set");
         }
@@ -175,7 +167,7 @@ public class EngineController
         private static final long serialVersionUID = 1L;
     }
 
-    public void startDebugSession(int expandLevel, Map<String, Integer> arguments) {
+    public void startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments) {
         if (engine == null) {
             throw new IllegalStateException("Program has not been set");
         }
@@ -187,21 +179,21 @@ public class EngineController
         inDebugSession = true;
     }
 
-    public ExecutionResultDTO debugStep() {
+    public @NotNull ExecutionResultDTO debugStep() {
         if (engine == null || !inDebugSession) {
             throw new IllegalStateException("Debug session not active");
         }
         return engine.debugStep();
     }
 
-    public ExecutionResultDTO debugStepBackward() {
+    public @NotNull ExecutionResultDTO debugStepBackward() {
         if (engine == null || !inDebugSession) {
             throw new IllegalStateException("Debug session not active");
         }
         return engine.debugStepBackward();
     }
 
-    public ExecutionResultDTO debugResume() {
+    public @NotNull ExecutionResultDTO debugResume() {
         if (engine == null || !inDebugSession) {
             throw new IllegalStateException("Debug session not active");
         }
