@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Quote extends Instruction {
+    private boolean isFinishedInitialization = false;
     public final static String functionNameArgumentName = "functionName";
     public final static String functionArgumentsArgumentName = "functionArguments";
     private final @NotNull ProgramEngine mainFunction;
@@ -29,18 +30,24 @@ public class Quote extends Instruction {
     public Quote(String mainVarName, Map<String, String> args, String label, @NotNull ProgramEngine mainFunction) {
         super(mainVarName, args, label);
         this.mainFunction = mainFunction;
+
         initAndValidateQuote();
     }
 
-    private void initAndValidateQuote() {
+    public void initAndValidateQuote() {
         String funcName = args.get(functionNameArgumentName);
         allArgsString = args.get(functionArgumentsArgumentName) == null ? "" : args.get(functionArgumentsArgumentName);
-        Map<String, ProgramEngine> functions = mainFunction.getFunctions();
-
-        if (!functions.containsKey(funcName) && !mainFunction.getProgramName().equals(funcName)) {
-            throw new IllegalArgumentException("No such function: " + funcName); // TODO: custom exception
+        Map<String, ProgramEngine> functions = mainFunction.getAllFunctionsInMain();
+        if (functions == null) {
+            mainFunction.addToUninitializedQuotes(this);
+            return;
         }
 
+        if (!functions.containsKey(funcName) && !mainFunction.getProgramName().equals(funcName)) {
+            throw new IllegalArgumentException("No such function: " + funcName);
+        }
+
+        isFinishedInitialization = true;
         functionToRun = funcName.equals(mainFunction.getProgramName()) ?
                 mainFunction : functions.get(funcName);
 
@@ -49,6 +56,7 @@ public class Quote extends Instruction {
         } else {
             funcArgsNames = ProgramUtils.splitArgs(allArgsString);
         }
+
         initSubfunctionCalls();
     }
 
@@ -67,8 +75,10 @@ public class Quote extends Instruction {
 
     @Override
     public void execute(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException {
-        saveResult(contextMap, executeAndGetResult(contextMap));
-        incrementProgramCounter(contextMap);
+        if (isFinishedInitialization) {
+            saveResult(contextMap, executeAndGetResult(contextMap));
+            incrementProgramCounter(contextMap);
+        }
     }
 
     public void saveResult(@NotNull Map<String, Integer> contextMap, int result) {
@@ -116,12 +126,18 @@ public class Quote extends Instruction {
 
     @Override
     public int getCycles() {
-        final int quoteOverhead = 5;
-        return quoteOverhead + functionToRun.getTotalCycles() + subFunctionsCycles;
+        if (isFinishedInitialization) {
+            final int quoteOverhead = 5;
+            return quoteOverhead + functionToRun.getTotalCycles() + subFunctionsCycles;
+        }
+        return 0; // not initialized yet
     }
 
     public int getFunctionCycles() {
-        return functionToRun.getTotalCycles() + subFunctionsCycles;
+        if (isFinishedInitialization) {
+            return functionToRun.getTotalCycles() + subFunctionsCycles;
+        }
+        return 0; // not initialized yet
     }
 
     @Override

@@ -33,7 +33,8 @@ public class ProgramEngine implements Serializable {
     private final List<Set<String>> labelsByExpandLevel = new ArrayList<>();
     private final List<Integer> cyclesPerExpandLevel = new ArrayList<>();
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
-    private Map<String, ProgramEngine> functions;
+    private Map<String, ProgramEngine> allFunctionsInMain;
+    private final List<Quote> unitializedQuotes = new ArrayList<>();
 
     private String funcName;
 
@@ -51,9 +52,9 @@ public class ProgramEngine implements Serializable {
     public ProgramEngine(@NotNull SProgram program) throws LabelNotExist {
         this.programName = program.getName();
 
-        functions = buildFunctions(program);
+        allFunctionsInMain = buildFunctions(program);
 
-        functions.forEach((name, function) -> function.setFunctions(functions));
+        allFunctionsInMain.forEach((name, function) -> function.finishInitFunction(allFunctionsInMain));
 
         SInstructions sInstructions = program.getSInstructions();
 
@@ -105,12 +106,25 @@ public class ProgramEngine implements Serializable {
         return programName;
     }
 
-    public Map<String, ProgramEngine> getFunctions() {
-        return functions;
+    public Map<String, ProgramEngine> getAllFunctionsInMain() {
+        return allFunctionsInMain;
     }
 
-    protected void setFunctions(@NotNull Map<String, ProgramEngine> functions) {
-        this.functions = functions.entrySet().stream()
+    public void addToUninitializedQuotes(Quote quote) {
+        unitializedQuotes.add(quote);
+    }
+
+    private void finishInitFunction(@NotNull Map<String, ProgramEngine> allFunctionsInMain) {
+        setFunctions(allFunctionsInMain);
+        for (Quote quote : unitializedQuotes) {
+            quote.initAndValidateQuote();
+        }
+        unitializedQuotes.clear();
+    }
+
+
+    private void setFunctions(@NotNull Map<String, ProgramEngine> allFunctionsInMain) {
+        this.allFunctionsInMain = allFunctionsInMain.entrySet().stream()
                 .filter(entry -> !entry.getKey().equals(programName))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

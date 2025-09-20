@@ -129,18 +129,19 @@ public class ProgramUtils {
     }
 
     public static void initAllVariablesFromQuoteArguments(String value, Map<String, Integer> originalContextMap) {
-        if (isFunctionCall(value)) {
-            value = extractFunctionContent(value);
-        }
-        String[] parts = value.split(",");
+        List<String> parts = splitArgs(value);
         for (String part : parts) {
-            part = part.trim();
-            if (isSingleValidArgument(part) && !originalContextMap.containsKey(part)) {
-                originalContextMap.put(part, 0);
-            } else if (isFunctionCall(part)) {
-                initAllVariablesFromQuoteArguments(part, originalContextMap);
+            if (isFunctionCall(part)) {
+                initAllVariablesFromQuoteArguments(extractFunctionContent(part), originalContextMap);
             } else {
-                System.out.println("Encountered \"" + part + "\" a function name or invalid argument while initializing variables from quote arguments.");
+                part = part.trim();
+                if (isSingleValidArgument(part) && !originalContextMap.containsKey(part)) {
+                    originalContextMap.put(part, 0);
+                } else if (isFunctionCall(part)) {
+                    initAllVariablesFromQuoteArguments(part, originalContextMap);
+                } else {
+                    System.out.println("Encountered \"" + part + "\" a function name or invalid argument while initializing variables from quote arguments.");
+                }
             }
         }
     }
