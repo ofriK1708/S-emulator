@@ -26,7 +26,7 @@ public class EngineController
     public static Predicate<String> validArgumentValueCheck = ProgramUtils.validArgumentCheck;
     private int maxExpandLevel = 0;
 
-    // Add these fields to Debuger:
+    // Add these fields to Debugger:
     private boolean inDebugSession = false;
 
 
@@ -232,4 +232,19 @@ public class EngineController
         return engine != null && engine.isDebugFinished();
     }
 
+    // NEW DEBUG FUNCTIONALITY - Added at the end as requested
+
+    public Map<String, Integer> getDebugWorkVariables() {
+        if (engine == null || !inDebugSession) {
+            throw new IllegalStateException("Debug session not active");
+        }
+        return engine.getDebugWorkVariables();
+    }
+
+    public int getCurrentDebugCycles() {
+        if (engine == null || !inDebugSession) {
+            throw new IllegalStateException("Debug session not active");
+        }
+        return engine.getCurrentDebugCycles();
+    }
 }

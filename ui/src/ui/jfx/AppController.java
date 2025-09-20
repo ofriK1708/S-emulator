@@ -5,6 +5,7 @@ import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
 import dto.ui.VariableDTO;
+import engine.utils.ProgramUtils;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -35,7 +36,9 @@ import ui.jfx.variables.VariablesTableController;
 import ui.utils.UIUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static ui.utils.UIUtils.*;
@@ -416,13 +419,44 @@ public class AppController {
 
 
     //add this method to implement Debugger:
+
+    public void stopDebugSession() {
+        try {
+            engineController.stopDebugSession();
+            showInfo("Debug session stopped");
+            ExecutionResultDTO result = engineController.debugStep();
+            int currentPC = engineController.getCurrentDebugPC();
+
+            highlightCurrentInstruction(currentPC);
+            updateDebugVariableStateWithResult(result);
+            endDebugSession(result);
+
+        }
+        catch (Exception e) {
+            System.err.println("Error stopping debug session: " + e.getMessage());
+            showError("Error stopping debug session: " + e.getMessage());
+        }
+    }
+
+    private void highlightCurrentInstruction(int instructionIndex) {
+        // Scroll to and highlight current instruction
+        javafx.application.Platform.runLater(() -> {
+            instructionsTableController.highlightCurrentInstruction(instructionIndex);
+        });
+    }
+
+// ===== UPDATE EXISTING METHOD: startDebugExecution() =====
+
     public void startDebugExecution() {
         try {
             int expandLevel = currentExpandLevel.get();
             System.out.println("Starting debug execution with arguments: " + programArguments);
 
-            programRunning.set(true);
-            debugMode.set(true);
+            // Property Updates for UI State Management:
+            programRunning.set(true);      // Triggers: runControlsTitledPane collapse via bindTitlePanesExpansion()
+            debugMode.set(true);           // Triggers: debugControlsTitledPane expansion via bindTitlePanesExpansion()
+            programFinished.set(false);    // Ensures debug controls remain expanded
+
             if (debugControlsController != null) {
                 debugControlsController.notifyDebugSessionStarted();
             }
@@ -434,7 +468,7 @@ public class AppController {
             // Get the program at this expand level for UI display
             ProgramDTO program = engineController.getProgramByExpandLevel(expandLevel);
 
-            // Show initial debug state
+            // Show initial debug state with variables
             showInitialDebugState();
 
             // Highlight first instruction
@@ -445,20 +479,21 @@ public class AppController {
         } catch (Exception e) {
             System.err.println("Error starting debug execution: " + e.getMessage());
             showError("Error starting debug execution: " + e.getMessage());
+
+            // Reset properties on error
             debugMode.set(false);
             programRunning.set(false);
             inDebugSession = false;
         }
     }
+
+// ===== UPDATE METHOD: showInitialDebugState() =====
+
     private void showInitialDebugState() {
         try {
             // Get initial state without executing any instruction
             int currentPC = engineController.getCurrentDebugPC();
 
-            // Show initial variable state with arguments applied
-
-
-            // Update cycles (should be 0 initially)
             currentCycles.set(0);
 
         } catch (Exception e) {
@@ -466,6 +501,7 @@ public class AppController {
         }
     }
 
+// ===== UPDATE METHOD: debugStep() =====
 
     public void debugStep() {
         if (!inDebugSession) {
@@ -478,13 +514,25 @@ public class AppController {
             int currentPC = engineController.getCurrentDebugPC();
 
             highlightCurrentInstruction(currentPC);
-            showDebugState(result);
+            updateDebugVariableStateWithResult(result);
 
+            // בדיקה אם התוכנית הסתיימה
             if (engineController.isDebugFinished()) {
-                showInfo("Program execution completed. Total cycles: " + result.numOfCycles());
+                try {
+                    ExecutionStatisticsDTO debugStatistics = engineController.getLastExecutionStatistics();
+                    executionStatistics.add(debugStatistics); //
+                    System.out.println("Debug execution statistics added to history: " +
+                            debugStatistics.cyclesUsed() + " cycles, result: " + debugStatistics.result());
+                } catch (Exception e) {
+                    System.err.println("Error adding debug statistics to history: " + e.getMessage());
+                }
+
+                showSuccess("Program execution completed successfully!\n" +
+                        "Cycles: " + result.numOfCycles() + "\n" +
+                        "Final memory state updated in instruction table.");
+
                 endDebugSession(result);
             } else {
-                // Show current step info
                 showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + result.numOfCycles());
             }
 
@@ -493,6 +541,29 @@ public class AppController {
             showError("Error during debug step: " + e.getMessage());
         }
     }
+    // ===== NEW METHOD:
+    private void updateDebugVariableStateWithResult(ExecutionResultDTO result) {
+        List<VariableDTO> variablesSorted = new ArrayList<>();
+
+        // OUTPUT - מה-result!
+        variablesSorted.add(UIUtils.toVariableDTO(ProgramUtils.OUTPUT_NAME, result.result()));
+
+        // ARGUMENTS - מה-result
+        result.argumentsValues().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(UIUtils.programNameComparator))
+                .map(UIUtils::toVariableDTO)
+                .forEach(variablesSorted::add);
+
+        // WORK VARIABLES - מה-result
+        result.workVariablesValues().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(UIUtils.programNameComparator))
+                .map(UIUtils::toVariableDTO)
+                .forEach(variablesSorted::add);
+
+        allVariablesDTO.setAll(variablesSorted);
+        argumentsDTO.setAll(UIUtils.extractArguments(result.argumentsValues()));
+    }
+// ===== UPDATE METHOD: debugStepBackward() =====
 
     public void debugStepBackward() {
         if (!inDebugSession) {
@@ -505,7 +576,10 @@ public class AppController {
             int currentPC = engineController.getCurrentDebugPC();
 
             highlightCurrentInstruction(currentPC);
-            showDebugState(result);
+
+            // Property Update: Refresh variables after stepping backward
+            // Uses existing binding infrastructure to update tables automatically
+            updateDebugVariableStateWithResult(result);
 
             // Note: Cycles should remain monotonic even when stepping backward
             showInfo("Stepped backward to PC: " + currentPC +
@@ -517,6 +591,8 @@ public class AppController {
         }
     }
 
+// ===== UPDATE METHOD: debugResume() =====
+
     public void debugResume() {
         if (!inDebugSession) {
             showError("No debug session active");
@@ -526,11 +602,9 @@ public class AppController {
         try {
             ExecutionResultDTO result = engineController.debugResume();
 
-            // Clear instruction highlighting
             instructionsTableController.highlightVariable(null);
-            showDebugState(result);
+            updateDebugVariableStateWithResult(result);
             endDebugSession(result);
-
             showInfo("Program resumed and completed successfully!");
 
         } catch (Exception e) {
@@ -540,48 +614,12 @@ public class AppController {
         }
     }
 
-    public void stopDebugSession() {
-        try {
-            engineController.stopDebugSession();
-            endDebugSession(null);
-            showInfo("Debug session stopped");
-
-        } catch (Exception e) {
-            System.err.println("Error stopping debug session: " + e.getMessage());
-            showError("Error stopping debug session: " + e.getMessage());
-        }
-    }
-
-    private void endDebugSession(ExecutionResultDTO finalResult) {
+// ===== UPDATE METHOD: endDebugSession() =====
+    private void endDebugSession(ExecutionResultDTO result) {
         inDebugSession = false;
         debugMode.set(false);
         programRunning.set(false);
-
-        if (debugControlsController != null) {
-            debugControlsController.notifyDebugSessionEnded();
-        }
-
-        if (finalResult != null) {
-            programFinished.set(true);
-            programRanAtLeastOnce.set(true);
-            currentCycles.set(finalResult.numOfCycles());
-            // updateExecutionStatistics(finalResult);
-            // updateVariableDropdown();
-        }
-
-        // Clear instruction highlighting
-        instructionsTableController.highlightVariable(null);
-    }
-
-    private void highlightCurrentInstruction(int instructionIndex) {
-        // Scroll to and highlight current instruction
-        javafx.application.Platform.runLater(() -> {
-            instructionsTableController.highlightCurrentInstruction(instructionIndex);
-        });
-    }
-
-    private void showDebugState(ExecutionResultDTO result) {
-        // Update cycles with monotonic counter
-        currentCycles.set(result.numOfCycles());
+        programFinished.set(true);
+        updateDebugVariableStateWithResult(result);
     }
 }
