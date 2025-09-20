@@ -3,6 +3,7 @@ package engine.core;
 import dto.engine.ExecutionResultDTO;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
+import engine.core.syntheticCommand.Quote;
 import engine.exception.LabelNotExist;
 import engine.generated_2.SFunction;
 import engine.generated_2.SInstruction;
@@ -143,21 +144,26 @@ public class ProgramEngine implements Serializable {
             if (!instruction.getLabel().isEmpty()) {
                 originalContextMap.put(instruction.getLabel().trim(), instruction_index);
             }
-            for (String argName : instruction.getArgs().values()) {
-                if (!originalContextMap.containsKey(argName)) {
-                    if (isLabelArgument(argName) && !validateLabel(argName)) {
-                        throw new LabelNotExist(
-                                instruction.getClass().getSimpleName(),
-                                instruction_index + 1,
-                                argName);
+            for (Map.Entry<String, String> argsEntry : instruction.getArgs().entrySet()) {
+                if (argsEntry.getKey().equals(Quote.functionArgumentsArgumentName)) {
+                    ProgramUtils.initAllVariablesFromQuoteArguments(argsEntry.getValue(), originalContextMap);
+                } else {
+                    String argValueName = argsEntry.getValue().trim();
+                    if (!originalContextMap.containsKey(argValueName)) {
+                        if (isLabelArgument(argValueName) && !validateLabel(argValueName)) {
+                            throw new LabelNotExist(
+                                    instruction.getClass().getSimpleName(),
+                                    instruction_index + 1,
+                                    argValueName);
 
-                    } else if (ProgramUtils.isSingleValidArgument(argName)) {
-                        originalContextMap.put(argName.trim(), 0);
+                        } else if (ProgramUtils.isSingleValidArgument(argValueName)) {
+                            originalContextMap.put(argValueName.trim(), 0);
+                        }
                     }
-                }
-                if (argName.equals(ProgramUtils.EXIT_LABEL_NAME)) {
-                    originalContextMap.put(argName, originalInstructions.size()); // EXIT label is set to the end of the program
-                    originalLabels.add(argName);
+                    if (argValueName.equals(ProgramUtils.EXIT_LABEL_NAME)) {
+                        originalContextMap.put(argValueName, originalInstructions.size()); // EXIT label is set to the end of the program
+                        originalLabels.add(argValueName);
+                    }
                 }
             }
         }

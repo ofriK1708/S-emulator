@@ -3,18 +3,22 @@ package engine.core.syntheticCommand;
 import engine.core.Instruction;
 import engine.core.ProgramEngine;
 import engine.utils.CommandType;
+import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class Quote extends Instruction {
-    private final static String functionNameArgumentName = "functionName";
-    private final static String functionArgumentsArgumentName = "functionArgumentsArgumentName";
+    public final static String functionNameArgumentName = "functionName";
+    public final static String functionArgumentsArgumentName = "functionArguments";
     private final @NotNull ProgramEngine mainFunction;
     private ProgramEngine functionToRun;
     private String allArgsString;
     private List<String> funcArgsNames;
+    private final List<Quote> subfunctionCalls = new ArrayList<>();
+    private int subFunctionsCycles;
 
     public Quote(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex, @NotNull ProgramEngine mainFunction) {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
@@ -32,13 +36,33 @@ public class Quote extends Instruction {
         String funcName = args.get(functionNameArgumentName);
         allArgsString = args.get(functionArgumentsArgumentName) == null ? "" : args.get(functionArgumentsArgumentName);
         Map<String, ProgramEngine> functions = mainFunction.getFunctions();
-        funcArgsNames = allArgsString.isBlank() ? List.of() : List.of(allArgsString.split(","));
 
         if (!functions.containsKey(funcName) && !mainFunction.getProgramName().equals(funcName)) {
             throw new IllegalArgumentException("No such function: " + funcName); // TODO: custom exception
         }
+
         functionToRun = funcName.equals(mainFunction.getProgramName()) ?
                 mainFunction : functions.get(funcName);
+
+        if (allArgsString.isBlank()) {
+            funcArgsNames = List.of();
+        } else {
+            funcArgsNames = ProgramUtils.splitArgs(allArgsString);
+        }
+        initSubfunctionCalls();
+    }
+
+    private void initSubfunctionCalls() {
+        subfunctionCalls.clear();
+        for (String argName : funcArgsNames) {
+            if (ProgramUtils.isFunctionCall(argName)) {
+                Quote functionCall = Instruction.createQuoteFromString(argName, mainFunction);
+                subfunctionCalls.add(functionCall);
+            }
+        }
+        subFunctionsCycles = subfunctionCalls.stream()
+                .mapToInt(Quote::getCycles)
+                .sum();
     }
 
     @Override
@@ -52,18 +76,30 @@ public class Quote extends Instruction {
     }
 
     public int executeAndGetResult(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException {
-        List<Integer> arguments = getArgumentsValues(contextMap, funcArgsNames);
+        List<Integer> arguments = getArgumentsValues(contextMap);
         Map<String, Integer> functionToRunNeededArguments = functionToRun.getSortedArguments();
         prepareArguments(functionToRunNeededArguments, arguments);
         functionToRun.run(functionToRunNeededArguments);
         return functionToRun.getOutput();
     }
 
-    private @NotNull List<Integer> getArgumentsValues(@NotNull Map<String, Integer> contextMap, @NotNull List<String> funcArgsName) {
-        return funcArgsName.stream()
-                .map(String::trim)
-                .map(contextMap::get)
-                .toList();
+    private @NotNull List<Integer> getArgumentsValues(@NotNull Map<String, Integer> contextMap) {
+        List<Integer> argumentsValues = new ArrayList<>();
+        int quoteIndex = 0;
+        for (String argName : funcArgsNames) {
+            if (ProgramUtils.isFunctionCall(argName)) {
+                Quote functionCall = subfunctionCalls.get(quoteIndex);
+                argumentsValues.add(functionCall.executeAndGetResult(contextMap));
+                quoteIndex++;
+            } else {
+                if (contextMap.containsKey(argName)) {
+                    argumentsValues.add(contextMap.get(argName));
+                } else {
+                    throw new IllegalArgumentException("No such variable in context: " + argName);
+                }
+            }
+        }
+        return argumentsValues;
     }
 
     private void prepareArguments(@NotNull Map<String, Integer> functionToRunArguments, @NotNull List<Integer> arguments) {
@@ -81,11 +117,11 @@ public class Quote extends Instruction {
     @Override
     public int getCycles() {
         final int quoteOverhead = 5;
-        return quoteOverhead + functionToRun.getTotalCycles();
+        return quoteOverhead + functionToRun.getTotalCycles() + subFunctionsCycles;
     }
 
     public int getFunctionCycles() {
-        return functionToRun.getTotalCycles();
+        return functionToRun.getTotalCycles() + subFunctionsCycles;
     }
 
     @Override
@@ -105,8 +141,25 @@ public class Quote extends Instruction {
 
     @Override
     public @NotNull String getStringRepresentation() {
-        String argsNames = allArgsString.isEmpty() ? "" : "," + allArgsString;
-        return String.format("%s <- (%s%s)", mainVarName, functionToRun.getFuncName(), argsNames);
+        StringBuilder quoteStringBuilder = new StringBuilder(String.format("%s <- (%s", mainVarName, functionToRun.getFuncName()));
+        if (allArgsString.isBlank()) {
+            quoteStringBuilder.append(")");
+        } else {
+            List<String> allArgs = ProgramUtils.splitArgs(allArgsString);
+            int subFunctionIndex = 0;
+            for (String arg : allArgs) {
+                quoteStringBuilder.append(",");
+                if (ProgramUtils.isFunctionCall(arg)) {
+                    Quote subFunction = subfunctionCalls.get(subFunctionIndex);
+                    quoteStringBuilder.append(subFunction.getFunctionStringRepresentation());
+                    subFunctionIndex++;
+                } else {
+                    quoteStringBuilder.append(arg);
+                }
+            }
+            quoteStringBuilder.append(")");
+        }
+        return quoteStringBuilder.toString();
     }
 
     public @NotNull String getFunctionStringRepresentation() {

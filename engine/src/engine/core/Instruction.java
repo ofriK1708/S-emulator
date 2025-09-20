@@ -8,6 +8,7 @@ import engine.core.basicCommand.Neutral;
 import engine.core.syntheticCommand.*;
 import engine.generated_2.SInstruction;
 import engine.generated_2.SInstructionArguments;
+import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -78,6 +79,17 @@ public abstract class Instruction implements Command, Serializable
                     new JumpEqualFunction(mainVarName, args, labelName, engine);
             default -> throw new IllegalArgumentException("Unknown instruction type: " + sInstruction.getName());
         };
+    }
+
+    protected static Quote createQuoteFromString(String argName, @NotNull ProgramEngine mainFunction) {
+        String functionCallContent = ProgramUtils.extractFunctionContent(argName);
+        List<String> parts = ProgramUtils.splitArgs(functionCallContent);
+        String functionName = parts.getFirst().trim();
+        String functionArgs = String.join(",", parts.subList(1, parts.size()));
+        Map<String, String> quoteArgs = new HashMap<>();
+        quoteArgs.put(Quote.functionNameArgumentName, functionName);
+        quoteArgs.put(Quote.functionArgumentsArgumentName, functionArgs);
+        return new Quote("", quoteArgs, "", mainFunction);
     }
 
     public String getMainVarName()

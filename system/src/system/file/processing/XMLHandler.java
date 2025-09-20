@@ -1,4 +1,4 @@
-package system.file.file.processing;
+package system.file.processing;
 
 import engine.generated_2.SProgram;
 import jakarta.xml.bind.JAXBContext;

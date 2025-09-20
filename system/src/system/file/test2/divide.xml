@@ -48,7 +48,8 @@
 			<S-Variable>z1</S-Variable>
 			<S-Instruction-Arguments>
 				<S-Instruction-Argument name="functionName" value="AND"/>
-				<S-Instruction-Argument name="functionArguments" value="(Smaller_Equal_Than,z3,x2),(NOT,(EQUAL,z3,(CONST0)))"/>
+                <S-Instruction-Argument name="functionArguments"
+                                        value="(Bigger_Equal_Than,z3,x2),(NOT,(EQUAL,z3,(CONST0)))"/>
 			</S-Instruction-Arguments>
 		</S-Instruction>
 	
@@ -211,11 +212,25 @@
 						<S-Instruction-Argument name="functionArguments" value="(Smaller_Equal_Than,x1,x2),(NOT,(EQUAL,x2,x1))"/>
 					</S-Instruction-Arguments>
 				</S-Instruction>
+
+            </S-Instructions>
+        </S-Function>
+
+        <S-Function name="Bigger_Equal_Than" user-string="&gt;=">
+            <S-Instructions>
+
+                <S-Instruction type="synthetic" name="QUOTE">
+                    <S-Variable>y</S-Variable>
+                    <S-Instruction-Arguments>
+                        <S-Instruction-Argument name="functionName" value="NOT"/>
+                        <S-Instruction-Argument name="functionArguments" value="(Smaller_Than,x1,x2)"/>
+                    </S-Instruction-Arguments>
+                </S-Instruction>
 							
 			</S-Instructions>
 		</S-Function>
 
-		<S-Function name="CONST0" user-string="C0">
+        <S-Function name="CONST0" user-string="C0">
 			<S-Instructions>
 			
 				<S-Instruction type="synthetic" name="CONSTANT_ASSIGNMENT">

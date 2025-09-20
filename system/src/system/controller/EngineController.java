@@ -10,7 +10,7 @@ import engine.utils.ProgramUtils;
 import jakarta.xml.bind.JAXBException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import system.file.file.processing.XMLHandler;
+import system.file.processing.XMLHandler;
 
 import java.io.IOException;
 import java.io.Serial;

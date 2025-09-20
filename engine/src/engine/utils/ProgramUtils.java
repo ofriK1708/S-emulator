@@ -118,4 +118,54 @@ public class ProgramUtils {
         return new HashSet<>(labelsByExpandLevel.get(expandLevel));
     }
 
+    public static boolean isFunctionCall(String argName) {
+        if (argName.startsWith("(") && argName.endsWith(")")) {
+            int openParenIndex = argName.indexOf('(');
+            int closeParenIndex = argName.lastIndexOf(')');
+            return openParenIndex < closeParenIndex;
+        } else {
+            return false;
+        }
+    }
+
+    public static void initAllVariablesFromQuoteArguments(String value, Map<String, Integer> originalContextMap) {
+        if (isFunctionCall(value)) {
+            value = extractFunctionContent(value);
+        }
+        String[] parts = value.split(",");
+        for (String part : parts) {
+            part = part.trim();
+            if (isSingleValidArgument(part) && !originalContextMap.containsKey(part)) {
+                originalContextMap.put(part, 0);
+            } else if (isFunctionCall(part)) {
+                initAllVariablesFromQuoteArguments(part, originalContextMap);
+            } else {
+                System.out.println("Encountered \"" + part + "\" a function name or invalid argument while initializing variables from quote arguments.");
+            }
+        }
+    }
+
+    public static String extractFunctionContent(String argName) {
+        return argName.substring(1, argName.length() - 1); // Remove parentheses
+    }
+
+    public static List<String> splitArgs(String input) {
+        List<String> result = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        int parentLevel = 0;
+        for (char c : input.toCharArray()) {
+            if (c == ',' && parentLevel == 0) {
+                result.add(current.toString().trim());
+                current.setLength(0);
+            } else {
+                if (c == '(') parentLevel++;
+                if (c == ')') parentLevel--;
+                current.append(c);
+            }
+        }
+        if (!current.isEmpty()) {
+            result.add(current.toString().trim());
+        }
+        return result;
+    }
 }
