@@ -176,9 +176,11 @@ public abstract class Instruction implements Command, Serializable {
         Iterator<String> newArgsNamesIterator = newArgsNames.iterator();
         Set<String> replaced = new HashSet<>();
 
-        String nextFreeWorkVariableName = ProgramUtils.getNextFreeWorkVariableName(mainContextMap);
-        findAndChangeAllOccurrences(functionInstructions, mainVarName, nextFreeWorkVariableName);
-        replaced.add(nextFreeWorkVariableName);
+        if (!mainVarName.equals(ProgramUtils.OUTPUT_NAME)) {
+            String nextFreeWorkVariableName = ProgramUtils.getNextFreeWorkVariableName(mainContextMap);
+            findAndChangeAllOccurrences(functionInstructions, mainVarName, nextFreeWorkVariableName);
+            replaced.add(nextFreeWorkVariableName);
+        }
 
         for (String newArgsName : newArgsNames) {
             String newWorkVarInPlaceOfArg = ProgramUtils.getNextFreeWorkVariableName(mainContextMap);
