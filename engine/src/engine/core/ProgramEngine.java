@@ -17,7 +17,6 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static engine.utils.ProgramUtils.*;
 
@@ -27,15 +26,15 @@ public class ProgramEngine implements Serializable {
     private final String programName;
     private final Map<String, Integer> originalContextMap = new HashMap<>();
     private final List<Map<String, Integer>> contextMapsByExpandLevel = new ArrayList<>();
-    private final @NotNull List<Instruction> originalInstructions;
+    private final List<Quote> uninitializedQuotes = new ArrayList<>();
     private final List<List<Instruction>> instructionExpansionLevels = new ArrayList<>();
-    private final @NotNull Set<String> originalLabels;
+    private @NotNull List<Instruction> originalInstructions;
     private final List<Set<String>> labelsByExpandLevel = new ArrayList<>();
     private final List<Integer> cyclesPerExpandLevel = new ArrayList<>();
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
     private Map<String, ProgramEngine> allFunctionsInMain;
-    private final List<Quote> unitializedQuotes = new ArrayList<>();
-
+    private @NotNull Set<String> originalLabels;
+    private SFunction originalSFunction = null;
     private String funcName;
 
     // Enhanced debugger fields with proper state management:
@@ -78,6 +77,8 @@ public class ProgramEngine implements Serializable {
         originalLabels = buildLabels(sInstructions);
 
         finishInitialization();
+
+        originalSFunction = function;
     }
 
     private static @NotNull Set<String> buildLabels(@NotNull SInstructions sInstructions) {
@@ -111,15 +112,15 @@ public class ProgramEngine implements Serializable {
     }
 
     public void addToUninitializedQuotes(Quote quote) {
-        unitializedQuotes.add(quote);
+        uninitializedQuotes.add(quote);
     }
 
     private void finishInitFunction(@NotNull Map<String, ProgramEngine> allFunctionsInMain) {
         setFunctions(allFunctionsInMain);
-        for (Quote quote : unitializedQuotes) {
+        for (Quote quote : uninitializedQuotes) {
             quote.initAndValidateQuote();
         }
-        unitializedQuotes.clear();
+        uninitializedQuotes.clear();
     }
 
 
@@ -164,7 +165,7 @@ public class ProgramEngine implements Serializable {
                 } else {
                     String argValueName = argsEntry.getValue().trim();
                     if (!originalContextMap.containsKey(argValueName)) {
-                        if (isLabelArgument(argValueName) && !validateLabel(argValueName)) {
+                        if (ProgramUtils.isLabel(argValueName) && !validateLabel(argValueName)) {
                             throw new LabelNotExist(
                                     instruction.getClass().getSimpleName(),
                                     instruction_index + 1,
@@ -184,10 +185,6 @@ public class ProgramEngine implements Serializable {
         fillUnusedLabels();
     }
 
-    private boolean isLabelArgument(@NotNull String argName) {
-        return argName.startsWith("L");
-    }
-
     private void fillUnusedLabels() {
         for (String label : originalLabels) {
             if (!originalContextMap.containsKey(label)) {
@@ -201,12 +198,13 @@ public class ProgramEngine implements Serializable {
     }
 
     public void run(int expandLevel, @NotNull Map<String, Integer> arguments) {
-        clearPreviousRunData();
+        if (expandLevel < contextMapsByExpandLevel.size()) {
+            clearPreviousRunData(expandLevel);
+        }
         ExecutionStatistics exStats = new ExecutionStatistics(executionStatisticsList.size() + 1,
                 expandLevel, arguments);
-        originalContextMap.putAll(arguments);
-        contextMapsByExpandLevel.getFirst().putAll(arguments);
         expand(expandLevel);
+        contextMapsByExpandLevel.get(expandLevel).putAll(arguments);
         List<Instruction> executedInstructions = instructionExpansionLevels.get(expandLevel);
         Map<String, Integer> executedContextMap = contextMapsByExpandLevel.get(expandLevel);
         while (executedContextMap.get(Instruction.ProgramCounterName) < executedInstructions.size()) {
@@ -227,13 +225,14 @@ public class ProgramEngine implements Serializable {
         run(0, arguments);
     }
 
-    private void clearPreviousRunData() {
-        contextMapsByExpandLevel.clear();
-        contextMapsByExpandLevel.add(new HashMap<>(originalContextMap));
-        instructionExpansionLevels.clear();
-        instructionExpansionLevels.add(originalInstructions);
-        labelsByExpandLevel.clear();
-        labelsByExpandLevel.add(new HashSet<>(originalLabels));
+    private void clearPreviousRunData(int expandLevel) {
+        Map<String, Integer> currentContextMap = contextMapsByExpandLevel.get(expandLevel);
+        for (Map.Entry<String, Integer> entry : currentContextMap.entrySet()) {
+            if (ProgramUtils.isVariable(entry.getKey())) {
+                entry.setValue(0);
+            }
+        }
+        currentContextMap.put(Instruction.ProgramCounterName, 0); // Reset PC
     }
 
     private void expand(int level) {
@@ -287,8 +286,8 @@ public class ProgramEngine implements Serializable {
                 programName,
                 argsMap.keySet(),
                 extractLabels(labelsByExpandLevel, expandLevel),
-                IntStream.range(0, instructionsAtLevel.size())
-                        .mapToObj(i -> instructionsAtLevel.get(i).toDTO(i))
+                instructionsAtLevel.stream()
+                        .map(instruction -> instruction.toDTO(expandLevel))
                         .toList()
         );
     }
@@ -358,7 +357,7 @@ public class ProgramEngine implements Serializable {
     // FIXED: Enhanced debugger methods with proper state management
 
     public void startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments) {
-        clearPreviousRunData();
+        clearPreviousRunData(expandLevel);
         resetDebugState();
 
         debugMode = true;
@@ -502,5 +501,30 @@ public class ProgramEngine implements Serializable {
         Map<String, Integer> workVars = ProgramUtils.extractSortedWorkVars(currentDebugContext);
 
         return new ExecutionResultDTO(result, arguments, workVars, result, totalDebugCycles);
+    }
+
+    protected @NotNull List<Instruction> getFunctionInstructions() {
+        return instructionExpansionLevels.getFirst();
+    }
+
+    protected void resetFunction() {
+        originalContextMap.clear();
+        instructionExpansionLevels.clear();
+        contextMapsByExpandLevel.clear();
+        labelsByExpandLevel.clear();
+        cyclesPerExpandLevel.clear();
+        try {
+            if (originalSFunction != null) {
+                SInstructions sInstructions = originalSFunction.getSInstructions();
+
+                originalInstructions = buildInstructions(sInstructions);
+
+                originalLabels = buildLabels(sInstructions);
+
+                finishInitialization();
+            }
+        } catch (LabelNotExist e) {
+            throw new RuntimeException(e);
+        }
     }
 }

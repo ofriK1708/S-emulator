@@ -89,9 +89,10 @@ public class ProgramUtils {
     }
 
     public static @NotNull Set<String> extractAllVariableAndLabelNamesUnsorted(@NotNull Map<String, Integer> contextMap) {
-        contextMap.remove(EXIT_LABEL_NAME);
-        contextMap.remove(PC_NAME);
-        return new HashSet<>(contextMap.keySet());
+        Map<String, Integer> newContextMap = new HashMap<>(contextMap);
+        newContextMap.remove(EXIT_LABEL_NAME);
+        newContextMap.remove(PC_NAME);
+        return new HashSet<>(newContextMap.keySet());
     }
 
     public static @NotNull Map<String, Integer> extractSortedWorkVars(@NotNull Map<String, Integer> contextMap) {
@@ -128,17 +129,22 @@ public class ProgramUtils {
         }
     }
 
-    public static void initAllVariablesFromQuoteArguments(String value, Map<String, Integer> originalContextMap) {
+    public static Set<String> extractAllVariablesFromQuoteArguments(String value) {
+        Set<String> variables = new HashSet<>();
+        value = isFunctionCall(value) ? extractFunctionContent(value) : value;
+        extractVariablesHelper(value, variables);
+        return variables;
+    }
+
+    private static void extractVariablesHelper(String value, Set<String> variables) {
         List<String> parts = splitArgs(value);
         for (String part : parts) {
             if (isFunctionCall(part)) {
-                initAllVariablesFromQuoteArguments(extractFunctionContent(part), originalContextMap);
+                extractVariablesHelper(extractFunctionContent(part), variables);
             } else {
                 part = part.trim();
-                if (isSingleValidArgument(part) && !originalContextMap.containsKey(part)) {
-                    originalContextMap.put(part, 0);
-                } else if (isFunctionCall(part)) {
-                    initAllVariablesFromQuoteArguments(part, originalContextMap);
+                if (isSingleValidArgument(part)) {
+                    variables.add(part);
                 } else {
                     System.out.println("Encountered \"" + part + "\" a function name or invalid argument while initializing variables from quote arguments.");
                 }
@@ -146,11 +152,20 @@ public class ProgramUtils {
         }
     }
 
-    public static String extractFunctionContent(String argName) {
+    public static void initAllVariablesFromQuoteArguments(String value, Map<String, Integer> originalContextMap) {
+        Set<String> variables = extractAllVariablesFromQuoteArguments(value);
+        for (String var : variables) {
+            if (!originalContextMap.containsKey(var)) {
+                originalContextMap.put(var, 0);
+            }
+        }
+    }
+
+    public static String extractFunctionContent(@NotNull String argName) {
         return argName.substring(1, argName.length() - 1); // Remove parentheses
     }
 
-    public static List<String> splitArgs(String input) {
+    public static List<String> splitArgs(@NotNull String input) {
         List<String> result = new ArrayList<>();
         StringBuilder current = new StringBuilder();
         int parentLevel = 0;
@@ -168,5 +183,21 @@ public class ProgramUtils {
             result.add(current.toString().trim());
         }
         return result;
+    }
+
+    public static boolean isLabel(@NotNull String argName) {
+        return argName.startsWith(LABEL_PREFIX);
+    }
+
+    public static boolean isArgument(@NotNull String argName) {
+        return argName.startsWith(ARG_PREFIX);
+    }
+
+    public static boolean isVariable(@NotNull String argName) {
+        return argName.startsWith(WORK_VAR_PREFIX) || argName.startsWith(ARG_PREFIX) || argName.equals(OUTPUT_NAME);
+    }
+
+    public static boolean isWorkVariable(String oldValue) {
+        return oldValue.startsWith(WORK_VAR_PREFIX);
     }
 }

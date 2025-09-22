@@ -6,6 +6,7 @@ import engine.core.basicCommand.Neutral;
 import engine.utils.CommandType;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,14 +14,18 @@ import java.util.Map;
 
 public class JumpEqualVariable extends Instruction
 {
-    private static final String labelArgumentName = "JEVariableLabel";
-    private static final String variableArgumentName = "variableName";
+    public static final String labelArgumentName = "JEVariableLabel";
+    public static final String variableArgumentName = "variableName";
     private static int expandLevel;
 
     public JumpEqualVariable(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
         expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
+    }
+
+    protected JumpEqualVariable(String mainVarName, Map<String, String> args, @Nullable String label, @NotNull Instruction derivedFrom, int derivedFromIndex) {
+        super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }
 
     @Override

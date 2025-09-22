@@ -14,8 +14,8 @@ import java.util.Map;
 
 public class JumpEqualConstant extends Instruction
 {
-    private final String labelArgumentName = "JEConstantLabel";
-    private final String constantArgumentName = "constantValue";
+    public final String labelArgumentName = "JEConstantLabel";
+    public final String constantArgumentName = "constantValue";
     private static int expandLevel = -1;
 
     public JumpEqualConstant(String mainVarName, Map<String, String> args, String labelName)

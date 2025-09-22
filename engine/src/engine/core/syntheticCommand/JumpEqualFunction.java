@@ -2,9 +2,12 @@ package engine.core.syntheticCommand;
 
 import engine.core.Instruction;
 import engine.core.ProgramEngine;
+import engine.core.basicCommand.Neutral;
 import engine.utils.CommandType;
+import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -54,12 +57,20 @@ public class JumpEqualFunction extends Instruction {
 
     @Override
     public int getExpandLevel() {
-        return 0; //return ProgramUtils.calculateExpandedLevel(this); TODO - implement this after implementing expansion
+        return ProgramUtils.calculateExpandedLevel(this);
     }
 
     @Override
     public @NotNull List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex) {
-        return List.of(); // TODO - implement this
+        List<Instruction> expandedInstructions = new ArrayList<>();
+        String freeWorkVar = ProgramUtils.getNextFreeWorkVariableName(contextMap);
+        if (!label.isBlank()) {
+            expandedInstructions.add(new Neutral(ProgramUtils.OUTPUT_NAME, Map.of(), label, this, originalInstructionIndex));
+        }
+        expandedInstructions.add(new Quote(freeWorkVar, args, label, this, originalInstructionIndex, mainEngine));
+        expandedInstructions.add(new JumpEqualVariable(mainVarName, Map.of(JumpEqualVariable.labelArgumentName,
+                args.get(labelArgumentName), JumpEqualVariable.variableArgumentName, freeWorkVar), "", this, originalInstructionIndex));
+        return expandedInstructions;
     }
 
     @Override

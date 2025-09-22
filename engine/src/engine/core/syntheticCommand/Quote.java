@@ -2,11 +2,13 @@ package engine.core.syntheticCommand;
 
 import engine.core.Instruction;
 import engine.core.ProgramEngine;
+import engine.core.basicCommand.Neutral;
 import engine.utils.CommandType;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +34,17 @@ public class Quote extends Instruction {
         this.mainFunction = mainFunction;
 
         initAndValidateQuote();
+    }
+
+    public Quote(String mainVarName, String label, Quote quote, Instruction derivedFrom, int derivedFromIndex) {
+        super(mainVarName, quote.args, label, derivedFrom, derivedFromIndex);
+        this.mainFunction = quote.mainFunction;
+        this.functionToRun = quote.functionToRun;
+        this.allArgsString = quote.allArgsString;
+        this.funcArgsNames = new ArrayList<>(quote.funcArgsNames);
+        this.subfunctionCalls.addAll(quote.subfunctionCalls);
+        this.subFunctionsCycles = quote.subFunctionsCycles;
+        this.isFinishedInitialization = quote.isFinishedInitialization;
     }
 
     public void initAndValidateQuote() {
@@ -68,6 +81,10 @@ public class Quote extends Instruction {
                 subfunctionCalls.add(functionCall);
             }
         }
+        calcSubFunctionCycles();
+    }
+
+    private void calcSubFunctionCycles() {
         subFunctionsCycles = subfunctionCalls.stream()
                 .mapToInt(Quote::getCycles)
                 .sum();
@@ -147,12 +164,39 @@ public class Quote extends Instruction {
 
     @Override
     public int getExpandLevel() {
-        return 0; //return ProgramUtils.calculateExpandedLevel(this); TODO - implement this after implementing expansion
+        return ProgramUtils.calculateExpandedLevel(this);
     }
 
     @Override
     public @NotNull List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex) {
-        return List.of(); // TODO - implement this
+        List<Instruction> expandedInstructions = new ArrayList<>();
+        List<String> newArgsNames = new ArrayList<>();
+        if (!label.isBlank()) {
+            expandedInstructions.add(new Neutral(ProgramUtils.OUTPUT_NAME, Map.of(), label, this, originalInstructionIndex));
+        }
+        handelNewAssignment(contextMap, originalInstructionIndex, newArgsNames, expandedInstructions);
+        expandedInstructions.addAll(getUpdatedFunctionInstructions(contextMap, functionToRun, mainVarName, newArgsNames, this, originalInstructionIndex));
+        return expandedInstructions;
+    }
+
+    private void handelNewAssignment(Map<String, Integer> contextMap, int originalInstructionIndex,
+                                     List<String> newArgsNames, List<Instruction> expandedInstructions) {
+        Iterator<Quote> subFuncIter = subfunctionCalls.iterator();
+        for (String funcArg : funcArgsNames) {
+            if (ProgramUtils.isArgument(funcArg)) {
+                continue; // skip arguments that are main function arguments
+            }
+            String newArgName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
+            newArgsNames.add(newArgName);
+            if (ProgramUtils.isFunctionCall(funcArg)) {
+                Quote subFunc = subFuncIter.next();
+                expandedInstructions.add(new Quote(newArgName, "", subFunc, this, originalInstructionIndex));
+            } else {
+                expandedInstructions.add(new Assignment(newArgName, Map.of(Assignment.sourceArgumentName,
+                        funcArg), "", this, originalInstructionIndex));
+            }
+
+        }
     }
 
     @Override
