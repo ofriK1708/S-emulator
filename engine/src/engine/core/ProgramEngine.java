@@ -286,8 +286,8 @@ public class ProgramEngine implements Serializable {
                 programName,
                 argsMap.keySet(),
                 extractLabels(labelsByExpandLevel, expandLevel),
-                instructionsAtLevel.stream()
-                        .map(instruction -> instruction.toDTO(expandLevel))
+                java.util.stream.IntStream.range(0, instructionsAtLevel.size())
+                        .mapToObj(i -> instructionsAtLevel.get(i).toDTO(i))
                         .toList()
         );
     }

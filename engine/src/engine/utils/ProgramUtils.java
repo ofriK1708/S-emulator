@@ -131,7 +131,6 @@ public class ProgramUtils {
 
     public static Set<String> extractAllVariablesFromQuoteArguments(String value) {
         Set<String> variables = new HashSet<>();
-        value = isFunctionCall(value) ? extractFunctionContent(value) : value;
         extractVariablesHelper(value, variables);
         return variables;
     }
