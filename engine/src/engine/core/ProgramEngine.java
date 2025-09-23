@@ -1,6 +1,5 @@
 package engine.core;
 
-import dto.engine.ExecutionResultDTO;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
 import engine.core.syntheticCommand.Quote;
@@ -135,8 +134,25 @@ public class ProgramEngine implements Serializable {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Get the output value after execution at a specific expansion level.
+     * used for debugging program, because output is changing during execution
+     *
+     * @param expandLevel the expansion level to get the output from
+     * @return the output value during execution at the specified expansion level
+     */
+    public Integer getOutput(int expandLevel) {
+        return contextMapsByExpandLevel.get(expandLevel).get(ProgramUtils.OUTPUT_NAME);
+    }
+
+    /**
+     * Get the output value after execution at the last expansion level.
+     * used for normal program execution, because output is final after execution
+     *
+     * @return the final output value after execution at the last expansion level
+     */
     public Integer getOutput() {
-        return contextMapsByExpandLevel.getFirst().get(ProgramUtils.OUTPUT_NAME);
+        return contextMapsByExpandLevel.getLast().get(ProgramUtils.OUTPUT_NAME);
     }
 
     private void finishInitialization() throws LabelNotExist {
@@ -291,19 +307,6 @@ public class ProgramEngine implements Serializable {
         );
     }
 
-    public @NotNull ExecutionResultDTO toExecutionResultDTO(int expandLevel) {
-        if (executionStatisticsList.isEmpty()) {
-            throw new IllegalStateException("No execution has been run yet.");
-        }
-        ExecutionStatisticsDTO executionStatisticsDTO = executionStatisticsList.getLast().toDTO();
-        return new ExecutionResultDTO(executionStatisticsDTO.result(),
-                executionStatisticsDTO.arguments(),
-                extractSortedWorkVars(contextMapsByExpandLevel.get(expandLevel)),
-                contextMapsByExpandLevel.get(expandLevel).get(ProgramUtils.OUTPUT_NAME),
-                executionStatisticsDTO.cyclesUsed()
-        );
-    }
-
     public @NotNull List<ExecutionStatisticsDTO> getAllExecutionStatistics() {
         return executionStatisticsList.stream()
                 .map(ExecutionStatistics::toDTO)
@@ -338,6 +341,22 @@ public class ProgramEngine implements Serializable {
         return extractAllVariableAndLabelNamesUnsorted(contextMapsByExpandLevel.get(expandLevel));
     }
 
+    /**
+     * Get sorted arguments at a specific expansion level.
+     * Used in debugging a program, because arguments can change during execution.
+     *
+     * @param expandLevel the expansion level to get the arguments from
+     * @return a map of argument names to their values at the specified expansion level
+     */
+    public @NotNull Map<String, Integer> getSortedArguments(int expandLevel) {
+        return ProgramUtils.extractSortedArguments(contextMapsByExpandLevel.get(expandLevel));
+    }
+
+    /**
+     * Get sorted arguments at the original expansion level (0).
+     * Used in normal program execution, because arguments are fixed after execution.
+     * @return a map of argument names to their values at the original expansion level
+     */
     public @NotNull Map<String, Integer> getSortedArguments() {
         return ProgramUtils.extractSortedArguments(originalContextMap);
     }
@@ -358,29 +377,18 @@ public class ProgramEngine implements Serializable {
     public void startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments) {
         clearPreviousRunData(expandLevel);
         resetDebugState();
-
-        debugMode = true;
         debugExpandLevel = expandLevel;
-        currentDebugPC = 0;
-        totalDebugCycles = 0;
 
-        // Store arguments for persistent access
-        debugArguments.clear();
-        debugArguments.putAll(arguments);
-
-        // Apply arguments to original context first
-        originalContextMap.putAll(arguments);
-
-        // Expand to required level - this preserves the arguments
+        // Expand to required level
         expand(expandLevel);
 
-        // Setup debug context with arguments properly applied
-        currentDebugInstructions = new ArrayList<>(instructionExpansionLevels.get(expandLevel));
-        currentDebugContext = new HashMap<>(contextMapsByExpandLevel.get(expandLevel));
+        // Apply arguments to context map at the specified expand level
+        contextMapsByExpandLevel.get(expandLevel).putAll(arguments);
 
-        // Ensure arguments are preserved in debug context
-        currentDebugContext.putAll(debugArguments);
-        currentDebugContext.put(Instruction.ProgramCounterName, 0);
+
+        // Setup debug context with arguments properly applied
+        currentDebugInstructions = instructionExpansionLevels.get(expandLevel);
+        currentDebugContext = contextMapsByExpandLevel.get(expandLevel);
 
         // Save initial state with zero cycles
         debugStateHistory.add(new HashMap<>(currentDebugContext));
@@ -398,15 +406,16 @@ public class ProgramEngine implements Serializable {
         currentDebugContext = null;
         totalDebugCycles = 0;
         currentDebugPC = 0;
+        debugMode = true;
     }
 
-    public @NotNull ExecutionResultDTO debugStep() {
+    public void debugStep() {
         if (!debugMode) {
             throw new IllegalStateException("Debug session not started");
         }
 
         if (currentDebugPC >= currentDebugInstructions.size()) {
-            return getCurrentDebugState(); // Program finished
+            return; // Already at the end
         }
 
         // Execute current instruction
@@ -431,18 +440,16 @@ public class ProgramEngine implements Serializable {
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Error executing debug instruction at PC=" + currentDebugPC + ": " + e.getMessage(), e);
         }
-
-        return getCurrentDebugState();
     }
 
-    public @NotNull ExecutionResultDTO debugStepBackward() {
+    public void debugStepBackward() {
         if (!debugMode) {
             throw new IllegalStateException("Debug session not started");
         }
 
         if (debugStateHistory.size() <= 1) {
             // Can't go back further than initial state
-            return getCurrentDebugState();
+            return;
         }
 
         // Remove current state and restore previous
@@ -450,18 +457,17 @@ public class ProgramEngine implements Serializable {
         debugCyclesHistory.removeLast();
 
         // Restore previous state
-        currentDebugContext = new HashMap<>(debugStateHistory.get(debugStateHistory.size() - 1));
+        currentDebugContext.putAll(debugStateHistory.getLast());
         currentDebugPC = currentDebugContext.get(Instruction.ProgramCounterName);
 
         // Update totalDebugCycles to match the current state
-        totalDebugCycles = debugCyclesHistory.get(debugCyclesHistory.size() - 1);
+        totalDebugCycles = debugCyclesHistory.getLast();
 
         System.out.println("Debug stepped backward to PC=" + currentDebugPC +
                 ", cycles: " + totalDebugCycles);
-        return getCurrentDebugState();
     }
 
-    public @NotNull ExecutionResultDTO debugResume() {
+    public void debugResume() {
         if (!debugMode) {
             throw new IllegalStateException("Debug session not started");
         }
@@ -470,8 +476,6 @@ public class ProgramEngine implements Serializable {
         while (currentDebugPC < currentDebugInstructions.size()) {
             debugStep();
         }
-
-        return getCurrentDebugState();
     }
 
     public void stopDebugSession() {
@@ -490,18 +494,6 @@ public class ProgramEngine implements Serializable {
 
     public boolean isDebugFinished() {
         return debugMode && currentDebugPC >= currentDebugInstructions.size();
-    }
-
-    private @NotNull ExecutionResultDTO getCurrentDebugState() {
-        if (!debugMode || currentDebugContext == null) {
-            throw new IllegalStateException("No debug session active");
-        }
-
-        int result = currentDebugContext.get(ProgramUtils.OUTPUT_NAME);
-        Map<String, Integer> arguments = new HashMap<>(debugArguments); // Use stored debug arguments
-        Map<String, Integer> workVars = ProgramUtils.extractSortedWorkVars(currentDebugContext);
-
-        return new ExecutionResultDTO(result, arguments, workVars, result, totalDebugCycles);
     }
 
     public Map<String, Integer> getDebugWorkVariables() {

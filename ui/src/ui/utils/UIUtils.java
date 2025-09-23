@@ -62,8 +62,23 @@ public class UIUtils {
     public static @NotNull List<VariableDTO> getAllVariablesSorted(@NotNull EngineController engineController, int expandLevel) {
         List<VariableDTO> variablesSorted = new ArrayList<>();
 
-        variablesSorted.add(toVariableDTO(ProgramUtils.OUTPUT_NAME, engineController.getProgramResult()));
-        engineController.getSortedArguments().entrySet().stream()
+        variablesSorted.add(toVariableDTO(ProgramUtils.OUTPUT_NAME, engineController.getProgramResult(expandLevel)));
+        engineController.getSortedArguments(expandLevel).entrySet().stream()
+                .map(UIUtils::toVariableDTO)
+                .forEach(variablesSorted::add);
+
+        engineController.getWorkVars(expandLevel).entrySet().stream()
+                .map(UIUtils::toVariableDTO)
+                .forEach(variablesSorted::add);
+
+        return variablesSorted;
+    }
+
+    public static @NotNull List<VariableDTO> getAllVariablesSnapshotForDebug(@NotNull EngineController engineController, int expandLevel) {
+        List<VariableDTO> variablesSorted = new ArrayList<>();
+
+        variablesSorted.add(toVariableDTO(ProgramUtils.OUTPUT_NAME, engineController.getProgramResult(expandLevel)));
+        engineController.getSortedArguments(expandLevel).entrySet().stream()
                 .map(UIUtils::toVariableDTO)
                 .forEach(variablesSorted::add);
 

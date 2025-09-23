@@ -1,6 +1,4 @@
 package system.controller;
-
-import dto.engine.ExecutionResultDTO;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
 import engine.core.ProgramEngine;
@@ -83,7 +81,7 @@ public class EngineController
     }
 
 
-    public @NotNull ExecutionResultDTO runLoadedProgram(int expandLevel, @NotNull Map<String, Integer> arguments)
+    public void runLoadedProgram(int expandLevel, @NotNull Map<String, Integer> arguments)
     {
         if (engine == null)
         {
@@ -94,7 +92,6 @@ public class EngineController
             throw new IllegalArgumentException("Expand level must be between 0 and " + maxExpandLevel);
         }
         engine.run(expandLevel, arguments);
-        return engine.toExecutionResultDTO(expandLevel);
     }
 
 
@@ -142,6 +139,12 @@ public class EngineController
         return engine.getAllVariablesNamesAndLabels(expandLevel);
     }
 
+    public @NotNull Map<String, Integer> getSortedArguments(int expandLevel) {
+        if (engine == null) {
+            throw new IllegalStateException("Program has not been set");
+        }
+        return engine.getSortedArguments(expandLevel);
+    }
     public @NotNull Map<String, Integer> getSortedArguments() {
         if (engine == null) {
             throw new IllegalStateException("Program has not been set");
@@ -150,11 +153,11 @@ public class EngineController
     }
 
 
-    public @NotNull Integer getProgramResult() {
+    public @NotNull Integer getProgramResult(int expandLevel) {
         if (engine == null) {
             throw new IllegalStateException("No program loaded");
         }
-        return engine.getAllExecutionStatistics().getLast().result();
+        return engine.getOutput(expandLevel);
     }
 
     public @NotNull Map<String, Integer> getWorkVars(int expandLevel) {
@@ -182,27 +185,26 @@ public class EngineController
         inDebugSession = true;
     }
 
-    public @NotNull ExecutionResultDTO debugStep() {
+    public void debugStep() {
         if (engine == null || !inDebugSession) {
             throw new IllegalStateException("Debug session not active");
         }
-        return engine.debugStep();
+        engine.debugStep();
     }
 
-    public @NotNull ExecutionResultDTO debugStepBackward() {
+    public void debugStepBackward() {
         if (engine == null || !inDebugSession) {
             throw new IllegalStateException("Debug session not active");
         }
-        return engine.debugStepBackward();
+        engine.debugStepBackward();
     }
 
-    public @NotNull ExecutionResultDTO debugResume() {
+    public void debugResume() {
         if (engine == null || !inDebugSession) {
             throw new IllegalStateException("Debug session not active");
         }
-        ExecutionResultDTO result = engine.debugResume();
+        engine.debugResume();
         inDebugSession = false; // Session ends after resume
-        return result;
     }
 
     public void stopDebugSession() {
