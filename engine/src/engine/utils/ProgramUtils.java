@@ -96,14 +96,14 @@ public class ProgramUtils {
     }
 
     public static @NotNull Map<String, Integer> extractSortedWorkVars(@NotNull Map<String, Integer> contextMap) {
-        return getStringIntegerMap(contextMap, WORK_VAR_PREFIX);
+        return getVariableIntegerMap(contextMap, WORK_VAR_PREFIX);
     }
 
     public static @NotNull Map<String, Integer> extractSortedArguments(@NotNull Map<String, Integer> contextMap) {
-        return getStringIntegerMap(contextMap, ARG_PREFIX);
+        return getVariableIntegerMap(contextMap, ARG_PREFIX);
     }
 
-    private static @NotNull Map<String, Integer> getStringIntegerMap(@NotNull Map<String, Integer> contextMap, @NotNull String argPrefix) {
+    private static @NotNull Map<String, Integer> getVariableIntegerMap(@NotNull Map<String, Integer> contextMap, @NotNull String argPrefix) {
         Map<String, Integer> sortedArguments = new LinkedHashMap<>();
         contextMap.entrySet().stream()
                 .filter(e -> e.getKey().startsWith(argPrefix))

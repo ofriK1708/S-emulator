@@ -11,7 +11,6 @@ import engine.generated_2.SInstructions;
 import engine.generated_2.SProgram;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -511,7 +510,7 @@ public class ProgramEngine implements Serializable {
         }
 
         // Reuse existing extractWorkVars logic from ProgramUtils
-        return ProgramUtils.extractWorkVars(currentDebugContext);
+        return ProgramUtils.extractSortedWorkVars(currentDebugContext);
     }
 
     public int getCurrentDebugCycles() {

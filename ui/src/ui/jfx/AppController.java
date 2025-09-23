@@ -518,7 +518,7 @@ public class AppController {
             highlightCurrentInstruction(currentPC);
             updateDebugVariableStateWithResult(result);
 
-            // בדיקה אם התוכנית הסתיימה
+
             if (engineController.isDebugFinished()) {
                 try {
                     ExecutionStatisticsDTO debugStatistics = engineController.getLastExecutionStatistics();
@@ -623,5 +623,6 @@ public class AppController {
         programRunning.set(false);
         programFinished.set(true);
         updateDebugVariableStateWithResult(result);
+        executionStatistics.add(engineController.getLastExecutionStatistics());
     }
 }
