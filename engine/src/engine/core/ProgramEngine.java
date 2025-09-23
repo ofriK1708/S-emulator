@@ -41,12 +41,12 @@ public class ProgramEngine implements Serializable {
     private boolean debugMode = false;
     private int currentDebugPC = 0;
     private final List<Map<String, Integer>> debugStateHistory = new ArrayList<>();
-    private final List<Integer> debugCyclesHistory = new ArrayList<>(); // NEW: Track cycles per step
-    private @Nullable List<Instruction> currentDebugInstructions;
-    private @Nullable Map<String, Integer> currentDebugContext;
-    private final Map<String, Integer> debugArguments = new HashMap<>(); // NEW: Store debug arguments
+    private final List<Integer> debugCyclesHistory = new ArrayList<>(); // Track cycles per step
+    private List<Instruction> currentDebugInstructions;
+    private Map<String, Integer> currentDebugContext;
+    private final Map<String, Integer> debugArguments = new HashMap<>(); // Store debug arguments
     private int debugExpandLevel = 0;
-    private int totalDebugCycles = 0; // NEW: Monotonic cycle counter
+    private int totalDebugCycles = 0; // Monotonic cycle counter
 
     public ProgramEngine(@NotNull SProgram program) throws LabelNotExist {
         this.programName = program.getName();
@@ -354,7 +354,7 @@ public class ProgramEngine implements Serializable {
         return funcName;
     }
 
-    // FIXED: Enhanced debugger methods with proper state management
+    // Enhanced debugger methods with proper state management
 
     public void startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments) {
         clearPreviousRunData(expandLevel);
@@ -454,9 +454,11 @@ public class ProgramEngine implements Serializable {
         currentDebugContext = new HashMap<>(debugStateHistory.get(debugStateHistory.size() - 1));
         currentDebugPC = currentDebugContext.get(Instruction.ProgramCounterName);
 
+        // Update totalDebugCycles to match the current state
+        totalDebugCycles = debugCyclesHistory.get(debugCyclesHistory.size() - 1);
 
         System.out.println("Debug stepped backward to PC=" + currentDebugPC +
-                ", total cycles remain at: " + totalDebugCycles);
+                ", cycles: " + totalDebugCycles);
         return getCurrentDebugState();
     }
 
@@ -501,6 +503,23 @@ public class ProgramEngine implements Serializable {
         Map<String, Integer> workVars = ProgramUtils.extractSortedWorkVars(currentDebugContext);
 
         return new ExecutionResultDTO(result, arguments, workVars, result, totalDebugCycles);
+    }
+
+    public Map<String, Integer> getDebugWorkVariables() {
+        if (!debugMode || currentDebugContext == null) {
+            throw new IllegalStateException("Debug session not active");
+        }
+
+        // Reuse existing extractWorkVars logic from ProgramUtils
+        return ProgramUtils.extractWorkVars(currentDebugContext);
+    }
+
+    public int getCurrentDebugCycles() {
+        if (!debugMode) {
+            throw new IllegalStateException("Debug session not active");
+        }
+
+        return totalDebugCycles;
     }
 
     protected @NotNull List<Instruction> getFunctionInstructions() {
