@@ -226,7 +226,15 @@ public class ProgramEngine implements Serializable {
             int currentPC = executedContextMap.get(Instruction.ProgramCounterName);
             Instruction instruction = executedInstructions.get(currentPC);
             try {
+                if (programName.equals("Divide")) {
+                    System.out.println("at function \"" + programName + "\"");
+                    System.out.println("Executing instruction at PC=" + currentPC + ": " + instruction.getLabel() + " " + instruction.getStringRepresentation());
+                    System.out.println("before executing: z1 = " + executedContextMap.get("z1"));
+                }
                 instruction.execute(executedContextMap);
+                if (programName.equals("Divide")) {
+                    System.out.println("after executing: z1 = " + executedContextMap.get("z1"));
+                }
                 exStats.incrementCycles(instruction.getCycles());
             } catch (IllegalArgumentException e) {
                 throw new RuntimeException("Error executing instruction at PC=" + currentPC + ": " + e.getMessage(), e);
@@ -355,6 +363,7 @@ public class ProgramEngine implements Serializable {
     /**
      * Get sorted arguments at the original expansion level (0).
      * Used in normal program execution, because arguments are fixed after execution.
+     *
      * @return a map of argument names to their values at the original expansion level
      */
     public @NotNull Map<String, Integer> getSortedArguments() {

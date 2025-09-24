@@ -176,28 +176,37 @@ public abstract class Instruction implements Command, Serializable {
         Iterator<String> newArgsNamesIterator = newArgsNames.iterator();
         Set<String> replaced = new HashSet<>();
 
+        /* first if the mainVarName != y, we need all old use of mainVarName to be replaced with a new work variable
+         so we won't mix between and change the old mainVarName to y as well*/
         if (!mainVarName.equals(ProgramUtils.OUTPUT_NAME)) {
             String nextFreeWorkVariableName = ProgramUtils.getNextFreeWorkVariableName(mainContextMap);
             findAndChangeAllOccurrences(functionInstructions, mainVarName, nextFreeWorkVariableName);
             replaced.add(nextFreeWorkVariableName);
         }
 
+        /* here we do the same as before, replacing the old use of our arguments to newer ones so they won't mix*/
         for (String newArgsName : newArgsNames) {
             String newWorkVarInPlaceOfArg = ProgramUtils.getNextFreeWorkVariableName(mainContextMap);
             findAndChangeAllOccurrences(functionInstructions, newArgsName, newWorkVarInPlaceOfArg);
             replaced.add(newWorkVarInPlaceOfArg);
         }
 
+        // now we can go and replace all the old variables with new ones, after we made sure they won't mix
         for (Instruction instruction : functionInstructions) {
+            // first we set the derived from info
             instruction.setDerivedFrom(derivedFrom);
             instruction.setDerivedFromIndex(derivedFromIndex);
+
+            // check for label swap
             replaceIfNeeded(mainContextMap, replaced, functionInstructions, instruction.getLabel(),
                     mainVarName,
                     instruction::setLabel, newArgsNamesIterator);
 
+            // check for main var swap
             replaceIfNeeded(mainContextMap, replaced, functionInstructions, instruction.getMainVarName(), mainVarName,
                     instruction::setMainVarName, newArgsNamesIterator);
 
+            // check for args swap
             processInstructionArguments(mainContextMap, replaced, functionInstructions, instruction, newArgsNamesIterator);
         }
         checkForExitLabel(functionInstructions, mainContextMap, derivedFrom, derivedFromIndex);
@@ -228,13 +237,16 @@ public abstract class Instruction implements Command, Serializable {
     ) {
 
         for (Map.Entry<String, String> argsEntry : instruction.getArgs().entrySet()) {
-            if (argsEntry.getKey().equals(Quote.functionNameArgumentName)) {
+            // special case for quote in argument, we need to extract all the variables from the arguments and replace them all
+            if (argsEntry.getKey().equals(Quote.functionArgumentsArgumentName)) {
+                Quote currentInstructionAsQuote = (Quote) instruction;
                 Set<String> quoteArguments = ProgramUtils.extractAllVariablesFromQuoteArguments(argsEntry.getValue());
                 for (String argValue : quoteArguments) {
                     replaceIfNeeded(mainContextMap, alreadyReplaced, functionInstructions, argValue, mainVarName,
                             newVal -> argsEntry.setValue(argsEntry.getValue().replace(argValue, newVal)),
                             newArgsNamesIterator);
                 }
+                currentInstructionAsQuote.updateArguments(argsEntry.getValue());
             } else {
                 String argValue = argsEntry.getValue();
                 replaceIfNeeded(mainContextMap, alreadyReplaced, functionInstructions, argValue, mainVarName,

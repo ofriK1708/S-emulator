@@ -226,4 +226,17 @@ public class Quote extends Instruction {
         String argsNames = allArgsString.isEmpty() ? "" : "," + allArgsString;
         return String.format("(%s%s)", functionToRun.getFuncName(), argsNames);
     }
+
+    public void updateArguments(String updatedArguments) {
+        // only update if there is a change
+        if (!allArgsString.equals(updatedArguments)) {
+            this.allArgsString = updatedArguments;
+            if (updatedArguments.isBlank()) {
+                funcArgsNames = List.of();
+            } else {
+                funcArgsNames = ProgramUtils.splitArgs(updatedArguments);
+            }
+            initSubfunctionCalls();
+        }
+    }
 }
