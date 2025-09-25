@@ -38,86 +38,47 @@ import ui.jfx.variables.VariablesTableController;
 import ui.utils.UIUtils;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ui.utils.UIUtils.*;
 
 public class AppController {
 
-    @FXML
-    private HBox fileHandler;
-    @FXML
-    private FileHandlerController fileHandlerController;
-    @FXML
-    private HBox cycles;
-    @FXML
-    private CyclesController cyclesController;
-    @FXML
-    private HBox programFunction;
-    @FXML
-    private ProgramFunctionController programFunctionController;
-    @FXML
-    private AnchorPane instructionsTable;
-    @FXML
-    private InstructionTableController instructionsTableController;
-    @FXML
-    private AnchorPane derivedInstructionsTable;
-    @FXML
-    private InstructionTableController derivedInstructionsTableController;
-    @FXML
-    private AnchorPane argumentsTable;
-    @FXML
-    private VariablesTableController argumentsTableController;
-    @FXML
-    private VBox runControls;
-    @FXML
-    private RunControlsController runControlsController;
-    @FXML
-    private TitledPane runControlsTitledPane;
-    @FXML
-    private TitledPane debugControlsTitledPane;
-    @FXML
-    private TitledPane variablesTitledPane;
-    @FXML
-    private TitledPane staticsTitledPane;
-    @FXML
-    private AnchorPane allVarsTable;
-    @FXML
-    private HistoryStatsController historyStatsController;
-    @FXML
-    private SummaryLineController summaryLineController;
-    @FXML
-    private VariablesTableController allVarsTableController;
-    @FXML
-    private DebuggerController debugControlsController;
-    @FXML
-    private TitledPane statisticsTitledPane;
-    @FXML
-    private AnchorPane historyStats;
+    @FXML private HBox fileHandler;
+    @FXML private FileHandlerController fileHandlerController;
+    @FXML private HBox cycles;
+    @FXML private CyclesController cyclesController;
+    @FXML private HBox programFunction;
+    @FXML private ProgramFunctionController programFunctionController;
+    @FXML private AnchorPane instructionsTable;
+    @FXML private InstructionTableController instructionsTableController;
+    @FXML private AnchorPane derivedInstructionsTable;
+    @FXML private InstructionTableController derivedInstructionsTableController;
+    @FXML private AnchorPane argumentsTable;
+    @FXML private VariablesTableController argumentsTableController;
+    @FXML private VBox runControls;
+    @FXML private RunControlsController runControlsController;
+    @FXML private TitledPane runControlsTitledPane;
+    @FXML private TitledPane debugControlsTitledPane;
+    @FXML private TitledPane variablesTitledPane;
+    @FXML private TitledPane statisticsTitledPane;
+    @FXML private AnchorPane allVarsTable;
+    @FXML private HistoryStatsController historyStatsController;
+    @FXML private SummaryLineController summaryLineController;
+    @FXML private VariablesTableController allVarsTableController;
+    @FXML private DebuggerController debugControlsController;
+    @FXML private AnchorPane historyStats;
 
-    // Arguments and variables Lists
-    private final ListProperty<VariableDTO> allVariablesDTO =
-            new SimpleListProperty<>(FXCollections.observableArrayList());
-
-    private final ListProperty<VariableDTO> argumentsDTO =
-            new SimpleListProperty<>(FXCollections.observableArrayList());
+    // Arguments and variables
+    private final ListProperty<VariableDTO> allVariablesDTO = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<VariableDTO> argumentsDTO = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final BooleanProperty argumentsLoaded = new SimpleBooleanProperty(false);
 
-    // Core system controller - same as console version
-    private final ListProperty<InstructionDTO> programInstructions =
-            new SimpleListProperty<>(FXCollections.observableArrayList());
-
-    private final ListProperty<InstructionDTO> derivedInstructions =
-            new SimpleListProperty<>(FXCollections.observableArrayList());
-
-    private final ListProperty<ExecutionStatisticsDTO> executionStatistics =
-            new SimpleListProperty<>(FXCollections.observableArrayList());
-
-    private final ListProperty<String> programVariablesNamesAndLabels =
-            new SimpleListProperty<>(FXCollections.observableArrayList());
+    // Core system controller
+    private final ListProperty<InstructionDTO> programInstructions = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<InstructionDTO> derivedInstructions = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<ExecutionStatisticsDTO> executionStatistics = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<String> programVariablesNamesAndLabels = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     private final @NotNull EngineController engineController;
     private @Nullable ProgramDTO loadedProgram = null;
@@ -131,29 +92,27 @@ public class AppController {
     private final IntegerProperty currentExpandLevel = new SimpleIntegerProperty(0);
     private final IntegerProperty currentCycles = new SimpleIntegerProperty(0);
     private boolean inDebugSession = false;
+    private Map<String, Integer> previousDebugVariables = new HashMap<>();
+    private boolean isFirstDebugStep = true;
+
 
     public AppController() {
         this.engineController = new EngineController();
-
     }
 
     @FXML
     public void initialize() {
-        if (fileHandlerController != null && cyclesController != null
-                && programFunctionController != null && instructionsTableController != null &&
-                derivedInstructionsTableController != null && argumentsTableController != null &&
-                allVarsTableController != null && debugControlsController != null &&
-                runControlsController != null && historyStatsController != null && summaryLineController != null) {
+        if (fileHandlerController != null && cyclesController != null && programFunctionController != null &&
+                instructionsTableController != null && derivedInstructionsTableController != null && argumentsTableController != null &&
+                allVarsTableController != null && debugControlsController != null && runControlsController != null &&
+                historyStatsController != null && summaryLineController != null) {
 
-            // Initialize all controllers that don't have FXML injection timing issues
             fileHandlerController.initComponent(this::loadProgramFromFile, this::clearLoadedProgram);
             programFunctionController.initComponent(this::expandProgramToLevel, this::setPaneMode,
                     currentExpandLevel, maxExpandLevel, programLoaded, this::handleVariableSelection,
                     programVariablesNamesAndLabels);
 
-            // RunControlsController works fine because it follows the two-phase pattern correctly
             runControlsController.initComponent(this::RunProgram, this::prepareForTakingArguments, programLoaded, argumentsLoaded);
-
             cyclesController.initComponent(currentCycles);
             instructionsTableController.initializeMainInstructionTable(programInstructions, derivedInstructions);
             derivedInstructionsTableController.markAsDerivedInstructionsTable();
@@ -161,13 +120,11 @@ public class AppController {
             argumentsTableController.initArgsTable(argumentsDTO);
             allVarsTableController.initAllVarsTable(allVariablesDTO);
             historyStatsController.initComponent(executionStatistics);
-
-            // Initialize DebuggerController - only debug operations, no program execution
             debugControlsController.initComponent(
-                    this::debugStep,                  // debugStepCallback
-                    this::debugStepBackward,          // debugStepBackwardCallback
-                    this::debugResume,                // debugResumeCallback
-                    this::stopDebugSession           // stopDebugSessionCallback
+                    this::debugStep,
+                    this::debugStepBackward,
+                    this::debugResume,
+                    this::stopDebugSession
             );
 
             System.out.println("AppController initialized");
@@ -176,25 +133,13 @@ public class AppController {
             throw new IllegalStateException("FXML injection failed: required controllers are null.");
         }
     }
+
     private void bindTitlePanesExpansion() {
-        // Bind properties to expand/collapse titled panes based on program state
-
-        runControlsTitledPane.expandedProperty().bind(
-                Bindings.and(programLoaded, programRunning.not()));
-
-        debugControlsTitledPane.expandedProperty().bind(
-                Bindings.and(programLoaded,
-                        Bindings.and(debugMode, programFinished.not())));
-
-        variablesTitledPane.expandedProperty().bind(
-                Bindings.and(programLoaded,
-                        Bindings.or(argumentsLoaded,
-                                Bindings.or(programFinished, debugMode))));
-
-        statisticsTitledPane.expandedProperty().bind(
-                Bindings.and(programLoaded,
-                        Bindings.and(programRunning.not(), programRanAtLeastOnce)));
-
+        runControlsTitledPane.expandedProperty().bind(Bindings.and(programLoaded, programRunning.not()));
+        debugControlsTitledPane.expandedProperty().bind(Bindings.and(programLoaded, Bindings.and(debugMode, programFinished.not())));
+        variablesTitledPane.expandedProperty().bind(Bindings.and(programLoaded,
+                Bindings.or(argumentsLoaded, Bindings.or(programFinished, debugMode))));
+        statisticsTitledPane.expandedProperty().bind(Bindings.and(programLoaded, Bindings.and(programRunning.not(), programRanAtLeastOnce)));
     }
 
     private void unbindTitlePanesExpansion() {
@@ -222,7 +167,9 @@ public class AppController {
             loadingStage.initModality(Modality.APPLICATION_MODAL);
             loadingStage.setTitle("Loading File");
             loadingStage.setScene(new Scene(root, 1000, 183));
-            UIAdapterLoadFileTask uiAdapter = new UIAdapterLoadFileTask(programLoaded::set,
+
+            UIAdapterLoadFileTask uiAdapter = new UIAdapterLoadFileTask(
+                    programLoaded::set,
                     argumentsLoaded::set,
                     programVariablesNamesAndLabels::setAll,
                     programInstructions::setAll,
@@ -231,15 +178,12 @@ public class AppController {
                     maxExpandLevel::set,
                     currentExpandLevel::set,
                     currentCycles::set,
-                    (program) -> {
-                        loadedProgram = program;
-                        loadingStage.close();
-                    });
-            loadingStage.setOnShown(event -> fileLoaderController.initializeAndRunFileLoaderTaskThread(
-                    file.toPath(), engineController, uiAdapter));
+                    program -> { loadedProgram = program; loadingStage.close(); }
+            );
+
+            loadingStage.setOnShown(event -> fileLoaderController.initializeAndRunFileLoaderTaskThread(file.toPath(), engineController, uiAdapter));
             loadingStage.show();
         } catch (Exception e) {
-            System.err.println("Error loading file: " + e.getMessage());
             e.printStackTrace();
             showError("Error loading file: " + e.getMessage());
         }
@@ -250,32 +194,19 @@ public class AppController {
             showError("No program loaded. Please load a program first.");
             return;
         }
-        try {
-            // Get required program arguments from SystemController
-            if (programArguments.isEmpty()) {
-                programArguments.putAll(engineController.getSortedArguments());
-            }
 
-            if (programArguments.isEmpty()) {
-                // No arguments needed, mark as entered
-                argumentsLoaded.set(true);
-                showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() +
-                        "\nNo variables required. Ready for execution.");
-                return;
-            }
+        if (programArguments.isEmpty()) programArguments.putAll(engineController.getSortedArguments());
 
-            // Create and show the multi-variable input dialog
-            getArgumentsFromUser();
+        if (programArguments.isEmpty()) {
             argumentsLoaded.set(true);
-            argumentsDTO.setAll(UIUtils.extractArguments(programArguments));
-            // Display success message and show variables
-            showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() +
-                    "\nArguments captured. Ready for execution.");
-
-        } catch (Exception e) {
-            System.err.println("Error getting program arguments: " + e.getMessage());
-            showError("Error getting program arguments: " + e.getMessage());
+            showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() + "\nNo variables required.");
+            return;
         }
+
+        getArgumentsFromUser();
+        argumentsLoaded.set(true);
+        argumentsDTO.setAll(UIUtils.extractArguments(programArguments));
+        showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() + "\nArguments captured.");
     }
 
     public void getArgumentsFromUser() {
@@ -290,97 +221,41 @@ public class AppController {
             dialogStage.setTitle("Program Arguments");
             dialogStage.setScene(new Scene(root));
             dialogStage.showAndWait();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void RunProgram(@NotNull ProgramRunType programRunType) {
-        if (!programLoaded.get()) {
-            showError("No program loaded. Please load a program first.");
-            return;
-        }
-        if (!argumentsLoaded.get()) {
-            showError("Arguments not entered. Please load a program and enter arguments first.");
-            return;
-        }
+        if (!programLoaded.get()) { showError("No program loaded"); return; }
+        if (!argumentsLoaded.get()) { showError("Arguments not entered"); return; }
+
         switch (programRunType) {
-            case REGULAR:
-                startRegularExecution();
-                break;
-            case DEBUG:
-                startDebugExecution();
-                break;
-            default:
-                showError("Unknown run type selected.");
+            case REGULAR -> startRegularExecution();
+            case DEBUG -> startDebugExecution();
+            default -> showError("Unknown run type selected.");
         }
     }
 
     public void startRegularExecution() {
         try {
             int expandLevel = currentExpandLevel.get();
-            System.out.println("Starting regular execution with arguments: " + programArguments);
             programRunning.set(true);
-
-            // Execute the program using SystemController
-            ExecutionResultDTO executionResult = engineController.runLoadedProgram(expandLevel, programArguments);
+            ExecutionResultDTO result = engineController.runLoadedProgram(expandLevel, programArguments);
             allVariablesDTO.setAll(UIUtils.getAllVariablesSorted(engineController, expandLevel));
             executionStatistics.add(engineController.getLastExecutionStatistics());
 
-            // Get the updated program state after execution
             ProgramDTO executedProgram = engineController.getProgramByExpandLevel(expandLevel);
             programInstructions.setAll(executedProgram.instructions());
             derivedInstructions.clear();
-            currentCycles.set(executionResult.numOfCycles());
+            currentCycles.set(result.numOfCycles());
             summaryLineController.updateCounts(executedProgram.instructions());
 
-            // Show execution results
             updateProperties();
-
-            showSuccess("Program executed successfully!\n" +
-                    "Cycles: " + executionResult.numOfCycles() + "\n" +
-                    "Final memory state updated in instruction table.");
-
-        } catch (IllegalArgumentException e) {
-            System.err.println("Invalid arguments for execution: " + e.getMessage());
-            showError("Invalid arguments for execution: " + e.getMessage());
+            showSuccess("Program executed successfully! Cycles: " + result.numOfCycles());
         } catch (Exception e) {
-            System.err.println("Error during execution: " + e.getMessage());
+            e.printStackTrace();
             showError("Error during execution: " + e.getMessage());
-        }
-    }
-
-    public void expandProgramToLevel(int expandLevel) {
-        if (!programLoaded.get()) {
-            showError("No program loaded. Please load a program first.");
-            return;
-        }
-
-        if (expandLevel < 0 || expandLevel > maxExpandLevel.get()) {
-            showError("Invalid expand level. Must be between 0 and " + maxExpandLevel.get());
-            return;
-        }
-
-        try {
-            currentExpandLevel.set(expandLevel);
-            System.out.println("Program expanded to level: " + expandLevel);
-
-            ProgramDTO program = engineController.getProgramByExpandLevel(expandLevel);
-            System.out.println("Program at level " + expandLevel + " has " + program.instructions().size() + " instructions");
-            derivedInstructions.clear();
-            programInstructions.setAll(program.instructions());
-            currentCycles.set(engineController.getCyclesCount(expandLevel));
-            allVariablesDTO.clear();
-            argumentsDTO.clear();
-            summaryLineController.updateCounts(program.instructions()); // NEW: Update summary
-            programVariablesNamesAndLabels.setAll(engineController.getAllVariablesAndLabelsNames(expandLevel));
-
-            showInfo("Program expanded to level " + expandLevel);
-
-        } catch (Exception e) {
-            System.err.println("Error expanding program: " + e.getMessage());
-            showError("Error expanding program: " + e.getMessage());
         }
     }
 
@@ -388,6 +263,27 @@ public class AppController {
         programRunning.set(false);
         programFinished.set(true);
         programRanAtLeastOnce.set(true);
+    }
+
+    public void expandProgramToLevel(int expandLevel) {
+        if (!programLoaded.get()) { showError("No program loaded"); return; }
+        if (expandLevel < 0 || expandLevel > maxExpandLevel.get()) { showError("Invalid expand level"); return; }
+
+        try {
+            currentExpandLevel.set(expandLevel);
+            ProgramDTO program = engineController.getProgramByExpandLevel(expandLevel);
+            derivedInstructions.clear();
+            programInstructions.setAll(program.instructions());
+            currentCycles.set(engineController.getCyclesCount(expandLevel));
+            allVariablesDTO.clear();
+            argumentsDTO.clear();
+            summaryLineController.updateCounts(program.instructions());
+            programVariablesNamesAndLabels.setAll(engineController.getAllVariablesAndLabelsNames(expandLevel));
+            showInfo("Program expanded to level " + expandLevel);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Error expanding program: " + e.getMessage());
+        }
     }
 
     public void clearLoadedProgram() {
@@ -399,242 +295,200 @@ public class AppController {
         programArguments.clear();
         engineController.clearLoadedProgram();
         executionStatistics.clear();
-        // Clear UI components
         programInstructions.clear();
-        summaryLineController.clearCounts(); // NEW: Clear summary
+        derivedInstructions.clear();
         allVariablesDTO.clear();
         argumentsDTO.clear();
-        derivedInstructions.clear();
         currentCycles.set(0);
+        summaryLineController.clearCounts();
         instructionsTableController.highlightVariable(null);
         derivedInstructionsTableController.highlightVariable(null);
-
         showInfo("Loaded program cleared.");
     }
 
     private void handleVariableSelection(@Nullable String variableName) {
-        // Highlight the variable in the main instruction table
         instructionsTableController.highlightVariable(variableName);
-
-        // Also highlight in derived instructions table if it has content
         derivedInstructionsTableController.highlightVariable(variableName);
-
-        if (variableName != null) {
-            System.out.println("Highlighting variable '" + variableName + "' in all instruction tables");
-        } else {
-            System.out.println("Clearing variable highlighting in all instruction tables");
-        }
     }
-
-    public boolean isProgramLoaded() {
-        return programLoaded.get();
-    }
-
-
 
     private void highlightCurrentInstruction(int instructionIndex) {
-        // Scroll to and highlight current instruction
-        javafx.application.Platform.runLater(() -> {
-            instructionsTableController.highlightCurrentInstruction(instructionIndex);
-        });
+        javafx.application.Platform.runLater(() -> instructionsTableController.highlightCurrentInstruction(instructionIndex));
     }
+    private @NotNull VariableDTO createVariableDTOWithChangeDetection(@NotNull String name, @NotNull Integer value) {
+        boolean hasChanged = false;
 
+        if (!isFirstDebugStep && previousDebugVariables.containsKey(name)) {
+            Integer previousValue = previousDebugVariables.get(name);
+            hasChanged = !Objects.equals(previousValue, value);
 
-// ===== UPDATE METHOD: showInitialDebugState() =====
-
-    private void showInitialDebugState() {
-        try {
-            // Get initial state without executing any instruction
-            int currentPC = engineController.getCurrentDebugPC();
-
-            currentCycles.set(0);
-
-        } catch (Exception e) {
-            System.err.println("Error showing initial debug state: " + e.getMessage());
+            // Debug logging (remove in production)
+            if (hasChanged) {
+                System.out.println("Variable changed: " + name + " from " + previousValue + " to " + value);
+            }
+        } else if (!isFirstDebugStep) {
+            // Variable didn't exist before, so it's a new variable
+            hasChanged = true;
+            System.out.println("New variable detected: " + name + " = " + value);
         }
+
+        return new VariableDTO(
+                new SimpleStringProperty(name),
+                new SimpleIntegerProperty(value),
+                new SimpleBooleanProperty(hasChanged)
+        );
     }
 
-
-    private void updateDebugVariableStateWithResult(ExecutionResultDTO result) {
-        List<VariableDTO> variablesSorted = new ArrayList<>();
-
-        // OUTPUT - מה-result!
-        variablesSorted.add(UIUtils.toVariableDTO(ProgramUtils.OUTPUT_NAME, result.result()));
-
-        // ARGUMENTS - מה-result
-        result.argumentsValues().entrySet().stream()
-                .sorted(Map.Entry.comparingByKey(UIUtils.programNameComparator))
-                .map(UIUtils::toVariableDTO)
-                .forEach(variablesSorted::add);
-
-        // WORK VARIABLES - מה-result
-        result.workVariablesValues().entrySet().stream()
-                .sorted(Map.Entry.comparingByKey(UIUtils.programNameComparator))
-                .map(UIUtils::toVariableDTO)
-                .forEach(variablesSorted::add);
-
-        allVariablesDTO.setAll(variablesSorted);
-        argumentsDTO.setAll(UIUtils.extractArguments(result.argumentsValues()));
-    }
-    // ===== UPDATED DEBUG METHODS FOR CALLBACK SYSTEM =====
-
+    // DEBUG METHODS
     public void startDebugExecution() {
         try {
             int expandLevel = currentExpandLevel.get();
-            System.out.println("Starting debug execution with arguments: " + programArguments);
+            programRunning.set(true);
+            debugMode.set(true);
+            programFinished.set(false);
 
-            // Property Updates for UI State Management:
-            programRunning.set(true);      // Triggers button bindings
-            debugMode.set(true);           // Triggers: debugControlsTitledPane expansion
-            programFinished.set(false);    // Ensures debug controls remain expanded
+            // CRITICAL: Reset change tracking state for new debug session
+            previousDebugVariables.clear();
+            isFirstDebugStep = true;
+            System.out.println("Debug session started - change tracking reset");
 
-            // Notify DebuggerController that debug session started
             if (debugControlsController != null) {
                 debugControlsController.notifyDebugSessionStarted();
             }
 
-            // Start debug session in engine
             engineController.startDebugSession(expandLevel, programArguments);
             inDebugSession = true;
 
-            // Show initial debug state with variables
             showInitialDebugState();
-
-            // Highlight first instruction
             highlightCurrentInstruction(0);
-
-            showInfo("Debug session started. Use step controls to debug the program.");
+            showInfo("Debug session started.");
 
         } catch (Exception e) {
-            System.err.println("Error starting debug execution: " + e.getMessage());
+            e.printStackTrace();
             showError("Error starting debug execution: " + e.getMessage());
-
-            // Reset properties on error
             debugMode.set(false);
             programRunning.set(false);
             inDebugSession = false;
+            // Reset change tracking on error
+            previousDebugVariables.clear();
+            isFirstDebugStep = true;
 
-            // Notify controller of failure
             if (debugControlsController != null) {
                 debugControlsController.notifyDebugSessionEnded();
             }
         }
     }
-// ===== UPDATE METHOD: debugStep() =====
-public void debugStep() {
-    if (!inDebugSession) {
-        showError("No debug session active");
-        return;
+
+    private void showInitialDebugState() {
+        try { currentCycles.set(0); }
+        catch (Exception e) { e.printStackTrace(); }
     }
 
-    try {
-        ExecutionResultDTO result = engineController.debugStep();
-        int currentPC = engineController.getCurrentDebugPC();
+    private void updateDebugVariableStateWithResult(@NotNull ExecutionResultDTO result) {
+        List<VariableDTO> variablesSorted = new ArrayList<>();
+        Map<String, Integer> currentStepVariables = new HashMap<>();
 
-        currentCycles.set(result.numOfCycles());
-        highlightCurrentInstruction(currentPC);
-        updateDebugVariableStateWithResult(result);
+        // 1. Add OUTPUT variable (always first)
+        String outputName = ProgramUtils.OUTPUT_NAME;
+        Integer outputValue = result.result();
+        currentStepVariables.put(outputName, outputValue);
+        variablesSorted.add(createVariableDTOWithChangeDetection(outputName, outputValue));
 
-        if (engineController.isDebugFinished()) {
-            // CRITICAL FIX: Ensure statistics are finalized in the engine BEFORE trying to get them
-            if (!engineController.areDebugStatisticsFinalized()) {
-                engineController.finalizeDebugStatistics();
-            }
+        // 2. Add argument variables (maintain order)
+        result.argumentsValues().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(UIUtils.programNameComparator))
+                .forEach(entry -> {
+                    String name = entry.getKey();
+                    Integer value = entry.getValue();
+                    currentStepVariables.put(name, value);
+                    variablesSorted.add(createVariableDTOWithChangeDetection(name, value));
+                });
 
-            try {
-                ExecutionStatisticsDTO debugStatistics = engineController.getLastExecutionStatistics();
-                executionStatistics.add(debugStatistics);
-                programRanAtLeastOnce.set(true); // MISSING: This was only set in normal execution
-                System.out.println("Debug execution statistics added to history: " +
-                        "execution #" + debugStatistics.executionNumber() +
-                        ", result=" + debugStatistics.result() +
-                        ", cycles=" + debugStatistics.cyclesUsed());
-            } catch (Exception e) {
-                System.err.println("Error adding debug statistics to history: " + e.getMessage());
-                e.printStackTrace(); // Add stack trace for debugging
-            }
+        // 3. Add work variables (maintain order)
+        result.workVariablesValues().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(UIUtils.programNameComparator))
+                .forEach(entry -> {
+                    String name = entry.getKey();
+                    Integer value = entry.getValue();
+                    currentStepVariables.put(name, value);
+                    variablesSorted.add(createVariableDTOWithChangeDetection(name, value));
+                });
 
-            showSuccess("Program execution completed successfully!\n" +
-                    "Cycles: " + result.numOfCycles() + "\n" +
-                    "Final memory state updated in instruction table.");
+        // 4. Update UI collections
+        allVariablesDTO.setAll(variablesSorted);
+        argumentsDTO.setAll(UIUtils.extractArguments(result.argumentsValues()));
 
-            endDebugSession(result);
-        } else {
-            showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + result.numOfCycles());
-        }
+        // 5. Store current state as previous for next comparison
+        previousDebugVariables.clear();
+        previousDebugVariables.putAll(currentStepVariables);
 
-    } catch (Exception e) {
-        System.err.println("Error during debug step: " + e.getMessage());
-        showError("Error during debug step: " + e.getMessage());
-        e.printStackTrace();
+        // 6. Mark that first step is completed
+        isFirstDebugStep = false;
+
+        System.out.println("Updated variables. Changed count: " +
+                variablesSorted.stream().mapToInt(v -> v.hasChanged().get() ? 1 : 0).sum());
     }
-}
 
-    public void debugStepBackward() {
-        if (!inDebugSession) {
-            showError("No debug session active");
-            return;
-        }
-
+    public void debugStep() {
+        if (!inDebugSession) { showError("No debug session active"); return; }
         try {
-            ExecutionResultDTO result = engineController.debugStepBackward();
+            ExecutionResultDTO result = engineController.debugStep();
             int currentPC = engineController.getCurrentDebugPC();
-
             currentCycles.set(result.numOfCycles());
             highlightCurrentInstruction(currentPC);
             updateDebugVariableStateWithResult(result);
 
-            showInfo("Stepped backward to PC: " + currentPC +
-                    ", Total execution cycles: " + result.numOfCycles());
+            if (engineController.isDebugFinished()) {
+                if (!engineController.areDebugStatisticsFinalized()) engineController.finalizeDebugStatistics();
+                executionStatistics.add(engineController.getLastExecutionStatistics());
+                programRanAtLeastOnce.set(true);
+                endDebugSession(result);
+                showSuccess("Debug execution finished. Cycles: " + result.numOfCycles());
+            } else showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + result.numOfCycles());
+        } catch (Exception e) { e.printStackTrace(); showError("Error during debug step: " + e.getMessage()); }
+    }
 
-        } catch (Exception e) {
-            System.err.println("Error during debug step backward: " + e.getMessage());
-            showError("Error during debug step backward: " + e.getMessage());
-        }
+    public void debugStepBackward() {
+        if (!inDebugSession) { showError("No debug session active"); return; }
+        try {
+            ExecutionResultDTO result = engineController.debugStepBackward();
+            int currentPC = engineController.getCurrentDebugPC();
+            currentCycles.set(result.numOfCycles());
+            highlightCurrentInstruction(currentPC);
+            updateDebugVariableStateWithResult(result);
+            showInfo("Stepped backward to PC: " + currentPC + ", Total cycles: " + result.numOfCycles());
+        } catch (Exception e) { e.printStackTrace(); showError("Error during debug step backward: " + e.getMessage()); }
     }
 
     public void debugResume() {
-        if (!inDebugSession) {
-            showError("No debug session active");
-            return;
-        }
-
+        if (!inDebugSession) { showError("No debug session active"); return; }
         try {
             ExecutionResultDTO result = engineController.debugResume();
-
             instructionsTableController.highlightVariable(null);
             updateDebugVariableStateWithResult(result);
-
-            showInfo("Program resumed and completed successfully!");
             currentCycles.set(result.numOfCycles());
             endDebugSession(result);
-
-        } catch (Exception e) {
-            System.err.println("Error during debug resume: " + e.getMessage());
-            showError("Error during debug resume: " + e.getMessage());
-            endDebugSession(null);
-        }
+            showInfo("Program resumed and completed successfully!");
+        } catch (Exception e) { e.printStackTrace(); showError("Error during debug resume: " + e.getMessage()); endDebugSession(null); }
     }
 
     public void stopDebugSession() {
         try {
             engineController.stopDebugSession();
-
+            endDebugSession(null);
             showInfo("Debug session stopped");
-            endDebugSession(null);
-
-        } catch (Exception e) {
-            System.err.println("Error stopping debug session: " + e.getMessage());
-            showError("Error stopping debug session: " + e.getMessage());
-            endDebugSession(null);
-        }
+        } catch (Exception e) { e.printStackTrace(); showError("Error stopping debug session: " + e.getMessage()); endDebugSession(null); }
     }
 
-    private void endDebugSession(ExecutionResultDTO result) {
+    private void endDebugSession(@Nullable ExecutionResultDTO result) {
         inDebugSession = false;
         debugMode.set(false);
         programRunning.set(false);
         programFinished.set(true);
+
+        // CRITICAL: Reset change tracking when session ends
+        previousDebugVariables.clear();
+        isFirstDebugStep = true;
+        System.out.println("Debug session ended - change tracking reset");
 
         if (result != null) {
             updateDebugVariableStateWithResult(result);
