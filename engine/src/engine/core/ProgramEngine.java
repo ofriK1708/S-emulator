@@ -497,10 +497,6 @@ public class ProgramEngine implements Serializable {
         while (currentDebugPC < currentDebugInstructions.size()) {
             debugStep(); // This will finalize statistics when program completes
         }
-
-        // Statistics are already finalized by debugStep() - don't call finalizeDebugStatistics() again
-
-        return getCurrentDebugState();
     }
 
     public void stopDebugSession() {

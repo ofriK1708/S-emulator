@@ -1,4 +1,5 @@
 package ui.jfx;
+
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
@@ -37,35 +38,59 @@ import ui.utils.UIUtils;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static ui.utils.UIUtils.*;
 
 public class AppController {
 
-    @FXML private HBox fileHandler;
-    @FXML private FileHandlerController fileHandlerController;
-    @FXML private HBox cycles;
-    @FXML private CyclesController cyclesController;
-    @FXML private HBox programFunction;
-    @FXML private ProgramFunctionController programFunctionController;
-    @FXML private AnchorPane instructionsTable;
-    @FXML private InstructionTableController instructionsTableController;
-    @FXML private AnchorPane derivedInstructionsTable;
-    @FXML private InstructionTableController derivedInstructionsTableController;
-    @FXML private AnchorPane argumentsTable;
-    @FXML private VariablesTableController argumentsTableController;
-    @FXML private VBox runControls;
-    @FXML private RunControlsController runControlsController;
-    @FXML private TitledPane runControlsTitledPane;
-    @FXML private TitledPane debugControlsTitledPane;
-    @FXML private TitledPane variablesTitledPane;
-    @FXML private TitledPane statisticsTitledPane;
-    @FXML private AnchorPane allVarsTable;
-    @FXML private HistoryStatsController historyStatsController;
-    @FXML private SummaryLineController summaryLineController;
-    @FXML private VariablesTableController allVarsTableController;
-    @FXML private DebuggerController debugControlsController;
-    @FXML private AnchorPane historyStats;
+    private final Map<String, Integer> previousDebugVariables = new HashMap<>();
+    @FXML
+    private HBox fileHandler;
+    @FXML
+    private FileHandlerController fileHandlerController;
+    @FXML
+    private HBox cycles;
+    @FXML
+    private CyclesController cyclesController;
+    @FXML
+    private HBox programFunction;
+    @FXML
+    private ProgramFunctionController programFunctionController;
+    @FXML
+    private AnchorPane instructionsTable;
+    @FXML
+    private InstructionTableController instructionsTableController;
+    @FXML
+    private AnchorPane derivedInstructionsTable;
+    @FXML
+    private InstructionTableController derivedInstructionsTableController;
+    @FXML
+    private AnchorPane argumentsTable;
+    @FXML
+    private VariablesTableController argumentsTableController;
+    @FXML
+    private VBox runControls;
+    @FXML
+    private RunControlsController runControlsController;
+    @FXML
+    private TitledPane runControlsTitledPane;
+    @FXML
+    private TitledPane debugControlsTitledPane;
+    @FXML
+    private TitledPane variablesTitledPane;
+    @FXML
+    private TitledPane statisticsTitledPane;
+    @FXML
+    private AnchorPane allVarsTable;
+    @FXML
+    private HistoryStatsController historyStatsController;
+    @FXML
+    private SummaryLineController summaryLineController;
+    @FXML
+    private VariablesTableController allVarsTableController;
+    @FXML
+    private DebuggerController debugControlsController;
 
     // Arguments and variables
     private final ListProperty<VariableDTO> allVariablesDTO = new SimpleListProperty<>(FXCollections.observableArrayList());
@@ -90,7 +115,8 @@ public class AppController {
     private final IntegerProperty currentExpandLevel = new SimpleIntegerProperty(0);
     private final IntegerProperty currentCycles = new SimpleIntegerProperty(0);
     private boolean inDebugSession = false;
-    private Map<String, Integer> previousDebugVariables = new HashMap<>();
+    @FXML
+    private AnchorPane historyStats;
     private boolean isFirstDebugStep = true;
 
 
@@ -176,7 +202,10 @@ public class AppController {
                     maxExpandLevel::set,
                     currentExpandLevel::set,
                     currentCycles::set,
-                    program -> { loadedProgram = program; loadingStage.close(); }
+                    program -> {
+                        loadedProgram = program;
+                        loadingStage.close();
+                    }
             );
 
             loadingStage.setOnShown(event -> fileLoaderController.initializeAndRunFileLoaderTaskThread(file.toPath(), engineController, uiAdapter));
@@ -193,7 +222,8 @@ public class AppController {
             return;
         }
 
-        if (programArguments.isEmpty()) programArguments.putAll(engineController.getSortedArguments());
+        if (programArguments.isEmpty())
+            programArguments.putAll(engineController.getSortedArguments());
 
         if (programArguments.isEmpty()) {
             argumentsLoaded.set(true);
@@ -225,8 +255,14 @@ public class AppController {
     }
 
     public void RunProgram(@NotNull ProgramRunType programRunType) {
-        if (!programLoaded.get()) { showError("No program loaded"); return; }
-        if (!argumentsLoaded.get()) { showError("Arguments not entered"); return; }
+        if (!programLoaded.get()) {
+            showError("No program loaded");
+            return;
+        }
+        if (!argumentsLoaded.get()) {
+            showError("Arguments not entered");
+            return;
+        }
 
         switch (programRunType) {
             case REGULAR -> startRegularExecution();
@@ -273,8 +309,14 @@ public class AppController {
     }
 
     public void expandProgramToLevel(int expandLevel) {
-        if (!programLoaded.get()) { showError("No program loaded"); return; }
-        if (expandLevel < 0 || expandLevel > maxExpandLevel.get()) { showError("Invalid expand level"); return; }
+        if (!programLoaded.get()) {
+            showError("No program loaded");
+            return;
+        }
+        if (expandLevel < 0 || expandLevel > maxExpandLevel.get()) {
+            showError("Invalid expand level");
+            return;
+        }
 
         try {
             currentExpandLevel.set(expandLevel);
@@ -341,16 +383,16 @@ public class AppController {
             updateDebugVariableState();
             endDebugSession();
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.err.println("Error stopping debug session: " + e.getMessage());
             showError("Error stopping debug session: " + e.getMessage());
         }
     }
 
     private void highlightCurrentInstruction(int instructionIndex) {
-       instructionsTableController.highlightCurrentInstruction(instructionIndex);
+        instructionsTableController.highlightCurrentInstruction(instructionIndex);
     }
+
     private @NotNull VariableDTO createVariableDTOWithChangeDetection(@NotNull String name, @NotNull Integer value) {
         boolean hasChanged = false;
 
@@ -400,7 +442,7 @@ public class AppController {
             engineController.startDebugSession(expandLevel, programArguments);
             inDebugSession = true;
 
-            showInitialDebugState();
+            //showInitialDebugState();
             // Highlight first instruction
             highlightCurrentInstruction(0);
             showInfo("Debug session started.");
@@ -424,7 +466,10 @@ public class AppController {
 // ===== UPDATE METHOD: debugStep() =====
 
     public void debugStep() {
-        if (!inDebugSession) { showError("No debug session active"); return; }
+        if (!inDebugSession) {
+            showError("No debug session active");
+            return;
+        }
         try {
             engineController.debugStep();
             int currentPC = engineController.getCurrentDebugPC();
@@ -451,15 +496,17 @@ public class AppController {
                 showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + currentCycles.get());
             }
 
-                if (!engineController.areDebugStatisticsFinalized()) engineController.finalizeDebugStatistics();
+            if (!engineController.areDebugStatisticsFinalized()) {
+                engineController.finalizeDebugStatistics();
                 executionStatistics.add(engineController.getLastExecutionStatistics());
                 programRanAtLeastOnce.set(true);
-                endDebugSession(result);
-                showSuccess("Debug execution finished. Cycles: " + result.numOfCycles());
-            } else showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + result.numOfCycles());
+                endDebugSession();
+                showSuccess("Debug execution finished. Cycles: " + currentCycles.get());
+            } else
+                showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + currentCycles.get());
         } catch (Exception e) {
             e.printStackTrace();
-            endDebugSession(null);
+            endDebugSession();
             showError("Error during debug step: " + e.getMessage());
         }
     }
@@ -469,7 +516,10 @@ public class AppController {
     }
 
     public void debugStepBackward() {
-        if (!inDebugSession) { showError("No debug session active"); return; }
+        if (!inDebugSession) {
+            showError("No debug session active");
+            return;
+        }
         try {
             engineController.debugStepBackward();
             int currentPC = engineController.getCurrentDebugPC();
@@ -492,32 +542,32 @@ public class AppController {
     }
 
     public void debugResume() {
-        if (!inDebugSession) { showError("No debug session active"); return; }
+        if (!inDebugSession) {
+            showError("No debug session active");
+            return;
+        }
         try {
             engineController.debugResume();
             instructionsTableController.highlightCurrentInstruction(0);
             updateDebugVariableState();
-            currentCycles.set(result.numOfCycles());
+            currentCycles.set(engineController.getCurrentDebugCycles());
             endDebugSession();
             showInfo("Program resumed and completed successfully!");
-        } catch (Exception e) { e.printStackTrace(); showError("Error during debug resume: " + e.getMessage()); endDebugSession(null); }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Error during debug resume: " + e.getMessage());
+            endDebugSession();
+        }
     }
 
-    public void stopDebugSession() {
-        try {
-            engineController.stopDebugSession();
-            endDebugSession(null);
-            showInfo("Debug session stopped");
-        } catch (Exception e) { e.printStackTrace(); showError("Error stopping debug session: " + e.getMessage()); endDebugSession(); }
-    }
-
-// ===== UPDATE METHOD: endDebugSession() =====
-private void endDebugSession() {
+    // ===== UPDATE METHOD: endDebugSession() =====
+    private void endDebugSession() {
         inDebugSession = false;
         debugMode.set(false);
         programRunning.set(false);
         programFinished.set(true);
-    updateDebugVariableState();
-    //executionStatistics.add(engineController.getLastExecutionStatistics());
+        updateDebugVariableState();
+        //executionStatistics.add(engineController.getLastExecutionStatistics());
     }
 }
+
