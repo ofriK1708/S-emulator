@@ -436,24 +436,23 @@ public class ProgramEngine implements Serializable {
 
         // Execute current instruction
         Instruction currentInstruction = currentDebugInstructions.get(currentDebugPC);
-        System.out.println("Executing debug step " + currentDebugPC + ": " + currentInstruction);
+        System.out.println("Executing debug step " + currentDebugPC + ": " + currentInstruction.getStringRepresentation());
 
         try {
             // Execute instruction
             currentInstruction.execute(currentDebugContext);
 
             // Add cycles from this instruction to total (monotonic increment)
-            int instructionCycles = currentInstruction.getCycles();
-            totalDebugCycles += instructionCycles;
+            totalDebugCycles += currentInstruction.getCycles();
 
             // Update PC from context
-            currentDebugPC = currentDebugContext.get(Instruction.ProgramCounterName);
+            currentDebugPC = currentDebugContext.get(PC_NAME);
 
             // Save state after execution with accumulated cycles
             debugStateHistory.add(new HashMap<>(currentDebugContext));
             debugCyclesHistory.add(totalDebugCycles);
 
-            if (currentDebugPC >= currentDebugInstructions.size() && !areDebugStatisticsFinalized()) {
+            if (currentDebugPC >= currentDebugInstructions.size()) {
                 finalizeDebugStatistics();
             }
 
@@ -583,8 +582,4 @@ public class ProgramEngine implements Serializable {
             throw new RuntimeException(e);
         }
     }
-    public boolean areDebugStatisticsFinalized() {
-        return currentDebugStatistics == null; // null means already finalized and added to list
-    }
-
 }

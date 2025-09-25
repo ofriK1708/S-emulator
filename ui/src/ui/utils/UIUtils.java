@@ -38,17 +38,17 @@ public class UIUtils {
     }
 
     public static void showSuccess(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Success");
-        alert.setContentText(message);
-        alert.showAndWait();
+//        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+//        alert.setTitle("Success");
+//        alert.setContentText(message);
+//        alert.showAndWait();
     }
 
     public static void showInfo(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Information");
-        alert.setContentText(message);
-        alert.showAndWait();
+//        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+//        alert.setTitle("Information");
+//        alert.setContentText(message);
+//        alert.showAndWait();
     }
 
     public static void sleep(int milliseconds) {
@@ -59,7 +59,7 @@ public class UIUtils {
         }
     }
 
-    public static @NotNull List<VariableDTO> getAllVariablesSorted(@NotNull EngineController engineController, int expandLevel) {
+    public static @NotNull List<VariableDTO> getAllVariablesDTOSorted(@NotNull EngineController engineController, int expandLevel) {
         List<VariableDTO> variablesSorted = new ArrayList<>();
 
         variablesSorted.add(toVariableDTO(ProgramUtils.OUTPUT_NAME, engineController.getProgramResult(expandLevel)));
@@ -74,19 +74,14 @@ public class UIUtils {
         return variablesSorted;
     }
 
-    public static @NotNull List<VariableDTO> getAllVariablesSnapshotForDebug(@NotNull EngineController engineController, int expandLevel) {
-        List<VariableDTO> variablesSorted = new ArrayList<>();
+    public static @NotNull Map<String, Integer> getAllVariablesMap(@NotNull EngineController engineController, int expandLevel) {
+        Map<String, Integer> allVars = new LinkedHashMap<>();
 
-        variablesSorted.add(toVariableDTO(ProgramUtils.OUTPUT_NAME, engineController.getProgramResult(expandLevel)));
-        engineController.getSortedArguments(expandLevel).entrySet().stream()
-                .map(UIUtils::toVariableDTO)
-                .forEach(variablesSorted::add);
+        allVars.put(ProgramUtils.OUTPUT_NAME, engineController.getProgramResult(expandLevel));
+        allVars.putAll(engineController.getSortedArguments(expandLevel));
+        allVars.putAll(engineController.getWorkVars(expandLevel));
 
-        engineController.getWorkVars(expandLevel).entrySet().stream()
-                .map(UIUtils::toVariableDTO)
-                .forEach(variablesSorted::add);
-
-        return variablesSorted;
+        return allVars;
     }
 
     public static @NotNull List<VariableDTO> extractArguments(@NotNull Map<String, Integer> arguments) {

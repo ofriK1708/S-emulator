@@ -52,27 +52,6 @@
     -fx-font-weight: 400;
 }
 
-/* Alternating row colors */
-.table-row-cell:odd {
-    -fx-background-color: #f5f9fa;
-}
-
-.table-row-cell:even {
-    -fx-background-color: #e7f2f5;
-}
-
-/* Hover effect */
-.table-row-cell:hover {
-    -fx-background-color: #d4f0ee;
-    -fx-text-background-color: #1a7a76;
-}
-
-/* Selected row */
-.table-row-cell:selected {
-    -fx-background-color: #54bebc;
-    -fx-text-background-color: white;
-}
-
 /* Keep the focus style while showing grid lines */
 .table-view:focused {
     -fx-background-color: transparent;
@@ -149,8 +128,8 @@
 
 /* Hover effect for unchanged variables */
 .table-row-cell.unchanged-variable:hover {
-    -fx-background-color: #e0f7fa; /* Light blue hover to match table theme */
-    -fx-text-fill: #004d40;
+    -fx-background-color: #d4f0ee;
+    -fx-text-background-color: #1a7a76;
 }
 
 /* Keep table header and alternating rows intact */
@@ -162,14 +141,8 @@
     -fx-background-color: #e7f2f5;
 }
 
-/* Selected row overrides */
-.table-row-cell:selected {
+.table-row-cell.unchanged-variable:selected {
     -fx-background-color: #54bebc;
-    -fx-text-fill: white;
+    -fx-text-background-color: white;
 }
 
-/* Placeholder label */
-.placeholder-label {
-    -fx-font-style: italic;
-    -fx-text-fill: #666666;
-}

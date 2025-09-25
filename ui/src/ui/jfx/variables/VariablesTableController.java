@@ -41,7 +41,8 @@ public class VariablesTableController {
                 super.updateItem(item, empty);
                 getStyleClass().removeAll("changed-variable", "unchanged-variable");
                 if (item != null && !empty) {
-                    if (item.hasChanged().get()) getStyleClass().add("changed-variable");
+                    if (item.hasChanged().get())
+                        getStyleClass().add("changed-variable");
                     else getStyleClass().add("unchanged-variable");
 
                     item.hasChanged().addListener((obs, oldV, newV) -> {
@@ -52,13 +53,8 @@ public class VariablesTableController {
             }
         });
     }
-    public void initVariablesTable(@NotNull ListProperty<VariableDTO> variablesList) {
-        variablesTable.itemsProperty().bind(variablesList);
-        variablesList.addListener((obs, oldList, newList) -> variablesTable.refresh());
-    }
 
-
-public void initAllVarsTable(@NotNull ListProperty<VariableDTO> variables) {
+    public void initAllVarsTable(@NotNull ListProperty<VariableDTO> variables) {
         variablesTable.itemsProperty().bind(variables);
 
         // Add change listener to refresh highlighting when list changes

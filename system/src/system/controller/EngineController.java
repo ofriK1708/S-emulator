@@ -244,18 +244,4 @@ public class EngineController
         }
         return engine.getCurrentDebugCycles();
     }
-    public boolean areDebugStatisticsFinalized() {
-        if (engine == null || !inDebugSession) {
-            return false;
-        }
-        return engine.areDebugStatisticsFinalized();
-    }
-
-    public void finalizeDebugStatistics() {
-        if (engine == null || !inDebugSession) {
-            throw new IllegalStateException("Debug session not active");
-        }
-        engine.finalizeDebugStatistics();
-    }
-
 }

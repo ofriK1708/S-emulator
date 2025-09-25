@@ -37,8 +37,8 @@ import ui.utils.UIUtils;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static ui.utils.UIUtils.*;
 
@@ -94,6 +94,7 @@ public class AppController {
 
     // Arguments and variables
     private final ListProperty<VariableDTO> allVariablesDTO = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<VariableDTO> previousVariablesDTO = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final ListProperty<VariableDTO> argumentsDTO = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final BooleanProperty argumentsLoaded = new SimpleBooleanProperty(false);
 
@@ -278,7 +279,7 @@ public class AppController {
 
             // Execute the program using SystemController
             engineController.runLoadedProgram(expandLevel, programArguments);
-            allVariablesDTO.setAll(UIUtils.getAllVariablesSorted(engineController, expandLevel));
+            allVariablesDTO.setAll(UIUtils.getAllVariablesDTOSorted(engineController, expandLevel));
             executionStatistics.add(engineController.getLastExecutionStatistics());
 
             ProgramDTO executedProgram = engineController.getProgramByExpandLevel(expandLevel);
@@ -398,7 +399,7 @@ public class AppController {
 
         if (!isFirstDebugStep && previousDebugVariables.containsKey(name)) {
             Integer previousValue = previousDebugVariables.get(name);
-            hasChanged = !Objects.equals(previousValue, value);
+            hasChanged = !previousValue.equals(value);
 
             // Debug logging (remove in production)
             if (hasChanged) {
@@ -471,6 +472,12 @@ public class AppController {
             return;
         }
         try {
+            if (isFirstDebugStep) {
+                isFirstDebugStep = false;
+            } else {
+                // Save current variable states before stepping
+                previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
+            }
             engineController.debugStep();
             int currentPC = engineController.getCurrentDebugPC();
             currentCycles.set(engineController.getCurrentDebugCycles());
@@ -478,41 +485,46 @@ public class AppController {
             updateDebugVariableState();
 
             if (engineController.isDebugFinished()) {
-                try {
-                    ExecutionStatisticsDTO debugStatistics = engineController.getLastExecutionStatistics();
-                    executionStatistics.add(debugStatistics); //
-                    System.out.println("Debug execution statistics added to history: " +
-                            debugStatistics.cyclesUsed() + " cycles, result: " + debugStatistics.result());
-                } catch (Exception e) {
-                    System.err.println("Error adding debug statistics to history: " + e.getMessage());
-                }
-
-                showSuccess("Program execution completed successfully!\n" +
-                        "Cycles: " + engineController.getCyclesCount(currentExpandLevel.get()) + "\n" +
-                        "Final memory state updated in instruction table.");
-
-                endDebugSession();
+                handelEndOfRunStatistics();
             } else {
                 showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + currentCycles.get());
             }
-
-            if (!engineController.areDebugStatisticsFinalized()) {
-                engineController.finalizeDebugStatistics();
-                executionStatistics.add(engineController.getLastExecutionStatistics());
-                programRanAtLeastOnce.set(true);
-                endDebugSession();
-                showSuccess("Debug execution finished. Cycles: " + currentCycles.get());
-            } else
-                showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + currentCycles.get());
         } catch (Exception e) {
-            e.printStackTrace();
-            endDebugSession();
+            System.err.println("Error during debug step: " + e.getMessage());
             showError("Error during debug step: " + e.getMessage());
         }
     }
 
+
+    private void handelEndOfRunStatistics() {
+        try {
+            executionStatistics.add(engineController.getLastExecutionStatistics());
+            programRanAtLeastOnce.set(true);
+            endDebugSession();
+            showSuccess("Debug execution finished. Cycles: " + currentCycles.get());
+        } catch (Exception e) {
+            System.err.println("Error adding debug statistics to history: " + e.getMessage());
+        }
+
+        showSuccess("Program execution completed successfully!\n" +
+                "Cycles: " + engineController.getCyclesCount(currentExpandLevel.get()) + "\n" +
+                "Final memory state updated in instruction table.");
+
+        endDebugSession();
+    }
+
     private void updateDebugVariableState() {
-        allVariablesDTO.setAll(UIUtils.getAllVariablesSorted(engineController, currentExpandLevel.get()));
+        if (!isFirstDebugStep) {
+            List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted(engineController, currentExpandLevel.get());
+            List<VariableDTO> allVarWithChangeDetection = FXCollections.observableArrayList();
+            allVarNoChangeDetection.stream()
+                    .map(var -> createVariableDTOWithChangeDetection(var.name().get(), var.value().get()))
+                    .forEach(allVarWithChangeDetection::add);
+
+            allVariablesDTO.setAll(allVarWithChangeDetection);
+        } else {
+            allVariablesDTO.setAll(UIUtils.getAllVariablesDTOSorted(engineController, currentExpandLevel.get()));
+        }
     }
 
     public void debugStepBackward() {
@@ -521,6 +533,7 @@ public class AppController {
             return;
         }
         try {
+            previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
             engineController.debugStepBackward();
             int currentPC = engineController.getCurrentDebugPC();
             currentCycles.set(engineController.getCurrentDebugCycles());
