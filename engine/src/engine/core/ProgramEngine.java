@@ -213,6 +213,7 @@ public class ProgramEngine implements Serializable {
     }
 
     public void run(int expandLevel, @NotNull Map<String, Integer> arguments) {
+        int debugNumOfInstructionsExecuted = 0;
         if (expandLevel < contextMapsByExpandLevel.size()) {
             clearPreviousRunData(expandLevel);
         }
@@ -226,11 +227,6 @@ public class ProgramEngine implements Serializable {
             int currentPC = executedContextMap.get(Instruction.ProgramCounterName);
             Instruction instruction = executedInstructions.get(currentPC);
             try {
-                if (programName.equals("Divide")) {
-                    System.out.println("at function \"" + programName + "\"");
-                    System.out.println("Executing instruction at PC=" + currentPC + ": " + instruction.getLabel() + " " + instruction.getStringRepresentation());
-                    System.out.println("before executing: z1 = " + executedContextMap.get("z1"));
-                }
                 instruction.execute(executedContextMap);
                 if (programName.equals("Divide")) {
                     System.out.println("after executing: z1 = " + executedContextMap.get("z1"));
@@ -240,6 +236,7 @@ public class ProgramEngine implements Serializable {
                 throw new RuntimeException("Error executing instruction at PC=" + currentPC + ": " + e.getMessage(), e);
             }
         }
+        System.out.println("Program \"" + programName + "\" executed " + debugNumOfInstructionsExecuted + " instructions.");
         exStats.setY(executedContextMap.get(ProgramUtils.OUTPUT_NAME));
         executionStatisticsList.add(exStats);
     }
