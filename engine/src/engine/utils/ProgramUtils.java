@@ -144,8 +144,6 @@ public class ProgramUtils {
                 part = part.trim();
                 if (isSingleValidArgument(part)) {
                     variables.add(part);
-                } else {
-                    System.out.println("Encountered \"" + part + "\" a function name or invalid argument while initializing variables from quote arguments.");
                 }
             }
         }
