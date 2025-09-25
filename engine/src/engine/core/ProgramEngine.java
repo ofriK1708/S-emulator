@@ -236,7 +236,6 @@ public class ProgramEngine implements Serializable {
                 throw new RuntimeException("Error executing instruction at PC=" + currentPC + ": " + e.getMessage(), e);
             }
         }
-        System.out.println("Program \"" + programName + "\" executed " + debugNumOfInstructionsExecuted + " instructions.");
         exStats.setY(executedContextMap.get(ProgramUtils.OUTPUT_NAME));
         executionStatisticsList.add(exStats);
     }
