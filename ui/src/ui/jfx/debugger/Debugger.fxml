@@ -7,7 +7,7 @@
 <?import javafx.scene.shape.SVGPath?>
 
 <VBox spacing="12.0"
-      xmlns="http://javafx.com/javafx/24.0.1"
+      xmlns="http://javafx.com/javafx/22.0.2"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="ui.jfx.debugger.DebuggerController"
       stylesheets="@Debugger.css"

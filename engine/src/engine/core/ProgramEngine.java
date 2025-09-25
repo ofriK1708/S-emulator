@@ -45,6 +45,8 @@ public class ProgramEngine implements Serializable {
     private final Map<String, Integer> debugArguments = new HashMap<>(); // Store debug arguments
     private int debugExpandLevel = 0;
     private int totalDebugCycles = 0; // Monotonic cycle counter
+    private ExecutionStatistics currentDebugStatistics = null;
+
 
     public ProgramEngine(@NotNull SProgram program) throws LabelNotExist {
         this.programName = program.getName();
@@ -395,6 +397,14 @@ public class ProgramEngine implements Serializable {
         currentDebugInstructions = instructionExpansionLevels.get(expandLevel);
         currentDebugContext = contextMapsByExpandLevel.get(expandLevel);
 
+        // CREATE DEBUG STATISTICS - same pattern as normal run
+        currentDebugStatistics = new ExecutionStatistics(
+                executionStatisticsList.size() + 1,  // execution number
+                expandLevel,                         // expand level
+                new HashMap<>(arguments)             // input arguments copy
+        );
+        // Note: result and cycles will be set when debug session completes
+
         // Save initial state with zero cycles
         debugStateHistory.add(new HashMap<>(currentDebugContext));
         debugCyclesHistory.add(0);
@@ -411,6 +421,7 @@ public class ProgramEngine implements Serializable {
         currentDebugContext = null;
         totalDebugCycles = 0;
         currentDebugPC = 0;
+        currentDebugStatistics = null;
         debugMode = true;
     }
 
@@ -441,6 +452,11 @@ public class ProgramEngine implements Serializable {
             // Save state after execution with accumulated cycles
             debugStateHistory.add(new HashMap<>(currentDebugContext));
             debugCyclesHistory.add(totalDebugCycles);
+
+            if (currentDebugPC >= currentDebugInstructions.size() && !areDebugStatisticsFinalized()) {
+                finalizeDebugStatistics();
+            }
+
 
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Error executing debug instruction at PC=" + currentDebugPC + ": " + e.getMessage(), e);
@@ -479,14 +495,42 @@ public class ProgramEngine implements Serializable {
 
         // Execute remaining instructions
         while (currentDebugPC < currentDebugInstructions.size()) {
-            debugStep();
+            debugStep(); // This will finalize statistics when program completes
         }
+
+        // Statistics are already finalized by debugStep() - don't call finalizeDebugStatistics() again
+
+        return getCurrentDebugState();
     }
 
     public void stopDebugSession() {
+        if (debugMode && currentDebugStatistics != null) {
+            // Finalize statistics even if session was stopped manually
+            finalizeDebugStatistics();
+        }
+
         debugMode = false;
         resetDebugState();
         System.out.println("Debug session stopped");
+    }
+
+    // New method to finalize debug statistics:
+    public void finalizeDebugStatistics() {
+        if (currentDebugStatistics != null && currentDebugContext != null) {
+            // Set final result (Y value) and cycles used
+            int finalResult = currentDebugContext.get(ProgramUtils.OUTPUT_NAME);
+            currentDebugStatistics.setY(finalResult);
+            currentDebugStatistics.incrementCycles(totalDebugCycles);
+
+            // Add to statistics list
+            executionStatisticsList.add(currentDebugStatistics);
+
+            System.out.println("Debug statistics finalized: " +
+                    ", result=" + finalResult +
+                    ", cycles=" + totalDebugCycles);
+
+            currentDebugStatistics = null; // Clear reference
+        }
     }
 
     public int getCurrentDebugPC() {
@@ -528,6 +572,7 @@ public class ProgramEngine implements Serializable {
         contextMapsByExpandLevel.clear();
         labelsByExpandLevel.clear();
         cyclesPerExpandLevel.clear();
+        currentDebugStatistics = null; // Clear statistics reference
         try {
             if (originalSFunction != null) {
                 SInstructions sInstructions = originalSFunction.getSInstructions();
@@ -542,4 +587,8 @@ public class ProgramEngine implements Serializable {
             throw new RuntimeException(e);
         }
     }
+    public boolean areDebugStatisticsFinalized() {
+        return currentDebugStatistics == null; // null means already finalized and added to list
+    }
+
 }
