@@ -312,7 +312,7 @@ public class AppController {
     }
 
     private void highlightCurrentInstruction(int instructionIndex) {
-        javafx.application.Platform.runLater(() -> instructionsTableController.highlightCurrentInstruction(instructionIndex));
+       instructionsTableController.highlightCurrentInstruction(instructionIndex);
     }
     private @NotNull VariableDTO createVariableDTOWithChangeDetection(@NotNull String name, @NotNull Integer value) {
         boolean hasChanged = false;
@@ -385,13 +385,16 @@ public class AppController {
 
     private void updateDebugVariableStateWithResult(@NotNull ExecutionResultDTO result) {
         List<VariableDTO> variablesSorted = new ArrayList<>();
+        List<VariableDTO> argumentsIncludingOutput = new ArrayList<>();
         Map<String, Integer> currentStepVariables = new HashMap<>();
 
         // 1. Add OUTPUT variable (always first)
         String outputName = ProgramUtils.OUTPUT_NAME;
         Integer outputValue = result.result();
         currentStepVariables.put(outputName, outputValue);
-        variablesSorted.add(createVariableDTOWithChangeDetection(outputName, outputValue));
+        VariableDTO outputVariable = createVariableDTOWithChangeDetection(outputName, outputValue);
+        variablesSorted.add(outputVariable);
+        argumentsIncludingOutput.add(outputVariable);
 
         // 2. Add argument variables (maintain order)
         result.argumentsValues().entrySet().stream()
@@ -400,7 +403,9 @@ public class AppController {
                     String name = entry.getKey();
                     Integer value = entry.getValue();
                     currentStepVariables.put(name, value);
-                    variablesSorted.add(createVariableDTOWithChangeDetection(name, value));
+                    VariableDTO argVariable = createVariableDTOWithChangeDetection(name, value);
+                    variablesSorted.add(argVariable);
+                    argumentsIncludingOutput.add(argVariable);
                 });
 
         // 3. Add work variables (maintain order)
@@ -415,7 +420,7 @@ public class AppController {
 
         // 4. Update UI collections
         allVariablesDTO.setAll(variablesSorted);
-        argumentsDTO.setAll(UIUtils.extractArguments(result.argumentsValues()));
+        argumentsDTO.setAll(argumentsIncludingOutput); // 🆕 עכשיו כולל גם OUTPUT (Y)
 
         // 5. Store current state as previous for next comparison
         previousDebugVariables.clear();
@@ -444,7 +449,11 @@ public class AppController {
                 endDebugSession(result);
                 showSuccess("Debug execution finished. Cycles: " + result.numOfCycles());
             } else showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + result.numOfCycles());
-        } catch (Exception e) { e.printStackTrace(); showError("Error during debug step: " + e.getMessage()); }
+        } catch (Exception e) {
+            e.printStackTrace();
+            endDebugSession(null);
+            showError("Error during debug step: " + e.getMessage());
+        }
     }
 
     public void debugStepBackward() {
@@ -463,7 +472,7 @@ public class AppController {
         if (!inDebugSession) { showError("No debug session active"); return; }
         try {
             ExecutionResultDTO result = engineController.debugResume();
-            instructionsTableController.highlightVariable(null);
+            instructionsTableController.highlightCurrentInstruction(0);
             updateDebugVariableStateWithResult(result);
             currentCycles.set(result.numOfCycles());
             endDebugSession(result);
@@ -484,8 +493,6 @@ public class AppController {
         debugMode.set(false);
         programRunning.set(false);
         programFinished.set(true);
-
-        // CRITICAL: Reset change tracking when session ends
         previousDebugVariables.clear();
         isFirstDebugStep = true;
         System.out.println("Debug session ended - change tracking reset");

@@ -57,13 +57,6 @@ public class VariablesTableController {
         variablesList.addListener((obs, oldList, newList) -> variablesTable.refresh());
     }
 
-    public void refreshHighlighting() {
-        variablesTable.refresh();
-    }
-
-    public void resetHighlighting() {
-        variablesTable.refresh();
-    }
 
 public void initAllVarsTable(@NotNull ListProperty<VariableDTO> variables) {
         variablesTable.itemsProperty().bind(variables);
