@@ -93,16 +93,23 @@ public class AppController {
     private DebuggerController debugControlsController;
 
     // Arguments and variables
-    private final ListProperty<VariableDTO> allVariablesDTO = new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final ListProperty<VariableDTO> previousVariablesDTO = new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final ListProperty<VariableDTO> argumentsDTO = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<VariableDTO> allVariablesDTO =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<VariableDTO> previousVariablesDTO =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<VariableDTO> argumentsDTO =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
     private final BooleanProperty argumentsLoaded = new SimpleBooleanProperty(false);
 
     // Core system controller
-    private final ListProperty<InstructionDTO> programInstructions = new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final ListProperty<InstructionDTO> derivedInstructions = new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final ListProperty<ExecutionStatisticsDTO> executionStatistics = new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final ListProperty<String> programVariablesNamesAndLabels = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<InstructionDTO> programInstructions =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<InstructionDTO> derivedInstructions =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<ExecutionStatisticsDTO> executionStatistics =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<String> programVariablesNamesAndLabels =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
 
     private final @NotNull EngineController engineController;
     private @Nullable ProgramDTO loadedProgram = null;
@@ -137,7 +144,8 @@ public class AppController {
                     currentExpandLevel, maxExpandLevel, programLoaded, this::handleVariableSelection,
                     programVariablesNamesAndLabels);
 
-            runControlsController.initComponent(this::RunProgram, this::prepareForTakingArguments, programLoaded, argumentsLoaded);
+            runControlsController.initComponent(this::RunProgram, this::prepareForTakingArguments, programLoaded,
+                    argumentsLoaded);
             cyclesController.initComponent(currentCycles);
             instructionsTableController.initializeMainInstructionTable(programInstructions, derivedInstructions);
             derivedInstructionsTableController.markAsDerivedInstructionsTable();
@@ -161,10 +169,12 @@ public class AppController {
 
     private void bindTitlePanesExpansion() {
         runControlsTitledPane.expandedProperty().bind(Bindings.and(programLoaded, programRunning.not()));
-        debugControlsTitledPane.expandedProperty().bind(Bindings.and(programLoaded, Bindings.and(debugMode, programFinished.not())));
+        debugControlsTitledPane.expandedProperty().bind(Bindings.and(programLoaded, Bindings.and(debugMode,
+                programFinished.not())));
         variablesTitledPane.expandedProperty().bind(Bindings.and(programLoaded,
                 Bindings.or(argumentsLoaded, Bindings.or(programFinished, debugMode))));
-        statisticsTitledPane.expandedProperty().bind(Bindings.and(programLoaded, Bindings.and(programRunning.not(), programRanAtLeastOnce)));
+        statisticsTitledPane.expandedProperty().bind(Bindings.and(programLoaded, Bindings.and(programRunning.not(),
+                programRanAtLeastOnce)));
     }
 
     private void unbindTitlePanesExpansion() {
@@ -209,7 +219,9 @@ public class AppController {
                     }
             );
 
-            loadingStage.setOnShown(event -> fileLoaderController.initializeAndRunFileLoaderTaskThread(file.toPath(), engineController, uiAdapter));
+            loadingStage.setOnShown(event -> fileLoaderController.initializeAndRunFileLoaderTaskThread(
+                    file.toPath(),
+                    engineController, uiAdapter));
             loadingStage.show();
         } catch (Exception e) {
             e.printStackTrace();
@@ -228,7 +240,8 @@ public class AppController {
 
         if (programArguments.isEmpty()) {
             argumentsLoaded.set(true);
-            showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() + "\nNo variables required.");
+            showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() + "\nNo variables required" +
+                    ".");
             return;
         }
 
@@ -320,6 +333,9 @@ public class AppController {
         }
 
         try {
+            //TODO: prepare the scene for expansion (clear highlighting, reset variables, etc)
+            instructionsTableController.clearHighlighting();
+            derivedInstructionsTableController.clearHighlighting();
             currentExpandLevel.set(expandLevel);
             ProgramDTO program = engineController.getProgramByExpandLevel(expandLevel);
             derivedInstructions.clear();
@@ -328,7 +344,8 @@ public class AppController {
             allVariablesDTO.clear();
             argumentsDTO.clear();
             summaryLineController.updateCounts(program.instructions());
-            programVariablesNamesAndLabels.setAll(engineController.getAllVariablesAndLabelsNames(expandLevel));
+            programVariablesNamesAndLabels.setAll(sortAllProgramNames(engineController.
+                    getAllVariablesAndLabelsNames(expandLevel)));
             showInfo("Program expanded to level " + expandLevel);
         } catch (Exception e) {
             e.printStackTrace();
@@ -351,8 +368,8 @@ public class AppController {
         argumentsDTO.clear();
         currentCycles.set(0);
         summaryLineController.clearCounts();
-        instructionsTableController.highlightVariable(null);
-        derivedInstructionsTableController.highlightVariable(null);
+        instructionsTableController.clearHighlighting();
+        derivedInstructionsTableController.clearHighlighting();
         showInfo("Loaded program cleared.");
     }
 
@@ -366,13 +383,6 @@ public class AppController {
             System.out.println("Clearing variable highlighting in all instruction tables");
         }
     }
-
-    public boolean isProgramLoaded() {
-        return programLoaded.get();
-    }
-
-
-    //add this method to implement Debugger:
 
     public void stopDebugSession() {
         try {
@@ -515,7 +525,8 @@ public class AppController {
 
     private void updateDebugVariableState() {
         if (!isFirstDebugStep) {
-            List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted(engineController, currentExpandLevel.get());
+            List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted(engineController,
+                    currentExpandLevel.get());
             List<VariableDTO> allVarWithChangeDetection = FXCollections.observableArrayList();
             allVarNoChangeDetection.stream()
                     .map(var -> createVariableDTOWithChangeDetection(var.name().get(), var.value().get()))

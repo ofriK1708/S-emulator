@@ -17,13 +17,9 @@ import java.util.function.Consumer;
 
 public class ProgramFunctionController {
 
-    Consumer<Integer> OnExpandLevelChangeCallback;
+
     @FXML
     public RadioButton autoPaneMode;
-    Consumer<String> OnVariableSelectionCallback; // NEW: Callback for variable selection
-    final IntegerProperty currentLevel = new SimpleIntegerProperty();
-    final IntegerProperty maxLevel = new SimpleIntegerProperty();
-
     @FXML
     private Button collapseButton;
     @FXML
@@ -41,6 +37,10 @@ public class ProgramFunctionController {
     @FXML
     public RadioButton manualPaneMode;
 
+    final IntegerProperty currentLevel = new SimpleIntegerProperty();
+    final IntegerProperty maxLevel = new SimpleIntegerProperty();
+    Consumer<Integer> OnExpandLevelChangeCallback;
+    Consumer<String> OnVariableSelectionCallback; // NEW: Callback for variable selection
     Consumer<PaneMode> OnPaneModeChangeCallback;
 
     @FXML
@@ -50,7 +50,8 @@ public class ProgramFunctionController {
 
     public void initComponent(Consumer<Integer> OnExpandLevelChangeCallback,
                               Consumer<PaneMode> OnPaneModeChangeCallback,
-                              @NotNull IntegerProperty currentExpandLevelProperty, @NotNull IntegerProperty MaxExpandLevelProperty,
+                              @NotNull IntegerProperty currentExpandLevelProperty,
+                              @NotNull IntegerProperty MaxExpandLevelProperty,
                               @NotNull BooleanProperty programLoadedProperty,
                               Consumer<String> OnVariableSelectionCallback,
                               @NotNull ListProperty<String> programVariables) { // NEW: Add variable selection callback
@@ -104,7 +105,7 @@ public class ProgramFunctionController {
 
         // Add "Clear Highlighting" option
         MenuItem clearItem = new MenuItem("Clear Highlighting");
-        clearItem.setOnAction(e -> OnVariableSelectionCallback.accept(null)); // null means clear highlighting});
+        clearItem.setOnAction(e -> OnVariableSelectionCallback.accept(null)); // null means clear highlighting
 
         highlightSelectionButton.getItems().add(clearItem);
         highlightSelectionButton.getItems().add(new SeparatorMenuItem());

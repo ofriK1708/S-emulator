@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class InstructionTableController {
 
@@ -92,10 +93,12 @@ public class InstructionTableController {
         currentHighlightedVariable = variableName;
 
         // Refresh the table to update row highlighting
-//        instructionTable.refresh();
+        instructionTable.refresh();
 
         if (variableName != null) {
             System.out.println("Highlighting variable: " + variableName + " in instruction table");
+
+            instructionTable.getSelectionModel().clearSelection();
 
             // Find first matching row and scroll to TOP
             List<InstructionDTO> items = instructionTable.getItems();
@@ -104,17 +107,18 @@ public class InstructionTableController {
                     // Scroll to position target row at top
                     int scrollToIndex = Math.max(0, targetIndex - 2); // -2 for header padding
                     instructionTable.scrollTo(scrollToIndex);
-
-                    // Alternative: Force selection then clear to ensure top positioning
-                    instructionTable.getSelectionModel().clearSelection();
-
                     instructionTable.getSelectionModel().select(targetIndex);
                     break;
                 }
             }
         } else {
+            instructionTable.getSelectionModel().clearSelection();
             System.out.println("Clearing variable highlighting in instruction table");
         }
+    }
+
+    public void clearHighlighting() {
+        highlightVariable(null);
     }
 
 
@@ -147,16 +151,19 @@ public class InstructionTableController {
         if (instruction == null || variableName == null) {
             return false;
         }
+        String pattern = Pattern.quote(variableName); // Escape special regex characters
+        pattern = "\\b" + pattern + "\\b"; // Match whole word
+        pattern = ".*" + pattern + ".*"; // Match anywhere in the string
 
         // Check in the command field - this is where variable references typically appear
         String command = instruction.command();
-        if (command != null && command.contains(variableName)) {
+        if (command != null && command.matches(pattern)) {
             return true;
         }
 
         // Check in the label field as well
         String label = instruction.label();
-        return label != null && label.contains(variableName);
+        return label != null && label.matches(pattern);
     }
 
     /**

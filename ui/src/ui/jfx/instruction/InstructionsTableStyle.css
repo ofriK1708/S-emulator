@@ -75,7 +75,7 @@
 
 /* NEW: Highlighted row styling for variable highlighting */
 .table-row-cell.highlighted-row {
-    -fx-background-color: #fff3cd !important;
+    -fx-background-color: #fff3cd;
     -fx-border-color: #ffeaa7;
     -fx-border-width: 2px;
     -fx-border-radius: 4px;
@@ -83,19 +83,19 @@
 }
 
 .table-row-cell.highlighted-row:odd {
-    -fx-background-color: #fff3cd !important;
+    -fx-background-color: #fff3cd;
 }
 
 .table-row-cell.highlighted-row:even {
-    -fx-background-color: #fff3cd !important;
+    -fx-background-color: #fff3cd;
 }
 
 .table-row-cell.highlighted-row:hover {
-    -fx-background-color: #ffeaa7 !important;
+    -fx-background-color: #ffeaa7;
 }
 
 .table-row-cell.highlighted-row:selected {
-    -fx-background-color: #f39c12 !important;
+    -fx-background-color: #f39c12;
     -fx-text-background-color: white;
 }
 
@@ -122,21 +122,21 @@
     -fx-background-color: #25a5a0;
 }
 
-/* NEW: Additional styling for better highlighting visibility */
-.table-row-cell.highlighted-row .table-cell {
-    -fx-text-fill: #856404 !important;
-    -fx-font-weight: bold;
-}
-.table-row-cell:selected {
-    -fx-background-color: #0096C9;
-    -fx-text-fill: white;
-}
+/*!* NEW: Additional styling for better highlighting visibility *!*/
+/*.table-row-cell.highlighted-row .table-cell {*/
+/*    -fx-text-fill: #856404 !important;*/
+/*    -fx-font-weight: bold;*/
+/*}*/
+/*.table-row-cell:selected {*/
+/*    -fx-background-color: #0096C9;*/
+/*    -fx-text-fill: white;*/
+/*}*/
 
-.table-row-cell:selected .table-cell {
-    -fx-text-fill: white;
-}
+/*.table-row-cell:selected .table-cell {*/
+/*    -fx-text-fill: white;*/
+/*}*/
 
-.highlighted-row {
-    -fx-background-color: #FFEB3B;
-    -fx-text-fill: black;
-}
+/*.highlighted-row {*/
+/*    -fx-background-color: #FFEB3B;*/
+/*    -fx-text-fill: black;*/
+/*}*/

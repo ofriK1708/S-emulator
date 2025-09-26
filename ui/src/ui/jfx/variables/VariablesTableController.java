@@ -41,14 +41,12 @@ public class VariablesTableController {
                 super.updateItem(item, empty);
                 getStyleClass().removeAll("changed-variable", "unchanged-variable");
                 if (item != null && !empty) {
-                    if (item.hasChanged().get())
+                    if (item.hasChanged().get()) {
                         getStyleClass().add("changed-variable");
-                    else getStyleClass().add("unchanged-variable");
-
-                    item.hasChanged().addListener((obs, oldV, newV) -> {
-                        getStyleClass().removeAll("changed-variable", "unchanged-variable");
-                        getStyleClass().add(newV ? "changed-variable" : "unchanged-variable");
-                    });
+                        variablesTable.scrollTo(getIndex());
+                    } else {
+                        getStyleClass().add("unchanged-variable");
+                    }
                 }
             }
         });
@@ -59,8 +57,7 @@ public class VariablesTableController {
 
         // Add change listener to refresh highlighting when list changes
         variables.addListener((observable, oldList, newList) -> {
-            // Force table refresh to apply new highlighting
-            variablesTable.refresh();
+            scrollToFirstChangedVariable();
         });
     }
 
@@ -69,9 +66,20 @@ public class VariablesTableController {
         variableColumn.setText("Arguments");
 
         // Add change listener to refresh highlighting when list changes
-        args.addListener((observable, oldList, newList) -> {
-            // Force table refresh to apply new highlighting
-            variablesTable.refresh();
-        });
+//        args.addListener((observable, oldList, newList) -> {
+//            // Force table refresh to apply new highlighting
+//            variablesTable.refresh();
+//        });
+    }
+
+    private void scrollToFirstChangedVariable() {
+        for (int i = 0; i < variablesTable.getItems().size(); i++) {
+            if (variablesTable.getItems().get(i).hasChanged().get()) {
+                int scrollToIndex = Math.max(0, i - 2); // -2 for header padding
+                variablesTable.scrollTo(scrollToIndex);
+                variablesTable.getSelectionModel().select(i);
+                break;
+            }
+        }
     }
 }
