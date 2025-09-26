@@ -230,9 +230,6 @@ public class ProgramEngine implements Serializable {
             Instruction instruction = executedInstructions.get(currentPC);
             try {
                 instruction.execute(executedContextMap);
-                if (programName.equals("Divide")) {
-                    System.out.println("after executing: z1 = " + executedContextMap.get("z1"));
-                }
                 exStats.incrementCycles(instruction.getCycles());
             } catch (IllegalArgumentException e) {
                 throw new RuntimeException("Error executing instruction at PC=" + currentPC + ": " + e.getMessage(), e);

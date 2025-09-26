@@ -7,7 +7,15 @@
             <S-Label>L1</S-Label>
             <S-Instruction-Arguments>
                 <S-Instruction-Argument name="functionName" value="Bigger_Equal_Than"/>
-                <S-Instruction-Argument name="functionArguments" value="z3,z4"/>
+                <S-Instruction-Argument name="functionArguments" value="x2,x1"/>
+            </S-Instruction-Arguments>
+        </S-Instruction>
+        <S-Instruction type="synthetic" name="QUOTE">
+            <S-Variable>z4</S-Variable>
+            <S-Label>L1</S-Label>
+            <S-Instruction-Arguments>
+                <S-Instruction-Argument name="functionName" value="Bigger_Equal_Than"/>
+                <S-Instruction-Argument name="functionArguments" value="x1,x2"/>
             </S-Instruction-Arguments>
         </S-Instruction>
     </S-Instructions>

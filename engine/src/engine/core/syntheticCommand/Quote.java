@@ -7,10 +7,7 @@ import engine.utils.CommandType;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Quote extends Instruction {
     private boolean isFinishedInitialization = false;
@@ -170,32 +167,37 @@ public class Quote extends Instruction {
     @Override
     public @NotNull List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex) {
         List<Instruction> expandedInstructions = new ArrayList<>();
-        List<String> newArgsNames = new ArrayList<>();
+        Map<String, String> argsReplacements = new HashMap<>();
         if (!label.isBlank()) {
             expandedInstructions.add(new Neutral(ProgramUtils.OUTPUT_NAME, Map.of(), label, this, originalInstructionIndex));
         }
-        handelNewAssignment(contextMap, originalInstructionIndex, newArgsNames, expandedInstructions);
-        expandedInstructions.addAll(getUpdatedFunctionInstructions(contextMap, functionToRun, mainVarName, newArgsNames, this, originalInstructionIndex));
+        handelNewAssignment(contextMap, originalInstructionIndex, argsReplacements, expandedInstructions);
+        expandedInstructions.addAll(getUpdatedFunctionInstructions(contextMap, functionToRun, mainVarName,
+                argsReplacements, this, originalInstructionIndex));
         return expandedInstructions;
     }
 
     private void handelNewAssignment(Map<String, Integer> contextMap, int originalInstructionIndex,
-                                     List<String> newArgsNames, List<Instruction> expandedInstructions) {
+                                     Map<String, String> argsReplacements, List<Instruction> expandedInstructions) {
+
         Iterator<Quote> subFuncIter = subfunctionCalls.iterator();
+        int argCounter = 1;
         for (String funcArg : funcArgsNames) {
             if (ProgramUtils.isArgument(funcArg)) {
-                continue; // skip arguments that are main function arguments
-            }
-            String newArgName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
-            newArgsNames.add(newArgName);
-            if (ProgramUtils.isFunctionCall(funcArg)) {
-                Quote subFunc = subFuncIter.next();
-                expandedInstructions.add(new Quote(newArgName, "", subFunc, this, originalInstructionIndex));
+                argsReplacements.put(ProgramUtils.ARG_PREFIX + argCounter, funcArg);
+                argCounter++;
             } else {
-                expandedInstructions.add(new Assignment(newArgName, Map.of(Assignment.sourceArgumentName,
-                        funcArg), "", this, originalInstructionIndex));
+                String newArgName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
+                argsReplacements.put(ProgramUtils.ARG_PREFIX + argCounter, newArgName);
+                argCounter++;
+                if (ProgramUtils.isFunctionCall(funcArg)) {
+                    Quote subFunc = subFuncIter.next();
+                    expandedInstructions.add(new Quote(newArgName, "", subFunc, this, originalInstructionIndex));
+                } else {
+                    expandedInstructions.add(new Assignment(newArgName, Map.of(Assignment.sourceArgumentName,
+                            funcArg), "", this, originalInstructionIndex));
+                }
             }
-
         }
     }
 

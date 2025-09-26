@@ -130,7 +130,7 @@ public class ProgramUtils {
     }
 
     public static Set<String> extractAllVariablesFromQuoteArguments(String value) {
-        Set<String> variables = new HashSet<>();
+        Set<String> variables = new LinkedHashSet<>();
         extractVariablesHelper(value, variables);
         return variables;
     }
