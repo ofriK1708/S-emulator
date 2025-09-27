@@ -377,9 +377,15 @@ public class AppController {
     public void stopDebugSession() {
         try {
             engineController.stopDebugSession();
-            showInfo("Debug session stopped");
-            int currentPC = engineController.getCurrentDebugPC();
 
+            // Check if we were at the final step when stopping
+            if (engineController.isDebugFinished()) {
+                showInfo("Debug session stopped. Execution was completed.");
+            } else {
+                showInfo("Debug session stopped at PC: " + engineController.getCurrentDebugPC());
+            }
+
+            int currentPC = engineController.getCurrentDebugPC();
             highlightCurrentInstruction(currentPC);
             updateDebugVariableState();
             endDebugSession();
@@ -389,7 +395,6 @@ public class AppController {
             showError("Error stopping debug session: " + e.getMessage());
         }
     }
-
     private void highlightCurrentInstruction(int instructionIndex) {
         instructionsTableController.highlightCurrentInstruction(instructionIndex);
     }
@@ -397,6 +402,7 @@ public class AppController {
     private @NotNull VariableDTO createVariableDTOWithChangeDetection(@NotNull String name, @NotNull Integer value) {
         boolean hasChanged = false;
 
+        // FIX 2: Only check for changes if NOT on the first debug step
         if (!isFirstDebugStep && previousDebugVariables.containsKey(name)) {
             Integer previousValue = previousDebugVariables.get(name);
             hasChanged = !previousValue.equals(value);
@@ -406,10 +412,11 @@ public class AppController {
                 System.out.println("Variable changed: " + name + " from " + previousValue + " to " + value);
             }
         } else if (!isFirstDebugStep) {
-            // Variable didn't exist before, so it's a new variable
+            // Variable didn't exist before, so it's a new variable (but only if not first step)
             hasChanged = true;
             System.out.println("New variable detected: " + name + " = " + value);
         }
+        // If isFirstDebugStep is true, hasChanged remains false for all variables
 
         return new VariableDTO(
                 new SimpleStringProperty(name),
@@ -417,7 +424,6 @@ public class AppController {
                 new SimpleBooleanProperty(hasChanged)
         );
     }
-
     // DEBUG METHODS
     public void startDebugExecution() {
         try {
@@ -471,21 +477,35 @@ public class AppController {
             showError("No debug session active");
             return;
         }
+
+        // ENHANCEMENT: Check if execution is already finished to prevent invalid operations
+        if (engineController.isDebugFinished()) {
+            showInfo("Execution finished. Program has completed successfully.");
+            return;
+        }
+
         try {
-            if (isFirstDebugStep) {
-                isFirstDebugStep = false;
-            } else {
-                // Save current variable states before stepping
+            // Save current variable states before stepping (except on first step)
+            if (!isFirstDebugStep) {
                 previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
             }
+
             engineController.debugStep();
             int currentPC = engineController.getCurrentDebugPC();
             currentCycles.set(engineController.getCurrentDebugCycles());
             highlightCurrentInstruction(currentPC);
+
+            // Update variables AFTER the step
             updateDebugVariableState();
 
+            // Mark that we're no longer on first step AFTER updating variables
+            if (isFirstDebugStep) {
+                isFirstDebugStep = false;
+            }
+
+            // ENHANCEMENT: Handle final step with clear UI feedback
             if (engineController.isDebugFinished()) {
-                handelEndOfRunStatistics();
+                handleExecutionFinished();
             } else {
                 showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + currentCycles.get());
             }
@@ -494,7 +514,6 @@ public class AppController {
             showError("Error during debug step: " + e.getMessage());
         }
     }
-
 
     private void handelEndOfRunStatistics() {
         try {
@@ -514,24 +533,27 @@ public class AppController {
     }
 
     private void updateDebugVariableState() {
-        if (!isFirstDebugStep) {
-            List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted(engineController, currentExpandLevel.get());
-            List<VariableDTO> allVarWithChangeDetection = FXCollections.observableArrayList();
-            allVarNoChangeDetection.stream()
-                    .map(var -> createVariableDTOWithChangeDetection(var.name().get(), var.value().get()))
-                    .forEach(allVarWithChangeDetection::add);
+        // FIX 2: Always create variables with change detection, but on first step all will be unchanged
+        List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted(engineController, currentExpandLevel.get());
+        List<VariableDTO> allVarWithChangeDetection = FXCollections.observableArrayList();
+        allVarNoChangeDetection.stream()
+                .map(var -> createVariableDTOWithChangeDetection(var.name().get(), var.value().get()))
+                .forEach(allVarWithChangeDetection::add);
 
-            allVariablesDTO.setAll(allVarWithChangeDetection);
-        } else {
-            allVariablesDTO.setAll(UIUtils.getAllVariablesDTOSorted(engineController, currentExpandLevel.get()));
-        }
+        allVariablesDTO.setAll(allVarWithChangeDetection);
     }
-
     public void debugStepBackward() {
         if (!inDebugSession) {
             showError("No debug session active");
             return;
         }
+
+        // ENHANCEMENT: Prevent step backward when execution is finished
+        if (engineController.isDebugFinished()) {
+            showInfo("Execution finished. Cannot step backward from final state.");
+            return;
+        }
+
         try {
             previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
             engineController.debugStepBackward();
@@ -539,12 +561,8 @@ public class AppController {
             currentCycles.set(engineController.getCurrentDebugCycles());
 
             highlightCurrentInstruction(currentPC);
-
-            // Property Update: Refresh variables after stepping backward
-            // Uses existing binding infrastructure to update tables automatically
             updateDebugVariableState();
 
-            // Note: Cycles should remain monotonic even when stepping backward
             showInfo("Stepped backward to PC: " + currentPC +
                     ", Total execution cycles: " + currentCycles.get());
 
@@ -554,18 +572,28 @@ public class AppController {
         }
     }
 
+
     public void debugResume() {
         if (!inDebugSession) {
             showError("No debug session active");
             return;
         }
+
+        // ENHANCEMENT: Handle case where execution is already finished
+        if (engineController.isDebugFinished()) {
+            showInfo("Execution already finished.");
+            return;
+        }
+
         try {
             engineController.debugResume();
             instructionsTableController.highlightCurrentInstruction(0);
             updateDebugVariableState();
             currentCycles.set(engineController.getCurrentDebugCycles());
-            endDebugSession();
-            showInfo("Program resumed and completed successfully!");
+
+            // ENHANCEMENT: Always handle as finished after resume
+            handleExecutionFinished();
+
         } catch (Exception e) {
             e.printStackTrace();
             showError("Error during debug resume: " + e.getMessage());
@@ -574,13 +602,51 @@ public class AppController {
     }
 
     // ===== UPDATE METHOD: endDebugSession() =====
+    private void handleExecutionFinished() {
+        try {
+            // Notify debugger controller that execution is finished
+            if (debugControlsController != null) {
+                debugControlsController.notifyExecutionFinished();
+            }
+
+            // Add execution statistics
+            executionStatistics.add(engineController.getLastExecutionStatistics());
+            programRanAtLeastOnce.set(true);
+
+            // Show clear completion message
+            showSuccess("Execution completed successfully!\n" +
+                    "Total cycles: " + currentCycles.get() + "\n" +
+                    "Program finished. Use 'Run' to start a new execution.");
+
+            // Update final state but keep debug session active with disabled controls
+            updateDebugVariableState();
+
+            System.out.println("Debug execution completed - controls disabled, session remains active for inspection");
+
+        } catch (Exception e) {
+            System.err.println("Error handling execution completion: " + e.getMessage());
+            showError("Error completing execution: " + e.getMessage());
+        }
+    }
+
+    // ===== ENHANCED METHOD: endDebugSession() =====
     private void endDebugSession() {
         inDebugSession = false;
         debugMode.set(false);
         programRunning.set(false);
         programFinished.set(true);
+
+        // Reset debug state for next session
+        previousDebugVariables.clear();
+        isFirstDebugStep = true;
+
+        // Notify debugger controller that session ended
+        if (debugControlsController != null) {
+            debugControlsController.notifyDebugSessionEnded();
+        }
+
         updateDebugVariableState();
-        //executionStatistics.add(engineController.getLastExecutionStatistics());
+        System.out.println("Debug session ended - ready for new execution");
     }
 }
 
