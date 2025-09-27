@@ -1,0 +1,144 @@
+/* ShowRunView.css - Modern blue/green style matching VariableInputDialog */
+
+.root {
+    -fx-background-color: linear-gradient(to bottom right, #e0f7fa, #b2ebf2);
+    -fx-background-radius: 12px;
+    -fx-padding: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.10), 8, 0, 0, 2);
+}
+
+/* Header and label styling */
+.header-label {
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
+    -fx-text-fill: #1976d2;
+    -fx-padding: 0 0 8 0;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+}
+
+.section-header {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-text-fill: #1976d2;
+    -fx-padding: 4 0 4 0;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+}
+
+.info-label {
+    -fx-text-fill: #222;
+    -fx-font-size: 14px;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+}
+
+.content-label {
+    -fx-text-fill: #222;
+    -fx-font-size: 12px;
+    -fx-padding: 8 12 8 12;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 8px;
+    -fx-border-color: #25a5a0;
+    -fx-border-radius: 8px;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(37,165,160,0.08), 2, 0, 0, 1);
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+}
+
+/* Variables table styling */
+.variables-table {
+    -fx-background-color: white;
+    -fx-border-color: #25a5a0;
+    -fx-border-width: 2px;
+    -fx-border-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(37,165,160,0.08), 2, 0, 0, 1);
+}
+
+.variables-table .table-view {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+}
+
+.variables-table .table-column {
+    -fx-background-color: linear-gradient(to bottom, #e0f7fa, #b2ebf2);
+    -fx-text-fill: #1976d2;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+}
+
+.variables-table .table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #e0f7fa transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.variables-table .table-row-cell:selected {
+    -fx-background-color: #e3f2fd;
+    -fx-text-fill: #1976d2;
+}
+
+.variables-table .table-cell {
+    -fx-padding: 8 12 8 12;
+    -fx-alignment: CENTER_LEFT;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+}
+
+.placeholder-label {
+    -fx-text-fill: #666;
+    -fx-font-style: italic;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+}
+
+/* Button styling to match VariableInputDialog */
+.button {
+    -fx-background-radius: 20px;
+    -fx-background-color: linear-gradient(to bottom, #25a5a0, #1e8883);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 24px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 2, 0, 0, 1);
+    -fx-border-width: 0;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+}
+
+.button:hover {
+    -fx-background-color: linear-gradient(to bottom, #2bb8b2, #21968f);
+}
+
+.button:pressed {
+    -fx-background-color: #1a7a76;
+}
+
+.button:disabled {
+    -fx-background-color: linear-gradient(to bottom, #89c6c3, #7ab8b5);
+    -fx-opacity: 0.7;
+    -fx-effect: none;
+}
+
+/* Legacy pill-button class for compatibility */
+.pill-button {
+    -fx-background-radius: 20px;
+    -fx-background-color: linear-gradient(to bottom, #25a5a0, #1e8883);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 24px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 2, 0, 0, 1);
+    -fx-border-width: 0;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+}
+
+.pill-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #2bb8b2, #21968f);
+}
+
+.pill-button:pressed {
+    -fx-background-color: #1a7a76;
+}
+
+/* Separator styling */
+.separator {
+    -fx-background-color: #25a5a0;
+    -fx-opacity: 0.3;
+}

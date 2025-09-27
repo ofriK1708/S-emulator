@@ -244,4 +244,60 @@ public class EngineController
         }
         return engine.getCurrentDebugCycles();
     }
+    // Add this method to your EngineController class:
+
+    /**
+     * Retrieves the final variable states for a given execution configuration.
+     * This method temporarily executes the program to get the final variable states,
+     * then restores the original state. Used by the Show functionality to display
+     * variable values from past executions.
+     *
+     * @param expandLevel The expansion level of the execution
+     * @param arguments The arguments used in the execution
+     * @return Map of variable names to their final values after execution
+     * @throws IllegalStateException if no program is loaded
+     * @throws IllegalArgumentException if expand level is invalid
+     */
+    public @NotNull Map<String, Integer> getFinalVariableStates(int expandLevel, @NotNull Map<String, Integer> arguments) {
+        if (engine == null) {
+            throw new IllegalStateException("Program has not been set");
+        }
+        if (expandLevel < 0 || expandLevel > maxExpandLevel) {
+            throw new IllegalArgumentException("Expand level must be between 0 and " + maxExpandLevel);
+        }
+
+        try {
+            // Store current engine state to restore later
+            boolean wasInDebugSession = inDebugSession;
+
+            // Temporarily execute the program to get final states
+            // Note: This creates a temporary execution that doesn't interfere with current state
+            engine.run(expandLevel, arguments);
+
+            // Get both work variables and arguments from the final state
+            Map<String, Integer> finalStates = new java.util.HashMap<>();
+
+            // Add work variables (z1, z2, etc.)
+            finalStates.putAll(engine.getSortedWorkVars(expandLevel));
+
+            // Add arguments (x1, x2, etc.) - these might have changed during execution
+            finalStates.putAll(engine.getSortedArguments(expandLevel));
+
+            // Add output variable (y)
+            finalStates.put(ProgramUtils.OUTPUT_NAME, engine.getOutput(expandLevel));
+
+            // Restore original debug session state
+            inDebugSession = wasInDebugSession;
+
+            System.out.println("Retrieved " + finalStates.size() + " final variable states for expand level " +
+                    expandLevel + " with arguments: " + arguments);
+
+            return finalStates;
+
+        } catch (Exception e) {
+            System.err.println("Error retrieving final variable states: " + e.getMessage());
+            // Return empty map as fallback
+            return new java.util.HashMap<>();
+        }
+    }
 }

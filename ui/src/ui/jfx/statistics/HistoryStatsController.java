@@ -4,12 +4,22 @@ import dto.engine.ExecutionStatisticsDTO;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.function.Function;
 
+import static ui.utils.UIUtils.showInfo;
+
+/**
+ * Controller for the History/Statistics table.
+ * Displays execution history and provides Show Details functionality.
+ * Re-run functionality is handled exclusively through the Show dialog.
+ */
 public class HistoryStatsController {
 
     @FXML
@@ -25,6 +35,13 @@ public class HistoryStatsController {
     @FXML
     private TableView<ExecutionStatisticsDTO> statisticsTable;
 
+    // Action button for viewing details
+    @FXML
+    private Button showButton;
+
+    // Callback for functionality - provided by AppController
+    private @Nullable Function<ExecutionStatisticsDTO, Map<String, Integer>> variableStatesProvider;
+
     @FXML
     public void initialize() {
         // Initialize table columns with proper bindings
@@ -38,10 +55,27 @@ public class HistoryStatsController {
                 new ReadOnlyObjectWrapper<>(cellData.getValue().cyclesUsed()));
         argumentColumn.setCellValueFactory(cellData ->
                 new ReadOnlyObjectWrapper<>(formatArguments(cellData.getValue().arguments())));
+
+        showButton.disableProperty().bind(
+                statisticsTable.getSelectionModel().selectedItemProperty().isNull()
+        );
     }
 
-    public void initComponent(ListProperty<ExecutionStatisticsDTO> statisticsData) {
+    /**
+     * Initialize the component with statistics data and variable states provider.
+     * Simplified initialization - Re-run functionality is handled by the Show dialog.
+     *
+     * @param statisticsData Observable list of execution statistics for the table
+     * @param variableStatesProvider Function to retrieve final variable states for a given execution
+     */
+    public void initComponent(
+            ListProperty<ExecutionStatisticsDTO> statisticsData,
+            @NotNull Function<ExecutionStatisticsDTO, Map<String, Integer>> variableStatesProvider) {
+
+        this.variableStatesProvider = variableStatesProvider;
         statisticsTable.itemsProperty().bind(statisticsData);
+
+        System.out.println("HistoryStatsController initialized with show functionality");
     }
 
     private @NotNull String formatArguments(@NotNull Map<String, Integer> arguments) {
@@ -58,5 +92,39 @@ public class HistoryStatsController {
         return argsBuilder.isEmpty() ? "None" : argsBuilder.toString();
     }
 
+    /**
+     * Handle Show button click.
+     * Opens the ShowRunView dialog with detailed execution information.
+     * Re-run functionality is available within the Show dialog.
+     */
+    @FXML
+    private void handleShow() {
+        ExecutionStatisticsDTO selectedExecution = statisticsTable.getSelectionModel().getSelectedItem();
+        if (selectedExecution == null) {
+            return;
+        }
 
+        if (variableStatesProvider == null) {
+            showInfo("Show functionality not fully initialized - missing variable states provider");
+            return;
+        }
+
+        try {
+            System.out.println("Show clicked for execution #" + selectedExecution.executionNumber());
+
+            // Retrieve the final variable states for this execution
+            Map<String, Integer> finalVariableStates = variableStatesProvider.apply(selectedExecution);
+
+            // Open the Show dialog with all required data
+            // Re-run functionality is handled within the Show dialog
+            ui.utils.UIUtils.openShowRunDialog(
+                    selectedExecution,
+                    finalVariableStates
+            );
+
+        } catch (Exception e) {
+            System.err.println("Error opening Show dialog: " + e.getMessage());
+            showInfo("Error displaying execution details: " + e.getMessage());
+        }
+    }
 }
