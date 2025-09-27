@@ -51,9 +51,12 @@ public class ProgramEngine implements Serializable {
     public ProgramEngine(@NotNull SProgram program) throws LabelNotExist {
         this.programName = program.getName();
 
-        allFunctionsInMain = buildFunctions(program);
+        if (program.getSFunctions() != null) {
 
-        allFunctionsInMain.forEach((name, function) -> function.finishInitFunction(allFunctionsInMain));
+            allFunctionsInMain = buildFunctions(program);
+
+            allFunctionsInMain.forEach((name, function) -> function.finishInitFunction(allFunctionsInMain));
+        }
 
         SInstructions sInstructions = program.getSInstructions();
 
@@ -97,7 +100,8 @@ public class ProgramEngine implements Serializable {
                     try {
                         return new ProgramEngine(func);
                     } catch (LabelNotExist e) {
-                        throw new RuntimeException("Error initializing function: " + func.getName(), e); // TODO - better error handling
+                        throw new RuntimeException("Error initializing function: " + func.getName(), e); // TODO -
+                        // better error handling
                     }
                 })
                 .collect(Collectors.toMap(ProgramEngine::getProgramName, funcEngine -> funcEngine));
@@ -182,7 +186,7 @@ public class ProgramEngine implements Serializable {
                 } else {
                     String argValueName = argsEntry.getValue().trim();
                     if (!originalContextMap.containsKey(argValueName)) {
-                        if (ProgramUtils.isLabel(argValueName) && !validateLabel(argValueName)) {
+                        if (ProgramUtils.isNumberedLabel(argValueName) && !validateLabel(argValueName)) {
                             throw new LabelNotExist(
                                     instruction.getClass().getSimpleName(),
                                     instruction_index + 1,
@@ -193,7 +197,8 @@ public class ProgramEngine implements Serializable {
                         }
                     }
                     if (argValueName.equals(ProgramUtils.EXIT_LABEL_NAME)) {
-                        originalContextMap.put(argValueName, originalInstructions.size()); // EXIT label is set to the end of the program
+                        originalContextMap.put(argValueName, originalInstructions.size()); // EXIT label is set to
+                        // the end of the program
                         originalLabels.add(argValueName);
                     }
                 }
@@ -205,7 +210,8 @@ public class ProgramEngine implements Serializable {
     private void fillUnusedLabels() {
         for (String label : originalLabels) {
             if (!originalContextMap.containsKey(label)) {
-                originalContextMap.put(label.trim(), -1); // Initialize unused labels with -1 to indicate they are not used
+                originalContextMap.put(label.trim(), -1); // Initialize unused labels with -1 to indicate they are
+                // not used
             }
         }
     }
@@ -316,8 +322,10 @@ public class ProgramEngine implements Serializable {
                 .toList();
     }
 
-    public @NotNull Set<String> getProgramArgsNames() {
-        return ProgramUtils.extractSortedArguments(originalContextMap).keySet();
+    public @NotNull List<String> getSortedProgramArgsNames() {
+        return ProgramUtils.extractSortedArguments(originalContextMap).keySet().stream()
+                .sorted(Comparator.comparingInt(str -> Integer.parseInt(str.substring(1))))
+                .collect(Collectors.toList());
     }
 
     private int calcTotalCycles(int expandLevel) {

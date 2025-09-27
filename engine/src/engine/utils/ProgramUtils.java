@@ -45,15 +45,6 @@ public class ProgramUtils {
         return varName;
     }
 
-    private static boolean isNumber(@NotNull String argName) {
-        try {
-            Integer.parseInt(argName);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
     public static boolean isSingleValidArgument(@NotNull String argName) {
         return argName.equals(OUTPUT_NAME) || argName.startsWith(ARG_PREFIX) || argName.startsWith(WORK_VAR_PREFIX);
     }
@@ -103,7 +94,8 @@ public class ProgramUtils {
         return getVariableIntegerMap(contextMap, ARG_PREFIX);
     }
 
-    private static @NotNull Map<String, Integer> getVariableIntegerMap(@NotNull Map<String, Integer> contextMap, @NotNull String argPrefix) {
+    private static @NotNull Map<String, Integer> getVariableIntegerMap(@NotNull Map<String, Integer> contextMap,
+                                                                       @NotNull String argPrefix) {
         Map<String, Integer> sortedArguments = new LinkedHashMap<>();
         contextMap.entrySet().stream()
                 .filter(e -> e.getKey().startsWith(argPrefix))
@@ -182,16 +174,52 @@ public class ProgramUtils {
         return result;
     }
 
-    public static boolean isLabel(@NotNull String argName) {
+    /**
+     * Checks if the given argument name is a numbered label (e.g., "L1", "L2", etc.).
+     * notice it return false for "EXIT"
+     *
+     * @param argName the argument name to check
+     * @return true if the argument name is a numbered label, false otherwise
+     */
+
+    public static boolean isNumberedLabel(@NotNull String argName) {
         return argName.startsWith(LABEL_PREFIX);
     }
+
+    /**
+     * Checks if the given argument name is a label (either numbered label or "EXIT").
+     *
+     * @param argName the argument name to check
+     * @return true if the argument name is a label, false otherwise
+     */
+    public static boolean isLabel(@NotNull String argName) {
+        return isNumberedLabel(argName) || argName.equals(EXIT_LABEL_NAME);
+    }
+
 
     public static boolean isArgument(@NotNull String argName) {
         return argName.startsWith(ARG_PREFIX);
     }
 
+    /**
+     * Checks if the given argument name is a variable (work variable, argument, or output).
+     *
+     * @param argName the argument name to check
+     * @return true if the argument name is a variable, false otherwise
+     */
     public static boolean isVariable(@NotNull String argName) {
         return argName.startsWith(WORK_VAR_PREFIX) || argName.startsWith(ARG_PREFIX) || argName.equals(OUTPUT_NAME);
+    }
+
+    /**
+     * Checks if the given argument name is either a variable or a label.
+     * includes the label "EXIT"
+     *
+     * @param argName the argument name to check
+     * @return true if the argument name is either a variable or a label, false otherwise
+     */
+    public static boolean isVariableOrLabel(@NotNull String argName) {
+        return isVariable(argName) || isLabel(argName);
     }
 
     public static boolean isWorkVariable(String oldValue) {

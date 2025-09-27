@@ -224,10 +224,11 @@ public abstract class Instruction implements Command, Serializable {
     private void replaceIfNeeded(@NotNull Map<String, Integer> mainContextMap,
                                  @NotNull String outputVar, String oldVar,
                                  Map<String, String> allReplacements, Consumer<String> valueSetter) {
-        if (mainContextMap.containsKey(oldVar)) {
-            if (oldVar.equals(ProgramUtils.OUTPUT_NAME) && allReplacements.containsKey(ProgramUtils.OUTPUT_NAME)) {
+        if (ProgramUtils.isVariableOrLabel(oldVar) &&
+                (mainContextMap.containsKey(oldVar) || allReplacements.containsKey(oldVar))) {
+            if (oldVar.equals(ProgramUtils.OUTPUT_NAME)) {
                 // special case for output var, if we already replaced it with a new work var, we need to use it
-                valueSetter.accept(allReplacements.get(ProgramUtils.OUTPUT_NAME));
+                valueSetter.accept(allReplacements.getOrDefault(ProgramUtils.OUTPUT_NAME, ProgramUtils.OUTPUT_NAME));
             } else if (ProgramUtils.isArgument(oldVar)) {
                 // special case for argument, we need to replace it with the new argument name
                 if (allReplacements.containsKey(oldVar)) {
@@ -244,6 +245,10 @@ public abstract class Instruction implements Command, Serializable {
                         k -> ProgramUtils.getNextFreeWorkVariableName(mainContextMap));
                 valueSetter.accept(newVar);
             }
+        }
+        if (ProgramUtils.isVariableOrLabel(oldVar)) {
+            mainContextMap.putIfAbsent(oldVar, 0); // just to reserve the name
+            allReplacements.putIfAbsent(oldVar, oldVar); // we don't need to replace it so map it to itself
         }
     }
 
@@ -306,39 +311,4 @@ public abstract class Instruction implements Command, Serializable {
         matcher.appendTail(result);
         valueSetter.accept(result.toString());
     }
-
-//    private void replaceIfNeeded(Map<String, Integer> mainContextMap,
-//                                 Set<String> alreadyReplaced,
-//                                 List<Instruction> functionInstructions,
-//                                 String oldValue,
-//                                 String mainVarName,
-//                                 Consumer<String> valueSetter,
-//                                 Iterator<String> newArgsNamesIterator) {
-//        if (!alreadyReplaced.contains(oldValue)) {
-//            alreadyReplaced.add(oldValue);
-//            String newValue = null;
-//            if (ProgramUtils.isLabel(oldValue) && !mainContextMap.containsKey(oldValue)) {
-//                mainContextMap.put(oldValue, 0); // just for saving the name
-//            } else if (ProgramUtils.isArgument(oldValue) && newArgsNamesIterator.hasNext()) {
-//                newValue = newArgsNamesIterator.next();
-//                valueSetter.accept(newValue);
-//                findAndChangeAllOccurrences(functionInstructions, oldValue, newValue);
-//            } else {
-//                if (mainContextMap.containsKey(oldValue)) {
-//                    if (oldValue.equals(ProgramUtils.OUTPUT_NAME)) {
-//                        newValue = mainVarName;
-//                        alreadyReplaced.add(mainVarName);
-//                    } else if (ProgramUtils.isLabel(oldValue)) {
-//                        newValue = ProgramUtils.getNextFreeLabelName(mainContextMap);
-//                    } else if (ProgramUtils.isWorkVariable(oldValue)) {
-//                        newValue = ProgramUtils.getNextFreeWorkVariableName(mainContextMap);
-//                    }
-//                    if (newValue != null) {
-//                        valueSetter.accept(newValue);
-//                        findAndChangeAllOccurrences(functionInstructions, oldValue, newValue);
-//                    }
-//                }
-//            }
-//        }
-//    }
 }

@@ -20,7 +20,8 @@ public class Quote extends Instruction {
     private final List<Quote> subfunctionCalls = new ArrayList<>();
     private int subFunctionsCycles;
 
-    public Quote(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex, @NotNull ProgramEngine mainFunction) {
+    public Quote(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom,
+                 int derivedFromIndex, @NotNull ProgramEngine mainFunction) {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
         this.mainFunction = mainFunction;
         initAndValidateQuote();
@@ -126,7 +127,8 @@ public class Quote extends Instruction {
         return argumentsValues;
     }
 
-    private void prepareArguments(@NotNull Map<String, Integer> functionToRunArguments, @NotNull List<Integer> arguments) {
+    private void prepareArguments(@NotNull Map<String, Integer> functionToRunArguments,
+                                  @NotNull List<Integer> arguments) {
         int i = 0;
         for (String argName : functionToRunArguments.keySet()) {
             if (i < arguments.size()) {
@@ -142,14 +144,14 @@ public class Quote extends Instruction {
     public int getCycles() {
         if (isFinishedInitialization) {
             final int quoteOverhead = 5;
-            return quoteOverhead + functionToRun.getTotalCycles() + subFunctionsCycles;
+            return quoteOverhead + functionToRun.getTotalCycles();
         }
         return 0; // not initialized yet
     }
 
     public int getFunctionCycles() {
         if (isFinishedInitialization) {
-            return functionToRun.getTotalCycles() + subFunctionsCycles;
+            return functionToRun.getTotalCycles();
         }
         return 0; // not initialized yet
     }
@@ -169,7 +171,8 @@ public class Quote extends Instruction {
         List<Instruction> expandedInstructions = new ArrayList<>();
         Map<String, String> argsReplacements = new HashMap<>();
         if (!label.isBlank()) {
-            expandedInstructions.add(new Neutral(ProgramUtils.OUTPUT_NAME, Map.of(), label, this, originalInstructionIndex));
+            expandedInstructions.add(new Neutral(ProgramUtils.OUTPUT_NAME, Map.of(), label, this,
+                    originalInstructionIndex));
         }
         handelNewAssignment(contextMap, originalInstructionIndex, argsReplacements, expandedInstructions);
         expandedInstructions.addAll(getUpdatedFunctionInstructions(contextMap, functionToRun, mainVarName,
@@ -180,33 +183,44 @@ public class Quote extends Instruction {
     private void handelNewAssignment(Map<String, Integer> contextMap, int originalInstructionIndex,
                                      Map<String, String> argsReplacements, List<Instruction> expandedInstructions) {
 
+        List<String> functionParamNames = functionToRun.getSortedProgramArgsNames();
         Iterator<Quote> subFuncIter = subfunctionCalls.iterator();
-        int argCounter = 1;
-        for (String funcArg : funcArgsNames) {
-            if (ProgramUtils.isArgument(funcArg)) {
-                argsReplacements.put(ProgramUtils.ARG_PREFIX + argCounter, funcArg);
-                argCounter++;
+        Iterator<String> funcArgsName = funcArgsNames.iterator();
+        for (String funcParam : functionParamNames) {
+            if (funcArgsName.hasNext()) {
+                String argName = funcArgsName.next();
+                if (ProgramUtils.isArgument(argName)) {
+                    argsReplacements.put(funcParam, argName);
+                } else {
+                    String newArgName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
+                    argsReplacements.put(funcParam, newArgName);
+                    if (ProgramUtils.isFunctionCall(argName)) {
+                        Quote subFunc = subFuncIter.next();
+                        expandedInstructions.add(new Quote(newArgName, "", subFunc, this, originalInstructionIndex));
+                    } else {
+                        expandedInstructions.add(new Assignment(newArgName, Map.of(Assignment.sourceArgumentName,
+                                argName), "", this, originalInstructionIndex));
+                    }
+                }
             } else {
                 String newArgName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
-                argsReplacements.put(ProgramUtils.ARG_PREFIX + argCounter, newArgName);
-                argCounter++;
-                if (ProgramUtils.isFunctionCall(funcArg)) {
-                    Quote subFunc = subFuncIter.next();
-                    expandedInstructions.add(new Quote(newArgName, "", subFunc, this, originalInstructionIndex));
-                } else {
-                    expandedInstructions.add(new Assignment(newArgName, Map.of(Assignment.sourceArgumentName,
-                            funcArg), "", this, originalInstructionIndex));
-                }
+                argsReplacements.put(funcParam, newArgName);
+                expandedInstructions.add(new ZeroVariable(newArgName, Map.of(), "", this, originalInstructionIndex));
             }
         }
     }
 
     @Override
     public @NotNull String getStringRepresentation() {
-        StringBuilder quoteStringBuilder = new StringBuilder(String.format("%s <- (%s", mainVarName, functionToRun.getFuncName()));
-        if (allArgsString.isBlank()) {
-            quoteStringBuilder.append(")");
-        } else {
+        return String.format("%s <- %s", mainVarName,
+                getFunctionStringRepresentation());
+    }
+
+    public @NotNull String getFunctionStringRepresentation() {
+        StringBuilder quoteStringBuilder = new StringBuilder();
+        quoteStringBuilder.append("(").append(functionToRun.getFuncName());
+
+        if (!allArgsString.isEmpty()) {
             List<String> allArgs = ProgramUtils.splitArgs(allArgsString);
             int subFunctionIndex = 0;
             for (String arg : allArgs) {
@@ -219,14 +233,10 @@ public class Quote extends Instruction {
                     quoteStringBuilder.append(arg);
                 }
             }
-            quoteStringBuilder.append(")");
         }
-        return quoteStringBuilder.toString();
-    }
 
-    public @NotNull String getFunctionStringRepresentation() {
-        String argsNames = allArgsString.isEmpty() ? "" : "," + allArgsString;
-        return String.format("(%s%s)", functionToRun.getFuncName(), argsNames);
+        quoteStringBuilder.append(")");
+        return quoteStringBuilder.toString();
     }
 
     public void updateArguments(String updatedArguments) {

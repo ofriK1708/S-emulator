@@ -76,6 +76,7 @@ public class JumpEqualFunction extends Instruction {
     @Override
     public @NotNull String getStringRepresentation() {
         String labelName = args.get(labelArgumentName);
-        return String.format("if %s == %s GOTO %s", mainVarName, functionQuoteToCheck.getFunctionStringRepresentation(), labelName);
+        return String.format("if %s == %s GOTO %s", mainVarName, functionQuoteToCheck.getFunctionStringRepresentation(),
+                labelName);
     }
 }
