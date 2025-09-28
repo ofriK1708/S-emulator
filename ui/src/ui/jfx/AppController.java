@@ -129,12 +129,13 @@ public class AppController {
     private final IntegerProperty currentCycles = new SimpleIntegerProperty(0);
     private boolean inDebugSession = false;
     @FXML
-    private AnchorPane historyStats;
+    private VBox historyStats;
     private boolean isFirstDebugStep = true;
-
 
     public AppController() {
         this.engineController = new EngineController();
+        // Set this instance for UIUtils re-run functionality
+        UIUtils.setAppControllerInstance(this);
     }
 
     @FXML
@@ -158,7 +159,14 @@ public class AppController {
             derivedInstructionsTableController.setDerivedInstructionsTable(derivedInstructions);
             argumentsTableController.initArgsTable(argumentsDTO);
             allVarsTableController.initAllVarsTable(allVariablesDTO);
-            historyStatsController.initComponent(executionStatistics);
+
+            // CLEANED: Only pass statistics data and variable states provider
+            // Re-run functionality is now handled exclusively by the Show dialog
+            historyStatsController.initComponent(
+                    executionStatistics,
+                    this::getFinalVariableStates
+            );
+
             debugControlsController.initComponent(
                     this::debugStep,
                     this::debugStepBackward,
@@ -166,11 +174,152 @@ public class AppController {
                     this::stopDebugSession
             );
 
-            System.out.println("AppController initialized");
+            System.out.println("AppController initialized with cleaned re-run architecture");
         } else {
             System.err.println("One or more controllers are not injected properly!");
             throw new IllegalStateException("FXML injection failed: required controllers are null.");
         }
+    }
+
+    /**
+     * Retrieves the final variable states for a given execution.
+     * This method is called by HistoryStatsController to get variable data for the Show dialog.
+     *
+     * @param executionStats The execution statistics for which to retrieve variable states
+     * @return Map of variable names to their final values from that execution
+     */
+    private @NotNull Map<String, Integer> getFinalVariableStates(@NotNull ExecutionStatisticsDTO executionStats) {
+        try {
+            // Extract execution parameters
+            int expandLevel = executionStats.expandLevel();
+            Map<String, Integer> arguments = executionStats.arguments();
+
+            System.out.println("Retrieving final variable states for execution #" +
+                    executionStats.executionNumber() + " (expand level: " + expandLevel + ")");
+
+            // Use the engine controller to get the final variable states for this execution
+            Map<String, Integer> finalStates = engineController.getFinalVariableStates(expandLevel, arguments);
+
+            System.out.println("Retrieved " + finalStates.size() + " final variable states for execution #" +
+                    executionStats.executionNumber());
+
+            return finalStates;
+
+        } catch (Exception e) {
+            System.err.println("Error retrieving final variable states: " + e.getMessage());
+            showError("Error retrieving execution details: " + e.getMessage());
+            return new HashMap<>();
+        }
+    }
+
+    /**
+     * PUBLIC METHOD: Handle re-run request from Show dialog.
+     * This prepares the system state for re-run by expanding to the correct level
+     * and pre-populating arguments.
+     *
+     * @param expandLevel The expand level from the selected execution
+     * @param previousArguments The arguments from the selected execution
+     */
+    public void handleRerunRequest(int expandLevel, @NotNull Map<String, Integer> previousArguments) {
+        if (!programLoaded.get()) {
+            showError("No program loaded");
+            return;
+        }
+
+        try {
+            System.out.println("Preparing re-run with expand level " + expandLevel +
+                    " and arguments: " + previousArguments);
+
+            // IMPORTANT: Preserve the current debug mode before reset
+            boolean wasInDebugMode = debugMode.get();
+            System.out.println("Preserving debug mode state: " + wasInDebugMode);
+
+            // Step 1: Reset system state for new run (preserve execution statistics and debug mode)
+            resetForRerun(wasInDebugMode);
+
+            // Step 2: Expand program to the required level from the previous run
+            expandProgramToLevel(expandLevel);
+
+            // Step 3: Pre-populate arguments from the previous run
+            programArguments.clear();
+            programArguments.putAll(previousArguments);
+
+            // Step 4: Trigger the normal Set Run dialog flow with pre-populated arguments
+            // This will open the dialog, allow user to confirm/edit, then proceed with execution
+            prepareForTakingArguments();
+            if(wasInDebugMode)
+            {
+                debugMode.set(true);
+                startDebugExecution();
+            }
+            else
+            {
+                debugMode.set(false);
+                startRegularExecution();
+            }
+
+
+            System.out.println("Re-run preparation completed. Set Run dialog should open with pre-populated arguments.");
+            System.out.println("Debug mode preserved: " + debugMode.get());
+
+        } catch (Exception e) {
+            System.err.println("Error preparing re-run: " + e.getMessage());
+            showError("Error preparing re-run: " + e.getMessage());
+        }
+    }
+    private void resetForRerun(boolean preserveDebugMode) {
+        // Reset execution state properties (but preserve debug mode if requested)
+        programRunning.set(false);
+        programFinished.set(false);
+
+        if (!preserveDebugMode) {
+            debugMode.set(false);
+        } else {
+            System.out.println("Debug mode preserved for rerun: " + debugMode.get());
+        }
+
+        if (inDebugSession) {
+            try {
+                engineController.stopDebugSession();
+            } catch (Exception e) {
+                System.err.println("Warning: Error stopping debug session during rerun reset: " + e.getMessage());
+            }
+            inDebugSession = false;
+
+            if (!preserveDebugMode && debugControlsController != null) {
+                debugControlsController.notifyDebugSessionEnded();
+            }
+        }
+
+        // Reset debug state tracking for new execution
+        previousDebugVariables.clear();
+        isFirstDebugStep = true;
+
+        // Clear UI data (but preserve program instructions and metadata)
+        allVariablesDTO.clear();
+
+        // Reset arguments loaded state so the dialog will appear
+        argumentsLoaded.set(false);
+        argumentsDTO.clear();
+
+        // Reset cycles counter
+        currentCycles.set(0);
+
+        // Clear instruction highlighting
+        instructionsTableController.highlightVariable(null);
+        instructionsTableController.highlightCurrentInstruction(-1);
+        derivedInstructionsTableController.highlightVariable(null);
+
+        System.out.println("System state reset completed for rerun (statistics and debug mode preserved)");
+    }
+
+
+    private void resetForNewRun() {
+        resetForRerun(false);
+
+        executionStatistics.clear();
+
+        System.out.println("Full system reset completed (statistics cleared, debug mode reset)");
     }
 
     private void bindTitlePanesExpansion() {
@@ -287,9 +436,12 @@ public class AppController {
             return;
         }
 
-        if (programArguments.isEmpty())
+        // If programArguments is empty, populate with default arguments from engine
+        if (programArguments.isEmpty()) {
             programArguments.putAll(engineController.getSortedArguments());
+        }
 
+        // If no arguments are needed, mark as loaded and return
         if (programArguments.isEmpty()) {
             argumentsLoaded.set(true);
             showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() + "\nNo variables required" +
@@ -297,10 +449,28 @@ public class AppController {
             return;
         }
 
+        // Open the arguments dialog (will be pre-populated if coming from re-run)
         getArgumentsFromUser();
+
+        // After dialog closes, update UI and mark arguments as loaded
         argumentsLoaded.set(true);
         argumentsDTO.setAll(UIUtils.extractArguments(programArguments));
-        showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() + "\nArguments captured.");
+
+        // Show appropriate success message based on whether this is a rerun and current mode
+        if (argumentsHaveNonZeroValues(programArguments)) {
+            String modeText = debugMode.get() ? "Debug" : "Regular";
+            showSuccess("Re-run arguments configured successfully!\n" +
+                    "Values were pre-populated from previous execution.\n" +
+                    "Current mode: " + modeText + "\n" +
+                    "Click 'Run Program' to execute in " + modeText.toLowerCase() + " mode.");
+        } else {
+            showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() +
+                    "\nArguments captured.");
+        }
+    }
+
+    private boolean argumentsHaveNonZeroValues(@NotNull Map<String, Integer> arguments) {
+        return arguments.values().stream().anyMatch(value -> value != null && value != 0);
     }
 
     public void getArgumentsFromUser() {
@@ -448,12 +618,22 @@ public class AppController {
         }
     }
 
+    public boolean isProgramLoaded() {
+        return programLoaded.get();
+    }
+
+    // DEBUG METHODS
     public void stopDebugSession() {
         try {
             engineController.stopDebugSession();
-            showInfo("Debug session stopped");
-            int currentPC = engineController.getCurrentDebugPC();
 
+            if (engineController.isDebugFinished()) {
+                showInfo("Debug session stopped. Execution was completed.");
+            } else {
+                showInfo("Debug session stopped at PC: " + engineController.getCurrentDebugPC());
+            }
+
+            int currentPC = engineController.getCurrentDebugPC();
             highlightCurrentInstruction(currentPC);
             updateDebugVariableState();
             endDebugSession();
@@ -475,12 +655,10 @@ public class AppController {
             Integer previousValue = previousDebugVariables.get(name);
             hasChanged = !previousValue.equals(value);
 
-            // Debug logging (remove in production)
             if (hasChanged) {
                 System.out.println("Variable changed: " + name + " from " + previousValue + " to " + value);
             }
         } else if (!isFirstDebugStep) {
-            // Variable didn't exist before, so it's a new variable
             hasChanged = true;
             System.out.println("New variable detected: " + name + " = " + value);
         }
@@ -492,20 +670,14 @@ public class AppController {
         );
     }
 
-    // DEBUG METHODS
     public void startDebugExecution() {
         try {
             int expandLevel = currentExpandLevel.get();
             programRunning.set(true);
             debugMode.set(true);
             programFinished.set(false);
-
-            // Property Updates for UI State Management:
-            programRunning.set(true);
-            debugMode.set(true);
-            programFinished.set(false);
             currentCycles.set(0);
-            // CRITICAL: Reset change tracking state for new debug session
+
             previousDebugVariables.clear();
             isFirstDebugStep = true;
             System.out.println("Debug session started - change tracking reset");
@@ -517,8 +689,6 @@ public class AppController {
             engineController.startDebugSession(expandLevel, programArguments);
             inDebugSession = true;
 
-            //showInitialDebugState();
-            // Highlight first instruction
             highlightCurrentInstruction(0);
             showInfo("Debug session started.");
 
@@ -528,7 +698,6 @@ public class AppController {
             debugMode.set(false);
             programRunning.set(false);
             inDebugSession = false;
-            // Reset change tracking on error
             previousDebugVariables.clear();
             isFirstDebugStep = true;
 
@@ -538,28 +707,35 @@ public class AppController {
         }
     }
 
-// ===== UPDATE METHOD: debugStep() =====
-
     public void debugStep() {
         if (!inDebugSession) {
             showError("No debug session active");
             return;
         }
+
+        if (engineController.isDebugFinished()) {
+            showInfo("Execution finished. Program has completed successfully.");
+            return;
+        }
+
         try {
-            if (isFirstDebugStep) {
-                isFirstDebugStep = false;
-            } else {
-                // Save current variable states before stepping
+            if (!isFirstDebugStep) {
                 previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
             }
+
             engineController.debugStep();
             int currentPC = engineController.getCurrentDebugPC();
             currentCycles.set(engineController.getCurrentDebugCycles());
             highlightCurrentInstruction(currentPC);
+
             updateDebugVariableState();
 
+            if (isFirstDebugStep) {
+                isFirstDebugStep = false;
+            }
+
             if (engineController.isDebugFinished()) {
-                handelEndOfRunStatistics();
+                handleExecutionFinished();
             } else {
                 showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + currentCycles.get());
             }
@@ -569,37 +745,15 @@ public class AppController {
         }
     }
 
-
-    private void handelEndOfRunStatistics() {
-        try {
-            executionStatistics.add(engineController.getLastExecutionStatistics());
-            programRanAtLeastOnce.set(true);
-            endDebugSession();
-            showSuccess("Debug execution finished. Cycles: " + currentCycles.get());
-        } catch (Exception e) {
-            System.err.println("Error adding debug statistics to history: " + e.getMessage());
-        }
-
-        showSuccess("Program execution completed successfully!\n" +
-                "Cycles: " + engineController.getCyclesCount(currentExpandLevel.get()) + "\n" +
-                "Final memory state updated in instruction table.");
-
-        endDebugSession();
-    }
-
     private void updateDebugVariableState() {
-        if (!isFirstDebugStep) {
-            List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted(engineController,
+        List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted(engineController,
                     currentExpandLevel.get());
-            List<VariableDTO> allVarWithChangeDetection = FXCollections.observableArrayList();
-            allVarNoChangeDetection.stream()
-                    .map(var -> createVariableDTOWithChangeDetection(var.name().get(), var.value().get()))
-                    .forEach(allVarWithChangeDetection::add);
+        List<VariableDTO> allVarWithChangeDetection = FXCollections.observableArrayList();
+        allVarNoChangeDetection.stream()
+                .map(var -> createVariableDTOWithChangeDetection(var.name().get(), var.value().get()))
+                .forEach(allVarWithChangeDetection::add);
 
-            allVariablesDTO.setAll(allVarWithChangeDetection);
-        } else {
-            allVariablesDTO.setAll(UIUtils.getAllVariablesDTOSorted(engineController, currentExpandLevel.get()));
-        }
+        allVariablesDTO.setAll(allVarWithChangeDetection);
     }
 
     public void debugStepBackward() {
@@ -607,6 +761,12 @@ public class AppController {
             showError("No debug session active");
             return;
         }
+
+        if (engineController.isDebugFinished()) {
+            showInfo("Execution finished. Cannot step backward from final state.");
+            return;
+        }
+
         try {
             previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
             engineController.debugStepBackward();
@@ -614,12 +774,8 @@ public class AppController {
             currentCycles.set(engineController.getCurrentDebugCycles());
 
             highlightCurrentInstruction(currentPC);
-
-            // Property Update: Refresh variables after stepping backward
-            // Uses existing binding infrastructure to update tables automatically
             updateDebugVariableState();
 
-            // Note: Cycles should remain monotonic even when stepping backward
             showInfo("Stepped backward to PC: " + currentPC +
                     ", Total execution cycles: " + currentCycles.get());
 
@@ -634,13 +790,20 @@ public class AppController {
             showError("No debug session active");
             return;
         }
+
+        if (engineController.isDebugFinished()) {
+            showInfo("Execution already finished.");
+            return;
+        }
+
         try {
             engineController.debugResume();
             instructionsTableController.highlightCurrentInstruction(0);
             updateDebugVariableState();
             currentCycles.set(engineController.getCurrentDebugCycles());
-            endDebugSession();
-            showInfo("Program resumed and completed successfully!");
+
+            handleExecutionFinished();
+
         } catch (Exception e) {
             e.printStackTrace();
             showError("Error during debug resume: " + e.getMessage());
@@ -648,14 +811,43 @@ public class AppController {
         }
     }
 
-    // ===== UPDATE METHOD: endDebugSession() =====
+    private void handleExecutionFinished() {
+        try {
+            if (debugControlsController != null) {
+                debugControlsController.notifyExecutionFinished();
+            }
+
+            executionStatistics.add(engineController.getLastExecutionStatistics());
+            programRanAtLeastOnce.set(true);
+
+            showSuccess("Execution completed successfully!\n" +
+                    "Total cycles: " + currentCycles.get() + "\n" +
+                    "Program finished. Use 'Run' to start a new execution.");
+
+            updateDebugVariableState();
+
+            System.out.println("Debug execution completed - controls disabled, session remains active for inspection");
+
+        } catch (Exception e) {
+            System.err.println("Error handling execution completion: " + e.getMessage());
+            showError("Error completing execution: " + e.getMessage());
+        }
+    }
+
     private void endDebugSession() {
         inDebugSession = false;
         debugMode.set(false);
         programRunning.set(false);
         programFinished.set(true);
+
+        previousDebugVariables.clear();
+        isFirstDebugStep = true;
+
+        if (debugControlsController != null) {
+            debugControlsController.notifyDebugSessionEnded();
+        }
+
         updateDebugVariableState();
-        //executionStatistics.add(engineController.getLastExecutionStatistics());
+        System.out.println("Debug session ended - ready for new execution");
     }
 }
-

@@ -16,6 +16,10 @@ public class DebuggerController {
 
     // Internal state properties
     private final BooleanProperty debugSessionActive = new SimpleBooleanProperty(false);
+    private final BooleanProperty atFirstStep = new SimpleBooleanProperty(true);
+
+    // NEW: Track if execution is finished to disable all controls
+    private final BooleanProperty executionFinished = new SimpleBooleanProperty(false);
 
     // FXML-injected controls - only debug control buttons
     @FXML private Button resume;
@@ -45,11 +49,18 @@ public class DebuggerController {
         this.debugResumeCallback = debugResumeCallback;
         this.stopDebugSessionCallback = stopDebugSessionCallback;
 
-        // All debug controls enabled only when debug session is active
-        stop.disableProperty().bind(debugSessionActive.not());
-        resume.disableProperty().bind(debugSessionActive.not());
-        stepOver.disableProperty().bind(debugSessionActive.not());
-        stepBackward.disableProperty().bind(debugSessionActive.not());
+        // ENHANCED: Debug controls disabled when session inactive OR execution finished
+        BooleanProperty controlsDisabled = new SimpleBooleanProperty();
+        controlsDisabled.bind(debugSessionActive.not().or(executionFinished));
+
+        stop.disableProperty().bind(controlsDisabled);
+        resume.disableProperty().bind(controlsDisabled);
+
+        // Step Over: disabled when controls disabled OR execution finished
+        stepOver.disableProperty().bind(controlsDisabled);
+
+        // Step Backward: additionally disabled at first step
+        stepBackward.disableProperty().bind(controlsDisabled.or(atFirstStep));
 
         System.out.println("DebuggerController bindings initialized successfully");
     }
@@ -57,21 +68,23 @@ public class DebuggerController {
     // FXML Event Handlers - only debug operations
     @FXML
     private void handleStepOver() {
-        if (debugStepCallback != null) {
+        if (debugStepCallback != null && !executionFinished.get()) {
             debugStepCallback.run();
+            // After first step, enable step backward
+            atFirstStep.set(false);
         }
     }
 
     @FXML
     private void handleStepBackward() {
-        if (debugStepBackwardCallback != null) {
+        if (debugStepBackwardCallback != null && !executionFinished.get()) {
             debugStepBackwardCallback.run();
         }
     }
 
     @FXML
     private void handleResume() {
-        if (debugResumeCallback != null) {
+        if (debugResumeCallback != null && !executionFinished.get()) {
             debugResumeCallback.run();
         }
     }
@@ -86,12 +99,22 @@ public class DebuggerController {
     // Public methods for AppController to manage debug session state
     public void notifyDebugSessionStarted() {
         debugSessionActive.set(true);
-        System.out.println("Debug session started - debug controls enabled");
+        atFirstStep.set(true); // Reset to first step when session starts
+        executionFinished.set(false); // Reset execution finished state
+        System.out.println("Debug session started - debug controls enabled, at first step");
     }
 
     public void notifyDebugSessionEnded() {
         debugSessionActive.set(false);
+        atFirstStep.set(true); // Reset for next session
+        executionFinished.set(false); // Reset for next session
         System.out.println("Debug session ended - debug controls disabled");
+    }
+
+    // NEW: Method to notify when execution reaches final step
+    public void notifyExecutionFinished() {
+        executionFinished.set(true);
+        System.out.println("Execution finished - all debug controls disabled");
     }
 
     // Getters
@@ -101,5 +124,21 @@ public class DebuggerController {
 
     public BooleanProperty debugSessionActiveProperty() {
         return debugSessionActive;
+    }
+
+    public boolean isAtFirstStep() {
+        return atFirstStep.get();
+    }
+
+    public BooleanProperty atFirstStepProperty() {
+        return atFirstStep;
+    }
+
+    public boolean isExecutionFinished() {
+        return executionFinished.get();
+    }
+
+    public BooleanProperty executionFinishedProperty() {
+        return executionFinished;
     }
 }
