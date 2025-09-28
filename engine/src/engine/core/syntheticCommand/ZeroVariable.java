@@ -52,7 +52,9 @@ public class ZeroVariable extends Instruction
     {
         List<Instruction> expanded = new LinkedList<>();
         String freeLabelName = ProgramUtils.getNextFreeLabelName(contextMap);
-        expanded.add(new Neutral(mainVarName, null, label, this, originalInstructionIndex));
+        if (!label.isBlank()) {
+            expanded.add(new Neutral(mainVarName, null, label, this, originalInstructionIndex));
+        }
         expanded.add(new Decrease(mainVarName, null, freeLabelName, this, originalInstructionIndex));
         expanded.add(new JumpNotZero(mainVarName,
                 Map.of(JumpNotZero.labelArgumentName, freeLabelName), null, this, originalInstructionIndex));

@@ -119,6 +119,10 @@ public class ProgramEngine implements Serializable {
         uninitializedQuotes.add(quote);
     }
 
+    public boolean isVariableInContext(String varName) {
+        return originalContextMap.containsKey(varName);
+    }
+
     private void finishInitFunction(@NotNull Map<String, ProgramEngine> allFunctionsInMain) {
         setFunctions(allFunctionsInMain);
         for (Quote quote : uninitializedQuotes) {

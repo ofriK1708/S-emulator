@@ -189,18 +189,14 @@ public class Quote extends Instruction {
         for (String funcParam : functionParamNames) {
             if (funcArgsName.hasNext()) {
                 String argName = funcArgsName.next();
-                if (ProgramUtils.isArgument(argName)) {
-                    argsReplacements.put(funcParam, argName);
+                String newArgName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
+                argsReplacements.put(funcParam, newArgName);
+                if (ProgramUtils.isFunctionCall(argName)) {
+                    Quote subFunc = subFuncIter.next();
+                    expandedInstructions.add(new Quote(newArgName, "", subFunc, this, originalInstructionIndex));
                 } else {
-                    String newArgName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
-                    argsReplacements.put(funcParam, newArgName);
-                    if (ProgramUtils.isFunctionCall(argName)) {
-                        Quote subFunc = subFuncIter.next();
-                        expandedInstructions.add(new Quote(newArgName, "", subFunc, this, originalInstructionIndex));
-                    } else {
-                        expandedInstructions.add(new Assignment(newArgName, Map.of(Assignment.sourceArgumentName,
-                                argName), "", this, originalInstructionIndex));
-                    }
+                    expandedInstructions.add(new Assignment(newArgName, Map.of(Assignment.sourceArgumentName,
+                            argName), "", this, originalInstructionIndex));
                 }
             } else {
                 String newArgName = ProgramUtils.getNextFreeWorkVariableName(contextMap);

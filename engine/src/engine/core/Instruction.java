@@ -168,9 +168,9 @@ public abstract class Instruction implements Command, Serializable {
 
         List<Instruction> functionInstructions = function.getFunctionInstructions();
         Map<String, String> allReplacements = new HashMap<>(argsReplacements);
-        setupConflictAvoidanceReplacements(mainContextMap, outputVar, argsReplacements, allReplacements);
-        boolean exitFound = checkForExitLabel(functionInstructions, mainContextMap, allReplacements, derivedFrom,
-                derivedFromIndex);
+        setupConflictAvoidanceReplacements(mainContextMap, outputVar, argsReplacements, allReplacements, function);
+        String endLabel = ProgramUtils.getNextFreeLabelName(mainContextMap);
+        allReplacements.put(ProgramUtils.EXIT_LABEL_NAME, endLabel);
 
         // now we can go and replace all the old variables with new ones, after we made sure they won't mix
         for (Instruction instruction : functionInstructions) {
@@ -190,11 +190,10 @@ public abstract class Instruction implements Command, Serializable {
             // check for args swap
             processInstructionArguments(instruction, mainContextMap, outputVar, allReplacements);
         }
-        if (exitFound) {
-            functionInstructions.addLast(new Neutral(ProgramUtils.OUTPUT_NAME, Map.of(),
-                    allReplacements.get(ProgramUtils.EXIT_LABEL_NAME),
-                    derivedFrom, derivedFromIndex));
-        }
+        functionInstructions.addLast(new Assignment(outputVar, Map.of(Assignment.sourceArgumentName,
+                allReplacements.get(ProgramUtils.OUTPUT_NAME)), allReplacements.get(ProgramUtils.EXIT_LABEL_NAME),
+                derivedFrom, derivedFromIndex));
+
         function.resetFunction();
         return functionInstructions;
     }
@@ -202,19 +201,23 @@ public abstract class Instruction implements Command, Serializable {
     private void setupConflictAvoidanceReplacements(@NotNull Map<String, Integer> mainContextMap,
                                                     @NotNull String outputVar,
                                                     @NotNull Map<String, String> argsReplacements,
-                                                    @NotNull Map<String, String> allReplacements) {
+                                                    @NotNull Map<String, String> allReplacements,
+                                                    @NotNull ProgramEngine function) {
 
-        /* first if the outputVar != y, we need all old use of outputVar to be replaced with a new work variable
-     so we won't mix between them */
-        if (!outputVar.equals(ProgramUtils.OUTPUT_NAME)) {
+        /* first we need to reserve a new work variable for the output of the function,
+         * so we won't mix it with any other variable in the main program */
+        String oldOutputReplacement = ProgramUtils.getNextFreeWorkVariableName(mainContextMap);
+        allReplacements.put(ProgramUtils.OUTPUT_NAME, oldOutputReplacement);
+        // if the output variable is already in the context, we need to replace it too
+        if (function.isVariableInContext(oldOutputReplacement)) {
             String nextFreeWorkVariableName = ProgramUtils.getNextFreeWorkVariableName(mainContextMap);
-            allReplacements.put(outputVar, nextFreeWorkVariableName);
-            allReplacements.put(ProgramUtils.OUTPUT_NAME, outputVar);
+            allReplacements.put(oldOutputReplacement, nextFreeWorkVariableName);
         }
 
-        /* here we do the same as before, replacing the old use of our arguments to newer ones so they won't mix */
+
+        /* we need to check if out replacements of arguments are already taken and if so we replace them too */
         for (String newArgsName : argsReplacements.values()) {
-            if (!ProgramUtils.isArgument(newArgsName)) {
+            if (function.isVariableInContext(newArgsName)) {
                 String newWorkVarInPlaceOfArg = ProgramUtils.getNextFreeWorkVariableName(mainContextMap);
                 allReplacements.put(newArgsName, newWorkVarInPlaceOfArg);
             }
@@ -250,27 +253,6 @@ public abstract class Instruction implements Command, Serializable {
             mainContextMap.putIfAbsent(oldVar, 0); // just to reserve the name
             allReplacements.putIfAbsent(oldVar, oldVar); // we don't need to replace it so map it to itself
         }
-    }
-
-    private boolean checkForExitLabel(@NotNull List<Instruction> functionInstructions,
-                                      @NotNull Map<String, Integer> mainContextMap,
-                                      @NotNull Map<String, String> allReplacements,
-                                      @NotNull Instruction derivedFrom,
-                                      int derivedFromIndex) {
-        String newExitLabel = "";
-        boolean foundExit = false;
-        for (Instruction instruction : functionInstructions) {
-            for (String varValues : instruction.getArgs().values()) {
-                if (varValues.equals(ProgramUtils.EXIT_LABEL_NAME)) {
-                    newExitLabel = ProgramUtils.getNextFreeLabelName(mainContextMap);
-                    allReplacements.put(varValues, newExitLabel);
-                    foundExit = true;
-                    break;
-                }
-            }
-            if (foundExit) break;
-        }
-        return foundExit;
     }
 
     private void processInstructionArguments(
