@@ -15,6 +15,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -46,7 +47,7 @@ public class EngineController
     private void createEngine(@NotNull SProgram program) throws LabelNotExist
     {
         engine = new ProgramEngine(program);
-        mainEngine = new ProgramEngine(program);
+        mainEngine = engine;
         mainEngineName = engine.getProgramName();
         maxExpandLevel = engine.getMaxExpandLevel();
     }
@@ -104,7 +105,7 @@ public class EngineController
         {
             throw new IllegalArgumentException("Expand level must be between 0 and " + maxExpandLevel);
         }
-        engine.run(expandLevel, arguments);
+        engine.run(expandLevel, arguments, true);
     }
 
 
@@ -185,6 +186,13 @@ public class EngineController
             throw new IllegalStateException("Program has not been set");
         }
         return engine.getSortedWorkVars(expandLevel);
+    }
+
+    public List<ExecutionStatisticsDTO> getAllExecutionStatistics() {
+        if (engine == null) {
+            throw new IllegalStateException("Program has not been set");
+        }
+        return engine.getAllExecutionStatistics();
     }
 
     private record StateData(ProgramEngine engine, int maxExpandLevel) implements Serializable

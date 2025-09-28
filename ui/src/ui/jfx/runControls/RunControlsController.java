@@ -45,6 +45,14 @@ public class RunControlsController {
         setRun.disableProperty().bind(programLoaded.not());
         runType.disableProperty().bind(programLoaded.not().or(variablesEntered.not()));
         debugType.disableProperty().bind(programLoaded.not().or(variablesEntered.not()));
+        variablesEntered.addListener((change, oldValue, newValue) -> {
+            if (!newValue) {
+                runTypeChosen.set(false);
+                programRunType = null;
+                debugModeActive.set(false);
+                runTypes.selectToggle(null);
+            }
+        });
         run.disableProperty().bind(runTypeChosen.not());
     }
 

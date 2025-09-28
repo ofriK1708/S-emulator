@@ -104,7 +104,7 @@ public class Quote extends Instruction {
         List<Integer> arguments = getArgumentsValues(contextMap);
         Map<String, Integer> functionToRunNeededArguments = functionToRun.getSortedArguments();
         prepareArguments(functionToRunNeededArguments, arguments);
-        functionToRun.run(functionToRunNeededArguments);
+        functionToRun.run(functionToRunNeededArguments, false);
         return functionToRun.getOutput();
     }
 

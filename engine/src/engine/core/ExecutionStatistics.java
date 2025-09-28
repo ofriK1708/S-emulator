@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ExecutionStatistics implements Serializable
@@ -22,7 +23,7 @@ public class ExecutionStatistics implements Serializable
     {
         this.executionNumber = executionNumber;
         this.expandLevel = expandLevel;
-        this.arguments = arguments;
+        this.arguments = new HashMap<>(arguments);
     }
 
     public void setY(int y)
@@ -39,7 +40,7 @@ public class ExecutionStatistics implements Serializable
     {
         return new ExecutionStatisticsDTO(executionNumber,
                 expandLevel,
-                arguments,
+                new HashMap<>(arguments),
                 Y,
                 numOfCycles);
     }

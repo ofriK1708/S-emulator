@@ -14,7 +14,7 @@
         </padding>
         <children>
             <Label styleClass="summary-label" text="Loaded program:"/>
-            <Label fx:id="programLoadedLabel" styleClass="summary-label"/>
+            <Label fx:id="programLoadedLabel" styleClass="value-label"/>
             <Label alignment="CENTER" styleClass="summary-label" text="Synthetic Instructions:">
                 <font>
                     <Font size="14.0"/>

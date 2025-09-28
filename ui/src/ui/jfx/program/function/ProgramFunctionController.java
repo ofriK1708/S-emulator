@@ -133,6 +133,14 @@ public class ProgramFunctionController {
     private void populateFunctionsMenu(@NotNull List<String> allSubFunction) {
 
         // Add main function
+        programFunctionSelect.getItems().clear();
+
+        if (allSubFunction.isEmpty()) {
+            MenuItem noFunctionsItem = new MenuItem("No functions available");
+            noFunctionsItem.setDisable(true);
+            programFunctionSelect.getItems().add(noFunctionsItem);
+            return;
+        }
         MenuItem mainFunctionItem = new MenuItem(mainFunctionName.get());
         mainFunctionItem.setOnAction(e -> onFunctionSelectedCallback.accept(mainFunctionName.get()));
 

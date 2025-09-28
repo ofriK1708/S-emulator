@@ -224,9 +224,7 @@ public class ProgramEngine implements Serializable {
         return originalLabels.contains(labelName);
     }
 
-    public void run(int expandLevel, @NotNull Map<String, Integer> arguments) {
-        long startTime = System.currentTimeMillis();
-        int debugNumOfInstructionsExecuted = 0;
+    public void run(int expandLevel, @NotNull Map<String, Integer> arguments, boolean saveToStats) {
         if (expandLevel < contextMapsByExpandLevel.size()) {
             clearPreviousRunData(expandLevel);
         }
@@ -246,14 +244,14 @@ public class ProgramEngine implements Serializable {
                 throw new RuntimeException("Error executing instruction at PC=" + currentPC + ": " + e.getMessage(), e);
             }
         }
-        double endTimeInSeconds = (double) (System.currentTimeMillis() - startTime) / 1000;
-        System.out.println("Program " + programName + "with expansion level of " + expandLevel + " executed in " + endTimeInSeconds + " seconds");
         exStats.setY(executedContextMap.get(ProgramUtils.OUTPUT_NAME));
-        executionStatisticsList.add(exStats);
+        if (saveToStats) {
+            executionStatisticsList.add(exStats);
+        }
     }
 
-    public void run(@NotNull Map<String, Integer> arguments) {
-        run(0, arguments);
+    public void run(@NotNull Map<String, Integer> arguments, boolean saveToStats) {
+        run(0, arguments, saveToStats);
     }
 
     private void clearPreviousRunData(int expandLevel) {

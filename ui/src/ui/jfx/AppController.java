@@ -118,6 +118,7 @@ public class AppController {
     private final @NotNull EngineController engineController;
     private @Nullable ProgramDTO loadedProgram = null;
     private final Map<String, Integer> programArguments = new HashMap<>();
+
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
     private final BooleanProperty debugMode = new SimpleBooleanProperty(false);
     private final BooleanProperty programRanAtLeastOnce = new SimpleBooleanProperty(false);
@@ -146,7 +147,7 @@ public class AppController {
             fileHandlerController.initComponent(this::loadProgramFromFile, this::clearLoadedProgram);
             programFunctionController.initComponent(this::expandProgramToLevel, this::setPaneMode,
                     currentExpandLevel, maxExpandLevel, programLoaded, this::handleVariableSelection,
-                    programVariablesNamesAndLabels, mainProgramName, allSubFunction, this::setLoadedProgram);
+                    programVariablesNamesAndLabels, mainProgramName, allSubFunction, this::switchLoadedProgram);
 
             runControlsController.initComponent(this::RunProgram, this::prepareForTakingArguments, programLoaded,
                     argumentsLoaded);
@@ -237,7 +238,7 @@ public class AppController {
         }
     }
 
-    public void setLoadedProgram(String functionName) {
+    public void switchLoadedProgram(String functionName) {
         if (functionName == null || functionName.isEmpty()) {
             showError("Function name cannot be null or empty.");
             return;
@@ -247,14 +248,14 @@ public class AppController {
             return;
         }
         try {
-            resetCurrentLoadedProgram(functionName);
+            setStageForLoadedProgram(functionName);
         } catch (Exception e) {
             e.printStackTrace();
             showError("Error retrieving instructions for function '" + functionName + "': " + e.getMessage());
         }
     }
 
-    private void resetCurrentLoadedProgram(String functionName) {
+    private void setStageForLoadedProgram(String functionName) {
         loadedProgram = engineController.setLoadedProgram(functionName);
         currentLoadedProgramName.set(loadedProgram.ProgramName());
         maxExpandLevel.set(engineController.getMaxExpandLevel());
@@ -267,7 +268,7 @@ public class AppController {
         programArguments.clear();
         programInstructions.setAll(loadedProgram.instructions());
         derivedInstructions.clear();
-        executionStatistics.clear();
+        executionStatistics.setAll(engineController.getAllExecutionStatistics());
         instructionsTableController.clearHighlighting();
         derivedInstructionsTableController.clearHighlighting();
         allVariablesDTO.clear();
@@ -334,6 +335,7 @@ public class AppController {
             case DEBUG -> startDebugExecution();
             default -> showError("Unknown run type selected.");
         }
+        argumentsLoaded.set(false);
     }
 
     public void startRegularExecution() {
@@ -423,7 +425,16 @@ public class AppController {
         summaryLineController.clearCounts();
         instructionsTableController.clearHighlighting();
         derivedInstructionsTableController.clearHighlighting();
-        showInfo("Loaded program cleared.");
+        programVariablesNamesAndLabels.clear();
+        allSubFunction.clear();
+        previousDebugVariables.clear();
+        isFirstDebugStep = true;
+        inDebugSession = false;
+        debugMode.set(false);
+        programRunning.set(false);
+        programFinished.set(false);
+        programRanAtLeastOnce.set(false);
+        showSuccess("Program cleared.");
     }
 
     private void handleVariableSelection(@Nullable String variableName) {
