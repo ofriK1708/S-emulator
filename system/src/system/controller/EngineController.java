@@ -24,6 +24,8 @@ public class EngineController
     public static @NotNull Predicate<String> validArgumentValueCheck = ProgramUtils.validArgumentCheck;
     private final @NotNull XMLHandler xmlHandler;
     private @Nullable ProgramEngine engine;
+    private ProgramEngine mainEngine;
+    private String mainEngineName;
     private int maxExpandLevel = 0;
 
     // Add these fields to Debugger:
@@ -44,7 +46,18 @@ public class EngineController
     private void createEngine(@NotNull SProgram program) throws LabelNotExist
     {
         engine = new ProgramEngine(program);
+        mainEngine = new ProgramEngine(program);
+        mainEngineName = engine.getProgramName();
         maxExpandLevel = engine.getMaxExpandLevel();
+    }
+
+    public @NotNull ProgramDTO setLoadedProgram(@NotNull String functionName) {
+        if (engine == null) {
+            throw new IllegalStateException("Program has not been set");
+        }
+        engine = functionName.equals(mainEngineName) ? mainEngine : engine.getFunctionByName(functionName);
+        maxExpandLevel = engine.getMaxExpandLevel();
+        return engine.toDTO(0);
     }
 
     public int getMaxExpandLevel()
@@ -150,6 +163,13 @@ public class EngineController
             throw new IllegalStateException("Program has not been set");
         }
         return engine.getSortedArguments();
+    }
+
+    public @NotNull Set<String> getFunctionsSet() {
+        if (engine == null) {
+            throw new IllegalStateException("Program has not been set");
+        }
+        return engine.getAllFunctionNames();
     }
 
 

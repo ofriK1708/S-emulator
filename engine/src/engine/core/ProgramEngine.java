@@ -221,6 +221,7 @@ public class ProgramEngine implements Serializable {
     }
 
     public void run(int expandLevel, @NotNull Map<String, Integer> arguments) {
+        long startTime = System.currentTimeMillis();
         int debugNumOfInstructionsExecuted = 0;
         if (expandLevel < contextMapsByExpandLevel.size()) {
             clearPreviousRunData(expandLevel);
@@ -241,6 +242,8 @@ public class ProgramEngine implements Serializable {
                 throw new RuntimeException("Error executing instruction at PC=" + currentPC + ": " + e.getMessage(), e);
             }
         }
+        double endTimeInSeconds = (double) (System.currentTimeMillis() - startTime) / 1000;
+        System.out.println("Program " + programName + "with expansion level of " + expandLevel + " executed in " + endTimeInSeconds + " seconds");
         exStats.setY(executedContextMap.get(ProgramUtils.OUTPUT_NAME));
         executionStatisticsList.add(exStats);
     }
@@ -586,5 +589,22 @@ public class ProgramEngine implements Serializable {
         } catch (LabelNotExist e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public @NotNull Set<String> getAllFunctionNames() {
+        if (allFunctionsInMain == null) {
+            return Collections.emptySet();
+        }
+        return allFunctionsInMain.keySet();
+    }
+
+    public @NotNull ProgramEngine getFunctionByName(@NotNull String name) {
+        if (name.equals(programName)) {
+            return this;
+        }
+        if (allFunctionsInMain == null || !allFunctionsInMain.containsKey(name)) {
+            throw new IllegalArgumentException("Function " + name + " does not exist in program " + programName);
+        }
+        return allFunctionsInMain.get(name);
     }
 }

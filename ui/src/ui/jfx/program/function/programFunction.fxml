@@ -15,13 +15,13 @@
         <Insets bottom="6" left="8" right="8" top="6" />
     </padding>
 
-    <Button fx:id="ProgramFunctionSelect" layoutX="18.0" layoutY="20.0" maxHeight="28" minWidth="-Infinity"
-            mnemonicParsing="false" onAction="#handleCollapse" text="Program\function selector">
+    <MenuButton fx:id="programFunctionSelect" layoutX="18.0" layoutY="20.0" maxHeight="28" minWidth="-Infinity"
+                mnemonicParsing="false" text="Program\function selector">
         <styleClass>
             <String fx:value="pill-button"/>
             <String fx:value="pill-green"/>
         </styleClass>
-    </Button>
+    </MenuButton>
 
     <!-- Small green pill: Collapse (decrements level by 1) -->
     <Button fx:id="collapseButton" maxHeight="28" minWidth="-Infinity" mnemonicParsing="false"

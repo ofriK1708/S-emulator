@@ -2,8 +2,10 @@ package ui.jfx.summaryLine;
 
 import dto.engine.InstructionDTO;
 import engine.utils.CommandType;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import org.jetbrains.annotations.Nullable;
@@ -16,6 +18,8 @@ public class SummaryLineController {
     private Label syntheticCountLabel;
     @FXML
     private Label basicCountLabel;
+    @FXML
+    private Label programLoadedLabel;
 
     // Observable properties for the counts
     private final IntegerProperty syntheticCount = new SimpleIntegerProperty(0);
@@ -31,8 +35,18 @@ public class SummaryLineController {
         updateCounts(null);
     }
 
+    public void initComponent(StringProperty loadedProgramName) {
+        // Bind the program loaded label to show the current program name or "No Program Loaded"
+        programLoadedLabel.textProperty().bind(
+                Bindings.when(loadedProgramName.isEmpty())
+                        .then("No Program Loaded")
+                        .otherwise(loadedProgramName)
+        );
+    }
+
     /**
      * Updates the instruction counts based on the provided instruction list
+     *
      * @param instructions List of InstructionDTO objects to analyze
      */
     public void updateCounts(@Nullable List<InstructionDTO> instructions) {

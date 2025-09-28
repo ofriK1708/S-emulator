@@ -1,9 +1,6 @@
 package ui.jfx.program.function;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -22,8 +19,7 @@ public class ProgramFunctionController {
     public RadioButton autoPaneMode;
     @FXML
     private Button collapseButton;
-    @FXML
-    private Button ProgramFunctionSelect;
+    private final StringProperty mainFunctionName = new SimpleStringProperty();
     @FXML
     private Label degreeInfoLabel;
     @FXML
@@ -42,19 +38,27 @@ public class ProgramFunctionController {
     Consumer<Integer> OnExpandLevelChangeCallback;
     Consumer<String> OnVariableSelectionCallback; // NEW: Callback for variable selection
     Consumer<PaneMode> OnPaneModeChangeCallback;
+    @FXML
+    private MenuButton programFunctionSelect;
+    private Consumer<String> onFunctionSelectedCallback;
+
 
     @FXML
     void initialize() {
         System.out.println("ProgramFunctionController initialized");
     }
 
-    public void initComponent(Consumer<Integer> OnExpandLevelChangeCallback,
-                              Consumer<PaneMode> OnPaneModeChangeCallback,
+    public void initComponent(@NotNull Consumer<Integer> OnExpandLevelChangeCallback,
+                              @NotNull Consumer<PaneMode> OnPaneModeChangeCallback,
                               @NotNull IntegerProperty currentExpandLevelProperty,
                               @NotNull IntegerProperty MaxExpandLevelProperty,
                               @NotNull BooleanProperty programLoadedProperty,
-                              Consumer<String> OnVariableSelectionCallback,
-                              @NotNull ListProperty<String> programVariables) { // NEW: Add variable selection callback
+                              @NotNull Consumer<String> OnVariableSelectionCallback,
+                              @NotNull ListProperty<String> programVariables,
+                              @NotNull StringProperty mainFunctionName,
+                              @NotNull ListProperty<String> allSubFunctions,
+                              @NotNull Consumer<String> onFunctionSelectedCallback) { // NEW: Add variable selection
+        // callback
         this.OnExpandLevelChangeCallback = OnExpandLevelChangeCallback;
         this.OnVariableSelectionCallback = OnVariableSelectionCallback;
 
@@ -65,7 +69,7 @@ public class ProgramFunctionController {
         expandButton.disableProperty().bind(
                 programLoadedProperty.not()
                         .or(currentExpandLevelProperty.isEqualTo(MaxExpandLevelProperty)));
-        ProgramFunctionSelect.disableProperty().bind(
+        programFunctionSelect.disableProperty().bind(
                 programLoadedProperty.not());
         chooseLevelButton.disableProperty().bind(
                 programLoadedProperty.not());
@@ -85,6 +89,11 @@ public class ProgramFunctionController {
                                       oldList, newList) ->
                 updateVariableDropdown(newList)
         );
+        this.mainFunctionName.bind(mainFunctionName);
+        this.onFunctionSelectedCallback = onFunctionSelectedCallback;
+        allSubFunctions.addListener((obs,
+                                     oldList, newList) ->
+                populateFunctionsMenu(newList));
     }
 
 
@@ -121,18 +130,41 @@ public class ProgramFunctionController {
         }
     }
 
+    private void populateFunctionsMenu(@NotNull List<String> allSubFunction) {
+
+        // Add main function
+        MenuItem mainFunctionItem = new MenuItem(mainFunctionName.get());
+        mainFunctionItem.setOnAction(e -> onFunctionSelectedCallback.accept(mainFunctionName.get()));
+
+        programFunctionSelect.getItems().add(mainFunctionItem);
+
+        // Add sub-functions if available
+        if (!allSubFunction.isEmpty()) {
+            programFunctionSelect.getItems().add(new SeparatorMenuItem()); // Separator for clarity
+
+            for (String subFunction : allSubFunction) {
+                MenuItem subFunctionItem = new MenuItem(subFunction);
+                subFunctionItem.setOnAction(e -> onFunctionSelectedCallback.accept(subFunction));
+                programFunctionSelect.getItems().add(subFunctionItem);
+            }
+        }
+    }
     @FXML
-    void handleCollapse(ActionEvent event) {
+    private void onFunctionSelected(ActionEvent event) {
+    }
+
+    @FXML
+    private void handleCollapse(ActionEvent event) {
         OnExpandLevelChangeCallback.accept(currentLevel.get() - 1);
     }
 
     @FXML
-    void handleExpand(ActionEvent event) {
+    private void handleExpand(ActionEvent event) {
         OnExpandLevelChangeCallback.accept(currentLevel.get() + 1);
     }
 
     @FXML
-    void handleChooseExpandLevel(ActionEvent event) {
+    private void handleChooseExpandLevel(ActionEvent event) {
         System.out.println("Change button pressed");
 
         // Create input dialog for manual level entry

@@ -110,7 +110,11 @@ public class AppController {
             new SimpleListProperty<>(FXCollections.observableArrayList());
     private final ListProperty<String> programVariablesNamesAndLabels =
             new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<String> allSubFunction =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
 
+    private final StringProperty mainProgramName = new SimpleStringProperty("");
+    private final StringProperty currentLoadedProgramName = new SimpleStringProperty("");
     private final @NotNull EngineController engineController;
     private @Nullable ProgramDTO loadedProgram = null;
     private final Map<String, Integer> programArguments = new HashMap<>();
@@ -142,10 +146,11 @@ public class AppController {
             fileHandlerController.initComponent(this::loadProgramFromFile, this::clearLoadedProgram);
             programFunctionController.initComponent(this::expandProgramToLevel, this::setPaneMode,
                     currentExpandLevel, maxExpandLevel, programLoaded, this::handleVariableSelection,
-                    programVariablesNamesAndLabels);
+                    programVariablesNamesAndLabels, mainProgramName, allSubFunction, this::setLoadedProgram);
 
             runControlsController.initComponent(this::RunProgram, this::prepareForTakingArguments, programLoaded,
                     argumentsLoaded);
+            summaryLineController.initComponent(currentLoadedProgramName);
             cyclesController.initComponent(currentCycles);
             instructionsTableController.initializeMainInstructionTable(programInstructions, derivedInstructions);
             derivedInstructionsTableController.markAsDerivedInstructionsTable();
@@ -215,6 +220,9 @@ public class AppController {
                     currentCycles::set,
                     program -> {
                         loadedProgram = program;
+                        mainProgramName.set(program.ProgramName());
+                        currentLoadedProgramName.set(program.ProgramName());
+                        allSubFunction.setAll(engineController.getFunctionsSet());
                         loadingStage.close();
                     }
             );
@@ -227,6 +235,49 @@ public class AppController {
             e.printStackTrace();
             showError("Error loading file: " + e.getMessage());
         }
+    }
+
+    public void setLoadedProgram(String functionName) {
+        if (functionName == null || functionName.isEmpty()) {
+            showError("Function name cannot be null or empty.");
+            return;
+        }
+        if (!allSubFunction.contains(functionName) && !functionName.equals(mainProgramName.get())) {
+            showError("Function '" + functionName + "' does not exist in the loaded program.");
+            return;
+        }
+        try {
+            resetCurrentLoadedProgram(functionName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Error retrieving instructions for function '" + functionName + "': " + e.getMessage());
+        }
+    }
+
+    private void resetCurrentLoadedProgram(String functionName) {
+        loadedProgram = engineController.setLoadedProgram(functionName);
+        currentLoadedProgramName.set(loadedProgram.ProgramName());
+        maxExpandLevel.set(engineController.getMaxExpandLevel());
+        currentExpandLevel.set(0);
+        programLoaded.set(true);
+        argumentsLoaded.set(false);
+        programRunning.set(false);
+        programFinished.set(false);
+        programRanAtLeastOnce.set(false);
+        programArguments.clear();
+        programInstructions.setAll(loadedProgram.instructions());
+        derivedInstructions.clear();
+        executionStatistics.clear();
+        instructionsTableController.clearHighlighting();
+        derivedInstructionsTableController.clearHighlighting();
+        allVariablesDTO.clear();
+        argumentsDTO.clear();
+        currentCycles.set(0);
+        summaryLineController.updateCounts(loadedProgram.instructions());
+        programVariablesNamesAndLabels.setAll(sortAllProgramNames(engineController.
+                getAllVariablesAndLabelsNames(0)));
+        showSuccess("Function '" + functionName + "' loaded successfully.");
+        showInfo("Displaying instructions for function: " + functionName);
     }
 
     public void prepareForTakingArguments() {
@@ -355,6 +406,8 @@ public class AppController {
 
     public void clearLoadedProgram() {
         programLoaded.set(false);
+        currentLoadedProgramName.set("");
+        mainProgramName.set("");
         argumentsLoaded.set(false);
         maxExpandLevel.set(0);
         currentExpandLevel.set(0);
