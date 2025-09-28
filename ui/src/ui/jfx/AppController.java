@@ -110,8 +110,8 @@ public class AppController {
             new SimpleListProperty<>(FXCollections.observableArrayList());
     private final ListProperty<String> programVariablesNamesAndLabels =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final ListProperty<String> allSubFunction =
-            new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final MapProperty<String, String> allSubFunction =
+            new SimpleMapProperty<>(FXCollections.observableHashMap());
 
     private final StringProperty mainProgramName = new SimpleStringProperty("");
     private final StringProperty currentLoadedProgramName = new SimpleStringProperty("");
@@ -223,7 +223,7 @@ public class AppController {
                         loadedProgram = program;
                         mainProgramName.set(program.ProgramName());
                         currentLoadedProgramName.set(program.ProgramName());
-                        allSubFunction.setAll(engineController.getFunctionsSet());
+                        allSubFunction.putAll(engineController.getFunctionsSet());
                         loadingStage.close();
                     }
             );
@@ -243,7 +243,7 @@ public class AppController {
             showError("Function name cannot be null or empty.");
             return;
         }
-        if (!allSubFunction.contains(functionName) && !functionName.equals(mainProgramName.get())) {
+        if (!allSubFunction.containsKey(functionName) && !functionName.equals(mainProgramName.get())) {
             showError("Function '" + functionName + "' does not exist in the loaded program.");
             return;
         }

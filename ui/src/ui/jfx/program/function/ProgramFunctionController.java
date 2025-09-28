@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import ui.utils.UIUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -56,7 +57,7 @@ public class ProgramFunctionController {
                               @NotNull Consumer<String> OnVariableSelectionCallback,
                               @NotNull ListProperty<String> programVariables,
                               @NotNull StringProperty mainFunctionName,
-                              @NotNull ListProperty<String> allSubFunctions,
+                              @NotNull MapProperty<String, String> allSubFunctions,
                               @NotNull Consumer<String> onFunctionSelectedCallback) { // NEW: Add variable selection
         // callback
         this.OnExpandLevelChangeCallback = OnExpandLevelChangeCallback;
@@ -92,8 +93,8 @@ public class ProgramFunctionController {
         this.mainFunctionName.bind(mainFunctionName);
         this.onFunctionSelectedCallback = onFunctionSelectedCallback;
         allSubFunctions.addListener((obs,
-                                     oldList, newList) ->
-                populateFunctionsMenu(newList));
+                                     oldFuncMap, newFuncMap) ->
+                populateFunctionsMenu(newFuncMap));
     }
 
 
@@ -130,12 +131,12 @@ public class ProgramFunctionController {
         }
     }
 
-    private void populateFunctionsMenu(@NotNull List<String> allSubFunction) {
+    private void populateFunctionsMenu(@NotNull Map<String, String> allSubFunctions) {
 
         // Add main function
         programFunctionSelect.getItems().clear();
 
-        if (allSubFunction.isEmpty()) {
+        if (allSubFunctions.isEmpty()) {
             MenuItem noFunctionsItem = new MenuItem("No functions available");
             noFunctionsItem.setDisable(true);
             programFunctionSelect.getItems().add(noFunctionsItem);
@@ -147,12 +148,12 @@ public class ProgramFunctionController {
         programFunctionSelect.getItems().add(mainFunctionItem);
 
         // Add sub-functions if available
-        if (!allSubFunction.isEmpty()) {
+        if (!allSubFunctions.isEmpty()) {
             programFunctionSelect.getItems().add(new SeparatorMenuItem()); // Separator for clarity
 
-            for (String subFunction : allSubFunction) {
-                MenuItem subFunctionItem = new MenuItem(subFunction);
-                subFunctionItem.setOnAction(e -> onFunctionSelectedCallback.accept(subFunction));
+            for (Map.Entry<String, String> entry : allSubFunctions.entrySet()) {
+                MenuItem subFunctionItem = new MenuItem(entry.getValue());
+                subFunctionItem.setOnAction(e -> onFunctionSelectedCallback.accept(entry.getKey()));
                 programFunctionSelect.getItems().add(subFunctionItem);
             }
         }

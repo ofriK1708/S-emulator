@@ -166,11 +166,11 @@ public class EngineController
         return engine.getSortedArguments();
     }
 
-    public @NotNull Set<String> getFunctionsSet() {
+    public @NotNull Map<String, String> getFunctionsSet() {
         if (engine == null) {
             throw new IllegalStateException("Program has not been set");
         }
-        return engine.getAllFunctionNames();
+        return engine.getAllFunctionNamesAndStrName();
     }
 
 

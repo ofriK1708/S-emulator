@@ -593,11 +593,15 @@ public class ProgramEngine implements Serializable {
         }
     }
 
-    public @NotNull Set<String> getAllFunctionNames() {
+    public @NotNull Map<String, String> getAllFunctionNamesAndStrName() {
         if (allFunctionsInMain == null) {
-            return Collections.emptySet();
+            return Collections.emptyMap();
         }
-        return allFunctionsInMain.keySet();
+        Map<String, String> allFunctionNamesAndStrName = new HashMap<>();
+        return allFunctionsInMain.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue().getFuncName()
+        ));
     }
 
     public @NotNull ProgramEngine getFunctionByName(@NotNull String name) {
