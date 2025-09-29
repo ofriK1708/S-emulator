@@ -12,13 +12,12 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ui.utils.UIUtils;
 
 import java.util.Map;
 
 /**
- * Controller for the ShowRunView.fxml - displays detailed information about a selected execution
- * and provides the ONLY re-run functionality in the system.
+ * Controller for the ShowRunView.fxml - displays detailed information about a selected execution.
+ * This is a display-only dialog. Rerun functionality is handled by HistoryStatsController.
  */
 public class ShowRunController {
 
@@ -32,7 +31,6 @@ public class ShowRunController {
     @FXML private TableView<VariableDTO> variablesTable;
     @FXML private TableColumn<VariableDTO, String> variableNameColumn;
     @FXML private TableColumn<VariableDTO, Number> variableValueColumn;
-    @FXML private Button rerunButton;
     @FXML private Button closeButton;
 
     // Data storage
@@ -142,40 +140,6 @@ public class ShowRunController {
         variablesTable.setItems(variablesList);
 
         System.out.println("Variables table populated with " + variablesList.size() + " variables");
-    }
-
-    /**
-     * Handle the Re-run button click.
-     * This is the SINGLE SOURCE OF TRUTH for re-run functionality.
-     * Opens the Set Run input dialog with pre-populated arguments.
-     */
-    @FXML
-    private void handleRerun() {
-        if (currentExecution == null) {
-            System.err.println("Cannot re-run: missing execution data");
-            UIUtils.showError("Cannot re-run: missing execution data");
-            return;
-        }
-
-        try {
-            System.out.println("Re-run triggered from Show dialog for execution #" +
-                    currentExecution.executionNumber());
-
-            // Extract execution parameters
-            int expandLevel = currentExecution.expandLevel();
-            Map<String, Integer> arguments = currentExecution.arguments();
-
-            // Use UIUtils to prepare the rerun (this will open the Set Run dialog)
-            UIUtils.executeRerunFromShowDialog(expandLevel, arguments);
-
-            // Close this dialog immediately after triggering rerun preparation
-            // The Set Run dialog will open next
-            handleClose();
-
-        } catch (Exception e) {
-            System.err.println("Error during re-run from Show dialog: " + e.getMessage());
-            UIUtils.showError("Error during re-run: " + e.getMessage());
-        }
     }
 
     /**

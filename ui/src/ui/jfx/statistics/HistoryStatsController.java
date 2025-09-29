@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.function.Function;
 
+import static ui.utils.UIUtils.showError;
 import static ui.utils.UIUtils.showInfo;
 
 /**
@@ -38,6 +39,8 @@ public class HistoryStatsController {
     // Action button for viewing details
     @FXML
     private Button showButton;
+    @FXML
+    private Button rerunButton;
 
     // Callback for functionality - provided by AppController
     private @Nullable Function<ExecutionStatisticsDTO, Map<String, Integer>> variableStatesProvider;
@@ -59,6 +62,10 @@ public class HistoryStatsController {
         showButton.disableProperty().bind(
                 statisticsTable.getSelectionModel().selectedItemProperty().isNull()
         );
+        rerunButton.disableProperty().bind(
+                statisticsTable.getSelectionModel().selectedItemProperty().isNull()
+        );
+
     }
 
     /**
@@ -125,6 +132,34 @@ public class HistoryStatsController {
         } catch (Exception e) {
             System.err.println("Error opening Show dialog: " + e.getMessage());
             showInfo("Error displaying execution details: " + e.getMessage());
+        }
+    }
+    /**
+     * Handle Rerun button click.
+     * Triggers rerun preparation with the selected execution's parameters.
+     * This opens the Set Run dialog with pre-populated arguments.
+     */
+    @FXML
+    private void handleRerun() {
+        ExecutionStatisticsDTO selectedExecution = statisticsTable.getSelectionModel().getSelectedItem();
+        if (selectedExecution == null) {
+            return;
+        }
+
+        try {
+            System.out.println("Rerun triggered from history table for execution #" +
+                    selectedExecution.executionNumber());
+
+            // Extract execution parameters
+            int expandLevel = selectedExecution.expandLevel();
+            Map<String, Integer> arguments = selectedExecution.arguments();
+
+            // Use UIUtils to prepare the rerun (this will open the Set Run dialog)
+            ui.utils.UIUtils.executeRerunFromShowDialog(expandLevel, arguments);
+
+        } catch (Exception e) {
+            System.err.println("Error during rerun from history table: " + e.getMessage());
+            showError("Error during rerun: " + e.getMessage());
         }
     }
 }
