@@ -300,7 +300,7 @@ public class EngineController
 
             // Temporarily execute the program to get final states
             // Note: This creates a temporary execution that doesn't interfere with current state
-            engine.run(expandLevel, arguments);
+            engine.run(expandLevel, arguments, false);
 
             // Get both work variables and arguments from the final state
             Map<String, Integer> finalStates = new java.util.HashMap<>();
