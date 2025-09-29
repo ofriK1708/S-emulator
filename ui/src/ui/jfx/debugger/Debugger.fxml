@@ -1,54 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.SVGPath?>
-
-<VBox spacing="12.0"
-      xmlns="http://javafx.com/javafx/22.0.2"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="ui.jfx.debugger.DebuggerController"
-      stylesheets="@Debugger.css"
-      styleClass="debugger">
+<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="12.0" styleClass="debugger" stylesheets="@Debugger.css"
+      xmlns="http://javafx.com/javafx/24.0.1" fx:controller="ui.jfx.debugger.DebuggerController">
 
     <children>
         <GridPane hgap="20" vgap="15">
 
             <!-- Row 1 -->
-            <Button fx:id="stop" text="Stop" onAction="#handleStop"
-                    GridPane.rowIndex="0" GridPane.columnIndex="0"
-                    styleClass="pill-button debug-stop">
+            <Button fx:id="stop" onAction="#handleStop" styleClass="pill-button, debug-stop" GridPane.columnIndex="0"
+                    GridPane.rowIndex="0">
                 <graphic>
-                    <SVGPath content="M4.893 0a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353L11.46.146A.5.5 0 0 0 11.107 0z"/>
+                    <HBox alignment="CENTER" spacing="10.0">
+                        <children>
+                            <Label styleClass="button-text" text="Stop"/>
+                            <SVGPath content="M4.5 1.5a3 3 0 0 0-3 3v7a3 3 0 0 0 3 3h7a3 3 0 0 0 3-3v-7a3 3 0 0 0-3-3z"
+                                     fill="#e53935" strokeType="OUTSIDE"/>
+                        </children>
+                    </HBox>
                 </graphic>
             </Button>
 
-            <Button fx:id="resume" text="Resume" onAction="#handleResume"
-                    GridPane.rowIndex="0" GridPane.columnIndex="1"
-                    styleClass="pill-button debug-resume">
+            <Button fx:id="resume" onAction="#handleResume" styleClass="pill-button, debug-resume"
+                    GridPane.columnIndex="1" GridPane.rowIndex="0">
                 <graphic>
-                    <SVGPath content="M6 18V6h2v12zm4 0l10-6l-10-6z"/>
+                    <HBox alignment="CENTER" spacing="10.0">
+                        <children>
+                            <Label styleClass="button-text" text="Resume"/>
+                            <SVGPath content="M6 18V6h2v12zm4 0l10-6l-10-6z" fill="#00f800"/>
+                        </children>
+                    </HBox>
                 </graphic>
             </Button>
 
             <!-- Row 2 -->
-            <Button fx:id="stepOver" text="Step Over" onAction="#handleStepOver"
-                    GridPane.rowIndex="1" GridPane.columnIndex="0"
-                    styleClass="pill-button debug-stepOver">
+            <Button fx:id="stepOver" onAction="#handleStepOver" styleClass="pill-button, debug-stepOver"
+                    GridPane.columnIndex="0" GridPane.rowIndex="1">
                 <graphic>
-                    <SVGPath content="M12 19q-1.25 0-2.125-.875T9 16t.875-2.125T12 13t2.125.875T15 16t-.875 2.125T12 19m-7.925-7q.35-2.975 2.6-4.988T11.975 5q1.825 0 3.375.738T18 7.75V5h2v7h-7v-2h4.2q-.8-1.35-2.162-2.175T12 7Q9.8 7 8.125 8.425T6.1 12z"/>
+                    <HBox alignment="CENTER" spacing="10.0">
+                        <children>
+                            <Label styleClass="button-text" text="Step Over"/>
+                            <SVGPath
+                                    content="M12 19q-1.25 0-2.125-.875T9 16t.875-2.125T12 13t2.125.875T15 16t-.875 2.125T12 19m-7.925-7q.35-2.975 2.6-4.988T11.975 5q1.825 0 3.375.738T18 7.75V5h2v7h-7v-2h4.2q-.8-1.35-2.162-2.175T12 7Q9.8 7 8.125 8.425T6.1 12z"
+                                    fill="WHITE"/>
+                        </children>
+                    </HBox>
                 </graphic>
             </Button>
 
-            <Button fx:id="stepBackward" text="Step Backward" onAction="#handleStepBackward"
-                    GridPane.rowIndex="1" GridPane.columnIndex="1"
-                    styleClass="pill-button debug-stepBackward">
+            <Button fx:id="stepBackward" onAction="#handleStepBackward" styleClass="pill-button, debug-stepBackward"
+                    GridPane.columnIndex="1" GridPane.rowIndex="1">
                 <graphic>
-                    <SVGPath content="M7 19v-2h7.1q1.575 0 2.738-1T18 13.5T16.838 11T14.1 10H7.8l2.6 2.6L9 14L4 9l5-5l1.4 1.4L7.8 8h6.3q2.425 0 4.163 1.575T20 13.5t-1.737 3.925T14.1 19z"/>
+                    <HBox alignment="CENTER" spacing="10.0">
+                        <children>
+                            <Label styleClass="button-text" text="Step Back"/>
+                            <SVGPath
+                                    content="M1.75 5.75v-4h1.5v2.542c1.145-1.359 2.911-2.209 4.84-2.209c3.177 0 5.92 2.307 6.16 5.398l.02.269h-1.5l-.022-.226c-.212-2.195-2.202-3.94-4.656-3.94c-1.736 0-3.244.875-4.05 2.166h2.83v1.5H2.707l-.961-.975V5.75h.003zM8 14a2 2 0 1 1 0-4a2 2 0 0 1 0 4"
+                                    fill="WHITE" scaleX="1.3" scaleY="1.3"/>
+                        </children>
+                    </HBox>
                 </graphic>
             </Button>
+            <columnConstraints>
+                <ColumnConstraints/>
+                <ColumnConstraints/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints/>
+                <RowConstraints/>
+            </rowConstraints>
 
         </GridPane>
     </children>

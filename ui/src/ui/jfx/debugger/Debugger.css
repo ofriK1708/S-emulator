@@ -1,43 +1,51 @@
 /* Base container */
-.debugger {
-    -fx-background-color: linear-gradient(to bottom right, #f8f9fa, #e9ecef);
-    -fx-background-radius: 8px;
-    -fx-padding: 12px;
-    -fx-spacing: 12px;
-}
 
-/* Reusable pill button */
+/* Debugger pill-style buttons, matching RunControls look */
 .pill-button {
     -fx-background-radius: 20px;
-    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-font-family: "Segoe UI Emoji", "Roboto", "Helvetica Neue", sans-serif;
     -fx-font-size: 13px;
     -fx-font-weight: bold;
     -fx-padding: 8px 16px;
     -fx-cursor: hand;
-    -fx-text-fill: white;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 3, 0, 0, 1);
-    -fx-min-width: 140px;
-    -fx-min-height: 36px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 3, 0, 0, 1);
+    -fx-background-color: black;
 }
 
-/* Hover & Pressed */
-.pill-button:hover {
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 4, 0, 0, 2);
-}
-.pill-button:pressed {
-    -fx-translate-y: 1;
-}
-
-/* Specific button overrides */
+/* Stop button: red text/icon */
 .debug-stop {
-    -fx-background-color: linear-gradient(to bottom, #dc3545, #b02a37);
+    -fx-text-fill: #e53935;
 }
+
+.debug-stop:hover {
+    fx-background-color: #111;
+    -fx-effect: dropshadow(gaussian, #e5393588, 6, 0, 0, 2);
+}
+
+/* Resume button: green text/icon */
 .debug-resume {
-    -fx-background-color: linear-gradient(to bottom, #28a745, #1e7e34);
+    -fx-text-fill: #00f800;
 }
-.debug-stepOver {
-    -fx-background-color: linear-gradient(to bottom, #007bff, #0056b3);
+
+.debug-resume:hover {
+    fx-background-color: #111; /* slightly lighter black */
+    -fx-text-fill: #39ff14; /* brighter green */
+    -fx-effect: dropshadow(gaussian, #00f80088, 6, 0, 0, 2);
 }
-.debug-stepBackward {
-    -fx-background-color: linear-gradient(to bottom, #ffc107, #e0a800);
+
+/* Step over/back: white text/icon, green shadow */
+.debug-stepOver, .debug-stepBackward {
+    -fx-text-fill: white;
+}
+
+.debug-stepOver:hover, .debug-stepBackward:hover {
+    -fx-effect: dropshadow(gaussian, #25a5a088, 6, 0, 0, 2);
+}
+
+/* Button text style */
+.button-text {
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: inherit;
 }
