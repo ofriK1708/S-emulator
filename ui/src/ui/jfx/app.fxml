@@ -2,135 +2,155 @@
 
 <!--suppress ALL -->
 
+
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.jfx.AppController">
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1" fitToHeight="true" fitToWidth="true"
+            xmlns="http://javafx.com/javafx/24.0.1" fx:controller="ui.jfx.AppController">
+    <content>
+        <BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity"
+                    minWidth="-Infinity">
 
-    <!-- TOP: file bar + program/function selector row -->
-    <top>
-        <VBox spacing="8.0">
-            <padding>
-                <Insets bottom="8" left="12" right="12" top="8" />
-            </padding>
-            <fx:include fx:id="fileHandler" source="fileHandler/fileHandler.fxml" />
-            <fx:include fx:id="programFunction" source="program/function/programFunction.fxml"/>
-        </VBox>
-    </top>
+            <!-- TOP: file bar + program/function selector row -->
+            <top>
+                <VBox spacing="8.0">
+                    <padding>
+                        <Insets bottom="8" left="12" right="12" top="8"/>
+                    </padding>
+                    <fx:include fx:id="fileHandler" source="fileHandler/fileHandler.fxml"/>
+                    <fx:include fx:id="programFunction" source="program/function/programFunction.fxml"/>
+                </VBox>
+            </top>
 
-    <!-- CENTER: instructions table + summary line (placeholders for now) -->
-    <center>
-        <ScrollPane fitToWidth="true" hvalue="0.5" vvalue="0.61">
-            <BorderPane.margin>
-                <Insets bottom="20.0" right="50.0"/>
-            </BorderPane.margin>
-            <content>
-                <SplitPane dividerPositions="0.5426573426573427" minHeight="0.0" minWidth="-Infinity">
-                    <items>
-                        <GridPane maxHeight="1.7976931348623157E308" minWidth="-Infinity">
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0"/>
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints minHeight="10.0" vgrow="ALWAYS"/>
-                                <RowConstraints maxHeight="231.0" minHeight="0.0" prefHeight="69.33331298828125"
-                                                vgrow="NEVER"/>
-                                <RowConstraints minHeight="10.0" vgrow="ALWAYS"/>
-                            </rowConstraints>
-                            <children>
-                                <fx:include fx:id="instructionsTable" source="instruction/InstructionsTable.fxml"/>
-                                <fx:include fx:id="summaryLine" source="summaryLine/summaryLine.fxml"
-                                            GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1"
-                                            GridPane.valignment="CENTER" GridPane.vgrow="NEVER"/>
-                                <fx:include fx:id="derivedInstructionsTable" source="instruction/InstructionsTable.fxml"
-                                            GridPane.rowIndex="2"/>
-                            </children>
-                        </GridPane>
-                        <ScrollPane fitToWidth="true">
-                            <content>
-                                <VBox maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minWidth="-Infinity"
-                                      spacing="12.0">
-                                    <padding>
-                                        <Insets bottom="6.0" right="12.0" top="6.0"/>
-                                    </padding>
-                                    <TitledPane fx:id="runControlsTitledPane" alignment="CENTER" contentDisplay="RIGHT"
-                                                text="Run Controls" VBox.vgrow="ALWAYS">
-                                        <content>
-                                            <VBox alignment="CENTER" minWidth="-Infinity" spacing="8.0">
-                                                <fx:include fx:id="runControls" source="runControls/runControls.fxml"/>
-                                            </VBox>
-                                        </content>
-                                    </TitledPane>
-                                    <TitledPane fx:id="debugControlsTitledPane" alignment="CENTER" minWidth="-Infinity"
-                                                text="Debug Controls">
-                                        <content>
-                                            <HBox alignment="CENTER" minWidth="-Infinity" spacing="8.0">
-                                                <fx:include fx:id="debugControls" source="debugger/Debugger.fxml"/>
-                                            </HBox>
-                                        </content>
-                                    </TitledPane>
-                                    <TitledPane fx:id="variablesTitledPane" alignment="CENTER"
-                                                maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                                                minHeight="-Infinity" minWidth="-Infinity"
-                                                text="args / variables / cycles" VBox.vgrow="ALWAYS">
-                                        <content>
-                                            <GridPane alignment="CENTER" hgap="20.0" maxHeight="1.7976931348623157E308"
-                                                      maxWidth="1.7976931348623157E308">
-                                                <columnConstraints>
-                                                    <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308"
-                                                                       minWidth="10.0" prefWidth="384.0"/>
-                                                    <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308"
-                                                                       minWidth="10.0" prefWidth="384.0"/>
-                                                </columnConstraints>
-                                                <rowConstraints>
-                                                    <RowConstraints maxHeight="228.0" minHeight="10.0" prefHeight="70.0"
-                                                                    vgrow="ALWAYS"/>
-                                                    <RowConstraints maxHeight="278.0" minHeight="0.0" prefHeight="136.0"
-                                                                    vgrow="ALWAYS"/>
-                                                    <RowConstraints maxHeight="328.0" minHeight="0.0" prefHeight="3.0"
-                                                                    vgrow="SOMETIMES"/>
-                                                    <RowConstraints maxHeight="328.0" minHeight="0.0" prefHeight="49.0"
-                                                                    vgrow="ALWAYS"/>
-                                                </rowConstraints>
-                                                <children>
-                                                    <fx:include fx:id="argumentsTable"
-                                                                source="variables/variablesTable.fxml"
-                                                                GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS"
-                                                                GridPane.rowSpan="2" GridPane.valignment="CENTER"
-                                                                GridPane.vgrow="ALWAYS"/>
-                                                    <fx:include fx:id="allVarsTable"
-                                                                source="variables/variablesTable.fxml"
-                                                                GridPane.columnIndex="1" GridPane.hgrow="ALWAYS"
-                                                                GridPane.rowSpan="4" GridPane.vgrow="ALWAYS"/>
-                                                    <fx:include fx:id="cycles" maxHeight="1.7976931348623157E308"
-                                                                maxWidth="1.7976931348623157E308"
-                                                                source="cycles/cycles.fxml" GridPane.halignment="CENTER"
-                                                                GridPane.hgrow="ALWAYS" GridPane.rowIndex="3"
-                                                                GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS"/>
-                                                </children>
-                                            </GridPane>
-                                        </content>
-                                    </TitledPane>
-                                    <TitledPane fx:id="statisticsTitledPane" alignment="CENTER"
-                                                maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                                                minWidth="-Infinity" text="History Statistics">
-                                        <content>
-                                            <ScrollPane fitToHeight="true" fitToWidth="true"
-                                                        maxHeight="1.7976931348623157E308"
-                                                        maxWidth="1.7976931348623157E308">
+            <!-- CENTER: instructions table + summary line (placeholders for now) -->
+            <center>
+                <ScrollPane fitToWidth="true" hvalue="0.5" vvalue="0.61">
+                    <BorderPane.margin>
+                        <Insets bottom="20.0" right="50.0"/>
+                    </BorderPane.margin>
+                    <content>
+                        <SplitPane dividerPositions="0.5426573426573427" minHeight="0.0" minWidth="-Infinity">
+                            <items>
+                                <GridPane maxHeight="1.7976931348623157E308" minWidth="-Infinity">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0"/>
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="10.0" vgrow="ALWAYS"/>
+                                        <RowConstraints maxHeight="231.0" minHeight="0.0" prefHeight="69.33331298828125"
+                                                        vgrow="NEVER"/>
+                                        <RowConstraints minHeight="10.0" vgrow="ALWAYS"/>
+                                    </rowConstraints>
+                                    <children>
+                                        <fx:include fx:id="instructionsTable"
+                                                    source="instruction/InstructionsTable.fxml"/>
+                                        <fx:include fx:id="summaryLine" source="summaryLine/summaryLine.fxml"
+                                                    GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS"
+                                                    GridPane.rowIndex="1" GridPane.valignment="CENTER"
+                                                    GridPane.vgrow="NEVER"/>
+                                        <fx:include fx:id="derivedInstructionsTable"
+                                                    source="instruction/InstructionsTable.fxml" GridPane.rowIndex="2"/>
+                                    </children>
+                                </GridPane>
+                                <ScrollPane fitToWidth="true" maxWidth="1.7976931348623157E308" prefWidth="860.0">
+                                    <content>
+                                        <VBox maxHeight="-Infinity" maxWidth="1.7976931348623157E308"
+                                              minWidth="-Infinity" spacing="12.0">
+                                            <padding>
+                                                <Insets bottom="6.0" right="12.0" top="6.0"/>
+                                            </padding>
+                                            <TitledPane fx:id="runControlsTitledPane" alignment="CENTER"
+                                                        contentDisplay="RIGHT" text="Run Controls" VBox.vgrow="ALWAYS">
                                                 <content>
-                                                    <fx:include fx:id="historyStats"
-                                                                source="statistics/HistoryStats.fxml"/>
+                                                    <VBox alignment="CENTER" minWidth="-Infinity" spacing="8.0">
+                                                        <fx:include fx:id="runControls"
+                                                                    source="runControls/runControls.fxml"/>
+                                                    </VBox>
                                                 </content>
-                                            </ScrollPane>
-                                        </content>
-                                    </TitledPane>
-                                </VBox>
-                            </content>
+                                            </TitledPane>
+                                            <TitledPane fx:id="debugControlsTitledPane" alignment="CENTER"
+                                                        minWidth="-Infinity" text="Debug Controls">
+                                                <content>
+                                                    <HBox alignment="CENTER" minWidth="-Infinity" spacing="8.0">
+                                                        <fx:include fx:id="debugControls"
+                                                                    source="debugger/Debugger.fxml"/>
+                                                    </HBox>
+                                                </content>
+                                            </TitledPane>
+                                            <TitledPane fx:id="variablesTitledPane" alignment="CENTER"
+                                                        maxHeight="1.7976931348623157E308"
+                                                        maxWidth="1.7976931348623157E308" minHeight="-Infinity"
+                                                        minWidth="-Infinity" text="args / variables / cycles"
+                                                        VBox.vgrow="ALWAYS">
+                                                <content>
+                                                    <GridPane alignment="CENTER" hgap="20.0"
+                                                              maxHeight="1.7976931348623157E308"
+                                                              maxWidth="1.7976931348623157E308">
+                                                        <columnConstraints>
+                                                            <ColumnConstraints hgrow="ALWAYS"
+                                                                               maxWidth="1.7976931348623157E308"
+                                                                               minWidth="10.0" prefWidth="384.0"/>
+                                                            <ColumnConstraints hgrow="ALWAYS"
+                                                                               maxWidth="1.7976931348623157E308"
+                                                                               minWidth="10.0" prefWidth="384.0"/>
+                                                        </columnConstraints>
+                                                        <rowConstraints>
+                                                            <RowConstraints maxHeight="228.0" minHeight="10.0"
+                                                                            prefHeight="70.0" vgrow="ALWAYS"/>
+                                                            <RowConstraints maxHeight="278.0" minHeight="0.0"
+                                                                            prefHeight="136.0" vgrow="ALWAYS"/>
+                                                            <RowConstraints maxHeight="328.0" minHeight="0.0"
+                                                                            prefHeight="3.0" vgrow="SOMETIMES"/>
+                                                            <RowConstraints maxHeight="328.0" minHeight="0.0"
+                                                                            prefHeight="49.0" vgrow="ALWAYS"/>
+                                                        </rowConstraints>
+                                                        <children>
+                                                            <fx:include fx:id="argumentsTable"
+                                                                        source="variables/variablesTable.fxml"
+                                                                        GridPane.halignment="CENTER"
+                                                                        GridPane.hgrow="ALWAYS" GridPane.rowSpan="2"
+                                                                        GridPane.valignment="CENTER"
+                                                                        GridPane.vgrow="ALWAYS"/>
+                                                            <fx:include fx:id="allVarsTable"
+                                                                        source="variables/variablesTable.fxml"
+                                                                        GridPane.columnIndex="1" GridPane.hgrow="ALWAYS"
+                                                                        GridPane.rowSpan="4" GridPane.vgrow="ALWAYS"/>
+                                                            <fx:include fx:id="cycles"
+                                                                        maxHeight="1.7976931348623157E308"
+                                                                        maxWidth="1.7976931348623157E308"
+                                                                        source="cycles/cycles.fxml"
+                                                                        GridPane.halignment="CENTER"
+                                                                        GridPane.hgrow="ALWAYS" GridPane.rowIndex="3"
+                                                                        GridPane.valignment="CENTER"
+                                                                        GridPane.vgrow="ALWAYS"/>
+                                                        </children>
+                                                    </GridPane>
+                                                </content>
+                                            </TitledPane>
+                                            <TitledPane fx:id="statisticsTitledPane" alignment="CENTER"
+                                                        maxHeight="1.7976931348623157E308"
+                                                        maxWidth="1.7976931348623157E308" minWidth="-Infinity"
+                                                        text="History Statistics">
+                                                <content>
+                                                    <ScrollPane fitToHeight="true" fitToWidth="true"
+                                                                maxHeight="1.7976931348623157E308"
+                                                                maxWidth="1.7976931348623157E308">
+                                                        <content>
+                                                            <fx:include fx:id="historyStats"
+                                                                        source="statistics/HistoryStats.fxml"/>
+                                                        </content>
+                                                    </ScrollPane>
+                                                </content>
+                                            </TitledPane>
+                                        </VBox>
+                                    </content>
                         </ScrollPane>
-                    </items>
-                </SplitPane>
-            </content>
-        </ScrollPane>
-    </center>
-</BorderPane>
+                            </items>
+                        </SplitPane>
+                    </content>
+                </ScrollPane>
+            </center>
+        </BorderPane>
+    </content>
+</ScrollPane>

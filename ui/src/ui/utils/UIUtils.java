@@ -100,7 +100,9 @@ public class UIUtils {
         sortedProgramNames.addAll(sortedLabels);
         return sortedProgramNames;
     }
-
+    /*TODO - change this whole mess - duplicated code, hardcoded code (using 'y' instead of const) unused code.
+       move this dialog mess from UIUtils, its not a utils function
+    *  make this code cleaner, modular and not AI written */
     /**
      * SIMPLIFIED: Open Show Run dialog without re-run callback.
      * Re-run functionality is now handled internally by the Show dialog.
