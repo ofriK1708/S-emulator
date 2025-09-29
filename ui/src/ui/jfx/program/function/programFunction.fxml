@@ -7,8 +7,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import java.lang.*?>
-<HBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER_LEFT" spacing="8" styleClass="buttons-HBox"
-      stylesheets="@programFunction.css" xmlns="http://javafx.com/javafx/24.0.1"
+<HBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" alignment="CENTER_LEFT" spacing="8" styleClass="buttons-HBox"
+      stylesheets="@styles/light.css" xmlns="http://javafx.com/javafx/24.0.1"
       fx:controller="ui.jfx.program.function.ProgramFunctionController">
 
     <padding>
@@ -73,5 +73,21 @@
             <String fx:value="pf-degree"/>
         </styleClass>
     </VBox>
+    <MenuButton mnemonicParsing="false" text="Theme">
+        <items>
+            <RadioMenuItem mnemonicParsing="false" selected="true" text="Light (default)">
+                <toggleGroup>
+                    <ToggleGroup fx:id="themes"/>
+                </toggleGroup>
+            </RadioMenuItem>
+            <RadioMenuItem mnemonicParsing="false" text="Dark" toggleGroup="$themes"/>
+            <RadioMenuItem mnemonicParsing="false" text="Mac is the best" toggleGroup="$themes"/>
+            <RadioMenuItem mnemonicParsing="false" text="Windows is the worst" toggleGroup="$themes"/>
+        </items>
+        <styleClass>
+            <String fx:value="pill-button"/>
+            <String fx:value="pill-green"/>
+        </styleClass>
+    </MenuButton>
 
 </HBox>

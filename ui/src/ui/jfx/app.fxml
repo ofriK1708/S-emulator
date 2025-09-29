@@ -117,8 +117,6 @@
                                                                         GridPane.columnIndex="1" GridPane.hgrow="ALWAYS"
                                                                         GridPane.rowSpan="4" GridPane.vgrow="ALWAYS"/>
                                                             <fx:include fx:id="cycles"
-                                                                        maxHeight="1.7976931348623157E308"
-                                                                        maxWidth="1.7976931348623157E308"
                                                                         source="cycles/cycles.fxml"
                                                                         GridPane.halignment="CENTER"
                                                                         GridPane.hgrow="ALWAYS" GridPane.rowIndex="3"

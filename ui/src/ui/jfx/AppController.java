@@ -29,6 +29,7 @@ import ui.jfx.fileLoader.UIAdapterLoadFileTask;
 import ui.jfx.instruction.InstructionTableController;
 import ui.jfx.program.function.PaneMode;
 import ui.jfx.program.function.ProgramFunctionController;
+import ui.jfx.program.function.Theme;
 import ui.jfx.runControls.RunControlsController;
 import ui.jfx.statistics.HistoryStatsController;
 import ui.jfx.summaryLine.SummaryLineController;
@@ -100,6 +101,7 @@ public class AppController {
     private final ListProperty<VariableDTO> argumentsDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
     private final BooleanProperty argumentsLoaded = new SimpleBooleanProperty(false);
+    private final ObjectProperty<Theme> selectedTheme = new SimpleObjectProperty<>(Theme.LIGHT);
 
     // Core system controller
     private final ListProperty<InstructionDTO> programInstructions =
@@ -148,7 +150,8 @@ public class AppController {
             fileHandlerController.initComponent(this::loadProgramFromFile, this::clearLoadedProgram);
             programFunctionController.initComponent(this::expandProgramToLevel, this::setPaneMode,
                     currentExpandLevel, maxExpandLevel, programLoaded, this::handleVariableSelection,
-                    programVariablesNamesAndLabels, mainProgramName, allSubFunction, this::switchLoadedProgram);
+                    programVariablesNamesAndLabels, mainProgramName, allSubFunction, this::switchLoadedProgram,
+                    this::onThemeSelect);
 
             runControlsController.initComponent(this::RunProgram, this::prepareForTakingArguments, programLoaded,
                     argumentsLoaded);
@@ -841,5 +844,11 @@ public class AppController {
 
         updateDebugVariableState();
         System.out.println("Debug session ended - ready for new execution");
+    }
+
+    public void onThemeSelect(Theme theme) {
+        selectedTheme.set(theme);
+        showInfo("Theme changed to: " + theme);
+        System.out.println("Theme changed to: " + theme);
     }
 }

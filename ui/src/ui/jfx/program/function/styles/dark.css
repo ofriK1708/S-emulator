@@ -1,0 +1,111 @@
+/* Dark theme for ProgramFunction - inspired by the current blue/teal modern look */
+
+/* Base container styling */
+.buttons-HBox {
+    -fx-background-color: linear-gradient(to bottom right, #23272b, #1a1d20);
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 7, 0, 0, 2);
+    -fx-spacing: 12px;
+    -fx-alignment: center-left;
+}
+
+/* Shared pill button styles */
+.pill-button {
+    -fx-background-radius: 20px;
+    -fx-text-fill: #e9ecef;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 4, 0, 0, 1);
+}
+
+/* Green pill buttons (Collapse/Expand) */
+.pill-green {
+    -fx-background-color: linear-gradient(to bottom, #1e8883, #25a5a0);
+    -fx-text-fill: #e9ecef;
+}
+
+.pill-green:hover {
+    -fx-background-color: linear-gradient(to bottom, #21968f, #2bb8b2);
+    -fx-effect: dropshadow(gaussian, #00ffd0aa, 8, 0, 0, 2);
+}
+
+.pill-green:pressed {
+    -fx-background-color: #176a66;
+}
+
+.pill-green:disabled {
+    -fx-background-color: linear-gradient(to bottom, #495057, #343a40);
+    -fx-opacity: 0.6;
+    -fx-effect: none;
+}
+
+/* Label styling - distinct from buttons */
+.info-label {
+    -fx-background-color: linear-gradient(to bottom, #343a40, #23272b);
+    -fx-text-fill: #e9ecef;
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 16px;
+    -fx-alignment: center;
+    -fx-font-size: 12px;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.18), 2, 0, 0, 1);
+    -fx-cursor: default;
+}
+
+/* HighSelectionButton text color */
+.menu-button > .label {
+    -fx-text-fill: #e9ecef;
+}
+
+/* Program selector button (special styling) */
+.pf-collapse {
+    -fx-min-width: 120px;
+}
+
+.pf-change {
+    -fx-min-width: 120px;
+}
+
+/* Degree info label styling */
+.pf-degree {
+    -fx-min-width: 150px;
+    -fx-text-alignment: center;
+    -fx-content-display: center;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+    -fx-max-height: 50px;
+    -fx-line-spacing: 4px;
+    -fx-text-fill: #e9ecef;
+}
+
+/* Program/function selector row */
+.root .program-function,
+.root .function-bar {
+    -fx-background-color: transparent;
+    -fx-padding: 0 12 8 12;
+}
+
+.root .program-function .button,
+.root .function-bar .button {
+    -fx-background-color: linear-gradient(to bottom, #23272b, #343a40);
+    -fx-text-fill: #e9ecef;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 6 14 6 14;
+}
+
+.root .program-function .button:hover,
+.root .function-bar .button:hover {
+    -fx-background-color: linear-gradient(to bottom, #343a40, #495057);
+}
+
+.pane-mode {
+    -fx-text-fill: #e9ecef;
+    -fx-font-size: 12px;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+}
+

@@ -4,20 +4,24 @@ import javafx.beans.property.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ui.utils.UIUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 public class ProgramFunctionController {
 
+    final IntegerProperty currentLevel = new SimpleIntegerProperty();
 
     @FXML
     public RadioButton autoPaneMode;
+    final IntegerProperty maxLevel = new SimpleIntegerProperty();
     @FXML
     private Button collapseButton;
     private final StringProperty mainFunctionName = new SimpleStringProperty();
@@ -33,14 +37,16 @@ public class ProgramFunctionController {
     public MenuButton highlightSelectionButton; // Changed from Button to MenuButton
     @FXML
     public RadioButton manualPaneMode;
-
-    final IntegerProperty currentLevel = new SimpleIntegerProperty();
-    final IntegerProperty maxLevel = new SimpleIntegerProperty();
-    Consumer<Integer> OnExpandLevelChangeCallback;
-    Consumer<String> OnVariableSelectionCallback; // NEW: Callback for variable selection
-    Consumer<PaneMode> OnPaneModeChangeCallback;
     @FXML
     private MenuButton programFunctionSelect;
+    @FXML
+    public ToggleGroup themes;
+    Consumer<Integer> onExpandLevelChangeCallback;
+    Consumer<String> onVariableSelectionCallback; // NEW: Callback for variable selection
+    Consumer<PaneMode> onPaneModeChangeCallback;
+    Consumer<Theme> onThemeSelectCallback;
+    @FXML
+    private HBox root;
     private Consumer<String> onFunctionSelectedCallback;
 
 
@@ -49,8 +55,8 @@ public class ProgramFunctionController {
         System.out.println("ProgramFunctionController initialized");
     }
 
-    public void initComponent(@NotNull Consumer<Integer> OnExpandLevelChangeCallback,
-                              @NotNull Consumer<PaneMode> OnPaneModeChangeCallback,
+    public void initComponent(@NotNull Consumer<Integer> onExpandLevelChangeCallback,
+                              @NotNull Consumer<PaneMode> onPaneModeChangeCallback,
                               @NotNull IntegerProperty currentExpandLevelProperty,
                               @NotNull IntegerProperty MaxExpandLevelProperty,
                               @NotNull BooleanProperty programLoadedProperty,
@@ -58,12 +64,14 @@ public class ProgramFunctionController {
                               @NotNull ListProperty<String> programVariables,
                               @NotNull StringProperty mainFunctionName,
                               @NotNull MapProperty<String, String> allSubFunctions,
-                              @NotNull Consumer<String> onFunctionSelectedCallback) { // NEW: Add variable selection
+                              @NotNull Consumer<String> onFunctionSelectedCallback,
+                              @NotNull Consumer<Theme> onThemeSelectCallback) { // NEW: Add variable selection
         // callback
-        this.OnExpandLevelChangeCallback = OnExpandLevelChangeCallback;
-        this.OnVariableSelectionCallback = OnVariableSelectionCallback;
+        this.onExpandLevelChangeCallback = onExpandLevelChangeCallback;
+        this.onVariableSelectionCallback = OnVariableSelectionCallback;
+        this.onThemeSelectCallback = onThemeSelectCallback;
 
-        this.OnPaneModeChangeCallback = OnPaneModeChangeCallback;
+        this.onPaneModeChangeCallback = onPaneModeChangeCallback;
         collapseButton.disableProperty().bind(
                 programLoadedProperty.not()
                         .or(currentExpandLevelProperty.isEqualTo(0)));
@@ -95,6 +103,13 @@ public class ProgramFunctionController {
         allSubFunctions.addListener((obs,
                                      oldFuncMap, newFuncMap) ->
                 populateFunctionsMenu(newFuncMap));
+        themes.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
+            if (newToggle != null) {
+                RadioMenuItem selectThemeButton = (RadioMenuItem) newToggle;
+                String themeName = selectThemeButton.getText();
+                onThemeSelect(themeName);
+            }
+        });
     }
 
 
@@ -115,7 +130,7 @@ public class ProgramFunctionController {
 
         // Add "Clear Highlighting" option
         MenuItem clearItem = new MenuItem("Clear Highlighting");
-        clearItem.setOnAction(e -> OnVariableSelectionCallback.accept(null)); // null means clear highlighting
+        clearItem.setOnAction(e -> onVariableSelectionCallback.accept(null)); // null means clear highlighting
 
         highlightSelectionButton.getItems().add(clearItem);
         highlightSelectionButton.getItems().add(new SeparatorMenuItem());
@@ -124,10 +139,49 @@ public class ProgramFunctionController {
         for (String variableName : variables) {
             MenuItem variableItem = new MenuItem(variableName);
             variableItem.setOnAction(e -> {
-                OnVariableSelectionCallback.accept(variableName);
+                onVariableSelectionCallback.accept(variableName);
                 System.out.println("Variable selected for highlighting: " + variableName);
             });
             highlightSelectionButton.getItems().add(variableItem);
+        }
+    }
+
+    private void onThemeSelect(String themeName) {
+        Theme selectedTheme;
+        switch (themeName.toLowerCase()) {
+            case "light (default)":
+                selectedTheme = Theme.LIGHT;
+                break;
+            case "dark":
+                selectedTheme = Theme.DARK;
+                break;
+            case "mac is the best":
+                selectedTheme = Theme.MAC_IS_THE_BEST;
+                break;
+            case "windows is the worst":
+                selectedTheme = Theme.WINDOWS_IS_THE_WORST;
+                break;
+            default:
+                System.out.println("Unknown theme selected: " + themeName);
+                return;
+        }
+        applyTheme(selectedTheme);
+        onThemeSelectCallback.accept(selectedTheme);
+    }
+
+    private void applyTheme(Theme theme) {
+        if (root != null) {
+            root.getStylesheets().clear();
+            switch (theme) {
+                case LIGHT -> root.getStylesheets().add(Objects.requireNonNull(
+                        getClass().getResource("styles/light.css")).toExternalForm());
+                case DARK -> root.getStylesheets().add(Objects.requireNonNull(
+                        getClass().getResource("styles/dark.css")).toExternalForm());
+                case MAC_IS_THE_BEST -> root.getStylesheets().add(Objects.requireNonNull(
+                        getClass().getResource("/styles/mac-theme.css")).toExternalForm());
+                case WINDOWS_IS_THE_WORST -> root.getStylesheets().add(Objects.requireNonNull(
+                        getClass().getResource("/styles/windows-theme.css")).toExternalForm());
+            }
         }
     }
 
@@ -164,12 +218,12 @@ public class ProgramFunctionController {
 
     @FXML
     private void handleCollapse(ActionEvent event) {
-        OnExpandLevelChangeCallback.accept(currentLevel.get() - 1);
+        onExpandLevelChangeCallback.accept(currentLevel.get() - 1);
     }
 
     @FXML
     private void handleExpand(ActionEvent event) {
-        OnExpandLevelChangeCallback.accept(currentLevel.get() + 1);
+        onExpandLevelChangeCallback.accept(currentLevel.get() + 1);
     }
 
     @FXML
@@ -185,7 +239,7 @@ public class ProgramFunctionController {
         Optional<String> result = dialog.showAndWait();
         if (result.isPresent()) {
             if (UIUtils.isValidProgramArgument(result.get())) {
-                OnExpandLevelChangeCallback.accept(Integer.parseInt(result.get().trim()));
+                onExpandLevelChangeCallback.accept(Integer.parseInt(result.get().trim()));
             } else {
                 showInvalidChoice(maxLevel.get());
             }
@@ -197,7 +251,7 @@ public class ProgramFunctionController {
         if (autoPaneMode.isSelected()) {
             System.out.println("Auto mode selected");
             // Notify listener about the mode change
-            OnPaneModeChangeCallback.accept(PaneMode.AUTO);
+            onPaneModeChangeCallback.accept(PaneMode.AUTO);
         }
     }
 
@@ -206,7 +260,7 @@ public class ProgramFunctionController {
         if (manualPaneMode.isSelected()) {
             System.out.println("Manual mode selected");
             // Notify listener about the mode change
-            OnPaneModeChangeCallback.accept(PaneMode.MANUAL);
+            onPaneModeChangeCallback.accept(PaneMode.MANUAL);
         }
     }
 
