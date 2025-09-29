@@ -19,7 +19,8 @@ public class Decrease extends Instruction
         super(mainVarName, args, labelName);
     }
 
-    public Decrease(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
+    public Decrease(String mainVarName, Map<String, String> args, String label, @NotNull Instruction derivedFrom,
+                    int derivedFromIndex)
     {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }

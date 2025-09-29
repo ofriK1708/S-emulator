@@ -413,11 +413,11 @@ public class AppController {
         argumentsLoaded.set(false);
         programRunning.set(false);
         programFinished.set(false);
-        programRanAtLeastOnce.set(false);
         programArguments.clear();
         programInstructions.setAll(loadedProgram.instructions());
         derivedInstructions.clear();
         executionStatistics.setAll(engineController.getAllExecutionStatistics());
+        programRanAtLeastOnce.set(!executionStatistics.isEmpty());
         instructionsTableController.clearHighlighting();
         derivedInstructionsTableController.clearHighlighting();
         allVariablesDTO.clear();
@@ -635,7 +635,7 @@ public class AppController {
             int currentPC = engineController.getCurrentDebugPC();
             highlightCurrentInstruction(currentPC);
             updateDebugVariableState();
-            endDebugSession();
+            handleExecutionFinished();
 
         } catch (Exception e) {
             System.err.println("Error stopping debug session: " + e.getMessage());
@@ -702,6 +702,8 @@ public class AppController {
 
             if (debugControlsController != null) {
                 debugControlsController.notifyDebugSessionEnded();
+                showSuccess("Debug session ended.");
+                programRunning.set(false);
             }
         }
     }
@@ -741,6 +743,7 @@ public class AppController {
         } catch (Exception e) {
             System.err.println("Error during debug step: " + e.getMessage());
             showError("Error during debug step: " + e.getMessage());
+            endDebugSession();
         }
     }
 
@@ -781,6 +784,7 @@ public class AppController {
         } catch (Exception e) {
             System.err.println("Error during debug step backward: " + e.getMessage());
             showError("Error during debug step backward: " + e.getMessage());
+            endDebugSession();
         }
     }
 
@@ -797,9 +801,8 @@ public class AppController {
 
         try {
             engineController.debugResume();
-            instructionsTableController.highlightCurrentInstruction(0);
             updateDebugVariableState();
-            currentCycles.set(engineController.getCurrentDebugCycles());
+            currentCycles.set(engineController.getLastDebugCycles());
 
             handleExecutionFinished();
 
@@ -812,21 +815,10 @@ public class AppController {
 
     private void handleExecutionFinished() {
         try {
-            if (debugControlsController != null) {
-                debugControlsController.notifyExecutionFinished();
-            }
-
-            executionStatistics.add(engineController.getLastExecutionStatistics());
-            programRanAtLeastOnce.set(true);
-
+            endDebugSession();
             showSuccess("Execution completed successfully!\n" +
                     "Total cycles: " + currentCycles.get() + "\n" +
                     "Program finished. Use 'Run' to start a new execution.");
-
-            updateDebugVariableState();
-
-            System.out.println("Debug execution completed - controls disabled, session remains active for inspection");
-
         } catch (Exception e) {
             System.err.println("Error handling execution completion: " + e.getMessage());
             showError("Error completing execution: " + e.getMessage());
@@ -838,9 +830,10 @@ public class AppController {
         debugMode.set(false);
         programRunning.set(false);
         programFinished.set(true);
-
         previousDebugVariables.clear();
         isFirstDebugStep = true;
+        executionStatistics.add(engineController.getLastExecutionStatistics());
+        programRanAtLeastOnce.set(true);
 
         if (debugControlsController != null) {
             debugControlsController.notifyDebugSessionEnded();

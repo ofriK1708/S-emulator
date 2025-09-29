@@ -111,7 +111,7 @@ public class ProgramUtils {
         return new HashSet<>(labelsByExpandLevel.get(expandLevel));
     }
 
-    public static boolean isFunctionCall(String argName) {
+    public static boolean isFunctionCall(@NotNull String argName) {
         if (argName.startsWith("(") && argName.endsWith(")")) {
             int openParenIndex = argName.indexOf('(');
             int closeParenIndex = argName.lastIndexOf(')');
@@ -121,13 +121,13 @@ public class ProgramUtils {
         }
     }
 
-    public static Set<String> extractAllVariablesFromQuoteArguments(String value) {
+    public static @NotNull Set<String> extractAllVariablesFromQuoteArguments(@NotNull String value) {
         Set<String> variables = new LinkedHashSet<>();
         extractVariablesHelper(value, variables);
         return variables;
     }
 
-    private static void extractVariablesHelper(String value, Set<String> variables) {
+    private static void extractVariablesHelper(@NotNull String value, @NotNull Set<String> variables) {
         List<String> parts = splitArgs(value);
         for (String part : parts) {
             if (isFunctionCall(part)) {
@@ -141,7 +141,8 @@ public class ProgramUtils {
         }
     }
 
-    public static void initAllVariablesFromQuoteArguments(String value, Map<String, Integer> originalContextMap) {
+    public static void initAllVariablesFromQuoteArguments(@NotNull String value,
+                                                          @NotNull Map<String, Integer> originalContextMap) {
         Set<String> variables = extractAllVariablesFromQuoteArguments(value);
         for (String var : variables) {
             if (!originalContextMap.containsKey(var)) {
@@ -150,11 +151,11 @@ public class ProgramUtils {
         }
     }
 
-    public static String extractFunctionContent(@NotNull String argName) {
+    public static @NotNull String extractFunctionContent(@NotNull String argName) {
         return argName.substring(1, argName.length() - 1); // Remove parentheses
     }
 
-    public static List<String> splitArgs(@NotNull String input) {
+    public static @NotNull List<String> splitArgs(@NotNull String input) {
         List<String> result = new ArrayList<>();
         StringBuilder current = new StringBuilder();
         int parentLevel = 0;
@@ -222,7 +223,4 @@ public class ProgramUtils {
         return isVariable(argName) || isLabel(argName);
     }
 
-    public static boolean isWorkVariable(String oldValue) {
-        return oldValue.startsWith(WORK_VAR_PREFIX);
-    }
 }

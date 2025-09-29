@@ -13,7 +13,6 @@ import javafx.scene.control.Alert;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import system.controller.EngineController;
 import ui.jfx.statistics.ShowRunController;
 
@@ -56,18 +55,18 @@ public class UIUtils {
 
     public static void showSuccess(String message) {
         // Alert disabled for performance - can be re-enabled if needed
-        // Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        // alert.setTitle("Success");
-        // alert.setContentText(message);
-        // alert.showAndWait();
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Success");
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public static void showInfo(String message) {
         // Alert disabled for performance - can be re-enabled if needed
-        // Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        // alert.setTitle("Information");
-        // alert.setContentText(message);
-        // alert.showAndWait();
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public static void sleep(int milliseconds) {

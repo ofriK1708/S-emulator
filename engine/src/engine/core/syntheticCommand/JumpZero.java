@@ -22,7 +22,8 @@ public class JumpZero extends Instruction
         expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
 
-    public JumpZero(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
+    public JumpZero(String mainVarName, Map<String, String> args, String label, @NotNull Instruction derivedFrom,
+                    int derivedFromIndex)
     {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }

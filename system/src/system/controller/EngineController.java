@@ -259,18 +259,18 @@ public class EngineController
 
     // NEW DEBUG FUNCTIONALITY - Added at the end as requested
 
-    public Map<String, Integer> getDebugWorkVariables() {
-        if (engine == null || !inDebugSession) {
-            throw new IllegalStateException("Debug session not active");
-        }
-        return engine.getDebugWorkVariables();
-    }
-
     public int getCurrentDebugCycles() {
         if (engine == null || !inDebugSession) {
             throw new IllegalStateException("Debug session not active");
         }
         return engine.getCurrentDebugCycles();
+    }
+
+    public int getLastDebugCycles() {
+        if (engine == null) {
+            throw new IllegalStateException("Program has not been set");
+        }
+        return engine.getLastDebugCycles();
     }
     // Add this method to your EngineController class:
 

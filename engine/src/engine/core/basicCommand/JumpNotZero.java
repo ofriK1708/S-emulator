@@ -17,7 +17,8 @@ public class JumpNotZero extends Instruction
         super(mainVarName, args, labelArgumentName);
     }
 
-    public JumpNotZero(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
+    public JumpNotZero(String mainVarName, Map<String, String> args, String label, @NotNull Instruction derivedFrom,
+                       int derivedFromIndex)
     {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }

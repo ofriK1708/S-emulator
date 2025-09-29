@@ -10,6 +10,7 @@ import engine.generated_2.SInstructions;
 import engine.generated_2.SProgram;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -28,11 +29,10 @@ public class ProgramEngine implements Serializable {
     private final List<List<Instruction>> instructionExpansionLevels = new ArrayList<>();
     private @NotNull List<Instruction> originalInstructions;
     private final List<Set<String>> labelsByExpandLevel = new ArrayList<>();
-    private final List<Integer> cyclesPerExpandLevel = new ArrayList<>();
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
     private Map<String, ProgramEngine> allFunctionsInMain;
     private @NotNull Set<String> originalLabels;
-    private SFunction originalSFunction = null;
+    private @Nullable SFunction originalSFunction = null;
     private String funcName;
 
     // Enhanced debugger fields with proper state management:
@@ -40,12 +40,11 @@ public class ProgramEngine implements Serializable {
     private int currentDebugPC = 0;
     private final List<Map<String, Integer>> debugStateHistory = new ArrayList<>();
     private final List<Integer> debugCyclesHistory = new ArrayList<>(); // Track cycles per step
-    private List<Instruction> currentDebugInstructions;
-    private Map<String, Integer> currentDebugContext;
+    private List<Instruction> currentDebugInstructions = new ArrayList<>();
+    private Map<String, Integer> currentDebugContext = new HashMap<>();
     private final Map<String, Integer> debugArguments = new HashMap<>(); // Store debug arguments
-    private int debugExpandLevel = 0;
     private int totalDebugCycles = 0; // Monotonic cycle counter
-    private ExecutionStatistics currentDebugStatistics = null;
+    private @Nullable ExecutionStatistics currentDebugStatistics = null;
 
 
     public ProgramEngine(@NotNull SProgram program) throws LabelNotExist {
@@ -170,7 +169,6 @@ public class ProgramEngine implements Serializable {
         labelsByExpandLevel.add(originalLabels);
         initializeContextMap();
         contextMapsByExpandLevel.add(new HashMap<>(originalContextMap));
-        cyclesPerExpandLevel.add(calcTotalCycles(0));
     }
 
 
@@ -278,7 +276,6 @@ public class ProgramEngine implements Serializable {
                 instructionExpansionLevels.add(tempExpanded);
                 contextMapsByExpandLevel.add(latestContextMap);
                 updateLabelsAfterExpanding();
-                cyclesPerExpandLevel.add(calcTotalCycles(currLevel));
             }
         }
     }
@@ -333,21 +330,14 @@ public class ProgramEngine implements Serializable {
                 .collect(Collectors.toList());
     }
 
-    private int calcTotalCycles(int expandLevel) {
-        return instructionExpansionLevels.get(expandLevel).stream()
+    private int calcTotalCycles() {
+        return instructionExpansionLevels.getFirst().stream()
                 .mapToInt(Instruction::getCycles)
                 .sum();
     }
 
-    public int getTotalCycles(int expandLevel) {
-        if (expandLevel < 0 || expandLevel >= cyclesPerExpandLevel.size()) {
-            throw new IllegalArgumentException("Expand level out of bounds");
-        }
-        return cyclesPerExpandLevel.get(expandLevel);
-    }
-
     public int getTotalCycles() {
-        return calcTotalCycles(0);
+        return calcTotalCycles();
     }
 
     public int getLastExecutionCycles() {
@@ -401,7 +391,6 @@ public class ProgramEngine implements Serializable {
     public void startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments) {
         clearPreviousRunData(expandLevel);
         resetDebugState();
-        debugExpandLevel = expandLevel;
 
         // Expand to required level
         expand(expandLevel);
@@ -434,8 +423,8 @@ public class ProgramEngine implements Serializable {
         debugStateHistory.clear();
         debugCyclesHistory.clear();
         debugArguments.clear();
-        currentDebugInstructions = null;
-        currentDebugContext = null;
+        currentDebugInstructions = Collections.emptyList();
+        currentDebugContext = Collections.emptyMap();
         totalDebugCycles = 0;
         currentDebugPC = 0;
         currentDebugStatistics = null;
@@ -528,7 +517,7 @@ public class ProgramEngine implements Serializable {
 
     // New method to finalize debug statistics:
     public void finalizeDebugStatistics() {
-        if (currentDebugStatistics != null && currentDebugContext != null) {
+        if (currentDebugStatistics != null && !currentDebugContext.isEmpty()) {
             // Set final result (Y value) and cycles used
             int finalResult = currentDebugContext.get(ProgramUtils.OUTPUT_NAME);
             currentDebugStatistics.setY(finalResult);
@@ -557,15 +546,6 @@ public class ProgramEngine implements Serializable {
         return debugMode && currentDebugPC >= currentDebugInstructions.size();
     }
 
-    public Map<String, Integer> getDebugWorkVariables() {
-        if (!debugMode || currentDebugContext == null) {
-            throw new IllegalStateException("Debug session not active");
-        }
-
-        // Reuse existing extractWorkVars logic from ProgramUtils
-        return ProgramUtils.extractSortedWorkVars(currentDebugContext);
-    }
-
     public int getCurrentDebugCycles() {
         if (!debugMode) {
             throw new IllegalStateException("Debug session not active");
@@ -573,6 +553,7 @@ public class ProgramEngine implements Serializable {
 
         return totalDebugCycles;
     }
+
 
     protected @NotNull List<Instruction> getFunctionInstructions() {
         return instructionExpansionLevels.getFirst();
@@ -583,7 +564,6 @@ public class ProgramEngine implements Serializable {
         instructionExpansionLevels.clear();
         contextMapsByExpandLevel.clear();
         labelsByExpandLevel.clear();
-        cyclesPerExpandLevel.clear();
         currentDebugStatistics = null; // Clear statistics reference
         try {
             if (originalSFunction != null) {
@@ -604,7 +584,6 @@ public class ProgramEngine implements Serializable {
         if (allFunctionsInMain == null) {
             return Collections.emptyMap();
         }
-        Map<String, String> allFunctionNamesAndStrName = new HashMap<>();
         return allFunctionsInMain.entrySet().stream().collect(Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> entry.getValue().getFuncName()
@@ -619,5 +598,12 @@ public class ProgramEngine implements Serializable {
             throw new IllegalArgumentException("Function " + name + " does not exist in program " + programName);
         }
         return allFunctionsInMain.get(name);
+    }
+
+    public int getLastDebugCycles() {
+        if (debugCyclesHistory.isEmpty()) {
+            return 0;
+        }
+        return debugCyclesHistory.getLast();
     }
 }

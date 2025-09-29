@@ -20,7 +20,7 @@ public class Quote extends Instruction {
     private final List<Quote> subfunctionCalls = new ArrayList<>();
     private int subFunctionsCycles;
 
-    public Quote(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom,
+    public Quote(String mainVarName, Map<String, String> args, String label, @NotNull Instruction derivedFrom,
                  int derivedFromIndex, @NotNull ProgramEngine mainFunction) {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
         this.mainFunction = mainFunction;
@@ -34,7 +34,8 @@ public class Quote extends Instruction {
         initAndValidateQuote();
     }
 
-    public Quote(String mainVarName, String label, Quote quote, Instruction derivedFrom, int derivedFromIndex) {
+    public Quote(String mainVarName, String label, @NotNull Quote quote, @NotNull Instruction derivedFrom,
+                 int derivedFromIndex) {
         super(mainVarName, quote.args, label, derivedFrom, derivedFromIndex);
         this.mainFunction = quote.mainFunction;
         this.functionToRun = quote.functionToRun;
@@ -167,7 +168,7 @@ public class Quote extends Instruction {
     }
 
     @Override
-    public @NotNull List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex) {
+    public @NotNull List<Instruction> expand(@NotNull Map<String, Integer> contextMap, int originalInstructionIndex) {
         List<Instruction> expandedInstructions = new ArrayList<>();
         Map<String, String> argsReplacements = new HashMap<>();
         if (!label.isBlank()) {
@@ -180,8 +181,9 @@ public class Quote extends Instruction {
         return expandedInstructions;
     }
 
-    private void handelNewAssignment(Map<String, Integer> contextMap, int originalInstructionIndex,
-                                     Map<String, String> argsReplacements, List<Instruction> expandedInstructions) {
+    private void handelNewAssignment(@NotNull Map<String, Integer> contextMap, int originalInstructionIndex,
+                                     @NotNull Map<String, String> argsReplacements,
+                                     @NotNull List<Instruction> expandedInstructions) {
 
         List<String> functionParamNames = functionToRun.getSortedProgramArgsNames();
         Iterator<Quote> subFuncIter = subfunctionCalls.iterator();
@@ -235,7 +237,7 @@ public class Quote extends Instruction {
         return quoteStringBuilder.toString();
     }
 
-    public void updateArguments(String updatedArguments) {
+    public void updateArguments(@NotNull String updatedArguments) {
         // only update if there is a change
         if (!allArgsString.equals(updatedArguments)) {
             this.allArgsString = updatedArguments;

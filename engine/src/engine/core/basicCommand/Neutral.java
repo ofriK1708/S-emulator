@@ -15,7 +15,8 @@ public class Neutral extends Instruction
         super(mainVarName, args, labelName);
     }
 
-    public Neutral(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
+    public Neutral(String mainVarName, Map<String, String> args, String label, @NotNull Instruction derivedFrom,
+                   int derivedFromIndex)
     {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }

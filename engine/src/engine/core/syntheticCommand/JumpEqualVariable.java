@@ -24,6 +24,7 @@ public class JumpEqualVariable extends Instruction
         expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
 
+    @SuppressWarnings("SameParameterValue")
     protected JumpEqualVariable(String mainVarName, Map<String, String> args, @Nullable String label, @NotNull Instruction derivedFrom, int derivedFromIndex) {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }

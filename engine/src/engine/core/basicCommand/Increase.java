@@ -17,7 +17,8 @@ public class Increase extends Instruction
         super(mainVarName, args, labelName);
     }
 
-    public Increase(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
+    public Increase(String mainVarName, Map<String, String> args, String label, @NotNull Instruction derivedFrom,
+                    int derivedFromIndex)
     {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }

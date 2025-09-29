@@ -23,7 +23,8 @@ public class Assignment extends Instruction
         expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
 
-    public Assignment(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
+    public Assignment(String mainVarName, Map<String, String> args, String label, @NotNull Instruction derivedFrom,
+                      int derivedFromIndex)
     {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
         expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);

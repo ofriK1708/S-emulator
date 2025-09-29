@@ -87,7 +87,8 @@ public abstract class Instruction implements Command, Serializable {
         this.derivedFromIndex = derivedFromIndex;
     }
 
-    protected static Quote createQuoteFromString(String argName, @NotNull ProgramEngine mainFunction) {
+    protected static @NotNull Quote createQuoteFromString(@NotNull String argName,
+                                                          @NotNull ProgramEngine mainFunction) {
         String functionCallContent = ProgramUtils.extractFunctionContent(argName);
         List<String> parts = ProgramUtils.splitArgs(functionCallContent);
         String functionName = parts.getFirst().trim();
@@ -134,7 +135,6 @@ public abstract class Instruction implements Command, Serializable {
         return derivedInstructions;
     }
 
-    @Override
     public @NotNull InstructionDTO toDTO(int idx) {
         return new InstructionDTO(
                 idx,
@@ -158,7 +158,7 @@ public abstract class Instruction implements Command, Serializable {
         );
     }
 
-    protected List<Instruction> getUpdatedFunctionInstructions(
+    protected @NotNull List<Instruction> getUpdatedFunctionInstructions(
             @NotNull Map<String, Integer> mainContextMap,
             @NotNull ProgramEngine function,
             @NotNull String outputVar,
@@ -168,7 +168,7 @@ public abstract class Instruction implements Command, Serializable {
 
         List<Instruction> functionInstructions = function.getFunctionInstructions();
         Map<String, String> allReplacements = new HashMap<>(argsReplacements);
-        setupConflictAvoidanceReplacements(mainContextMap, outputVar, argsReplacements, allReplacements, function);
+        setupConflictAvoidanceReplacements(mainContextMap, argsReplacements, allReplacements, function);
         String endLabel = ProgramUtils.getNextFreeLabelName(mainContextMap);
         allReplacements.put(ProgramUtils.EXIT_LABEL_NAME, endLabel);
 
@@ -181,14 +181,14 @@ public abstract class Instruction implements Command, Serializable {
             // check for label swap
             String oldLabel = instruction.getLabel();
             // special case for exit label, we need to add a new neutral instruction after the function instructions
-            replaceIfNeeded(mainContextMap, outputVar, oldLabel, allReplacements, instruction::setLabel);
+            replaceIfNeeded(mainContextMap, oldLabel, allReplacements, instruction::setLabel);
 
             // check for main var swap
             String oldMainVar = instruction.getMainVarName();
-            replaceIfNeeded(mainContextMap, outputVar, oldMainVar, allReplacements, instruction::setMainVarName);
+            replaceIfNeeded(mainContextMap, oldMainVar, allReplacements, instruction::setMainVarName);
 
             // check for args swap
-            processInstructionArguments(instruction, mainContextMap, outputVar, allReplacements);
+            processInstructionArguments(instruction, mainContextMap, allReplacements);
         }
         functionInstructions.addLast(new Assignment(outputVar, Map.of(Assignment.sourceArgumentName,
                 allReplacements.get(ProgramUtils.OUTPUT_NAME)), allReplacements.get(ProgramUtils.EXIT_LABEL_NAME),
@@ -199,7 +199,6 @@ public abstract class Instruction implements Command, Serializable {
     }
 
     private void setupConflictAvoidanceReplacements(@NotNull Map<String, Integer> mainContextMap,
-                                                    @NotNull String outputVar,
                                                     @NotNull Map<String, String> argsReplacements,
                                                     @NotNull Map<String, String> allReplacements,
                                                     @NotNull ProgramEngine function) {
@@ -225,8 +224,8 @@ public abstract class Instruction implements Command, Serializable {
     }
 
     private void replaceIfNeeded(@NotNull Map<String, Integer> mainContextMap,
-                                 @NotNull String outputVar, String oldVar,
-                                 Map<String, String> allReplacements, Consumer<String> valueSetter) {
+                                 @NotNull String oldVar,
+                                 @NotNull Map<String, String> allReplacements, @NotNull Consumer<String> valueSetter) {
         if (ProgramUtils.isVariableOrLabel(oldVar) &&
                 (mainContextMap.containsKey(oldVar) || allReplacements.containsKey(oldVar))) {
             if (oldVar.equals(ProgramUtils.OUTPUT_NAME)) {
@@ -258,7 +257,6 @@ public abstract class Instruction implements Command, Serializable {
     private void processInstructionArguments(
             @NotNull Instruction instruction,
             @NotNull Map<String, Integer> mainContextMap,
-            @NotNull String outputVar,
             @NotNull Map<String, String> allReplacements
     ) {
 
@@ -272,13 +270,14 @@ public abstract class Instruction implements Command, Serializable {
                 currentInstructionAsQuote.updateArguments(argsEntry.getValue());
             } else {
                 String argValue = argsEntry.getValue();
-                replaceIfNeeded(mainContextMap, outputVar, argValue, allReplacements, argsEntry::setValue);
+                replaceIfNeeded(mainContextMap, argValue, allReplacements, argsEntry::setValue);
             }
         }
     }
 
-    private void swapIfNeededInFunctionCall(String functionArguments,
-                                            Map<String, String> replacements, Consumer<String> valueSetter) {
+    private void swapIfNeededInFunctionCall(@NotNull String functionArguments,
+                                            @NotNull Map<String, String> replacements,
+                                            @NotNull Consumer<String> valueSetter) {
 
         String pattern = "\\b(" + String.join("|", replacements.keySet()) + ")\\b";
         Pattern regex = Pattern.compile(pattern);

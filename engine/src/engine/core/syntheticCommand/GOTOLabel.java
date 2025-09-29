@@ -22,7 +22,8 @@ public class GOTOLabel extends Instruction
         expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
 
-    public GOTOLabel(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex)
+    public GOTOLabel(String mainVarName, Map<String, String> args, String label, @NotNull Instruction derivedFrom,
+                     int derivedFromIndex)
     {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
         expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);

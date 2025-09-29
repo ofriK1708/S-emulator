@@ -5,7 +5,6 @@ import engine.core.basicCommand.Increase;
 import engine.utils.CommandType;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +14,6 @@ public class ConstantAssignment extends Instruction
 {
     public final static String valueArgumentName = "constantValue";
     public static int expandLevel = -1;
-
-    protected ConstantAssignment(String mainVarName, Map<String, String> args, @Nullable String label, @NotNull Instruction derivedFrom, int derivedFromIndex) {
-        super(mainVarName, args, label, derivedFrom, derivedFromIndex);
-    }
 
     public ConstantAssignment(String mainVarName, Map<String, String> args, String labelName)
     {

@@ -16,12 +16,6 @@ public class JumpEqualFunction extends Instruction {
     private final @NotNull ProgramEngine mainEngine;
     private final @NotNull Quote functionQuoteToCheck;
 
-    public JumpEqualFunction(String mainVarName, Map<String, String> args, String label, Instruction derivedFrom, int derivedFromIndex, @NotNull ProgramEngine mainFunction) {
-        super(mainVarName, args, label, derivedFrom, derivedFromIndex);
-        this.mainEngine = mainFunction;
-        functionQuoteToCheck = new Quote("", this.args, "", mainEngine);
-    }
-
     public JumpEqualFunction(String mainVarName, Map<String, String> args, String label, @NotNull ProgramEngine mainFunction) {
         super(mainVarName, args, label);
         this.mainEngine = mainFunction;
@@ -61,7 +55,7 @@ public class JumpEqualFunction extends Instruction {
     }
 
     @Override
-    public @NotNull List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex) {
+    public @NotNull List<Instruction> expand(@NotNull Map<String, Integer> contextMap, int originalInstructionIndex) {
         List<Instruction> expandedInstructions = new ArrayList<>();
         String freeWorkVar = ProgramUtils.getNextFreeWorkVariableName(contextMap);
         if (!label.isBlank()) {

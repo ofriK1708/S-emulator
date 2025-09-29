@@ -1,6 +1,5 @@
 package engine.core;
 
-import dto.engine.InstructionDTO;
 import engine.utils.CommandType;
 
 import java.io.Serializable;
@@ -13,7 +12,6 @@ public interface Command extends Serializable {
     CommandType getType();
     int getExpandLevel();
     List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex);
-    InstructionDTO toDTO(int idx);
 
     String getStringRepresentation();
 }

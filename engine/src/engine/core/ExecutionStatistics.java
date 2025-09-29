@@ -14,12 +14,12 @@ public class ExecutionStatistics implements Serializable
     private static final long serialVersionUID = 1L;
     private final int executionNumber;
     private final int expandLevel;
-    private final Map<String, Integer> arguments;
+    private final @NotNull Map<String, Integer> arguments;
     private int Y = 0;
     private int numOfCycles = 0;
 
 
-    public ExecutionStatistics(int executionNumber, int expandLevel, Map<String, Integer> arguments)
+    public ExecutionStatistics(int executionNumber, int expandLevel, @NotNull Map<String, Integer> arguments)
     {
         this.executionNumber = executionNumber;
         this.expandLevel = expandLevel;
