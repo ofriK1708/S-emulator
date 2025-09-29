@@ -521,7 +521,7 @@ public class AppController {
             ProgramDTO executedProgram = engineController.getProgramByExpandLevel(expandLevel);
             programInstructions.setAll(executedProgram.instructions());
             derivedInstructions.clear();
-            currentCycles.set(engineController.getCyclesCount(expandLevel));
+            currentCycles.set(engineController.getLastExecutionNumberOfCycles());
             summaryLineController.updateCounts(executedProgram.instructions());
 
             updateProperties();
@@ -563,7 +563,6 @@ public class AppController {
             ProgramDTO program = engineController.getProgramByExpandLevel(expandLevel);
             derivedInstructions.clear();
             programInstructions.setAll(program.instructions());
-            currentCycles.set(engineController.getCyclesCount(expandLevel));
             allVariablesDTO.clear();
             argumentsDTO.clear();
             summaryLineController.updateCounts(program.instructions());

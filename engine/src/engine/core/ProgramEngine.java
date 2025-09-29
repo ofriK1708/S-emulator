@@ -350,6 +350,13 @@ public class ProgramEngine implements Serializable {
         return calcTotalCycles(0);
     }
 
+    public int getLastExecutionCycles() {
+        if (executionStatisticsList.isEmpty()) {
+            return 0;
+        }
+        return executionStatisticsList.getLast().toDTO().cyclesUsed();
+    }
+
     public @NotNull Set<String> getAllVariablesNamesAndLabels(int expandLevel) {
         if (expandLevel < 0 || expandLevel >= labelsByExpandLevel.size()) {
             throw new IllegalArgumentException("Expand level out of bounds");

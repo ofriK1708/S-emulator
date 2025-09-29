@@ -109,11 +109,11 @@ public class EngineController
     }
 
 
-    public int getCyclesCount(int expandLevel) {
+    public int getLastExecutionNumberOfCycles() {
         if (engine == null) {
             throw new IllegalStateException("Program has not been set");
         }
-        return engine.getTotalCycles(expandLevel);
+        return engine.getLastExecutionCycles();
     }
 
     public @NotNull ProgramDTO getProgramByExpandLevel(int expandLevel)

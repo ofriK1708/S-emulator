@@ -9,15 +9,11 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public record UIAdapterLoadFileTask(
-        Consumer<Boolean> programLoadedDelegate,
-        Consumer<Boolean> variablesEnteredDelegate,
+        Consumer<Boolean> programLoadedDelegate, Consumer<Boolean> variablesEnteredDelegate,
         Consumer<List<String>> variablesAndLabelsNamesDelegate,
-        Consumer<List<InstructionDTO>> programInstructionsDelegate,
-        Runnable clearDerivedInstructionsDelegate,
-        Consumer<List<InstructionDTO>> summaryLineDelegate,
-        Consumer<Integer> maxExpandLevelDelegate,
-        Consumer<Integer> currentExpandLevelDelegate,
-        Consumer<Integer> cyclesDelegate, Consumer<ProgramDTO> onFinish) {
+        Consumer<List<InstructionDTO>> programInstructionsDelegate, Runnable clearDerivedInstructionsDelegate,
+        Consumer<List<InstructionDTO>> summaryLineDelegate, Consumer<Integer> maxExpandLevelDelegate,
+        Consumer<Integer> currentExpandLevelDelegate, Consumer<Integer> cyclesDelegate, Consumer<ProgramDTO> onFinish) {
 
     public void variablesAndInstructionsHandler(@NotNull ProgramDTO program, List<String> allVars) {
         Platform.runLater(() -> {

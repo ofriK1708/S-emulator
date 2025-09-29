@@ -20,7 +20,7 @@
 
     <!-- CENTER: instructions table + summary line (placeholders for now) -->
     <center>
-        <ScrollPane fitToWidth="true" hvalue="0.5">
+        <ScrollPane fitToWidth="true" hvalue="0.5" vvalue="0.61">
             <BorderPane.margin>
                 <Insets bottom="20.0" right="50.0"/>
             </BorderPane.margin>
@@ -90,7 +90,7 @@
                                                     <RowConstraints maxHeight="328.0" minHeight="0.0" prefHeight="3.0"
                                                                     vgrow="SOMETIMES"/>
                                                     <RowConstraints maxHeight="328.0" minHeight="0.0" prefHeight="49.0"
-                                                                    vgrow="SOMETIMES"/>
+                                                                    vgrow="ALWAYS"/>
                                                 </rowConstraints>
                                                 <children>
                                                     <fx:include fx:id="argumentsTable"
@@ -102,10 +102,11 @@
                                                                 source="variables/variablesTable.fxml"
                                                                 GridPane.columnIndex="1" GridPane.hgrow="ALWAYS"
                                                                 GridPane.rowSpan="4" GridPane.vgrow="ALWAYS"/>
-                                                    <fx:include fx:id="cycles" source="cycles/cycles.fxml"
-                                                                GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS"
-                                                                GridPane.rowIndex="3" GridPane.valignment="CENTER"
-                                                                GridPane.vgrow="ALWAYS"/>
+                                                    <fx:include fx:id="cycles" maxHeight="1.7976931348623157E308"
+                                                                maxWidth="1.7976931348623157E308"
+                                                                source="cycles/cycles.fxml" GridPane.halignment="CENTER"
+                                                                GridPane.hgrow="ALWAYS" GridPane.rowIndex="3"
+                                                                GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS"/>
                                                 </children>
                                             </GridPane>
                                         </content>
