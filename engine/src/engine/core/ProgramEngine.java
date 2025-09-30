@@ -462,11 +462,6 @@ public class ProgramEngine implements Serializable {
             debugStateHistory.add(new HashMap<>(currentDebugContext));
             debugCyclesHistory.add(totalDebugCycles);
 
-            if (currentDebugPC >= currentDebugInstructions.size()) {
-                finalizeDebugStatistics();
-            }
-
-
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Error executing debug instruction at PC=" + currentDebugPC + ": " + e.getMessage(), e);
         }
@@ -612,5 +607,10 @@ public class ProgramEngine implements Serializable {
             throw new IllegalArgumentException("Function " + name + " does not exist in program " + programName);
         }
         return allFunctionsInMain.get(name);
+    }
+    public void finalizeDebugExecution() {
+        if (debugMode && currentDebugStatistics != null && isDebugFinished()) {
+            finalizeDebugStatistics();
+        }
     }
 }

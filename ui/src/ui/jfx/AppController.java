@@ -707,44 +707,6 @@ public class AppController {
         }
     }
 
-    public void debugStep() {
-        if (!inDebugSession) {
-            showError("No debug session active");
-            return;
-        }
-
-        if (engineController.isDebugFinished()) {
-            showInfo("Execution finished. Program has completed successfully.");
-            return;
-        }
-
-        try {
-            if (!isFirstDebugStep) {
-                previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
-            }
-
-            engineController.debugStep();
-            int currentPC = engineController.getCurrentDebugPC();
-            currentCycles.set(engineController.getCurrentDebugCycles());
-            highlightCurrentInstruction(currentPC);
-
-            updateDebugVariableState();
-
-            if (isFirstDebugStep) {
-                isFirstDebugStep = false;
-            }
-
-            if (engineController.isDebugFinished()) {
-                handleExecutionFinished();
-            } else {
-                showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + currentCycles.get());
-            }
-        } catch (Exception e) {
-            System.err.println("Error during debug step: " + e.getMessage());
-            showError("Error during debug step: " + e.getMessage());
-        }
-    }
-
     private void updateDebugVariableState() {
         List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted(engineController,
                     currentExpandLevel.get());
@@ -785,40 +747,11 @@ public class AppController {
         }
     }
 
-    public void debugResume() {
-        if (!inDebugSession) {
-            showError("No debug session active");
-            return;
-        }
-
-        if (engineController.isDebugFinished()) {
-            showInfo("Execution already finished.");
-            return;
-        }
-
-        try {
-            engineController.debugResume();
-            instructionsTableController.highlightCurrentInstruction(0);
-            updateDebugVariableState();
-            currentCycles.set(engineController.getCurrentDebugCycles());
-
-            handleExecutionFinished();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            showError("Error during debug resume: " + e.getMessage());
-            endDebugSession();
-        }
-    }
-
     private void handleExecutionFinished() {
         try {
             if (debugControlsController != null) {
                 debugControlsController.notifyExecutionFinished();
             }
-
-            executionStatistics.add(engineController.getLastExecutionStatistics());
-            programRanAtLeastOnce.set(true);
 
             showSuccess("Execution completed successfully!\n" +
                     "Total cycles: " + currentCycles.get() + "\n" +
@@ -849,5 +782,80 @@ public class AppController {
 
         updateDebugVariableState();
         System.out.println("Debug session ended - ready for new execution");
+    }
+    public void debugStep() {
+        if (!inDebugSession) {
+            showError("No debug session active");
+            return;
+        }
+
+        if (engineController.isDebugFinished()) {
+            showInfo("Execution finished. Program has completed successfully.");
+            return;
+        }
+
+        try {
+            if (!isFirstDebugStep) {
+                previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
+            }
+
+            // Execute one instruction - finalization happens inside if needed
+            engineController.debugStep();
+
+            int currentPC = engineController.getCurrentDebugPC();
+            currentCycles.set(engineController.getCurrentDebugCycles());
+            highlightCurrentInstruction(currentPC);
+            updateDebugVariableState();
+
+            if (isFirstDebugStep) {
+                isFirstDebugStep = false;
+            }
+            if (engineController.isDebugFinished()) {
+                executionStatistics.setAll(engineController.getAllExecutionStatistics());
+                handleExecutionFinished();
+            } else {
+                showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + currentCycles.get());
+            }
+        } catch (Exception e) {
+            System.err.println("Error during debug step: " + e.getMessage());
+            showError("Error during debug step: " + e.getMessage());
+        }
+    }
+
+    public void debugResume() {
+        if (!inDebugSession) {
+            showError("No debug session active");
+            return;
+        }
+
+        if (engineController.isDebugFinished()) {
+            showInfo("Execution already finished.");
+            return;
+        }
+
+        try {
+            System.out.println("Debug Resume: Starting execution from PC=" + engineController.getCurrentDebugPC());
+
+            // Execute remaining instructions - finalization happens inside
+            engineController.debugResume();
+
+            // Clear instruction highlighting
+            instructionsTableController.highlightCurrentInstruction(-1);
+
+            // Update variable display
+            updateDebugVariableState();
+            currentCycles.set(engineController.getCurrentDebugCycles());
+
+            // SIMPLIFIED: Just refresh statistics from Service layer
+            executionStatistics.setAll(engineController.getAllExecutionStatistics());
+            handleExecutionFinished();
+
+            System.out.println("Debug Resume: Execution completed successfully");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Error during debug resume: " + e.getMessage());
+            endDebugSession();
+        }
     }
 }
