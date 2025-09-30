@@ -19,18 +19,12 @@ public class Quote extends Instruction {
     private List<String> funcArgsNames;
     private final List<Quote> subfunctionCalls = new ArrayList<>();
     private int subFunctionsCycles;
+    private int executedCycles = 0;
 
     public Quote(String mainVarName, Map<String, String> args, String label, @NotNull Instruction derivedFrom,
                  int derivedFromIndex, @NotNull ProgramEngine mainFunction) {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
         this.mainFunction = mainFunction;
-        initAndValidateQuote();
-    }
-
-    public Quote(String mainVarName, Map<String, String> args, String label, @NotNull ProgramEngine mainFunction) {
-        super(mainVarName, args, label);
-        this.mainFunction = mainFunction;
-
         initAndValidateQuote();
     }
 
@@ -42,8 +36,19 @@ public class Quote extends Instruction {
         this.allArgsString = quote.allArgsString;
         this.funcArgsNames = new ArrayList<>(quote.funcArgsNames);
         this.subfunctionCalls.addAll(quote.subfunctionCalls);
-        this.subFunctionsCycles = quote.subFunctionsCycles;
+        //this.subFunctionsCycles = quote.subFunctionsCycles;
         this.isFinishedInitialization = quote.isFinishedInitialization;
+    }
+
+    public Quote(String mainVarName, Map<String, String> args, String label, @NotNull ProgramEngine mainFunction) {
+        super(mainVarName, args, label);
+        this.mainFunction = mainFunction;
+
+        initAndValidateQuote();
+    }
+
+    public int getExecutedCycles() {
+        return executedCycles;
     }
 
     public void initAndValidateQuote() {
@@ -80,12 +85,11 @@ public class Quote extends Instruction {
                 subfunctionCalls.add(functionCall);
             }
         }
-        calcSubFunctionCycles();
     }
 
-    private void calcSubFunctionCycles() {
-        subFunctionsCycles = subfunctionCalls.stream()
-                .mapToInt(Quote::getCycles)
+    private int calcSubFunctionCycles() {
+        return subfunctionCalls.stream()
+                .mapToInt(Quote::getExecutedCycles)
                 .sum();
     }
 
@@ -106,6 +110,7 @@ public class Quote extends Instruction {
         Map<String, Integer> functionToRunNeededArguments = functionToRun.getSortedArguments();
         prepareArguments(functionToRunNeededArguments, arguments);
         functionToRun.run(functionToRunNeededArguments, false);
+        executedCycles = functionToRun.getTotalCycles(functionToRunNeededArguments);
         return functionToRun.getOutput();
     }
 
@@ -145,14 +150,14 @@ public class Quote extends Instruction {
     public int getCycles() {
         if (isFinishedInitialization) {
             final int quoteOverhead = 5;
-            return quoteOverhead + functionToRun.getTotalCycles();
+            return quoteOverhead + executedCycles + calcSubFunctionCycles();
         }
         return 0; // not initialized yet
     }
 
     public int getFunctionCycles() {
         if (isFinishedInitialization) {
-            return functionToRun.getTotalCycles();
+            return executedCycles + calcSubFunctionCycles();
         }
         return 0; // not initialized yet
     }

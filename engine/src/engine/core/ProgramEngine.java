@@ -330,14 +330,15 @@ public class ProgramEngine implements Serializable {
                 .collect(Collectors.toList());
     }
 
-    private int calcTotalCycles() {
-        return instructionExpansionLevels.getFirst().stream()
-                .mapToInt(Instruction::getCycles)
-                .sum();
+    private int calcTotalCycles(Map<String, Integer> arguments) {
+        run(0, arguments, true);
+        int cyclesThatTook = getLastExecutionCycles();
+        executionStatisticsList.removeLast(); // remove temporary stats, we only wanted the cycles
+        return cyclesThatTook;
     }
 
-    public int getTotalCycles() {
-        return calcTotalCycles();
+    public int getTotalCycles(Map<String, Integer> arguments) {
+        return calcTotalCycles(arguments);
     }
 
     public int getLastExecutionCycles() {
