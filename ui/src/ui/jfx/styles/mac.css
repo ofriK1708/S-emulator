@@ -1,0 +1,617 @@
+/* ===== MAC IS THE BEST THEME ===== */
+/* Modern Apple-inspired design - Clean, minimal, and elegant */
+
+.root {
+    /* Apple-inspired color palette */
+    -fx-primary-bg: #f5f5f7;
+    -fx-secondary-bg: #ffffff;
+    -fx-surface-bg: #fbfbfd;
+    -fx-text-primary: #1d1d1f;
+    -fx-text-secondary: #86868b;
+    -fx-text-accent: #007aff;
+
+    /* Apple button colors - All using the same beautiful blue */
+    -fx-blue-primary: #007aff;
+    -fx-blue-secondary: #0056cc;
+    -fx-blue-hover-primary: #409cff;
+    -fx-blue-hover-secondary: #007aff;
+    -fx-blue-pressed: #0051d0;
+    -fx-blue-disabled: #d1d1d6;
+
+    /* Simple button colors - using blue everywhere */
+    -fx-button-primary: #007aff;
+    -fx-button-secondary: #0056cc;
+    -fx-button-hover-primary: #409cff;
+    -fx-button-hover-secondary: #007aff;
+    -fx-button-pressed: #0051d0;
+    -fx-button-disabled: #d1d1d6;
+
+    /* Debug specific colors */
+    -fx-debug-bg: #1d1d1f;
+    -fx-debug-stop-color: #ff3b30;
+    -fx-debug-resume-color: #34c759;
+    -fx-debug-step-color: #ffffff;
+
+    /* Apple shadows - subtle and refined */
+    -fx-shadow-light: rgba(0, 0, 0, 0.04);
+    -fx-shadow-medium: rgba(0, 0, 0, 0.08);
+    -fx-shadow-dark: rgba(0, 0, 0, 0.12);
+
+    /* Clean Apple focus */
+    -fx-focus-color: #007aff;
+    -fx-faint-focus-color: rgba(0, 122, 255, 0.25);
+}
+
+/* ===== APPLE COMPONENT STYLES ===== */
+
+/* Root background */
+.app-main-border {
+    -fx-background-color: -fx-primary-bg;
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", "Arial", sans-serif;
+}
+
+/* Unified Button Styling - All buttons use the same beautiful blue */
+.button {
+    -fx-background-color: linear-gradient(to bottom, -fx-button-primary, -fx-button-secondary);
+    -fx-text-fill: white;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-padding: 8px 16px;
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", "Arial", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 122, 255, 0.3), 4, 0.3, 0, 1);
+}
+
+.button:hover {
+    -fx-background-color: linear-gradient(to bottom, -fx-button-hover-primary, -fx-button-hover-secondary);
+    -fx-effect: dropshadow(gaussian, rgba(0, 122, 255, 0.4), 6, 0.4, 0, 2);
+}
+
+.button:pressed {
+    -fx-background-color: -fx-button-pressed;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 2, 0.2, 0, 1);
+}
+
+.button:disabled {
+    -fx-background-color: -fx-button-disabled;
+    -fx-text-fill: #86868b;
+    -fx-effect: none;
+    -fx-opacity: 0.6;
+}
+
+/* Unified Pill Button Styling - Same style for all pill buttons */
+.pill-button {
+    -fx-background-color: linear-gradient(to bottom, -fx-button-primary, -fx-button-secondary);
+    -fx-text-fill: white;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-padding: 6px 16px;
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", "Arial", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 122, 255, 0.3), 4, 0.3, 0, 1);
+}
+
+.pill-button:hover {
+    -fx-background-color: linear-gradient(to bottom, -fx-button-hover-primary, -fx-button-hover-secondary);
+    -fx-effect: dropshadow(gaussian, rgba(0, 122, 255, 0.4), 6, 0.4, 0, 2);
+}
+
+.pill-button:pressed {
+    -fx-background-color: -fx-button-pressed;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 2, 0.2, 0, 1);
+}
+
+.pill-button:disabled {
+    -fx-background-color: -fx-button-disabled;
+    -fx-text-fill: #86868b;
+    -fx-opacity: 0.6;
+    -fx-effect: none;
+}
+
+/* Simple alternative for grey pill buttons if needed */
+.pill-button-alt {
+    -fx-background-color: linear-gradient(to bottom, #f2f2f7, #e5e5ea);
+    -fx-text-fill: #1d1d1f;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-border-color: rgba(0, 0, 0, 0.1);
+    -fx-border-width: 0.5px;
+}
+
+.pill-button-alt:hover {
+    -fx-background-color: linear-gradient(to bottom, #e5e5ea, #d1d1d6);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 4, 0.3, 0, 1);
+}
+
+.pill-button-alt:pressed {
+    -fx-background-color: #d1d1d6;
+}
+
+/* Text Field Styling - Sleek Apple style */
+.text-field {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1d1d1f;
+    -fx-border-color: rgba(0, 0, 0, 0.15);
+    -fx-border-width: 1px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-padding: 8px 12px;
+    -fx-font-family: "SF Pro Text", "Helvetica Neue", "Arial", sans-serif;
+    -fx-font-size: 13px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 2, 0.2, 0, 1);
+}
+
+.text-field:focused {
+    -fx-border-color: #007aff;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 122, 255, 0.25), 4, 0.5, 0, 0);
+}
+
+.text-field:disabled {
+    -fx-background-color: #f2f2f7;
+    -fx-text-fill: #86868b;
+    -fx-border-color: rgba(0, 0, 0, 0.08);
+    -fx-opacity: 0.6;
+}
+
+.text-field-wide {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1d1d1f;
+    -fx-border-color: rgba(0, 0, 0, 0.15);
+    -fx-border-width: 1px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-padding: 8px 12px;
+    -fx-font-family: "SF Pro Text", "Helvetica Neue", "Arial", sans-serif;
+    -fx-font-size: 13px;
+    -fx-min-width: 250px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 2, 0.2, 0, 1);
+}
+
+.text-field-wide:focused {
+    -fx-border-color: #007aff;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 122, 255, 0.25), 4, 0.5, 0, 0);
+}
+
+/* Label Styling */
+.label {
+    -fx-text-fill: #1d1d1f;
+    -fx-font-family: "SF Pro Text", "Helvetica Neue", "Arial", sans-serif;
+    -fx-font-size: 13px;
+}
+
+.info-label {
+    -fx-background-color: #f2f2f7;
+    -fx-text-fill: #1d1d1f;
+    -fx-background-radius: 8px;
+    -fx-padding: 6px 12px;
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", "Arial", sans-serif;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+}
+
+.file-path-label {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1d1d1f;
+    -fx-border-color: rgba(0, 0, 0, 0.15);
+    -fx-border-width: 1px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-padding: 6px 12px;
+    -fx-font-family: "SF Pro Text", "Helvetica Neue", "Arial", sans-serif;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 2, 0.2, 0, 1);
+}
+
+.pill-label {
+    -fx-text-fill: #1d1d1f;
+    -fx-font-family: "SF Pro Text", "Helvetica Neue", "Arial", sans-serif;
+}
+
+/* Menu Button Styling */
+.menu-button {
+    -fx-background-color: linear-gradient(to bottom, #f2f2f7, #e5e5ea);
+    -fx-text-fill: #1d1d1f;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: rgba(0, 0, 0, 0.1);
+    -fx-border-width: 0.5px;
+    -fx-padding: 6px 12px;
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", "Arial", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 3, 0.3, 0, 1);
+}
+
+.menu-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #e5e5ea, #d1d1d6);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 4, 0.4, 0, 2);
+}
+
+.menu-button > .label {
+    -fx-text-fill: #1d1d1f;
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", "Arial", sans-serif;
+}
+
+/* CheckBox Styling */
+.check-box {
+    -fx-text-fill: #1d1d1f;
+    -fx-font-family: "SF Pro Text", "Helvetica Neue", "Arial", sans-serif;
+    -fx-font-size: 13px;
+}
+
+.check-box > .box {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(0, 0, 0, 0.2);
+    -fx-border-width: 1px;
+    -fx-background-radius: 3px;
+    -fx-border-radius: 3px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 2, 0.2, 0, 1);
+}
+
+.check-box:selected > .box {
+    -fx-background-color: #007aff;
+    -fx-border-color: #007aff;
+}
+
+.check-box:selected > .box > .mark {
+    -fx-background-color: white;
+}
+
+.check-box:hover > .box {
+    -fx-border-color: #007aff;
+    -fx-effect: dropshadow(gaussian, rgba(0, 122, 255, 0.2), 3, 0.4, 0, 1);
+}
+
+/* RadioButton Styling - making text consistent */
+.radio-button {
+    -fx-text-fill: #1d1d1f;
+    -fx-font-family: "SF Pro Text", "Helvetica Neue", "Arial", sans-serif;
+    -fx-font-size: 13px;
+}
+
+.radio-button > .radio {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(0, 0, 0, 0.2);
+    -fx-border-width: 1px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 2, 0.2, 0, 1);
+}
+
+.radio-button:selected > .radio {
+    -fx-background-color: #007aff;
+    -fx-border-color: #007aff;
+}
+
+.radio-button:selected > .radio > .dot {
+    -fx-background-color: white;
+}
+
+.radio-button:hover > .radio {
+    -fx-border-color: #007aff;
+    -fx-effect: dropshadow(gaussian, rgba(0, 122, 255, 0.2), 3, 0.4, 0, 1);
+}
+
+/* Make radio buttons in all locations have consistent text color */
+.pane-mode,
+.radio-button,
+.program-function .radio-button,
+.function-bar .radio-button,
+.buttons-HBox .radio-button {
+    -fx-text-fill: #1d1d1f;
+    -fx-font-family: "SF Pro Text", "Helvetica Neue", "Arial", sans-serif;
+}
+
+/* ToggleButton Styling - Darker gray Apple-like toggle buttons */
+.toggle-button {
+    -fx-background-color: linear-gradient(to bottom, #8e8e93, #6d6d70);
+    -fx-text-fill: white;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-color: rgba(0, 0, 0, 0.15);
+    -fx-border-width: 0.5px;
+    -fx-padding: 6px 12px;
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", "Arial", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 3, 0.3, 0, 1);
+}
+
+.toggle-button:hover {
+}
+
+.toggle-button:pressed {
+    -fx-background-color: #d1d1d6;
+}
+
+.toggle-button:selected {
+    -fx-background-color: linear-gradient(to bottom, -fx-button-primary, -fx-button-secondary);
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 122, 255, 0.3), 4, 0.3, 0, 1);
+}
+
+.toggle-button:selected:hover {
+    -fx-background-color: linear-gradient(to bottom, -fx-button-hover-primary, -fx-button-hover-secondary);
+    -fx-effect: dropshadow(gaussian, rgba(0, 122, 255, 0.4), 5, 0.4, 0, 2);
+}
+
+/* Container Styling */
+.buttons-HBox {
+    -fx-background-color: linear-gradient(to bottom, #fbfbfd, #f5f5f7);
+    -fx-background-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 8, 0.3, 0, 2);
+    -fx-border-color: rgba(0, 0, 0, 0.08);
+    -fx-border-width: 0.5px;
+    -fx-border-radius: 12px;
+}
+
+.hbox {
+    -fx-background-color: -fx-primary-bg;
+}
+
+.vbox {
+    -fx-background-color: transparent;
+}
+
+.grid-pane {
+    -fx-background-color: transparent;
+}
+
+/* Cycles Component */
+.cycles-root {
+    -fx-background-color: linear-gradient(to bottom right, -fx-primary-bg, -fx-secondary-bg);
+}
+
+.cycles-hbox {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #fbfbfd);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 8, 0.3, 0, 2);
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(0, 0, 0, 0.08);
+    -fx-border-width: 0.5px;
+    -fx-border-radius: 12px;
+}
+
+.cycles-label {
+    -fx-text-fill: #86868b;
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", "Arial", sans-serif;
+    -fx-font-weight: 500;
+}
+
+/* Value Label */
+.value-label {
+    -fx-background-color: linear-gradient(to bottom, #f2f2f7, #e5e5ea);
+    -fx-text-fill: #007aff;
+    -fx-background-radius: 6px;
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", "Arial", sans-serif;
+    -fx-font-weight: 600;
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.04), 1, 0, 0, 1);
+}
+
+/* Clear Button - using simpler alternative styling */
+.clear-button {
+    -fx-background-color: linear-gradient(to bottom, #f2f2f7, #e5e5ea);
+    -fx-text-fill: #86868b;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-color: rgba(0, 0, 0, 0.1);
+    -fx-border-width: 0.5px;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-cursor: hand;
+}
+
+.clear-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #e5e5ea, #d1d1d6);
+    -fx-text-fill: #1d1d1f;
+}
+
+.clear-button:pressed {
+    -fx-background-color: #d1d1d6;
+}
+
+/* TitledPane Styling */
+.titled-pane {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(0, 0, 0, 0.08);
+    -fx-border-width: 0.5px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 8, 0.3, 0, 2);
+}
+
+.titled-pane > .title {
+    -fx-background-color: linear-gradient(to bottom, -fx-button-primary, -fx-button-secondary);
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-background-radius: 12px 12px 0 0;
+    -fx-border-radius: 12px 12px 0 0;
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", "Arial", sans-serif;
+    -fx-padding: 8px 16px;
+}
+
+.titled-pane > .title > .text {
+    -fx-fill: white;
+    -fx-text-fill: white;
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", "Arial", sans-serif;
+}
+
+.titled-pane > .title > .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.titled-pane > .title > .arrow-button > .arrow {
+    -fx-background-color: white;
+}
+
+.titled-pane > .content {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 0 0 12px 12px;
+    -fx-border-radius: 0 0 12px 12px;
+}
+
+/* Table Styling */
+.table-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(0, 0, 0, 0.08);
+    -fx-border-width: 0.5px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 6, 0.3, 0, 2);
+    -fx-table-cell-border-color: rgba(0, 0, 0, 0.05);
+}
+
+.table-view .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, -fx-button-primary, -fx-button-secondary);
+    -fx-background-radius: 8px 8px 0 0;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", "Arial", sans-serif;
+    -fx-font-weight: 600;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: white;
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", "Arial", sans-serif;
+}
+
+.table-view .table-cell {
+    -fx-text-fill: #1d1d1f;
+    -fx-font-family: "SF Pro Text", "Helvetica Neue", "Arial", sans-serif;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #ffffff;
+}
+
+.table-row-cell:even {
+    -fx-background-color: #fbfbfd;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: rgba(0, 122, 255, 0.08);
+}
+
+.table-row-cell:selected {
+    -fx-background-color: rgba(0, 122, 255, 0.15);
+}
+
+.table-row-cell.highlighted-row {
+    -fx-background-color: rgba(255, 214, 10, 0.15);
+    -fx-border-color: rgba(255, 214, 10, 0.4);
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+/* Summary Line */
+.summary-line {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #fbfbfd);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 8, 0.3, 0, 2);
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(0, 0, 0, 0.08);
+    -fx-border-width: 0.5px;
+    -fx-border-radius: 12px;
+}
+
+.summary-label {
+    -fx-text-fill: #86868b;
+    -fx-font-family: "SF Pro Text", "Helvetica Neue", "Arial", sans-serif;
+}
+
+.count-label {
+    -fx-text-fill: #007aff;
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", "Arial", sans-serif;
+    -fx-font-weight: 600;
+}
+
+/* ScrollPane Styling */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane > .corner {
+    -fx-background-color: #f2f2f7;
+}
+
+/* ScrollBar Styling */
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: rgba(142, 142, 147, 0.6);
+    -fx-background-radius: 4px;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: rgba(142, 142, 147, 0.8);
+}
+
+.scroll-bar .thumb:pressed {
+    -fx-background-color: rgba(109, 109, 112, 0.9);
+}
+
+.scroll-bar .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-button, .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+}
+
+/* SplitPane Styling */
+.split-pane {
+    -fx-background-color: transparent;
+}
+
+.split-pane-divider {
+    -fx-background-color: rgba(0, 0, 0, 0.1);
+    -fx-border-color: transparent;
+}
+
+/* Debug Button Styling - Only setting colors, relying on global button styling */
+.debug-stop {
+    -fx-text-fill: -fx-debug-stop-color;
+}
+
+.debug-resume {
+    -fx-text-fill: -fx-debug-resume-color;
+}
+
+.debug-stepOver, .debug-stepBackward {
+    -fx-text-fill: -fx-debug-step-color;
+}
+
+/* Program/Function selector - using alternative button style */
+.root .program-function .button,
+.root .function-bar .button {
+    -fx-background-color: linear-gradient(to bottom, #f2f2f7, #e5e5ea);
+    -fx-text-fill: #1d1d1f;
+    -fx-border-color: rgba(0, 0, 0, 0.1);
+    -fx-border-width: 0.5px;
+}
+
+.root .program-function .button:hover,
+.root .function-bar .button:hover {
+    -fx-background-color: linear-gradient(to bottom, #e5e5ea, #d1d1d6);
+}
+
+.pane-mode {
+    -fx-text-fill: #1d1d1f;
+    -fx-font-family: "SF Pro Text", "Helvetica Neue", "Arial", sans-serif;
+}

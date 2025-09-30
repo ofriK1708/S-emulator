@@ -865,17 +865,27 @@ public class AppController {
             System.err.println("Scene not set - cannot apply theme");
             return;
         }
+        fileHandlerController.removeJokes();
+        if (theme.equals(Theme.MAC_IS_THE_BEST)) {
+            fileHandlerController.addAppleJoke();
+        }
+        if (theme.equals(Theme.WINDOWS_IS_THE_WORST)) {
+            fileHandlerController.addWindowsJoke();
+        }
 
         // Remove existing theme stylesheets
         scene.getStylesheets().removeIf(stylesheet ->
-                stylesheet.contains("/styles/light.css") || stylesheet.contains("/styles/dark.css"));
+                stylesheet.contains("/styles/light.css") ||
+                        stylesheet.contains("/styles/dark.css") ||
+                        stylesheet.contains("/styles/mac.css") ||
+                        stylesheet.contains("/styles/windows.css"));
 
         // Add component CSS files (always loaded)
         loadComponentStylesheets();
 
         // Add the selected theme stylesheet
         String themeStylesheet = getClass().getResource("/ui/jfx/styles/" +
-                theme.name().toLowerCase() + ".css").toExternalForm();
+                theme.getDisplayName().toLowerCase() + ".css").toExternalForm();
         scene.getStylesheets().add(themeStylesheet);
 
         System.out.println("Applied " + theme + " theme with stylesheet: " + themeStylesheet);

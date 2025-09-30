@@ -154,10 +154,10 @@ public class ProgramFunctionController {
             case "dark":
                 selectedTheme = Theme.DARK;
                 break;
-            case "mac is the best":
+            case "mac is the best (for aviad ;) )":
                 selectedTheme = Theme.MAC_IS_THE_BEST;
                 break;
-            case "windows is the worst":
+            case "windows is the worst (for aviad ;) )":
                 selectedTheme = Theme.WINDOWS_IS_THE_WORST;
                 break;
             default:

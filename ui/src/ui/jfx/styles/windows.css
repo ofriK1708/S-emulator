@@ -1,0 +1,642 @@
+/* ===== WINDOWS IS THE WORST THEME ===== */
+/* Ugly, clunky, and terrible - just like Windows! 🪟❌ */
+
+.root {
+    /* Hideous Windows colors */
+    -fx-primary-bg: #0078d4; /* That awful Windows blue */
+    -fx-secondary-bg: #005a9e; /* Even worse darker blue */
+    -fx-surface-bg: #f0f0f0; /* Boring gray */
+    -fx-text-primary: #000000; /* Harsh black text */
+    -fx-text-secondary: #666666; /* Dull gray */
+    -fx-text-accent: #ff0000; /* Aggressive red - error vibes! */
+
+    /* Ugly Windows button colors */
+    -fx-green-primary: #008000; /* Harsh green */
+    -fx-green-secondary: #006400; /* Dark green */
+    -fx-green-hover-primary: #32cd32; /* Lime green - so ugly! */
+    -fx-green-hover-secondary: #228b22; /* Forest green */
+    -fx-green-pressed: #006400;
+    -fx-green-disabled: #a0a0a0;
+
+    -fx-blue-primary: #0000ff; /* Pure ugly blue */
+    -fx-blue-secondary: #0000cd; /* Medium blue */
+    -fx-blue-hover-primary: #4169e1; /* Royal blue */
+    -fx-blue-hover-secondary: #1e90ff; /* Dodger blue */
+    -fx-blue-pressed: #000080; /* Navy blue */
+    -fx-blue-disabled: #add8e6;
+
+    -fx-grey-primary: #808080; /* Basic gray */
+    -fx-grey-secondary: #696969; /* Dim gray */
+    -fx-grey-hover-primary: #a9a9a9; /* Dark gray */
+    -fx-grey-hover-secondary: #778899; /* Light slate gray */
+    -fx-grey-pressed: #2f4f4f; /* Dark slate gray */
+    -fx-grey-disabled: #d3d3d3;
+
+    -fx-vibrant-green-primary: #00ff00; /* Neon green - awful! */
+    -fx-vibrant-green-secondary: #32cd32; /* Lime green */
+    -fx-vibrant-green-hover-primary: #7fff00; /* Chartreuse - terrible! */
+    -fx-vibrant-green-hover-secondary: #9acd32; /* Yellow green */
+    -fx-vibrant-green-pressed: #228b22;
+    -fx-vibrant-green-text: #ffffff;
+
+    /* Debug colors with Windows error vibes */
+    -fx-debug-bg: #000080; /* Navy blue like BSOD */
+    -fx-debug-stop-color: #ff0000; /* Error red */
+    -fx-debug-resume-color: #00ff00; /* Ugly green */
+    -fx-debug-resume-bright: #32cd32; /* Lime green */
+    -fx-debug-step-color: #ffffff; /* White text */
+    -fx-debug-hover-bg: #191970; /* Midnight blue */
+
+    /* Harsh shadows - no subtlety here! */
+    -fx-shadow-light: rgba(0, 0, 0, 0.3);
+    -fx-shadow-medium: rgba(0, 0, 0, 0.5);
+    -fx-shadow-dark: rgba(0, 0, 0, 0.7);
+
+    /* Keep the ugly default JavaFX focus borders */
+    -fx-focus-color: #0078d4;
+    -fx-faint-focus-color: rgba(0, 120, 212, 0.4);
+}
+
+/* ===== UGLY COMPONENT STYLES ===== */
+
+/* Harsh Windows-style gradients everywhere */
+.cycles-root {
+    -fx-background-color: linear-gradient(to bottom, #87ceeb, #4682b4);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 25, 0.8, 5, 10);
+}
+
+.cycles-hbox {
+    -fx-background-color: linear-gradient(to bottom, #f0f0f0, #d3d3d3);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 15, 0.6, 3, 8);
+    -fx-background-radius: 0; /* Sharp corners - no elegance! */
+    -fx-border-radius: 0;
+    -fx-border-color: #808080;
+    -fx-border-width: 2;
+}
+
+.cycles-label {
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif; /* Comic Sans - the ultimate insult! */
+    -fx-font-weight: bold;
+}
+
+.value-label {
+    -fx-background-color: linear-gradient(to bottom, #ffff00, #ffd700); /* Ugly yellow */
+    -fx-text-fill: #800080; /* Purple text - terrible combination! */
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.5), 5, 0, 0, 3);
+    -fx-background-radius: 0; /* Sharp corners */
+    -fx-border-color: #ff0000;
+    -fx-border-width: 2;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+.cycles-button {
+    -fx-background-color: linear-gradient(to bottom, #0000ff, #000080);
+    -fx-text-fill: #ffff00; /* Yellow text on blue - eye strain! */
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 0, 0.8), 15, 0.8, 0, 8);
+    -fx-background-radius: 0; /* Sharp ugly corners */
+    -fx-border-color: #ff0000;
+    -fx-border-width: 3;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+.cycles-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #4169e1, #1e90ff);
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 0, 1.0), 20, 1.0, 0, 10);
+    -fx-text-fill: #00ff00; /* Green text - even worse! */
+}
+
+.cycles-button:pressed {
+    -fx-background-color: #000080;
+    -fx-text-fill: #ff00ff; /* Magenta text! */
+}
+
+/* Ugly Windows container styling */
+.buttons-HBox {
+    -fx-background-color: linear-gradient(to bottom, #87ceeb, #4682b4);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 20, 0.9, 8, 15);
+    -fx-background-radius: 0; /* No rounded corners! */
+    -fx-border-color: #000000;
+    -fx-border-width: 3;
+}
+
+/* Horrible Windows pill buttons */
+.pill-button {
+    -fx-text-fill: #ffff00; /* Yellow text */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 12, 0.8, 0, 6);
+    -fx-background-radius: 5; /* Slightly rounded but still ugly */
+    -fx-border-color: #000000;
+    -fx-border-width: 2;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+.pill-green {
+    -fx-background-color: linear-gradient(to bottom, #008000, #006400);
+    -fx-text-fill: #ffff00; /* Yellow on green - terrible! */
+}
+
+.pill-green:hover {
+    -fx-background-color: linear-gradient(to bottom, #32cd32, #228b22);
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 0, 0.8), 15, 0.8, 0, 8);
+    -fx-text-fill: #ff00ff; /* Magenta text! */
+}
+
+.pill-green:pressed {
+    -fx-background-color: #006400;
+    -fx-text-fill: #00ffff; /* Cyan text! */
+}
+
+.pill-green:selected {
+    -fx-background-color: #006400;
+    -fx-border-color: #ff0000;
+    -fx-border-width: 4;
+}
+
+.pill-green:disabled {
+    -fx-background-color: linear-gradient(to bottom, #a0a0a0, #808080);
+    -fx-opacity: 0.5;
+    -fx-effect: none;
+    -fx-text-fill: #000000;
+}
+
+.pill-blue {
+    -fx-background-color: linear-gradient(to bottom, #0000ff, #000080);
+    -fx-text-fill: #ffff00; /* Yellow on blue */
+}
+
+.pill-blue:hover {
+    -fx-background-color: linear-gradient(to bottom, #4169e1, #1e90ff);
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 0, 0.8), 15, 0.8, 0, 8);
+    -fx-text-fill: #00ff00; /* Green text */
+}
+
+.pill-blue:pressed {
+    -fx-background-color: #000080;
+}
+
+.pill-blue:selected {
+    -fx-background-color: #000080;
+    -fx-border-color: #ffff00;
+    -fx-border-width: 4;
+}
+
+.pill-blue:disabled {
+    -fx-background-color: linear-gradient(to bottom, #add8e6, #87ceeb);
+    -fx-opacity: 0.5;
+    -fx-effect: none;
+}
+
+.pill-grey {
+    -fx-background-color: linear-gradient(to bottom, #808080, #696969);
+    -fx-text-fill: #ffff00; /* Yellow on gray */
+}
+
+.pill-grey:hover {
+    -fx-background-color: linear-gradient(to bottom, #a9a9a9, #778899);
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 0, 0.6), 12, 0.6, 0, 6);
+}
+
+.pill-grey:pressed {
+    -fx-background-color: #2f4f4f;
+}
+
+.pill-grey:selected {
+    -fx-background-color: #2f4f4f;
+    -fx-border-color: #ff0000;
+    -fx-border-width: 3;
+}
+
+.pill-grey:disabled {
+    -fx-background-color: linear-gradient(to bottom, #d3d3d3, #a9a9a9);
+    -fx-opacity: 0.5;
+    -fx-effect: none;
+}
+
+.pill-vibrant-green {
+    -fx-background-color: linear-gradient(to bottom, #00ff00, #32cd32); /* Neon green! */
+    -fx-text-fill: #ff0000; /* Red text on green - eye pain! */
+}
+
+.pill-vibrant-green:hover {
+    -fx-background-color: linear-gradient(to bottom, #7fff00, #9acd32);
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 255, 0.8), 15, 0.8, 0, 8);
+    -fx-text-fill: #0000ff; /* Blue text */
+}
+
+.pill-vibrant-green:pressed {
+    -fx-background-color: #228b22;
+}
+
+.pill-vibrant-green:selected {
+    -fx-background-color: #228b22;
+    -fx-border-color: #ffff00;
+    -fx-border-width: 4;
+}
+
+.pill-vibrant-green:disabled {
+    -fx-background-color: linear-gradient(to bottom, #90ee90, #98fb98);
+    -fx-opacity: 0.5;
+    -fx-effect: none;
+}
+
+/* Ugly Windows labels */
+.info-label {
+    -fx-background-color: linear-gradient(to bottom, #808080, #696969);
+    -fx-text-fill: #ffff00; /* Yellow text */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 8, 0.8, 0, 4);
+    -fx-background-radius: 0; /* Sharp corners */
+    -fx-border-color: #000000;
+    -fx-border-width: 2;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+.menu-button > .label {
+    -fx-text-fill: #ffff00; /* Yellow text */
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+.root .program-function,
+.root .function-bar {
+    -fx-background-color: #c0c0c0; /* Silver background */
+}
+
+.root .program-function .button,
+.root .function-bar .button {
+    -fx-background-color: linear-gradient(to bottom, #808080, #696969);
+    -fx-text-fill: #ffff00;
+    -fx-background-radius: 0;
+    -fx-border-color: #000000;
+    -fx-border-width: 2;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+.root .program-function .button:hover,
+.root .function-bar .button:hover {
+    -fx-background-color: linear-gradient(to bottom, #a9a9a9, #778899);
+    -fx-text-fill: #ff00ff; /* Magenta text */
+}
+
+.pane-mode {
+    -fx-text-fill: #ffff00;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+/* Windows BSOD-style Debug buttons */
+.debug-stop, .debug-resume, .debug-stepOver, .debug-stepBackward {
+    -fx-background-color: -fx-debug-bg !important; /* Navy blue like BSOD */
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.8), 10, 0.8, 0, 5);
+    -fx-background-radius: 0; /* Sharp corners */
+    -fx-border-color: #ffffff;
+    -fx-border-width: 2;
+}
+
+.debug-stop:disabled, .debug-resume:disabled, .debug-stepOver:disabled, .debug-stepBackward:disabled {
+    -fx-background-color: -fx-debug-bg !important;
+    -fx-opacity: 0.3;
+}
+
+.debug-stop {
+    -fx-text-fill: -fx-debug-stop-color; /* Error red */
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+.debug-stop:hover {
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 0, 1.0), 20, 1.0, 0, 10);
+}
+
+.debug-resume {
+    -fx-text-fill: -fx-debug-resume-color; /* Ugly green */
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+.debug-resume:hover {
+    -fx-text-fill: -fx-debug-resume-bright;
+    -fx-effect: dropshadow(gaussian, rgba(0, 255, 0, 1.0), 20, 1.0, 0, 10);
+}
+
+.debug-stepOver, .debug-stepBackward {
+    -fx-text-fill: -fx-debug-step-color;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+.debug-stepOver:hover, .debug-stepBackward:hover {
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 1.0), 20, 1.0, 0, 10);
+}
+
+/* Ugly Windows tables */
+.table-view {
+    -fx-border-color: #000000;
+    -fx-border-width: 3;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 20, 0.9, 5, 15);
+    -fx-table-cell-border-color: #808080;
+    -fx-background-radius: 0; /* Sharp corners */
+    -fx-border-radius: 0;
+    -fx-background-color: #f0f0f0;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, #0000ff, #000080); /* Blue header */
+    -fx-background-radius: 0;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-border-color: #000000;
+    -fx-border-width: 2;
+    -fx-text-fill: #ffff00; /* Yellow text on blue */
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #ffff00;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+.table-view .table-cell {
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-border-color: #808080;
+    -fx-border-width: 1;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #ffffff;
+}
+
+.table-row-cell:even {
+    -fx-background-color: #f0f0f0;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #ffff00; /* Yellow background */
+    -fx-text-background-color: #ff0000; /* Red text */
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #0000ff; /* Blue background */
+    -fx-text-background-color: #ffff00; /* Yellow text */
+}
+
+.table-row-cell.highlighted-row {
+    -fx-background-color: #ff00ff; /* Magenta background */
+    -fx-border-color: #00ffff; /* Cyan border */
+    -fx-border-width: 3;
+}
+
+.table-row-cell.highlighted-row:hover {
+    -fx-background-color: #00ff00; /* Green background */
+}
+
+.table-row-cell.highlighted-row:selected {
+    -fx-background-color: #ff0000; /* Red background */
+    -fx-text-background-color: #ffffff;
+}
+
+/* Ugly Windows File Handler */
+.hbox {
+    -fx-background-color: #c0c0c0; /* Silver background */
+    -fx-border-color: #808080;
+    -fx-border-width: 2;
+}
+
+.button {
+    -fx-background-color: linear-gradient(to bottom, #0000ff, #000080);
+    -fx-text-fill: #ffff00;
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 0, 0.8), 10, 0.8, 0, 5);
+    -fx-background-radius: 0;
+    -fx-border-color: #000000;
+    -fx-border-width: 2;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+.button:hover {
+    -fx-background-color: linear-gradient(to bottom, #4169e1, #1e90ff);
+    -fx-text-fill: #00ff00;
+}
+
+.blue-teal-button {
+    -fx-background-color: linear-gradient(to bottom, #008000, #006400);
+    -fx-text-fill: #ffff00;
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 255, 0.8), 10, 0.8, 0, 5);
+    -fx-background-radius: 0;
+    -fx-border-color: #000000;
+    -fx-border-width: 2;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+.blue-teal-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #32cd32, #228b22);
+    -fx-text-fill: #ff00ff;
+}
+
+.text-field {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #000000;
+    -fx-border-color: #000000;
+    -fx-border-width: 2;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+}
+
+.text-field-wide {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #000000;
+    -fx-border-color: #000000;
+    -fx-border-width: 2;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+}
+
+.clear-button {
+    -fx-background-color: linear-gradient(to bottom, #808080, #696969);
+    -fx-text-fill: #ffff00;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 8, 0.8, 0, 4);
+    -fx-background-radius: 0;
+    -fx-border-color: #000000;
+    -fx-border-width: 2;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+.clear-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #a9a9a9, #778899);
+    -fx-text-fill: #ff00ff;
+}
+
+.clear-button:pressed {
+    -fx-background-color: #2f4f4f;
+}
+
+.file-path-label {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #000000;
+    -fx-border-color: #000000;
+    -fx-border-width: 2;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+}
+
+.label {
+    -fx-text-fill: #000000;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+/* Ugly Windows Summary Line */
+.summary-line {
+    -fx-background-color: linear-gradient(to bottom, #c0c0c0, #a9a9a9);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 15, 0.9, 5, 10);
+    -fx-background-radius: 0;
+    -fx-border-color: #000000;
+    -fx-border-width: 3;
+}
+
+.summary-label {
+    -fx-text-fill: #000000;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+.count-label {
+    -fx-text-fill: #ff0000;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+/* Horrible Windows layout */
+.app-main-border {
+    -fx-background-color: linear-gradient(to bottom, #87ceeb, #4682b4); /* Ugly blue gradient */
+}
+
+.titled-pane {
+    -fx-background-color: #f0f0f0;
+    -fx-border-color: #000000;
+    -fx-border-width: 3;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 15, 0.9, 8, 12);
+}
+
+.titled-pane > .title {
+    -fx-background-color: linear-gradient(to bottom, #0000ff, #000080);
+    -fx-text-fill: #ffff00;
+    -fx-font-weight: bold;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-border-color: #000000;
+    -fx-border-width: 2;
+}
+
+.titled-pane > .title > .text {
+    -fx-fill: #ffff00;
+    -fx-text-fill: #ffff00;
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}
+
+.titled-pane > .title > .arrow-button {
+    -fx-background-color: #ffff00;
+    -fx-border-color: #000000;
+    -fx-border-width: 1;
+}
+
+.titled-pane > .title > .arrow-button > .arrow {
+    -fx-background-color: #000000;
+}
+
+.titled-pane > .content {
+    -fx-background-color: #f0f0f0;
+    -fx-border-color: #000000;
+    -fx-border-width: 2;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+/* Ugly Windows scrollbars */
+.scroll-pane {
+    -fx-background-color: #c0c0c0;
+    -fx-border-color: #000000;
+    -fx-border-width: 2;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: #c0c0c0;
+}
+
+.scroll-pane > .corner {
+    -fx-background-color: #808080;
+}
+
+.scroll-bar {
+    -fx-background-color: #c0c0c0;
+    -fx-border-color: #000000;
+    -fx-border-width: 1;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #808080;
+    -fx-background-radius: 0;
+    -fx-border-color: #000000;
+    -fx-border-width: 1;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #a9a9a9;
+}
+
+.scroll-bar .thumb:pressed {
+    -fx-background-color: #696969;
+}
+
+.scroll-bar .increment-button, .scroll-bar .decrement-button {
+    -fx-background-color: #c0c0c0;
+    -fx-border-color: #000000;
+    -fx-border-width: 1;
+}
+
+.scroll-bar .increment-button:hover, .scroll-bar .decrement-button:hover {
+    -fx-background-color: #d3d3d3;
+}
+
+.split-pane {
+    -fx-background-color: #c0c0c0;
+}
+
+.split-pane-divider {
+    -fx-background-color: #808080;
+    -fx-border-color: #000000;
+    -fx-border-width: 2;
+}
+
+.vbox, .hbox {
+    -fx-background-color: transparent;
+}
+
+.grid-pane {
+    -fx-background-color: transparent;
+}
+
+/* Final Windows insults */
+.pill-label {
+    -fx-text-fill: #000000;
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 0, 0.8), 5, 0.8, 0, 3);
+    -fx-font-family: "Comic Sans MS", "Arial", sans-serif;
+    -fx-font-weight: bold;
+}

@@ -58,7 +58,7 @@
             <HBox spacing="10.0">
                 <children>
                     <RadioButton fx:id="autoPaneMode" mnemonicParsing="false" onAction="#handleAutoModeSelected"
-                                 style="-fx-text-fill: white;" styleClass="pane-mode" text="Auto">
+                                 styleClass="pane-mode" text="Auto">
                         <toggleGroup>
                             <ToggleGroup fx:id="paneMode"/>
                         </toggleGroup>
@@ -81,8 +81,8 @@
                 </toggleGroup>
             </RadioMenuItem>
             <RadioMenuItem mnemonicParsing="false" text="Dark" toggleGroup="$themes"/>
-            <RadioMenuItem mnemonicParsing="false" text="Mac is the best" toggleGroup="$themes"/>
-            <RadioMenuItem mnemonicParsing="false" text="Windows is the worst" toggleGroup="$themes"/>
+            <RadioMenuItem mnemonicParsing="false" text="Mac is the best (for Aviad ;) )" toggleGroup="$themes"/>
+            <RadioMenuItem mnemonicParsing="false" text="Windows is the worst (for Aviad ;) )" toggleGroup="$themes"/>
         </items>
         <styleClass>
             <String fx:value="pill-button"/>
