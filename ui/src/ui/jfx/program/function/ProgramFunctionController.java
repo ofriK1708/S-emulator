@@ -11,7 +11,6 @@ import ui.utils.UIUtils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -165,24 +164,7 @@ public class ProgramFunctionController {
                 System.out.println("Unknown theme selected: " + themeName);
                 return;
         }
-        applyTheme(selectedTheme);
         onThemeSelectCallback.accept(selectedTheme);
-    }
-
-    private void applyTheme(Theme theme) {
-        if (root != null) {
-            root.getStylesheets().clear();
-            switch (theme) {
-                case LIGHT -> root.getStylesheets().add(Objects.requireNonNull(
-                        getClass().getResource("styles/light.css")).toExternalForm());
-                case DARK -> root.getStylesheets().add(Objects.requireNonNull(
-                        getClass().getResource("styles/dark.css")).toExternalForm());
-                case MAC_IS_THE_BEST -> root.getStylesheets().add(Objects.requireNonNull(
-                        getClass().getResource("/styles/mac-theme.css")).toExternalForm());
-                case WINDOWS_IS_THE_WORST -> root.getStylesheets().add(Objects.requireNonNull(
-                        getClass().getResource("/styles/windows-theme.css")).toExternalForm());
-            }
-        }
     }
 
     private void populateFunctionsMenu(@NotNull Map<String, String> allSubFunctions) {

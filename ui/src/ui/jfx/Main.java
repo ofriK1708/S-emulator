@@ -23,6 +23,11 @@ public class Main extends Application {
         if (resource != null) {
             Parent root = fxmlLoader.load(resource.openStream());
             Scene scene = new Scene(root, 850, 500);
+
+            // Get the AppController and pass the scene reference for theme switching
+            AppController appController = fxmlLoader.getController();
+            appController.setScene(scene);
+
             primaryStage.setTitle("S-emulator");
             primaryStage.setScene(scene);
             primaryStage.show();

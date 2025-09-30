@@ -46,6 +46,10 @@ import static ui.utils.UIUtils.*;
 public class AppController {
 
     private final Map<String, Integer> previousDebugVariables = new HashMap<>();
+
+    // Scene reference for theme switching
+    private Scene scene;
+
     @FXML
     private HBox fileHandler;
     @FXML
@@ -848,7 +852,65 @@ public class AppController {
 
     public void onThemeSelect(Theme theme) {
         selectedTheme.set(theme);
+        applyTheme(theme);
         showInfo("Theme changed to: " + theme);
         System.out.println("Theme changed to: " + theme);
+    }
+
+    /**
+     * Apply the selected theme to the scene
+     */
+    private void applyTheme(Theme theme) {
+        if (scene == null) {
+            System.err.println("Scene not set - cannot apply theme");
+            return;
+        }
+
+        // Remove existing theme stylesheets
+        scene.getStylesheets().removeIf(stylesheet ->
+                stylesheet.contains("/styles/light.css") || stylesheet.contains("/styles/dark.css"));
+
+        // Add component CSS files (always loaded)
+        loadComponentStylesheets();
+
+        // Add the selected theme stylesheet
+        String themeStylesheet = getClass().getResource("/ui/jfx/styles/" +
+                theme.name().toLowerCase() + ".css").toExternalForm();
+        scene.getStylesheets().add(themeStylesheet);
+
+        System.out.println("Applied " + theme + " theme with stylesheet: " + themeStylesheet);
+    }
+
+    /**
+     * Load all component stylesheets that contain layout and structural styles
+     */
+    private void loadComponentStylesheets() {
+        String[] componentStylesheets = {
+                "/ui/jfx/cycles/cycles.css",
+                "/ui/jfx/runControls/RunControls.css",
+                "/ui/jfx/debugger/Debugger.css",
+                "/ui/jfx/summaryLine/SummaryLine.css",
+                "/ui/jfx/fileHandler/fileHandler.css",
+                "/ui/jfx/variables/variablesTable.css",
+                "/ui/jfx/statistics/Statistics.css",
+                "/ui/jfx/instruction/InstructionsTableStyle.css"
+        };
+
+        for (String stylesheet : componentStylesheets) {
+            try {
+                String stylesheetUrl = getClass().getResource(stylesheet).toExternalForm();
+                if (!scene.getStylesheets().contains(stylesheetUrl)) {
+                    scene.getStylesheets().add(stylesheetUrl);
+                }
+            } catch (Exception e) {
+                System.err.println("Warning: Could not load stylesheet: " + stylesheet);
+            }
+        }
+    }
+
+    public void setScene(Scene scene) {
+        this.scene = scene;
+        // Apply the selected theme to the new scene
+        applyTheme(selectedTheme.get());
     }
 }
