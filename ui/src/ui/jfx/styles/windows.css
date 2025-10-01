@@ -243,7 +243,8 @@
 }
 
 /* Ugly Windows labels */
-.info-label {
+.info-label,
+.staus-label {
     -fx-background-color: linear-gradient(to bottom, #808080, #696969);
     -fx-text-fill: #ffff00; /* Yellow text */
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 8, 0.8, 0, 4);

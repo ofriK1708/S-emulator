@@ -50,3 +50,25 @@
     -fx-border-radius: 4px;
     -fx-background-radius: 4px;
 }
+
+.status-label {
+    -fx-min-width: 150px;
+    -fx-text-alignment: center;
+    -fx-content-display: center;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+    -fx-max-height: 50px;
+    -fx-line-spacing: 4px;
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 16px;
+    -fx-alignment: center;
+    -fx-font-size: 12px;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-cursor: default;
+}
+
+.buttons-HBox {
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 12px;
+    -fx-spacing: 12px;
+}

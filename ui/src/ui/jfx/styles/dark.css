@@ -213,6 +213,10 @@
     -fx-text-fill: white;
 }
 
+.staus-label {
+    -fx-text-fill: white;
+}
+
 .pf-degree {
     -fx-effect: dropshadow(gaussian, -fx-shadow-light, 2, 0, 0, 1);
     -fx-background-color: linear-gradient(to bottom, -fx-grey-primary, -fx-grey-secondary);
