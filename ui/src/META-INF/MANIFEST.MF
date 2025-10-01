@@ -1,8 +1,11 @@
 Manifest-Version: 1.0
 Main-Class: ui.jfx.Main
-Class-Path: lib/JAXB/javafx-swt.jar lib/JAXB/javafx.web.jar lib/JAXB/javafx.base.jar lib/JAXB/javafx.fxml.ja
- r lib/JAXB/javafx.media.jar lib/JAXB/javafx.swing.jar lib/JAXB/javafx.controls.jar lib/JAXB/javafx.graphics
- .jar lib/JAXB/jaxb-jxc.jar lib/JAXB/jaxb-xjc.jar lib/JAXB/jaxb-core.jar lib/JAXB/jaxb-impl.jar lib/JAXB/angus-activa
- tion.jar lib/JAXB/jakarta.xml.bind-api.jar lib/JAXB/jakarta.activation-api.jar lib/JetBrainsAnnotation/annotation
- s-26.0.2.jar engine.jar system.jar dto.jar
+Class-Path: lib/JAXB/javafx-swt.jar lib/JAXB/javafx.web.jar lib/JAXB/jav
+ afx.base.jar lib/JAXB/javafx.fxml.jar lib/JAXB/javafx.media.jar lib/JAX
+ B/javafx.swing.jar lib/JAXB/javafx.controls.jar lib/JAXB/javafx.graphic
+ s.jar lib/JAXB/jaxb-jxc.jar lib/JAXB/jaxb-xjc.jar lib/JAXB/jaxb-core.ja
+ r lib/JAXB/jaxb-impl.jar lib/JAXB/angus-activation.jar lib/JAXB/jakarta
+ .xml.bind-api.jar lib/JAXB/jakarta.activation-api.jar lib/JetBrainsAnno
+ tation/annotations-26.0.2.jar lib/controlsfx-11.2.2.jar engine.jar syst
+ em.jar dto.jar
 
