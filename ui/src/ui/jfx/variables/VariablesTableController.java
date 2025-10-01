@@ -1,12 +1,17 @@
 package ui.jfx.variables;
 
 import dto.ui.VariableDTO;
+import javafx.animation.FadeTransition;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import org.jetbrains.annotations.NotNull;
+import ui.utils.AnimatedTableRow;
+import ui.utils.UIUtils;
 
 /**
  * Displays variables in a table format with change highlighting for debug mode.
@@ -19,14 +24,13 @@ public class VariablesTableController {
     @FXML
     private TableColumn<VariableDTO, Number> valueColumn;
 
+    private final BooleanProperty isAnimationsEnabled = new SimpleBooleanProperty(true);
+
     @FXML
     private void initialize() {
         // Initialize table columns
         variableColumn.setCellValueFactory(cellData -> cellData.getValue().name());
         valueColumn.setCellValueFactory(cellData -> cellData.getValue().value());
-
-        // Set up row factory for change highlighting
-        setupChangeHighlighting();
 
         System.out.println("VariablesController initialized with TableView and change highlighting");
     }
@@ -34,7 +38,10 @@ public class VariablesTableController {
     /**
      * Sets up the row factory to highlight changed variables in debug mode
      */
-    private void setupChangeHighlighting() {
+
+    public void initAllVarsTable(@NotNull ListProperty<VariableDTO> variables,
+                                 @NotNull BooleanProperty animationsEnabled) {
+        variablesTable.itemsProperty().bind(variables);
         variablesTable.setRowFactory(tv -> new TableRow<>() {
             @Override
             protected void updateItem(VariableDTO item, boolean empty) {
@@ -44,32 +51,45 @@ public class VariablesTableController {
                     if (item.hasChanged().get()) {
                         getStyleClass().add("changed-variable");
                         variablesTable.scrollTo(getIndex());
+                        handleVariablesAnimation(this, true);
                     } else {
-                        getStyleClass().add("unchanged-variable");
+                        getStyleClass().remove("unchanged-variable");
+                        handleVariablesAnimation(this, false);
                     }
                 }
             }
         });
-    }
 
-    public void initAllVarsTable(@NotNull ListProperty<VariableDTO> variables) {
-        variablesTable.itemsProperty().bind(variables);
 
         // Add change listener to refresh highlighting when list changes
-        variables.addListener((observable, oldList, newList) -> {
-            scrollToFirstChangedVariable();
-        });
+        variables.addListener((observable,
+                               oldList, newList) ->
+                scrollToFirstChangedVariable());
+        isAnimationsEnabled.bind(animationsEnabled);
+
+
     }
 
-    public void initArgsTable(@NotNull ListProperty<VariableDTO> args) {
+    public void initArgsTable(@NotNull ListProperty<VariableDTO> args,
+                              @NotNull BooleanProperty animationsEnabled) {
         variablesTable.itemsProperty().bind(args);
         variableColumn.setText("Arguments");
+        variablesTable.setRowFactory(tv ->
+                new AnimatedTableRow<>(animationsEnabled, 500, false));
+    }
 
-        // Add change listener to refresh highlighting when list changes
-//        args.addListener((observable, oldList, newList) -> {
-//            // Force table refresh to apply new highlighting
-//            variablesTable.refresh();
-//        });
+    private void handleVariablesAnimation(@NotNull TableRow<VariableDTO> row, boolean hasChanged) {
+        FadeTransition ft = (FadeTransition) row.getProperties().get("highlightFade");
+        if (ft != null) {
+            ft.stop();
+            row.setOpacity(1.0);
+            row.getProperties().remove("highlightFade");
+        }
+
+        if (!hasChanged) {
+            return;
+        }
+        UIUtils.checkIfShouldAnimate(row, isAnimationsEnabled.get());
     }
 
     private void scrollToFirstChangedVariable() {
@@ -77,9 +97,22 @@ public class VariablesTableController {
             if (variablesTable.getItems().get(i).hasChanged().get()) {
                 int scrollToIndex = Math.max(0, i - 2); // -2 for header padding
                 variablesTable.scrollTo(scrollToIndex);
-                variablesTable.getSelectionModel().select(i);
+                //variablesTable.getSelectionModel().select(i);
                 break;
             }
+        }
+    }
+
+    // for the animated rows with highlighting
+    private static class HighlightingAnimatedTableRow extends AnimatedTableRow<VariableDTO> {
+        private final TableView<VariableDTO> tableView;
+        private final VariablesTableController controller;
+
+        public HighlightingAnimatedTableRow(BooleanProperty animationsEnabled, int delay, boolean onlyAnimateOnce,
+                                            TableView<VariableDTO> tableView, VariablesTableController controller) {
+            super(animationsEnabled, delay, onlyAnimateOnce);
+            this.tableView = tableView;
+            this.controller = controller;
         }
     }
 }

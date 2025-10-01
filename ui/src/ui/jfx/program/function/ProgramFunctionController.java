@@ -5,6 +5,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import org.controlsfx.control.ToggleSwitch;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ui.utils.UIUtils;
@@ -21,6 +22,7 @@ public class ProgramFunctionController {
     @FXML
     public RadioButton autoPaneMode;
     final IntegerProperty maxLevel = new SimpleIntegerProperty();
+    public ToggleSwitch animationToggle;
     @FXML
     private Button collapseButton;
     private final StringProperty mainFunctionName = new SimpleStringProperty();
@@ -64,7 +66,8 @@ public class ProgramFunctionController {
                               @NotNull StringProperty mainFunctionName,
                               @NotNull MapProperty<String, String> allSubFunctions,
                               @NotNull Consumer<String> onFunctionSelectedCallback,
-                              @NotNull Consumer<Theme> onThemeSelectCallback) { // NEW: Add variable selection
+                              @NotNull Consumer<Theme> onThemeSelectCallback,
+                              @NotNull BooleanProperty isAnimationsOn) { // NEW: Add variable selection
         // callback
         this.onExpandLevelChangeCallback = onExpandLevelChangeCallback;
         this.onVariableSelectionCallback = OnVariableSelectionCallback;
@@ -109,6 +112,7 @@ public class ProgramFunctionController {
                 onThemeSelect(themeName);
             }
         });
+        isAnimationsOn.bind(animationToggle.selectedProperty());
     }
 
 

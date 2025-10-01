@@ -27,12 +27,12 @@
 
 /* Label styling - distinct from buttons */
 .info-label {
-    -fx-padding: 8px 12px;
-    -fx-background-radius: 16px;
     -fx-alignment: center;
     -fx-font-size: 12px;
     -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
     -fx-cursor: default;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
 }
 
 /* Program selector button (special styling) */
@@ -53,6 +53,8 @@
     -fx-wrap-text: true;
     -fx-max-height: 50px;
     -fx-line-spacing: 4px;
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 16px;
 }
 
 /* Program/function selector row */
@@ -69,7 +71,7 @@
     -fx-padding: 6 14 6 14;
 }
 
-.pane-mode {
+.radio-choice-box {
     -fx-font-size: 12px;
     -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
 }

@@ -4,6 +4,7 @@ import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
 import dto.ui.VariableDTO;
+import engine.utils.ProgramUtils;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -125,6 +126,7 @@ public class AppController {
     private @Nullable ProgramDTO loadedProgram = null;
     private final Map<String, Integer> programArguments = new HashMap<>();
 
+    private final BooleanProperty isAnimationsOn = new SimpleBooleanProperty(true);
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
     private final BooleanProperty debugMode = new SimpleBooleanProperty(false);
     private final BooleanProperty programRanAtLeastOnce = new SimpleBooleanProperty(false);
@@ -137,6 +139,7 @@ public class AppController {
     @FXML
     private VBox historyStats;
     private boolean isFirstDebugStep = true;
+    private boolean isInDebugResume = false;
 
     public AppController() {
         this.engineController = new EngineController();
@@ -155,23 +158,26 @@ public class AppController {
             programFunctionController.initComponent(this::expandProgramToLevel, this::setPaneMode,
                     currentExpandLevel, maxExpandLevel, programLoaded, this::handleVariableSelection,
                     programVariablesNamesAndLabels, mainProgramName, allSubFunction, this::switchLoadedProgram,
-                    this::onThemeSelect);
+                    this::onThemeSelect, isAnimationsOn);
 
             runControlsController.initComponent(this::RunProgram, this::prepareForTakingArguments, programLoaded,
                     argumentsLoaded);
             summaryLineController.initComponent(currentLoadedProgramName);
             cyclesController.initComponent(currentCycles);
-            instructionsTableController.initializeMainInstructionTable(programInstructions, derivedInstructions);
+            instructionsTableController.initializeMainInstructionTable(programInstructions, derivedInstructions,
+                    isAnimationsOn);
             derivedInstructionsTableController.markAsDerivedInstructionsTable();
-            derivedInstructionsTableController.setDerivedInstructionsTable(derivedInstructions);
-            argumentsTableController.initArgsTable(argumentsDTO);
-            allVarsTableController.initAllVarsTable(allVariablesDTO);
+            derivedInstructionsTableController.setDerivedInstructionsTable(derivedInstructions, isAnimationsOn);
+            argumentsTableController.initArgsTable(argumentsDTO, isAnimationsOn);
+            allVarsTableController.initAllVarsTable(allVariablesDTO, isAnimationsOn);
+
 
             // CLEANED: Only pass statistics data and variable states provider
             // Re-run functionality is now handled exclusively by the Show dialog
             historyStatsController.initComponent(
                     executionStatistics,
-                    this::getFinalVariableStates
+                    this::getFinalVariableStates,
+                    isAnimationsOn
             );
 
             debugControlsController.initComponent(
@@ -224,7 +230,7 @@ public class AppController {
      * This prepares the system state for re-run by expanding to the correct level
      * and pre-populating arguments.
      *
-     * @param expandLevel The expand level from the selected execution
+     * @param expandLevel       The expand level from the selected execution
      * @param previousArguments The arguments from the selected execution
      */
     public void handleRerunRequest(int expandLevel, @NotNull Map<String, Integer> previousArguments) {
@@ -254,19 +260,17 @@ public class AppController {
             // Step 4: Trigger the normal Set Run dialog flow with pre-populated arguments
             // This will open the dialog, allow user to confirm/edit, then proceed with execution
             prepareForTakingArguments();
-            if(wasInDebugMode)
-            {
+            if (wasInDebugMode) {
                 debugMode.set(true);
                 startDebugExecution();
-            }
-            else
-            {
+            } else {
                 debugMode.set(false);
                 startRegularExecution();
             }
 
 
-            System.out.println("Re-run preparation completed. Set Run dialog should open with pre-populated arguments.");
+            System.out.println("Re-run preparation completed. Set Run dialog should open with pre-populated arguments" +
+                    ".");
             System.out.println("Debug mode preserved: " + debugMode.get());
 
         } catch (Exception e) {
@@ -274,6 +278,7 @@ public class AppController {
             showError("Error preparing re-run: " + e.getMessage());
         }
     }
+
     private void resetForRerun(boolean preserveDebugMode) {
         // Reset execution state properties (but preserve debug mode if requested)
         programRunning.set(false);
@@ -314,19 +319,10 @@ public class AppController {
 
         // Clear instruction highlighting
         instructionsTableController.highlightVariable(null);
-        instructionsTableController.highlightCurrentInstruction(-1);
+        instructionsTableController.clearAllDebugHighlighting();
         derivedInstructionsTableController.highlightVariable(null);
 
         System.out.println("System state reset completed for rerun (statistics and debug mode preserved)");
-    }
-
-
-    private void resetForNewRun() {
-        resetForRerun(false);
-
-        executionStatistics.clear();
-
-        System.out.println("Full system reset completed (statistics cleared, debug mode reset)");
     }
 
     private void bindTitlePanesExpansion() {
@@ -657,16 +653,18 @@ public class AppController {
     private @NotNull VariableDTO createVariableDTOWithChangeDetection(@NotNull String name, @NotNull Integer value) {
         boolean hasChanged = false;
 
-        if (!isFirstDebugStep && previousDebugVariables.containsKey(name)) {
-            Integer previousValue = previousDebugVariables.get(name);
-            hasChanged = !previousValue.equals(value);
+        if (!isInDebugResume) {
+            if (!isFirstDebugStep && previousDebugVariables.containsKey(name)) {
+                Integer previousValue = previousDebugVariables.get(name);
+                hasChanged = !previousValue.equals(value);
 
-            if (hasChanged) {
-                System.out.println("Variable changed: " + name + " from " + previousValue + " to " + value);
+                if (hasChanged) {
+                    System.out.println("Variable changed: " + name + " from " + previousValue + " to " + value);
+                }
+            } else if (isFirstDebugStep) {
+                // On the first step, consider non-zero and non-argument variables as changed
+                hasChanged = value != 0 && !ProgramUtils.isArgument(name);
             }
-        } else if (!isFirstDebugStep) {
-            hasChanged = true;
-            System.out.println("New variable detected: " + name + " = " + value);
         }
 
         return new VariableDTO(
@@ -756,7 +754,7 @@ public class AppController {
 
     private void updateDebugVariableState() {
         List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted(engineController,
-                    currentExpandLevel.get());
+                currentExpandLevel.get());
         List<VariableDTO> allVarWithChangeDetection = FXCollections.observableArrayList();
         allVarNoChangeDetection.stream()
                 .map(var -> createVariableDTOWithChangeDetection(var.name().get(), var.value().get()))
@@ -805,7 +803,7 @@ public class AppController {
             showInfo("Execution already finished.");
             return;
         }
-
+        isInDebugResume = true;
         try {
             engineController.debugResume();
             updateDebugVariableState();
@@ -834,6 +832,7 @@ public class AppController {
 
     private void endDebugSession() {
         inDebugSession = false;
+        isInDebugResume = false;
         debugMode.set(false);
         programRunning.set(false);
         programFinished.set(true);
@@ -841,12 +840,8 @@ public class AppController {
         isFirstDebugStep = true;
         executionStatistics.add(engineController.getLastExecutionStatistics());
         programRanAtLeastOnce.set(true);
-
-        if (debugControlsController != null) {
-            debugControlsController.notifyDebugSessionEnded();
-        }
-
-        updateDebugVariableState();
+        debugControlsController.notifyDebugSessionEnded();
+        instructionsTableController.clearAllDebugHighlighting();
         System.out.println("Debug session ended - ready for new execution");
     }
 

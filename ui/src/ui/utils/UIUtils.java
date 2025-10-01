@@ -3,6 +3,7 @@ package ui.utils;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.ui.VariableDTO;
 import engine.utils.ProgramUtils;
+import javafx.animation.FadeTransition;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -10,8 +11,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.TableRow;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
 import system.controller.EngineController;
 import ui.jfx.statistics.ShowRunController;
@@ -262,5 +265,20 @@ public class UIUtils {
 
         // This should trigger the complete rerun process
         appControllerInstance.handleRerunRequest(expandLevel, arguments);
+    }
+
+    public static void checkIfShouldAnimate(@NotNull TableRow<?> row, boolean isAnimationsOn) {
+        if (isAnimationsOn) {
+            FadeTransition fade = new FadeTransition(Duration.millis(400), row);
+            fade.setFromValue(1.0);
+            fade.setToValue(0.3);
+            fade.setCycleCount(6);
+            fade.setAutoReverse(true);
+            fade.setOnFinished(e -> row.setOpacity(1.0));
+            fade.play();
+            row.getProperties().put("highlightFade", fade);
+        } else {
+            System.out.println("Skipping highlight animation as animations are disabled");
+        }
     }
 }

@@ -3,6 +3,7 @@ package ui.jfx.fileHandler;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -118,9 +119,7 @@ public class FileHandlerController {
 
     private static @NotNull Group getWindowLogoPart() {
         SVGPath part1 = new SVGPath();
-        part1.setContent("M6.75 11.0625L19.6875 9.33752V21.4125H6.75V11.0625Z"); // d=\"M24.8623 8.84464L41.2498 6
-        // .75V21.4125H24.8623V8.84464Z\"/><path d=\"M24.8623 27.45L41.2498 27.8333V41.25L24.8623 38.5666V27
-        // .45Z\"/><path d=\"M6.75 26.5875L19.6875 26.899V37.8L6.75 35.6198V26.5875Z"
+        part1.setContent("M6.75 11.0625L19.6875 9.33752V21.4125H6.75V11.0625Z");
         SVGPath part2 = new SVGPath();
         part2.setContent("M24.8623 8.84464L41.2498 6.75V21.4125H24.8623V8.84464Z");
         SVGPath part3 = new SVGPath();
@@ -186,12 +185,14 @@ public class FileHandlerController {
         Label joke = new Label("Mac? any day! mac is the best! mac > windows");
         joke.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
         Label equalSign = new Label(" = ");
+        HBox.setMargin(joke, new Insets(0, 0, 10, 0));
         equalSign.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-font-family: 'Comic Sans MS', cursive;");
         jokeBox.getChildren().addAll(joke, appleIcon, equalSign, crownLogo);
     }
 
     public void addWindowsJoke() {
         Label joke = new Label("Windows? ew, gross, get a mac");
+        HBox.setMargin(joke, new Insets(0, 0, 10, 0));
         Label equalSign = new Label(" = ");
         joke.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-font-family: 'Comic Sans MS', cursive;");
         equalSign.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-font-family: 'Comic Sans MS', cursive;");

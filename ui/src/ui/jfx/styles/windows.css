@@ -403,6 +403,25 @@
     -fx-text-background-color: #ffffff;
 }
 
+/* New debug highlighted row styles */
+.table-row-cell.highlighted-row-debug {
+    -fx-background-color: rgb(239, 0, 255);
+    -fx-border-color: rgba(0, 255, 139, 0.4);
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.table-row-cell.highlighted-row-debug:hover {
+    -fx-background-color: rgb(239, 0, 255);
+    -fx-border-color: rgba(0, 255, 139, 0.4);
+}
+
+.table-row-cell.highlighted-row-debug:selected {
+    -fx-background-color: rgb(239, 0, 255);
+    -fx-text-background-color: white;
+}
+
 /* Ugly Windows File Handler */
 .hbox {
     -fx-background-color: #c0c0c0; /* Silver background */

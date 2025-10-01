@@ -1,6 +1,7 @@
 package ui.jfx.statistics;
 
 import dto.engine.ExecutionStatisticsDTO;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.fxml.FXML;
@@ -9,6 +10,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ui.utils.AnimatedTableRow;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -77,10 +79,13 @@ public class HistoryStatsController {
      */
     public void initComponent(
             ListProperty<ExecutionStatisticsDTO> statisticsData,
-            @NotNull Function<ExecutionStatisticsDTO, Map<String, Integer>> variableStatesProvider) {
+            @NotNull Function<ExecutionStatisticsDTO, Map<String, Integer>> variableStatesProvider,
+            @NotNull BooleanProperty animationsEnabledProperty) {
 
         this.variableStatesProvider = variableStatesProvider;
         statisticsTable.itemsProperty().bind(statisticsData);
+        statisticsTable.setRowFactory(tv ->
+                new AnimatedTableRow<>(animationsEnabledProperty, 100, false));
 
         System.out.println("HistoryStatsController initialized with show functionality");
     }

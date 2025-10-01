@@ -416,8 +416,6 @@ public class ProgramEngine implements Serializable {
         debugStateHistory.add(new HashMap<>(currentDebugContext));
         debugCyclesHistory.add(0);
 
-        System.out.println("Debug session started at expand level " + expandLevel);
-        System.out.println("Debug arguments applied: " + debugArguments);
     }
 
     private void resetDebugState() {
@@ -443,7 +441,6 @@ public class ProgramEngine implements Serializable {
 
         // Execute current instruction
         Instruction currentInstruction = currentDebugInstructions.get(currentDebugPC);
-        System.out.println("Executing debug step " + currentDebugPC + ": " + currentInstruction.getStringRepresentation());
 
         try {
             // Execute instruction
@@ -484,9 +481,6 @@ public class ProgramEngine implements Serializable {
 
         // Update totalDebugCycles to match the current state
         totalDebugCycles = debugCyclesHistory.getLast();
-
-        System.out.println("Debug stepped backward to PC=" + currentDebugPC +
-                ", cycles: " + totalDebugCycles);
     }
 
     public void debugResume() {
@@ -508,7 +502,6 @@ public class ProgramEngine implements Serializable {
 
         debugMode = false;
         resetDebugState();
-        System.out.println("Debug session stopped");
     }
 
     // New method to finalize debug statistics:
@@ -521,11 +514,6 @@ public class ProgramEngine implements Serializable {
 
             // Add to statistics list
             executionStatisticsList.add(currentDebugStatistics);
-
-            System.out.println("Debug statistics finalized: " +
-                    ", result=" + finalResult +
-                    ", cycles=" + totalDebugCycles);
-
             currentDebugStatistics = null; // Clear reference
         }
     }

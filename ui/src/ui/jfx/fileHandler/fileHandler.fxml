@@ -10,15 +10,15 @@
     <Button fx:id="clearButton" onMousePressed="#onClearButtonPressed" styleClass="clear-button" text="Clear" />
     <Label fx:id="filePathField" alignment="CENTER" HBox.hgrow="ALWAYS">
       <HBox.margin>
-          <Insets top="0.0"/>
+          <Insets/>
       </HBox.margin>
       <styleClass>
           <String fx:value="file-path-label"/>
       </styleClass>
    </Label>
-    <HBox fx:id="jokeBox" alignment="CENTER" spacing="30.0" HBox.hgrow="ALWAYS">
+    <HBox fx:id="jokeBox" alignment="CENTER" spacing="30.0">
         <HBox.margin>
-            <Insets left="400.0"/>
+            <Insets left="5.0"/>
         </HBox.margin>
     </HBox>
 </HBox>

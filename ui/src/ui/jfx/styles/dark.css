@@ -210,9 +210,12 @@
 
 /* Label styling - distinct from buttons */
 .info-label {
-    -fx-background-color: linear-gradient(to bottom, -fx-grey-primary, -fx-grey-secondary);
     -fx-text-fill: white;
-    -fx-effect: dropshadow(gaussian, -fx-shadow-medium, 2, 0, 0, 1);
+}
+
+.pf-degree {
+    -fx-effect: dropshadow(gaussian, -fx-shadow-light, 2, 0, 0, 1);
+    -fx-background-color: linear-gradient(to bottom, -fx-grey-primary, -fx-grey-secondary);
 }
 
 /* HighSelectionButton text color */
@@ -390,16 +393,39 @@
 }
 
 .table-row-cell.highlighted-row {
-    -fx-background-color: #6c5b1f;
-    -fx-border-color: #f39c12;
+    -fx-background-color: rgba(37, 165, 160, 0.15);
+    -fx-border-color: rgba(37, 165, 160, 0.4);
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
 }
 
 .table-row-cell.highlighted-row:hover {
-    -fx-background-color: #8b7025;
+    -fx-background-color: rgba(37, 165, 160, 0.25);
+    -fx-border-color: rgba(37, 165, 160, 0.6);
 }
 
 .table-row-cell.highlighted-row:selected {
-    -fx-background-color: #f39c12;
+    -fx-background-color: rgba(37, 165, 160, 0.35);
+    -fx-text-background-color: white;
+}
+
+/* New debug highlighted row styles */
+.table-row-cell.highlighted-row-debug {
+    -fx-background-color: rgba(103, 58, 183, 0.15); /* Purple */
+    -fx-border-color: rgba(103, 58, 183, 0.4);
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.table-row-cell.highlighted-row-debug:hover {
+    -fx-background-color: rgba(103, 58, 183, 0.25);
+    -fx-border-color: rgba(103, 58, 183, 0.6);
+}
+
+.table-row-cell.highlighted-row-debug:selected {
+    -fx-background-color: rgba(103, 58, 183, 0.35);
     -fx-text-background-color: white;
 }
 

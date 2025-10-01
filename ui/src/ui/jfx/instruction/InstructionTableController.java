@@ -1,14 +1,19 @@
 package ui.jfx.instruction;
 
 import dto.engine.InstructionDTO;
+import javafx.animation.FadeTransition;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ui.utils.AnimatedTableRow;
+import ui.utils.UIUtils;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -16,7 +21,8 @@ import java.util.regex.Pattern;
 public class InstructionTableController {
 
     private boolean isDerivedMap = false;
-    private @Nullable String currentHighlightedVariable = null; // Track currently highlighted variable
+    private @Nullable String currentHighlightedVariable = null;  // Track currently highlighted variable
+    private int highlightedInstructionIndex = -1;
 
     @FXML
     private TableView<InstructionDTO> instructionTable;
@@ -30,6 +36,9 @@ public class InstructionTableController {
     private TableColumn<InstructionDTO, String> commandColumn;
     @FXML
     private TableColumn<InstructionDTO, Number> cyclesColumn;
+
+    @FXML
+    private BooleanProperty animationsEnabledProperty = new SimpleBooleanProperty(true);
 
     public void markAsDerivedInstructionsTable() {
         isDerivedMap = true;
@@ -50,8 +59,9 @@ public class InstructionTableController {
                 new ReadOnlyObjectWrapper<>(cellData.getValue().cycles()));
     }
 
-    public void initializeMainInstructionTable(ListProperty<InstructionDTO> instructions,
-                                               @NotNull ListProperty<InstructionDTO> derivedInstructions) {
+    public void initializeMainInstructionTable(@NotNull ListProperty<InstructionDTO> instructions,
+                                               @NotNull ListProperty<InstructionDTO> derivedInstructions,
+                                               @NotNull BooleanProperty animationsEnabledProperty) {
         if (isDerivedMap) {
             throw new IllegalStateException("initializeMainInstructionTable called on derived map table");
         }
@@ -75,12 +85,17 @@ public class InstructionTableController {
             return row;
         });
         instructionTable.itemsProperty().bind(instructions);
+        this.animationsEnabledProperty.bind(animationsEnabledProperty);
     }
 
-    public void setDerivedInstructionsTable(ListProperty<InstructionDTO> derivedInstructions) {
+    public void setDerivedInstructionsTable(ListProperty<InstructionDTO> derivedInstructions,
+                                            BooleanProperty animationsEnabledProperty) {
         if (!isDerivedMap) {
             throw new IllegalStateException("setDerivedInstructions called on non-derived map table");
         }
+        this.animationsEnabledProperty.bind(animationsEnabledProperty);
+        instructionTable.setRowFactory(tv ->
+                new AnimatedTableRow<>(animationsEnabledProperty, 100, false));
         instructionTable.itemsProperty().bind(derivedInstructions);
     }
 
@@ -126,21 +141,38 @@ public class InstructionTableController {
      * Updates the highlighting for a specific row based on the current highlighted variable
      */
     private void updateRowHighlighting(@NotNull TableRow<InstructionDTO> row, @Nullable InstructionDTO item) {
-        if (item == null || currentHighlightedVariable == null) {
-            // Clear highlighting
-            row.getStyleClass().removeAll("highlighted-row");
-            return;
+        // Remove any previous animation
+        FadeTransition ft = (FadeTransition) row.getProperties().get("highlightFade");
+        if (ft != null) {
+            ft.stop();
+            row.setOpacity(1.0);
+            row.getProperties().remove("highlightFade");
         }
+        if (item != null) {
 
-        // Check if this instruction contains the highlighted variable
-        boolean shouldHighlight = instructionContainsVariable(item, currentHighlightedVariable);
+            if (currentHighlightedVariable == null) {
+                row.getStyleClass().removeAll("highlighted-row");
 
-        if (shouldHighlight) {
-            if (!row.getStyleClass().contains("highlighted-row")) {
-                row.getStyleClass().add("highlighted-row");
             }
-        } else {
-            row.getStyleClass().removeAll("highlighted-row");
+
+            boolean instructionContainsVariable = instructionContainsVariable(item, currentHighlightedVariable);
+            boolean debugInstructionHighlight = (row.getIndex() == highlightedInstructionIndex);
+
+            if (instructionContainsVariable) {
+                if (!row.getStyleClass().contains("highlighted-row")) {
+                    row.getStyleClass().add("highlighted-row");
+                }
+                UIUtils.checkIfShouldAnimate(row, animationsEnabledProperty.get());
+            } else {
+                row.getStyleClass().removeAll("highlighted-row");
+            }
+            if (debugInstructionHighlight) {
+                if (!row.getStyleClass().contains("highlighted-row-debug")) {
+                    row.getStyleClass().add("highlighted-row-debug");
+                }
+            } else {
+                row.getStyleClass().removeAll();
+            }
         }
     }
 
@@ -172,15 +204,15 @@ public class InstructionTableController {
      * @param instructionIndex The index of the instruction to highlight (0-based)
      */
     public void highlightCurrentInstruction(int instructionIndex) {
-        // Clear previous selections
-        instructionTable.getSelectionModel().clearSelection();
-
-        // Select and scroll to the current instruction
         if (instructionIndex >= 0 && instructionIndex < instructionTable.getItems().size()) {
-            instructionTable.getSelectionModel().select(instructionIndex);
-            instructionTable.scrollTo(Math.max(0, instructionIndex - 2)); // Position near top
-
-            System.out.println("Highlighted instruction at index: " + instructionIndex);
+            highlightedInstructionIndex = instructionIndex;
+            instructionTable.scrollTo(Math.max(0, instructionIndex - 2));
+            instructionTable.refresh();
         }
+    }
+
+    public void clearAllDebugHighlighting() {
+        highlightedInstructionIndex = -1;
+        instructionTable.refresh();
     }
 }
