@@ -312,33 +312,37 @@
 .toggle-button {
     -fx-background-color: linear-gradient(to bottom, #8e8e93, #6d6d70);
     -fx-text-fill: white;
-    -fx-background-radius: 6px;
-    -fx-border-radius: 6px;
-    -fx-border-color: rgba(0, 0, 0, 0.15);
-    -fx-border-width: 0.5px;
-    -fx-padding: 6px 12px;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-padding: 6px 16px;
+    -fx-cursor: hand;
     -fx-font-family: "SF Pro Display", "Helvetica Neue", "Arial", sans-serif;
     -fx-font-size: 13px;
     -fx-font-weight: 500;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 3, 0.3, 0, 1);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 3, 0.2, 0, 1);
 }
 
 .toggle-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #aeaeb2, #8e8e93);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 4, 0.3, 0, 2);
 }
 
 .toggle-button:pressed {
-    -fx-background-color: #d1d1d6;
+    -fx-background-color: #48484a;
 }
 
 .toggle-button:selected {
-    -fx-background-color: linear-gradient(to bottom, -fx-button-primary, -fx-button-secondary);
+    -fx-background-color: linear-gradient(to bottom, #007aff, #0056cc);
     -fx-text-fill: white;
-    -fx-effect: dropshadow(gaussian, rgba(0, 122, 255, 0.3), 4, 0.3, 0, 1);
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.3), 3, 0, 0, 2);
+    -fx-border-width: 2;
+    -fx-border-color: white;
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
 }
 
 .toggle-button:selected:hover {
-    -fx-background-color: linear-gradient(to bottom, -fx-button-hover-primary, -fx-button-hover-secondary);
+    -fx-background-color: linear-gradient(to bottom, #409cff, #007aff);
     -fx-effect: dropshadow(gaussian, rgba(0, 122, 255, 0.4), 5, 0.4, 0, 2);
 }
 

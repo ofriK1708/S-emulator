@@ -18,7 +18,7 @@
    </Label>
     <HBox fx:id="jokeBox" alignment="CENTER" spacing="30.0" HBox.hgrow="ALWAYS">
         <HBox.margin>
-            <Insets left="500.0"/>
+            <Insets left="400.0"/>
         </HBox.margin>
     </HBox>
 </HBox>

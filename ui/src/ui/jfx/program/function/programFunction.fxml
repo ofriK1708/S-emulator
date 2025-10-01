@@ -73,7 +73,7 @@
             <String fx:value="pf-degree"/>
         </styleClass>
     </VBox>
-    <MenuButton mnemonicParsing="false" text="Theme">
+    <MenuButton mnemonicParsing="false" text="Choose Theme">
         <items>
             <RadioMenuItem mnemonicParsing="false" selected="true" text="Light (default)">
                 <toggleGroup>
