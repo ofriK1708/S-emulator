@@ -218,6 +218,9 @@ public class EngineController
             throw new IllegalStateException("Debug session not active");
         }
         engine.debugStep();
+        if (engine.isDebugFinished()) {
+            engine.finalizeDebugExecution();
+        }
     }
 
     public void debugStepBackward() {
@@ -232,7 +235,10 @@ public class EngineController
             throw new IllegalStateException("Debug session not active");
         }
         engine.debugResume();
-        inDebugSession = false; // Session ends after resume
+        // Finalize after resume completes
+        if (engine.isDebugFinished()) {
+            engine.finalizeDebugExecution();
+        }
     }
 
     public void stopDebugSession() {
