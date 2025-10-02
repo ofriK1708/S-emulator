@@ -25,8 +25,6 @@ import java.util.regex.Pattern;
 
 public class InstructionTableController {
 
-    private final static SVGPath breakPointIconFull;
-    private final static SVGPath breakPointIconEmpty;
     private boolean isDerivedMap = false;
     private @Nullable String currentHighlightedVariable = null;  // Track currently highlighted variable
     private int highlightedInstructionIndex = -1;
@@ -56,21 +54,6 @@ public class InstructionTableController {
         isDerivedMap = true;
     }
 
-    static {
-        breakPointIconFull = new SVGPath();
-        breakPointIconFull.setContent("M12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1" +
-                " 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22");
-        breakPointIconFull.setScaleX(0.8);
-        breakPointIconFull.setScaleY(0.8);
-        breakPointIconFull.setStyle("-fx-fill: red; -fx-stroke: black; -fx-stroke-width: 1;");
-        breakPointIconEmpty = new SVGPath();
-        breakPointIconEmpty.setContent("M12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8" +
-                ".1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3" +
-                ".35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8");
-        breakPointIconEmpty.setScaleX(0.8);
-        breakPointIconEmpty.setScaleY(0.8);
-        breakPointIconEmpty.setStyle("-fx-fill: transparent; -fx-stroke: black; -fx-stroke-width: 1;");
-    }
     @FXML
     public void initialize() {
         // Bind columns
@@ -347,7 +330,15 @@ public class InstructionTableController {
             breakpointButton.setText("");
             if (hasBreakpoint) {
                 breakpointButton.getStyleClass().add("breakpoint-active");
-                breakpointButton.setGraphic(breakPointIconFull);
+                SVGPath breakPointIcon = new SVGPath();
+                breakPointIcon.setContent("M12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3" +
+                        ".175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2" +
+                        ".138T12 22");
+                breakPointIcon.setScaleX(0.8);
+                breakPointIcon.setScaleY(0.8);
+                breakPointIcon.setStyle("-fx-fill: red; -fx-stroke: black; -fx-stroke-width: 1;");
+                breakpointButton.setGraphic(breakPointIcon);
+                breakpointButton.getStyleClass().add("breakpoint-active");
             } else {
                 breakpointButton.setGraphic(null);
             }
