@@ -38,16 +38,6 @@ public class UIUtils {
         return EngineController.validArgumentValueCheck.test(arg);
     }
 
-    public static @NotNull VariableDTO toVariableDTO(Map.@NotNull Entry<String, Integer> entry) {
-        return new VariableDTO(new SimpleStringProperty(entry.getKey()),
-                new SimpleIntegerProperty(entry.getValue()));
-    }
-
-    public static @NotNull VariableDTO toVariableDTO(String variableName, Integer result) {
-        return new VariableDTO(new SimpleStringProperty(variableName),
-                new SimpleIntegerProperty(result));
-    }
-
     public static void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
@@ -102,9 +92,7 @@ public class UIUtils {
         sortedProgramNames.addAll(sortedLabels);
         return sortedProgramNames;
     }
-    /*TODO - change this whole mess - duplicated code, hardcoded code (using 'y' instead of const) unused code.
-       move this dialog mess from UIUtils, its not a utils function
-    *  make this code cleaner, modular and not AI written */
+
     /**
      * SIMPLIFIED: Open Show Run dialog without re-run callback.
      * Re-run functionality is now handled internally by the Show dialog.
@@ -144,31 +132,6 @@ public class UIUtils {
             e.printStackTrace();
             showError("Failed to open execution details dialog: " + e.getMessage());
         }
-    }
-
-    /**
-     * Formats a map of arguments into a readable string for display.
-     *
-     * @param arguments Map of argument names to values
-     * @return Formatted string representation of arguments, or "None" if empty
-     */
-    public static @NotNull String formatArgumentsForDisplay(@NotNull Map<String, Integer> arguments) {
-        if (arguments.isEmpty()) {
-            return "None";
-        }
-
-        StringBuilder formatted = new StringBuilder();
-        boolean first = true;
-
-        for (Map.Entry<String, Integer> entry : arguments.entrySet()) {
-            if (!first) {
-                formatted.append(", ");
-            }
-            formatted.append(entry.getKey()).append(" = ").append(entry.getValue());
-            first = false;
-        }
-
-        return formatted.toString();
     }
 
     /**
@@ -222,11 +185,10 @@ public class UIUtils {
 
         Map<String, Integer> allVariables = getAllVariablesMap(engineController, expandLevel);
         Map<String, Integer> sortedVars = sortVariableMapByName(allVariables);
-        List<VariableDTO> variablesList = getSortedVariableDTOS(sortedVars);
 
         // Sort variables by name for consistent display
 
-        return variablesList;
+        return getSortedVariableDTOS(sortedVars);
     }
 
     public static Map<String, Integer> sortVariableMapByName(Map<String, Integer> variableMap) {
