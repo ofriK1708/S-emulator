@@ -686,7 +686,6 @@ public class AppController {
     private @NotNull VariableDTO createVariableDTOWithChangeDetection(@NotNull String name, @NotNull Integer value) {
         boolean hasChanged = false;
 
-        if (!isInDebugResume) {
             if (!isFirstDebugStep && previousDebugVariables.containsKey(name)) {
                 Integer previousValue = previousDebugVariables.get(name);
                 hasChanged = !previousValue.equals(value);
@@ -698,7 +697,7 @@ public class AppController {
                 // On the first step, consider non-zero and non-argument variables as changed
                 hasChanged = value != 0 && !ProgramUtils.isArgument(name);
             }
-        }
+
 
         return new VariableDTO(
                 new SimpleStringProperty(name),
@@ -847,6 +846,11 @@ public class AppController {
             showInfo("Execution already finished.");
             return;
         }
+        if (!isFirstDebugStep) {
+            previousDebugVariables.clear();
+            previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
+        }
+
         isInDebugResume = true;
         try {
             engineController.debugResume();
@@ -873,6 +877,9 @@ public class AppController {
             e.printStackTrace();
             showError("Error during debug resume: " + e.getMessage());
             endDebugSession();
+        } finally {
+            // ADDED: Always reset flag
+            isInDebugResume = false;
         }
     }
 
