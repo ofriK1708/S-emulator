@@ -17,13 +17,12 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class EngineController
 {
+    private final Map<Integer, BreakpointDTO> persistentBreakpoints = new HashMap<>();
     public static @NotNull Predicate<String> validArgumentValueCheck = ProgramUtils.validArgumentCheck;
     private final @NotNull XMLHandler xmlHandler;
     private @Nullable ProgramEngine engine;
@@ -140,6 +139,8 @@ public class EngineController
     public void clearLoadedProgram() {
         engine = null;
         maxExpandLevel = 0;
+        persistentBreakpoints.clear();
+
     }
 
     public ExecutionStatisticsDTO getLastExecutionStatistics() {
@@ -214,6 +215,12 @@ public class EngineController
 
         engine.startDebugSession(expandLevel, arguments);
         inDebugSession = true;
+        for (BreakpointDTO breakpoint : persistentBreakpoints.values()) {
+            engine.addBreakpoint(breakpoint);
+            System.out.println("Applied breakpoint at line " + breakpoint.lineNumber() +
+                    " to debug session");
+        }
+
     }
 
     public void debugStep() {
@@ -337,78 +344,104 @@ public class EngineController
             return new java.util.HashMap<>();
         }
     }
-    // Add these methods to EngineController class (add at the end, around line 400):
 
     /**
-     * Adds or updates a breakpoint in the current debug session.
+     * Adds or updates a breakpoint. Can be called at any time.
      *
      * @param breakpoint The breakpoint to add
      * @return true if breakpoint was added successfully
-     * @throws IllegalStateException if no debug session is active
      */
     public boolean addBreakpoint(@NotNull BreakpointDTO breakpoint) {
-        if (engine == null || !inDebugSession) {
-            throw new IllegalStateException("Debug session not active");
+        if (engine == null) {
+            throw new IllegalStateException("Program has not been set");
         }
-        return engine.addBreakpoint(breakpoint);
+
+        // Validate line number against current program
+        ProgramDTO program = engine.toDTO(0);
+        if (breakpoint.lineNumber() < 0 || breakpoint.lineNumber() >= program.instructions().size()) {
+            System.err.println("Invalid breakpoint line: " + breakpoint.lineNumber() +
+                    " (valid range: 0-" + (program.instructions().size() - 1) + ")");
+            return false;
+        }
+
+        // Store in persistent collection (always works)
+        persistentBreakpoints.put(breakpoint.lineNumber(), breakpoint);
+
+        // If in active debug session, also update engine
+        if (inDebugSession && engine.isInDebugMode()) {
+            engine.addBreakpoint(breakpoint);
+        }
+
+        System.out.println("Breakpoint set at line " + breakpoint.lineNumber() +
+                (inDebugSession ? " (active in current session)" : " (will activate in next debug session)"));
+        return true;
     }
 
     /**
      * Removes a breakpoint at the specified line number.
-     *
-     * @param lineNumber The line number to remove breakpoint from
-     * @return true if breakpoint was removed
-     * @throws IllegalStateException if no debug session is active
      */
-    public boolean removeBreakpoint(int lineNumber) {
-        if (engine == null || !inDebugSession) {
-            throw new IllegalStateException("Debug session not active");
+    public void removeBreakpoint(int lineNumber) {
+        if (engine == null) {
+            throw new IllegalStateException("Program has not been set");
         }
-        return engine.removeBreakpoint(lineNumber);
+
+        BreakpointDTO removed = persistentBreakpoints.remove(lineNumber);
+
+        // If in active debug session, also remove from engine
+        if (inDebugSession && engine.isInDebugMode()) {
+            engine.removeBreakpoint(lineNumber);
+        }
+
+        if (removed != null) {
+            System.out.println("Breakpoint removed from line " + lineNumber);
+        }
     }
 
     /**
-     * Removes all breakpoints from the current debug session.
-     *
-     * @throws IllegalStateException if no debug session is active
+     * Removes all breakpoints.
      */
     public void clearAllBreakpoints() {
-        if (engine == null || !inDebugSession) {
-            throw new IllegalStateException("Debug session not active");
+        if (engine == null) {
+            return; // Silently return if no engine
         }
-        engine.clearAllBreakpoints();
+
+        int count = persistentBreakpoints.size();
+        persistentBreakpoints.clear();
+
+        if (inDebugSession && engine.isInDebugMode()) {
+            engine.clearAllBreakpoints();
+        }
+
+        System.out.println("Cleared " + count + " breakpoint(s)");
     }
 
     /**
-     * Gets all currently set breakpoints in the debug session.
-     *
-     * @return List of all breakpoints
-     * @throws IllegalStateException if no debug session is active
+     * Gets all currently set breakpoints (from persistent storage).
      */
     public @NotNull List<BreakpointDTO> getAllBreakpoints() {
-        if (engine == null || !inDebugSession) {
-            throw new IllegalStateException("Debug session not active");
+        if (engine == null) {
+            return Collections.emptyList();
         }
-        return engine.getAllBreakpoints();
+        // Return from persistent storage, works outside debug session
+        return new ArrayList<>(persistentBreakpoints.values());
     }
 
     /**
      * Checks if there's a breakpoint at the specified line.
-     *
-     * @param lineNumber The line to check
-     * @return true if an enabled breakpoint exists at this line
+     * Checks persistent storage.
      */
     public boolean hasBreakpointAt(int lineNumber) {
-        if (engine == null || !inDebugSession) {
+        if (engine == null) {
             return false;
         }
-        return engine.hasBreakpointAt(lineNumber);
+        // Check persistent storage
+        BreakpointDTO bp = persistentBreakpoints.get(lineNumber);
+        return bp != null && bp.enabled();
     }
 
     /**
      * Gets the line number of the last breakpoint that was hit.
-     *
-     * @return The line number, or null if no breakpoint was hit
+     * Only meaningful during debug session.
      */
     public @Nullable Integer getLastBreakpointHit() {
         if (engine == null || !inDebugSession) {
@@ -419,14 +452,10 @@ public class EngineController
 
     /**
      * Toggles a breakpoint at the specified line.
-     * If a breakpoint exists, it's removed. Otherwise, a new one is added.
-     *
-     * @param lineNumber The line number to toggle
-     * @return true if a breakpoint now exists at this line
      */
     public boolean toggleBreakpoint(int lineNumber) {
-        if (engine == null || !inDebugSession) {
-            throw new IllegalStateException("Debug session not active");
+        if (engine == null) {
+            throw new IllegalStateException("Program has not been set");
         }
 
         if (hasBreakpointAt(lineNumber)) {

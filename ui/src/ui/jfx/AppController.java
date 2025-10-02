@@ -39,6 +39,7 @@ import ui.jfx.variables.VariablesTableController;
 import ui.utils.UIUtils;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -203,12 +204,6 @@ public class AppController {
      * @param lineNumber The line number where user wants to toggle breakpoint
      */
     private void handleBreakpointToggle(int lineNumber) {
-        if (!inDebugSession) {
-            showInfo("Breakpoints can only be set during a debug session.\n" +
-                    "Start debugging first, then right-click on instruction lines to set breakpoints.");
-            return;
-        }
-
         try {
             boolean nowHasBreakpoint = engineController.toggleBreakpoint(lineNumber);
 
@@ -354,6 +349,7 @@ public class AppController {
         // Clear instruction highlighting
         instructionsTableController.highlightVariable(null);
         instructionsTableController.clearAllDebugHighlighting();
+        instructionsTableController.clearBreakpointHitHighlight();
         derivedInstructionsTableController.highlightVariable(null);
 
         System.out.println("System state reset completed for rerun (statistics and debug mode preserved)");
@@ -463,6 +459,8 @@ public class AppController {
         allVariablesDTO.clear();
         argumentsDTO.clear();
         currentCycles.set(0);
+        List<BreakpointDTO> existingBreakpoints = engineController.getAllBreakpoints();
+        instructionsTableController.updateBreakpoints(existingBreakpoints);
         summaryLineController.updateCounts(loadedProgram.instructions());
         programVariablesNamesAndLabels.setAll(sortAllProgramNames(engineController.
                 getAllVariablesAndLabelsNames(0, true)));
@@ -553,7 +551,6 @@ public class AppController {
             int expandLevel = currentExpandLevel.get();
             programRunning.set(true);
 
-            instructionsTableController.updateBreakpoints(java.util.Collections.emptyList());
             instructionsTableController.clearBreakpointHitHighlight();
 
             // Execute the program using SystemController
@@ -626,6 +623,9 @@ public class AppController {
         currentExpandLevel.set(0);
         loadedProgram = null;
         programArguments.clear();
+        engineController.clearAllBreakpoints();
+        instructionsTableController.updateBreakpoints(Collections.emptyList());
+
         engineController.clearLoadedProgram();
         executionStatistics.clear();
         programInstructions.clear();
@@ -721,8 +721,15 @@ public class AppController {
             isFirstDebugStep = true;
             System.out.println("Debug session started - change tracking reset");
 
-            instructionsTableController.updateBreakpoints(java.util.Collections.emptyList());
+
+            // Get current breakpoints BEFORE clearing (we want to preserve them)
+            List<BreakpointDTO> currentBreakpoints = engineController.getAllBreakpoints();
+
+            // Clear only the HIT highlighting, keep breakpoint indicators
             instructionsTableController.clearBreakpointHitHighlight();
+            // Refresh breakpoint display (shows them from persistent storage)
+            instructionsTableController.updateBreakpoints(currentBreakpoints);
+
 
             if (debugControlsController != null) {
                 debugControlsController.notifyDebugSessionStarted();
