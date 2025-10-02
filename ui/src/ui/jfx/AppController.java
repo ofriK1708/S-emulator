@@ -372,10 +372,13 @@ public class AppController {
                     currentExpandLevel::set,
                     currentCycles::set,
                     program -> {
-                        loadedProgram = program;
-                        mainProgramName.set(program.ProgramName());
-                        currentLoadedProgramName.set(program.ProgramName());
-                        allSubFunction.putAll(engineController.getFunctionsSet());
+                        if (program != null) {
+                            UIUtils.showSuccess("File loaded successfully: " + file.getName());
+                            loadedProgram = program;
+                            mainProgramName.set(program.ProgramName());
+                            currentLoadedProgramName.set(program.ProgramName());
+                            allSubFunction.putAll(engineController.getFunctionsSet());
+                        }
                         loadingStage.close();
                     }
             );
