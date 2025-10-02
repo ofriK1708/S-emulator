@@ -356,11 +356,13 @@ public class EngineController
             throw new IllegalStateException("Program has not been set");
         }
 
-        // Validate line number against current program
-        ProgramDTO program = engine.toDTO(0);
-        if (breakpoint.lineNumber() < 0 || breakpoint.lineNumber() >= program.instructions().size()) {
+        int maxExpandedLevel = engine.getMaxExpandLevel();
+        ProgramDTO programAtMaxLevel = engine.toDTO(maxExpandedLevel);
+        int maxValidLine = programAtMaxLevel.instructions().size() - 1;
+
+        if (breakpoint.lineNumber() < 0 || breakpoint.lineNumber() >= maxValidLine) {
             System.err.println("Invalid breakpoint line: " + breakpoint.lineNumber() +
-                    " (valid range: 0-" + (program.instructions().size() - 1) + ")");
+                    " (valid range: 0-" + (maxValidLine) + ")");
             return false;
         }
 
