@@ -64,8 +64,14 @@
     -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
 }
 
-.variables-table .table-row-cell {
+.variables-table .table-row-cell:even {
     -fx-background-color: white;
+    -fx-border-color: transparent transparent #e0f7fa transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.variables-table .table-row-cell:odd {
+    -fx-background-color: #f9f9f9;
     -fx-border-color: transparent transparent #e0f7fa transparent;
     -fx-border-width: 0 0 1 0;
 }
