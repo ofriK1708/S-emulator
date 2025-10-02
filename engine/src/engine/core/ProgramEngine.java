@@ -1,5 +1,6 @@
 package engine.core;
 
+import dto.engine.BreakpointDTO;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
 import engine.core.syntheticCommand.Quote;
@@ -34,6 +35,9 @@ public class ProgramEngine implements Serializable {
     private @NotNull Set<String> originalLabels;
     private @Nullable SFunction originalSFunction = null;
     private String funcName;
+    private final Map<Integer, BreakpointDTO> breakpoints = new HashMap<>(); // line -> breakpoint
+    private @Nullable Integer lastBreakpointHit = null; // Track which breakpoint was just hit
+
 
     // Enhanced debugger fields with proper state management:
     private boolean debugMode = false;
@@ -430,6 +434,9 @@ public class ProgramEngine implements Serializable {
         currentDebugPC = 0;
         currentDebugStatistics = null;
         debugMode = true;
+        breakpoints.clear();
+        lastBreakpointHit = null;
+
     }
 
     public void debugStep() {
@@ -441,6 +448,11 @@ public class ProgramEngine implements Serializable {
             return; // Already at the end
         }
 
+        // Reset any previous breakpoint HIT statuses before stepping
+        resetBreakpointStatuses();
+        if (shouldStopAtBreakpoint()) {
+            markBreakpointHit();
+        }
         // Execute current instruction
         Instruction currentInstruction = currentDebugInstructions.get(currentDebugPC);
         System.out.println("Executing debug step " + currentDebugPC + ": " + currentInstruction.getStringRepresentation());
@@ -459,11 +471,12 @@ public class ProgramEngine implements Serializable {
             debugStateHistory.add(new HashMap<>(currentDebugContext));
             debugCyclesHistory.add(totalDebugCycles);
 
+
+
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Error executing debug instruction at PC=" + currentDebugPC + ": " + e.getMessage(), e);
         }
     }
-
     public void debugStepBackward() {
         if (!debugMode) {
             throw new IllegalStateException("Debug session not started");
@@ -494,10 +507,41 @@ public class ProgramEngine implements Serializable {
             throw new IllegalStateException("Debug session not started");
         }
 
-        // Execute remaining instructions
+        // Reset breakpoint statuses at start of resume
+        resetBreakpointStatuses();
+
+        // Execute remaining instructions, stopping at breakpoints
         while (currentDebugPC < currentDebugInstructions.size()) {
-            debugStep(); // This will finalize statistics when program completes
+            if (shouldStopAtBreakpoint()) {
+                markBreakpointHit();
+                System.out.println("Resume stopped at breakpoint at line " + currentDebugPC);
+                return; // Stop execution here
+            }
+
+            Instruction currentInstruction = currentDebugInstructions.get(currentDebugPC);
+
+            try {
+                // Execute instruction
+                currentInstruction.execute(currentDebugContext);
+
+                // Add cycles
+                totalDebugCycles += currentInstruction.getCycles();
+
+                // Update PC from context
+                currentDebugPC = currentDebugContext.get(PC_NAME);
+
+                // Save state
+                debugStateHistory.add(new HashMap<>(currentDebugContext));
+                debugCyclesHistory.add(totalDebugCycles);
+
+
+
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Error executing debug instruction at PC=" + currentDebugPC + ": " + e.getMessage(), e);
+            }
         }
+
+        System.out.println("Resume completed - reached end of program");
     }
 
     public void stopDebugSession() {
@@ -607,4 +651,124 @@ public class ProgramEngine implements Serializable {
             finalizeDebugStatistics();
         }
     }
+
+
+
+    /**
+     * Adds or updates a breakpoint at the specified line number.
+     *
+     * @param breakpoint The breakpoint to add
+     * @return true if breakpoint was added/updated successfully
+     */
+    public boolean addBreakpoint(@NotNull BreakpointDTO breakpoint) {
+        if (!debugMode) {
+            throw new IllegalStateException("Cannot add breakpoints outside of debug session");
+        }
+
+        // Validate line number
+        if (breakpoint.lineNumber() < 0 || breakpoint.lineNumber() >= currentDebugInstructions.size()) {
+            System.err.println("Invalid breakpoint line: " + breakpoint.lineNumber() +
+                    " (valid range: 0-" + (currentDebugInstructions.size() - 1) + ")");
+            return false;
+        }
+
+        breakpoints.put(breakpoint.lineNumber(), breakpoint);
+        System.out.println("Breakpoint added at line " + breakpoint.lineNumber() +
+                (breakpoint.condition() != null ? " with condition: " + breakpoint.condition() : ""));
+        return true;
+    }
+
+    /**
+     * Removes a breakpoint at the specified line number.
+     *
+     * @param lineNumber The line number to remove breakpoint from
+     * @return true if breakpoint was removed, false if no breakpoint existed
+     */
+    public boolean removeBreakpoint(int lineNumber) {
+        BreakpointDTO removed = breakpoints.remove(lineNumber);
+        if (removed != null) {
+            System.out.println("Breakpoint removed from line " + lineNumber);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Removes all breakpoints.
+     */
+    public void clearAllBreakpoints() {
+        int count = breakpoints.size();
+        breakpoints.clear();
+        lastBreakpointHit = null;
+        System.out.println("Cleared " + count + " breakpoint(s)");
+    }
+
+    /**
+     * Gets all currently set breakpoints.
+     *
+     * @return List of all breakpoints (defensive copy)
+     */
+    public @NotNull List<BreakpointDTO> getAllBreakpoints() {
+        return new ArrayList<>(breakpoints.values());
+    }
+
+    /**
+     * Checks if there's a breakpoint at the specified line.
+     *
+     * @param lineNumber The line to check
+     * @return true if an enabled breakpoint exists at this line
+     */
+    public boolean hasBreakpointAt(int lineNumber) {
+        BreakpointDTO bp = breakpoints.get(lineNumber);
+        return bp != null && bp.enabled();
+    }
+
+    /**
+     * Gets the breakpoint that was last hit during execution.
+     *
+     * @return The line number of the last hit breakpoint, or null if none
+     */
+    public @Nullable Integer getLastBreakpointHit() {
+        return lastBreakpointHit;
+    }
+
+    /**
+     * Checks if execution should stop at the current PC due to a breakpoint.
+     * Evaluates conditions if present.
+     */
+    private boolean shouldStopAtBreakpoint() {
+        if (!debugMode || currentDebugPC >= currentDebugInstructions.size()) {
+            return false;
+        }
+
+        BreakpointDTO breakpoint = breakpoints.get(currentDebugPC);
+        return breakpoint != null && breakpoint.enabled();
+        // Note: Ignores breakpoint.condition() entirely
+    }
+    /**
+     * Updates the breakpoint status to HIT for the current PC.
+     */
+    private void markBreakpointHit() {
+        BreakpointDTO breakpoint = breakpoints.get(currentDebugPC);
+        if (breakpoint != null) {
+            // Update status to HIT
+            breakpoints.put(currentDebugPC, breakpoint.withStatus(BreakpointDTO.BreakpointStatus.HIT));
+            lastBreakpointHit = currentDebugPC;
+            System.out.println("Breakpoint hit at line " + currentDebugPC);
+        }
+    }
+
+    /**
+     * Resets all breakpoint HIT statuses back to ACTIVE.
+     */
+    private void resetBreakpointStatuses() {
+        for (Map.Entry<Integer, BreakpointDTO> entry : breakpoints.entrySet()) {
+            BreakpointDTO bp = entry.getValue();
+            if (bp.status() == BreakpointDTO.BreakpointStatus.HIT) {
+                breakpoints.put(entry.getKey(), bp.withStatus(BreakpointDTO.BreakpointStatus.ACTIVE));
+            }
+        }
+        lastBreakpointHit = null;
+    }
+
 }

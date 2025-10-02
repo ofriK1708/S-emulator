@@ -1,5 +1,6 @@
 package ui.jfx;
 
+import dto.engine.BreakpointDTO;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
@@ -162,6 +163,7 @@ public class AppController {
             summaryLineController.initComponent(currentLoadedProgramName);
             cyclesController.initComponent(currentCycles);
             instructionsTableController.initializeMainInstructionTable(programInstructions, derivedInstructions);
+            instructionsTableController.initializeBreakpointSupport(this::handleBreakpointToggle);
             derivedInstructionsTableController.markAsDerivedInstructionsTable();
             derivedInstructionsTableController.setDerivedInstructionsTable(derivedInstructions);
             argumentsTableController.initArgsTable(argumentsDTO);
@@ -185,6 +187,38 @@ public class AppController {
         } else {
             System.err.println("One or more controllers are not injected properly!");
             throw new IllegalStateException("FXML injection failed: required controllers are null.");
+        }
+    }
+
+    /**
+     * Handles breakpoint toggle request from the instruction table.
+     * Called when user right-clicks on an instruction line.
+     *
+     * @param lineNumber The line number where user wants to toggle breakpoint
+     */
+    private void handleBreakpointToggle(int lineNumber) {
+        if (!inDebugSession) {
+            showInfo("Breakpoints can only be set during a debug session.\n" +
+                    "Start debugging first, then right-click on instruction lines to set breakpoints.");
+            return;
+        }
+
+        try {
+            boolean nowHasBreakpoint = engineController.toggleBreakpoint(lineNumber);
+
+            // Refresh breakpoint display
+            List<BreakpointDTO> allBreakpoints = engineController.getAllBreakpoints();
+            instructionsTableController.updateBreakpoints(allBreakpoints);
+
+            if (nowHasBreakpoint) {
+                showInfo("Breakpoint set at line " + (lineNumber + 1));
+            } else {
+                showInfo("Breakpoint removed from line " + (lineNumber + 1));
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error toggling breakpoint: " + e.getMessage());
+            showError("Error toggling breakpoint: " + e.getMessage());
         }
     }
 
@@ -224,7 +258,7 @@ public class AppController {
      * This prepares the system state for re-run by expanding to the correct level
      * and pre-populating arguments.
      *
-     * @param expandLevel The expand level from the selected execution
+     * @param expandLevel       The expand level from the selected execution
      * @param previousArguments The arguments from the selected execution
      */
     public void handleRerunRequest(int expandLevel, @NotNull Map<String, Integer> previousArguments) {
@@ -254,13 +288,10 @@ public class AppController {
             // Step 4: Trigger the normal Set Run dialog flow with pre-populated arguments
             // This will open the dialog, allow user to confirm/edit, then proceed with execution
             prepareForTakingArguments();
-            if(wasInDebugMode)
-            {
+            if (wasInDebugMode) {
                 debugMode.set(true);
                 startDebugExecution();
-            }
-            else
-            {
+            } else {
                 debugMode.set(false);
                 startRegularExecution();
             }
@@ -274,6 +305,7 @@ public class AppController {
             showError("Error preparing re-run: " + e.getMessage());
         }
     }
+
     private void resetForRerun(boolean preserveDebugMode) {
         // Reset execution state properties (but preserve debug mode if requested)
         programRunning.set(false);
@@ -604,6 +636,7 @@ public class AppController {
         programVariablesNamesAndLabels.clear();
         allSubFunction.clear();
         previousDebugVariables.clear();
+        engineController.clearAllBreakpoints();
         isFirstDebugStep = true;
         inDebugSession = false;
         debugMode.set(false);
@@ -727,22 +760,33 @@ public class AppController {
         }
 
         try {
+            // Clear previous breakpoint hit highlighting
+            instructionsTableController.clearBreakpointHitHighlight();
+
             if (!isFirstDebugStep) {
                 previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
             }
 
+            // Execute one instruction
             engineController.debugStep();
+
             int currentPC = engineController.getCurrentDebugPC();
             currentCycles.set(engineController.getCurrentDebugCycles());
             highlightCurrentInstruction(currentPC);
-
             updateDebugVariableState();
 
             if (isFirstDebugStep) {
                 isFirstDebugStep = false;
             }
 
+            // Check if we hit a breakpoint at the new PC location
+            if (engineController.hasBreakpointAt(currentPC)) {
+                instructionsTableController.highlightBreakpointHit(currentPC);
+                showInfo("Breakpoint hit at line " + (currentPC + 1) + ". Execution paused.");
+            }
+
             if (engineController.isDebugFinished()) {
+                executionStatistics.setAll(engineController.getAllExecutionStatistics());
                 handleExecutionFinished();
             } else {
                 showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + currentCycles.get());
@@ -756,7 +800,7 @@ public class AppController {
 
     private void updateDebugVariableState() {
         List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted(engineController,
-                    currentExpandLevel.get());
+                currentExpandLevel.get());
         List<VariableDTO> allVarWithChangeDetection = FXCollections.observableArrayList();
         allVarNoChangeDetection.stream()
                 .map(var -> createVariableDTOWithChangeDetection(var.name().get(), var.value().get()))
@@ -808,10 +852,24 @@ public class AppController {
 
         try {
             engineController.debugResume();
-            updateDebugVariableState();
-            currentCycles.set(engineController.getLastDebugCycles());
 
-            handleExecutionFinished();
+            // Update UI state
+            int currentPC = engineController.getCurrentDebugPC();
+            currentCycles.set(engineController.getCurrentDebugCycles());
+            highlightCurrentInstruction(currentPC);
+            updateDebugVariableState();
+
+            // Check if we stopped at a breakpoint
+            Integer breakpointHit = engineController.getLastBreakpointHit();
+            if (breakpointHit != null) {
+                // Stopped at breakpoint - highlight it
+                instructionsTableController.highlightBreakpointHit(breakpointHit);
+                showInfo("Breakpoint hit at line " + (breakpointHit + 1) +
+                        ". Execution paused.\nPC: " + currentPC +
+                        ", Total cycles: " + currentCycles.get());
+            } else if (engineController.isDebugFinished()) {
+                handleExecutionFinished();
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -880,41 +938,36 @@ public class AppController {
                         stylesheet.contains("/styles/mac.css") ||
                         stylesheet.contains("/styles/windows.css"));
 
-        // Add component CSS files (always loaded)
-        loadComponentStylesheets();
-
-        // Add the selected theme stylesheet
-        String themeStylesheet = getClass().getResource("/ui/jfx/styles/" +
-                theme.getDisplayName().toLowerCase() + ".css").toExternalForm();
-        scene.getStylesheets().add(themeStylesheet);
-
-        System.out.println("Applied " + theme + " theme with stylesheet: " + themeStylesheet);
-    }
-
-    /**
-     * Load all component stylesheets that contain layout and structural styles
-     */
-    private void loadComponentStylesheets() {
-        String[] componentStylesheets = {
-                "/ui/jfx/cycles/cycles.css",
-                "/ui/jfx/runControls/RunControls.css",
-                "/ui/jfx/debugger/Debugger.css",
-                "/ui/jfx/summaryLine/SummaryLine.css",
-                "/ui/jfx/fileHandler/fileHandler.css",
-                "/ui/jfx/variables/variablesTable.css",
-                "/ui/jfx/statistics/Statistics.css",
-                "/ui/jfx/instruction/InstructionsTableStyle.css"
-        };
-
-        for (String stylesheet : componentStylesheets) {
-            try {
-                String stylesheetUrl = getClass().getResource(stylesheet).toExternalForm();
-                if (!scene.getStylesheets().contains(stylesheetUrl)) {
-                    scene.getStylesheets().add(stylesheetUrl);
-                }
-            } catch (Exception e) {
-                System.err.println("Warning: Could not load stylesheet: " + stylesheet);
+        try {
+            instructionsTableController.clearBreakpointHitHighlight();
+            if (!isFirstDebugStep) {
+                previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
             }
+
+            // Execute one instruction - finalization happens inside if needed
+            engineController.debugStep();
+
+            int currentPC = engineController.getCurrentDebugPC();
+            currentCycles.set(engineController.getCurrentDebugCycles());
+            highlightCurrentInstruction(currentPC);
+            updateDebugVariableState();
+
+            if (isFirstDebugStep) {
+                isFirstDebugStep = false;
+            }
+            if (engineController.hasBreakpointAt(currentPC)) {
+                instructionsTableController.highlightBreakpointHit(currentPC);
+                showInfo("Breakpoint hit at line " + (currentPC + 1) + ". Execution paused.");
+            }
+            if (engineController.isDebugFinished()) {
+                executionStatistics.setAll(engineController.getAllExecutionStatistics());
+                handleExecutionFinished();
+            } else {
+                showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + currentCycles.get());
+            }
+        } catch (Exception e) {
+            System.err.println("Error during debug step: " + e.getMessage());
+            showError("Error during debug step: " + e.getMessage());
         }
     }
 
