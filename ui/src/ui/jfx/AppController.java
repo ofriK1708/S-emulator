@@ -933,36 +933,41 @@ public class AppController {
                         stylesheet.contains("/styles/mac.css") ||
                         stylesheet.contains("/styles/windows.css"));
 
-        try {
-            instructionsTableController.clearBreakpointHitHighlight();
-            if (!isFirstDebugStep) {
-                previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
-            }
+        // Add component CSS files (always loaded)
+        loadComponentStylesheets();
 
-            // Execute one instruction - finalization happens inside if needed
-            engineController.debugStep();
+        // Add the selected theme stylesheet
+        String themeStylesheet = getClass().getResource("/ui/jfx/styles/" +
+                theme.getDisplayName().toLowerCase() + ".css").toExternalForm();
+        scene.getStylesheets().add(themeStylesheet);
 
-            int currentPC = engineController.getCurrentDebugPC();
-            currentCycles.set(engineController.getCurrentDebugCycles());
-            highlightCurrentInstruction(currentPC);
-            updateDebugVariableState();
+        System.out.println("Applied " + theme + " theme with stylesheet: " + themeStylesheet);
+    }
 
-            if (isFirstDebugStep) {
-                isFirstDebugStep = false;
+    /**
+     * Load all component stylesheets that contain layout and structural styles
+     */
+    private void loadComponentStylesheets() {
+        String[] componentStylesheets = {
+                "/ui/jfx/cycles/cycles.css",
+                "/ui/jfx/runControls/RunControls.css",
+                "/ui/jfx/debugger/Debugger.css",
+                "/ui/jfx/summaryLine/SummaryLine.css",
+                "/ui/jfx/fileHandler/fileHandler.css",
+                "/ui/jfx/variables/variablesTable.css",
+                "/ui/jfx/statistics/Statistics.css",
+                "/ui/jfx/instruction/InstructionsTableStyle.css"
+        };
+
+        for (String stylesheet : componentStylesheets) {
+            try {
+                String stylesheetUrl = getClass().getResource(stylesheet).toExternalForm();
+                if (!scene.getStylesheets().contains(stylesheetUrl)) {
+                    scene.getStylesheets().add(stylesheetUrl);
+                }
+            } catch (Exception e) {
+                System.err.println("Warning: Could not load stylesheet: " + stylesheet);
             }
-            if (engineController.hasBreakpointAt(currentPC)) {
-                instructionsTableController.highlightBreakpointHit(currentPC);
-                showInfo("Breakpoint hit at line " + (currentPC + 1) + ". Execution paused.");
-            }
-            if (engineController.isDebugFinished()) {
-                executionStatistics.setAll(engineController.getAllExecutionStatistics());
-                handleExecutionFinished();
-            } else {
-                showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + currentCycles.get());
-            }
-        } catch (Exception e) {
-            System.err.println("Error during debug step: " + e.getMessage());
-            showError("Error during debug step: " + e.getMessage());
         }
     }
 
