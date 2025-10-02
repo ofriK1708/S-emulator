@@ -515,12 +515,6 @@ public class ProgramEngine implements Serializable {
 
         // Execute remaining instructions, stopping at breakpoints
         while (currentDebugPC < currentDebugInstructions.size()) {
-            if (shouldStopAtBreakpoint()) {
-                markBreakpointHit();
-                System.out.println("Resume stopped at breakpoint at line " + currentDebugPC);
-                return; // Stop execution here
-            }
-
             Instruction currentInstruction = currentDebugInstructions.get(currentDebugPC);
 
             try {
@@ -530,17 +524,22 @@ public class ProgramEngine implements Serializable {
                 // Add cycles
                 totalDebugCycles += currentInstruction.getCycles();
 
-                // Update PC from context
+                // Update PC from context (instruction may have modified it)
                 currentDebugPC = currentDebugContext.get(PC_NAME);
 
                 // Save state
                 debugStateHistory.add(new HashMap<>(currentDebugContext));
                 debugCyclesHistory.add(totalDebugCycles);
 
-
-
             } catch (IllegalArgumentException e) {
-                throw new RuntimeException("Error executing debug instruction at PC=" + currentDebugPC + ": " + e.getMessage(), e);
+                throw new RuntimeException("Error executing debug instruction at PC=" +
+                        currentDebugPC + ": " + e.getMessage(), e);
+            }
+
+            if (shouldStopAtBreakpoint()) {
+                markBreakpointHit();
+                System.out.println("Resume stopped at breakpoint at line " + currentDebugPC);
+                return; // Stop execution here
             }
         }
 

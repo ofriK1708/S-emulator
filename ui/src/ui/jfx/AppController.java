@@ -553,6 +553,9 @@ public class AppController {
             int expandLevel = currentExpandLevel.get();
             programRunning.set(true);
 
+            instructionsTableController.updateBreakpoints(java.util.Collections.emptyList());
+            instructionsTableController.clearBreakpointHitHighlight();
+
             // Execute the program using SystemController
             engineController.runLoadedProgram(expandLevel, programArguments);
             allVariablesDTO.setAll(UIUtils.getAllVariablesDTOSorted(engineController, expandLevel));
@@ -717,6 +720,9 @@ public class AppController {
             previousDebugVariables.clear();
             isFirstDebugStep = true;
             System.out.println("Debug session started - change tracking reset");
+
+            instructionsTableController.updateBreakpoints(java.util.Collections.emptyList());
+            instructionsTableController.clearBreakpointHitHighlight();
 
             if (debugControlsController != null) {
                 debugControlsController.notifyDebugSessionStarted();
