@@ -1,11 +1,11 @@
 Manifest-Version: 1.0
+Class-Path: lib/JFX/javafx.web.jar lib/JFX/javafx.swing.jar lib/JFX/java
+ fx.media.jar lib/JFX/javafx.graphics.jar lib/JFX/javafx.fxml.jar lib/JF
+ X/javafx.controls.jar lib/JFX/javafx.base.jar lib/JFX/javafx-swt.jar li
+ b/JAXB/jaxb-xjc.jar lib/JAXB/jaxb-jxc.jar lib/JAXB/jaxb-impl.jar lib/JA
+ XB/jaxb-core.jar lib/JAXB/jakarta.xml.bind-api.jar lib/JAXB/jakarta.act
+ ivation-api.jar lib/JAXB/angus-activation.jar lib/JetBrainsAnnotation/a
+ nnotations-26.0.2.jar lib/controlsfx-11.2.2.jar engine.jar system.jar d
+ to.jar
 Main-Class: ui.jfx.Main
-Class-Path: lib/JAXB/javafx-swt.jar lib/JAXB/javafx.web.jar lib/JAXB/jav
- afx.base.jar lib/JAXB/javafx.fxml.jar lib/JAXB/javafx.media.jar lib/JAX
- B/javafx.swing.jar lib/JAXB/javafx.controls.jar lib/JAXB/javafx.graphic
- s.jar lib/JAXB/jaxb-jxc.jar lib/JAXB/jaxb-xjc.jar lib/JAXB/jaxb-core.ja
- r lib/JAXB/jaxb-impl.jar lib/JAXB/angus-activation.jar lib/JAXB/jakarta
- .xml.bind-api.jar lib/JAXB/jakarta.activation-api.jar lib/JetBrainsAnno
- tation/annotations-26.0.2.jar lib/controlsfx-11.2.2.jar engine.jar syst
- em.jar dto.jar
 

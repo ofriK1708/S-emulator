@@ -23,7 +23,7 @@ public class LoadFileToProgramTask extends Task<ProgramDTO> {
     protected ProgramDTO call() throws Exception {
         updateMessage("Loading file...");
         updateProgress(0, 4);
-        final int SLEEP_TIME = 100;
+        final int SLEEP_TIME = 300;
         engineController.LoadProgramFromFile(filePath);
         ProgramDTO program = engineController.getBasicProgram();
         List<String> allVars = UIUtils.sortAllProgramNames(
