@@ -389,17 +389,20 @@
     -fx-text-background-color: #ffff00; /* Yellow text */
 }
 
-.table-row-cell.highlighted-row {
+.table-row-cell.highlighted-row,
+.table-row-cell.changed-variable {
     -fx-background-color: #ff00ff; /* Magenta background */
     -fx-border-color: #00ffff; /* Cyan border */
     -fx-border-width: 3;
 }
 
-.table-row-cell.highlighted-row:hover {
+.table-row-cell.highlighted-row:hover,
+.table-row-cell.changed-variable:hover {
     -fx-background-color: #00ff00; /* Green background */
 }
 
-.table-row-cell.highlighted-row:selected {
+.table-row-cell.highlighted-row:selected,
+.table-row-cell.changed-variable:selected {
     -fx-background-color: #ff0000; /* Red background */
     -fx-text-background-color: #ffffff;
 }

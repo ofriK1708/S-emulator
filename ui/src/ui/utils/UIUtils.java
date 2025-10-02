@@ -22,6 +22,12 @@ import java.util.*;
 
 public class UIUtils {
     public static final String ArgumentResourcePath = "/ui/jfx/VariableInputDialog/VariableInputDialog.fxml";
+    public static boolean showInfoAndSuccess = false;
+
+    // for later use if needed
+    public static void setShowInfoAndSuccess(boolean showInfoAndSuccess) {
+        UIUtils.showInfoAndSuccess = showInfoAndSuccess;
+    }
 
     // Reference to AppController for re-run functionality
     private static ui.jfx.AppController appControllerInstance = null;
@@ -47,18 +53,22 @@ public class UIUtils {
 
     public static void showSuccess(String message) {
         // Alert disabled for performance - can be re-enabled if needed
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Success");
-        alert.setContentText(message);
-        alert.showAndWait();
+        if (showInfoAndSuccess) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Success");
+            alert.setContentText(message);
+            alert.showAndWait();
+        }
     }
 
     public static void showInfo(String message) {
         // Alert disabled for performance - can be re-enabled if needed
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Information");
-        alert.setContentText(message);
-        alert.showAndWait();
+        if (showInfoAndSuccess) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Information");
+            alert.setContentText(message);
+            alert.showAndWait();
+        }
     }
 
     public static void sleep(int milliseconds) {

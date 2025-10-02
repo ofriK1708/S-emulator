@@ -396,7 +396,8 @@
     -fx-text-background-color: white;
 }
 
-.table-row-cell.highlighted-row {
+.table-row-cell.highlighted-row,
+.table-row-cell.changed-variable {
     -fx-background-color: rgba(37, 165, 160, 0.15);
     -fx-border-color: rgba(37, 165, 160, 0.4);
     -fx-border-width: 1px;
@@ -404,12 +405,14 @@
     -fx-background-radius: 4px;
 }
 
-.table-row-cell.highlighted-row:hover {
+.table-row-cell.highlighted-row:hover,
+.table-row-cell.changed-variable:hover {
     -fx-background-color: rgba(37, 165, 160, 0.25);
     -fx-border-color: rgba(37, 165, 160, 0.6);
 }
 
-.table-row-cell.highlighted-row:selected {
+.table-row-cell.highlighted-row:selected,
+.table-row-cell.changed-variable:selected {
     -fx-background-color: rgba(37, 165, 160, 0.35);
     -fx-text-background-color: white;
 }
