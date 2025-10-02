@@ -559,7 +559,6 @@ public class AppController {
         }
 
         try {
-            //TODO: prepare the scene for expansion (clear highlighting, reset variables, etc)
             instructionsTableController.clearHighlighting();
             derivedInstructionsTableController.clearHighlighting();
             currentExpandLevel.set(expandLevel);

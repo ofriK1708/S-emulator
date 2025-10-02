@@ -3,6 +3,7 @@ package engine.core.syntheticCommand;
 import engine.core.Instruction;
 import engine.core.ProgramEngine;
 import engine.core.basicCommand.Neutral;
+import engine.exception.FunctionNotFound;
 import engine.utils.CommandType;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class Quote extends Instruction {
+    private int quoteIndex = -1;
     private boolean isFinishedInitialization = false;
     public final static String functionNameArgumentName = "functionName";
     public final static String functionArgumentsArgumentName = "functionArguments";
@@ -21,8 +23,16 @@ public class Quote extends Instruction {
     private int subFunctionsCycles;
     private int executedCycles = 0;
 
+    public Quote(String mainVarName, Map<String, String> args, String label, @NotNull ProgramEngine mainFunction,
+                 int quoteIndex) throws FunctionNotFound {
+        super(mainVarName, args, label);
+        this.mainFunction = mainFunction;
+        this.quoteIndex = quoteIndex;
+        initAndValidateQuote();
+    }
+
     public Quote(String mainVarName, Map<String, String> args, String label, @NotNull Instruction derivedFrom,
-                 int derivedFromIndex, @NotNull ProgramEngine mainFunction) {
+                 int derivedFromIndex, @NotNull ProgramEngine mainFunction) throws FunctionNotFound {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
         this.mainFunction = mainFunction;
         initAndValidateQuote();
@@ -40,7 +50,8 @@ public class Quote extends Instruction {
         this.isFinishedInitialization = quote.isFinishedInitialization;
     }
 
-    public Quote(String mainVarName, Map<String, String> args, String label, @NotNull ProgramEngine mainFunction) {
+    public Quote(String mainVarName, Map<String, String> args, String label, @NotNull ProgramEngine mainFunction)
+            throws FunctionNotFound {
         super(mainVarName, args, label);
         this.mainFunction = mainFunction;
 
@@ -51,7 +62,7 @@ public class Quote extends Instruction {
         return executedCycles;
     }
 
-    public void initAndValidateQuote() {
+    public void initAndValidateQuote() throws FunctionNotFound {
         String funcName = args.get(functionNameArgumentName);
         allArgsString = args.get(functionArgumentsArgumentName) == null ? "" : args.get(functionArgumentsArgumentName);
         Map<String, ProgramEngine> functions = mainFunction.getAllFunctionsInMain();
@@ -61,7 +72,7 @@ public class Quote extends Instruction {
         }
 
         if (!functions.containsKey(funcName) && !mainFunction.getProgramName().equals(funcName)) {
-            throw new IllegalArgumentException("No such function: " + funcName);
+            throw new FunctionNotFound(quoteIndex, mainFunction.getProgramName(), funcName);
         }
 
         isFinishedInitialization = true;
@@ -81,7 +92,7 @@ public class Quote extends Instruction {
         subfunctionCalls.clear();
         for (String argName : funcArgsNames) {
             if (ProgramUtils.isFunctionCall(argName)) {
-                Quote functionCall = Instruction.createQuoteFromString(argName, mainFunction);
+                Quote functionCall = Instruction.createQuoteFromString(argName, mainFunction, quoteIndex);
                 subfunctionCalls.add(functionCall);
             }
         }

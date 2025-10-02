@@ -3,6 +3,7 @@ package engine.core;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
 import engine.core.syntheticCommand.Quote;
+import engine.exception.FunctionNotFound;
 import engine.exception.LabelNotExist;
 import engine.generated_2.SFunction;
 import engine.generated_2.SInstruction;
@@ -47,14 +48,18 @@ public class ProgramEngine implements Serializable {
     private @Nullable ExecutionStatistics currentDebugStatistics = null;
 
 
-    public ProgramEngine(@NotNull SProgram program) throws LabelNotExist {
+    public ProgramEngine(@NotNull SProgram program) throws LabelNotExist, FunctionNotFound {
         this.programName = program.getName();
 
         if (program.getSFunctions() != null) {
 
             allFunctionsInMain = buildFunctions(program);
 
-            allFunctionsInMain.forEach((name, function) -> function.finishInitFunction(allFunctionsInMain));
+            for (Map.Entry<String, ProgramEngine> entry : allFunctionsInMain.entrySet()) {
+                entry.getValue().finishInitFunction(allFunctionsInMain);
+            }
+
+//            allFunctionsInMain.forEach((name, function) -> function.finishInitFunction(allFunctionsInMain));
         }
 
         SInstructions sInstructions = program.getSInstructions();
@@ -67,7 +72,7 @@ public class ProgramEngine implements Serializable {
 
     }
 
-    public ProgramEngine(@NotNull SFunction function) throws LabelNotExist {
+    public ProgramEngine(@NotNull SFunction function) throws LabelNotExist, FunctionNotFound {
         this.programName = function.getName();
 
         funcName = function.getUserString();
@@ -93,17 +98,17 @@ public class ProgramEngine implements Serializable {
                 .collect(Collectors.toSet());
     }
 
-    private @NotNull Map<String, ProgramEngine> buildFunctions(@NotNull SProgram program) {
-        return program.getSFunctions().getSFunction().stream()
-                .map(func -> {
-                    try {
-                        return new ProgramEngine(func);
-                    } catch (LabelNotExist e) {
-                        throw new RuntimeException("Error initializing function: " + func.getName(), e); // TODO -
-                        // better error handling
-                    }
-                })
-                .collect(Collectors.toMap(ProgramEngine::getProgramName, funcEngine -> funcEngine));
+    private @NotNull Map<String, ProgramEngine> buildFunctions(@NotNull SProgram program)
+            throws LabelNotExist, FunctionNotFound {
+        Map<String, ProgramEngine> functionMap = new HashMap<>();
+        List<SFunction> sFunctions = program.getSFunctions().getSFunction();
+
+        for (SFunction sFunc : sFunctions) {
+            ProgramEngine engine = new ProgramEngine(sFunc);
+            functionMap.put(engine.getProgramName(), engine);
+        }
+
+        return functionMap;
     }
 
     public String getProgramName() {
@@ -122,7 +127,7 @@ public class ProgramEngine implements Serializable {
         return originalContextMap.containsKey(varName);
     }
 
-    private void finishInitFunction(@NotNull Map<String, ProgramEngine> allFunctionsInMain) {
+    private void finishInitFunction(@NotNull Map<String, ProgramEngine> allFunctionsInMain) throws FunctionNotFound {
         setFunctions(allFunctionsInMain);
         for (Quote quote : uninitializedQuotes) {
             quote.initAndValidateQuote();
@@ -137,10 +142,14 @@ public class ProgramEngine implements Serializable {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private @NotNull List<Instruction> buildInstructions(@NotNull SInstructions sInstructions) {
-        return sInstructions.getSInstruction().stream()
-                .map(sInstruction -> Instruction.createInstruction(sInstruction, this))
-                .collect(Collectors.toList());
+    private @NotNull List<Instruction> buildInstructions(@NotNull SInstructions sInstructions) throws FunctionNotFound {
+        List<Instruction> instructions = new ArrayList<>();
+        List<SInstruction> sInstructionList = sInstructions.getSInstruction();
+        for (int i = 0; i < sInstructionList.size(); i++) {
+            SInstruction sInstruction = sInstructionList.get(i);
+            instructions.add(Instruction.createInstruction(sInstruction, this, i));
+        }
+        return instructions;
     }
 
     /**
@@ -559,7 +568,7 @@ public class ProgramEngine implements Serializable {
 
                 finishInitialization();
             }
-        } catch (LabelNotExist e) {
+        } catch (LabelNotExist | FunctionNotFound e) {
             throw new RuntimeException(e);
         }
     }

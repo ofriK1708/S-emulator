@@ -2,6 +2,7 @@ package system.controller;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
 import engine.core.ProgramEngine;
+import engine.exception.FunctionNotFound;
 import engine.exception.LabelNotExist;
 import engine.generated_2.SProgram;
 import engine.utils.ProgramUtils;
@@ -44,7 +45,7 @@ public class EngineController
         }
     }
 
-    private void createEngine(@NotNull SProgram program) throws LabelNotExist
+    private void createEngine(@NotNull SProgram program) throws LabelNotExist, FunctionNotFound
     {
         engine = new ProgramEngine(program);
         mainEngine = engine;
@@ -70,7 +71,8 @@ public class EngineController
         return maxExpandLevel;
     }
 
-    public void LoadProgramFromFile(@NotNull Path xmlFilePath) throws LabelNotExist, JAXBException, IOException
+    public void LoadProgramFromFile(@NotNull Path xmlFilePath)
+            throws LabelNotExist, JAXBException, IOException, FunctionNotFound
     {
         if (!xmlFilePath.getFileName().toString().endsWith(".xml"))
         {

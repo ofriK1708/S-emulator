@@ -6,6 +6,7 @@ import engine.core.basicCommand.Increase;
 import engine.core.basicCommand.JumpNotZero;
 import engine.core.basicCommand.Neutral;
 import engine.core.syntheticCommand.*;
+import engine.exception.FunctionNotFound;
 import engine.generated_2.SInstruction;
 import engine.generated_2.SInstructionArguments;
 import engine.utils.ProgramUtils;
@@ -47,7 +48,8 @@ public abstract class Instruction implements Command, Serializable {
     }
 
     public static @NotNull Instruction createInstruction(@NotNull SInstruction sInstruction,
-                                                         @NotNull ProgramEngine engine) {
+                                                         @NotNull ProgramEngine engine,
+                                                         int instructionIndex) throws FunctionNotFound {
 
         Map<String, String> args = Optional.ofNullable(sInstruction.getSInstructionArguments())
                 .map(SInstructionArguments::getSInstructionArgument)
@@ -73,8 +75,8 @@ public abstract class Instruction implements Command, Serializable {
             case "JUMP_ZERO" -> new JumpZero(mainVarName, args, labelName);
             case "JUMP_EQUAL_CONSTANT" -> new JumpEqualConstant(mainVarName, args, labelName);
             case "JUMP_EQUAL_VARIABLE" -> new JumpEqualVariable(mainVarName, args, labelName);
-            case "QUOTE" -> new Quote(mainVarName, args, labelName, engine);
-            case "JUMP_EQUAL_FUNCTION" -> new JumpEqualFunction(mainVarName, args, labelName, engine);
+            case "QUOTE" -> new Quote(mainVarName, args, labelName, engine, instructionIndex);
+            case "JUMP_EQUAL_FUNCTION" -> new JumpEqualFunction(mainVarName, args, labelName, engine, instructionIndex);
             default -> throw new IllegalArgumentException("Unknown instruction type: " + sInstruction.getName());
         };
     }
@@ -88,7 +90,8 @@ public abstract class Instruction implements Command, Serializable {
     }
 
     protected static @NotNull Quote createQuoteFromString(@NotNull String argName,
-                                                          @NotNull ProgramEngine mainFunction) {
+                                                          @NotNull ProgramEngine mainFunction,
+                                                          int instructionIndex) {
         String functionCallContent = ProgramUtils.extractFunctionContent(argName);
         List<String> parts = ProgramUtils.splitArgs(functionCallContent);
         String functionName = parts.getFirst().trim();
@@ -96,7 +99,11 @@ public abstract class Instruction implements Command, Serializable {
         Map<String, String> quoteArgs = new HashMap<>();
         quoteArgs.put(Quote.functionNameArgumentName, functionName);
         quoteArgs.put(Quote.functionArgumentsArgumentName, functionArgs);
-        return new Quote("", quoteArgs, "", mainFunction);
+        try {
+            return new Quote("", quoteArgs, "", mainFunction, instructionIndex);
+        } catch (FunctionNotFound e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String getMainVarName() {

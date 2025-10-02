@@ -3,6 +3,7 @@ package engine.core.syntheticCommand;
 import engine.core.Instruction;
 import engine.core.ProgramEngine;
 import engine.core.basicCommand.Neutral;
+import engine.exception.FunctionNotFound;
 import engine.utils.CommandType;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
@@ -16,10 +17,12 @@ public class JumpEqualFunction extends Instruction {
     private final @NotNull ProgramEngine mainEngine;
     private final @NotNull Quote functionQuoteToCheck;
 
-    public JumpEqualFunction(String mainVarName, Map<String, String> args, String label, @NotNull ProgramEngine mainFunction) {
+    public JumpEqualFunction(String mainVarName, Map<String, String> args,
+                             String label, @NotNull ProgramEngine mainFunction,
+                             int quoteIndex) throws FunctionNotFound {
         super(mainVarName, args, label);
         this.mainEngine = mainFunction;
-        functionQuoteToCheck = new Quote("", this.args, "", mainEngine);
+        functionQuoteToCheck = new Quote("", this.args, "", mainEngine, quoteIndex);
     }
 
     @Override
@@ -61,7 +64,11 @@ public class JumpEqualFunction extends Instruction {
         if (!label.isBlank()) {
             expandedInstructions.add(new Neutral(ProgramUtils.OUTPUT_NAME, Map.of(), label, this, originalInstructionIndex));
         }
-        expandedInstructions.add(new Quote(freeWorkVar, args, label, this, originalInstructionIndex, mainEngine));
+        try {
+            expandedInstructions.add(new Quote(freeWorkVar, args, label, this, originalInstructionIndex, mainEngine));
+        } catch (FunctionNotFound e) {
+            throw new RuntimeException(e);
+        }
         expandedInstructions.add(new JumpEqualVariable(mainVarName, Map.of(JumpEqualVariable.labelArgumentName,
                 args.get(labelArgumentName), JumpEqualVariable.variableArgumentName, freeWorkVar), "", this, originalInstructionIndex));
         return expandedInstructions;
