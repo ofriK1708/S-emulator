@@ -357,11 +357,11 @@ public class ProgramEngine implements Serializable {
         return executionStatisticsList.getLast().toDTO().cyclesUsed();
     }
 
-    public @NotNull Set<String> getAllVariablesNamesAndLabels(int expandLevel) {
+    public @NotNull Set<String> getAllVariablesNames(int expandLevel, boolean includeLabels) {
         if (expandLevel < 0 || expandLevel >= labelsByExpandLevel.size()) {
             throw new IllegalArgumentException("Expand level out of bounds");
         }
-        return extractAllVariableAndLabelNamesUnsorted(contextMapsByExpandLevel.get(expandLevel));
+        return extractAllVariableAndLabelNamesUnsorted(contextMapsByExpandLevel.get(expandLevel), includeLabels);
     }
 
     /**

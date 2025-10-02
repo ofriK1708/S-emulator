@@ -431,7 +431,7 @@ public class AppController {
         currentCycles.set(0);
         summaryLineController.updateCounts(loadedProgram.instructions());
         programVariablesNamesAndLabels.setAll(sortAllProgramNames(engineController.
-                getAllVariablesAndLabelsNames(0)));
+                getAllVariablesAndLabelsNames(0, true)));
         showSuccess("Function '" + functionName + "' loaded successfully.");
         showInfo("Displaying instructions for function: " + functionName);
     }
@@ -460,7 +460,7 @@ public class AppController {
 
         // After dialog closes, update UI and mark arguments as loaded
         argumentsLoaded.set(true);
-        argumentsDTO.setAll(UIUtils.extractArguments(programArguments));
+        argumentsDTO.setAll(UIUtils.formatArgumentsToVariableDTO(programArguments));
 
         // Show appropriate success message based on whether this is a rerun and current mode
         if (argumentsHaveNonZeroValues(programArguments)) {
@@ -572,7 +572,7 @@ public class AppController {
             argumentsDTO.clear();
             summaryLineController.updateCounts(program.instructions());
             programVariablesNamesAndLabels.setAll(sortAllProgramNames(engineController.
-                    getAllVariablesAndLabelsNames(expandLevel)));
+                    getAllVariablesAndLabelsNames(expandLevel, true)));
             showInfo("Program expanded to level " + expandLevel);
         } catch (Exception e) {
             e.printStackTrace();
@@ -620,10 +620,6 @@ public class AppController {
         } else {
             System.out.println("Clearing variable highlighting in all instruction tables");
         }
-    }
-
-    public boolean isProgramLoaded() {
-        return programLoaded.get();
     }
 
     // DEBUG METHODS

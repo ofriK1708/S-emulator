@@ -12,7 +12,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableRow;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
@@ -130,14 +129,9 @@ public class UIUtils {
 
             // Create and configure the dialog stage
             Stage dialogStage = new Stage();
-            dialogStage.initModality(Modality.APPLICATION_MODAL);
             dialogStage.setTitle("Execution Details - Run #" + executionStats.executionNumber());
             dialogStage.setScene(new Scene(root));
 
-            // Set minimum size and make it resizable
-            dialogStage.setMinWidth(650);
-            dialogStage.setMinHeight(550);
-            dialogStage.setResizable(true);
 
             // Show the dialog
             dialogStage.show();
@@ -183,24 +177,9 @@ public class UIUtils {
      * @param programArguments Map of argument names to values
      * @return List of VariableDTO objects for UI display
      */
-    public static @NotNull List<VariableDTO> extractArguments(@NotNull Map<String, Integer> programArguments) {
-        List<VariableDTO> argumentsList = new ArrayList<>();
-
-        // Convert map entries to VariableDTO objects for table display
-        for (Map.Entry<String, Integer> entry : programArguments.entrySet()) {
-            VariableDTO variableDTO = new VariableDTO(
-                    new SimpleStringProperty(entry.getKey()),
-                    new SimpleIntegerProperty(entry.getValue()),
-                    // Arguments in the table don't need change detection
-                    new SimpleBooleanProperty(false)
-            );
-            argumentsList.add(variableDTO);
-        }
-
-        // Sort arguments by name for consistent display
-        argumentsList.sort((v1, v2) -> v1.name().get().compareToIgnoreCase(v2.name().get()));
-
-        return argumentsList;
+    public static @NotNull List<VariableDTO> formatArgumentsToVariableDTO(
+            @NotNull Map<String, Integer> programArguments) {
+        return getSortedVariableDTOS(programArguments);
     }
 
     /**
@@ -214,7 +193,7 @@ public class UIUtils {
             @NotNull system.controller.EngineController engineController,
             int expandLevel) {
 
-        Map<String, Integer> allVariables = new HashMap<>();
+        Map<String, Integer> allVariables = new LinkedHashMap<>();
 
         // Add work variables (z1, z2, etc.)
         allVariables.putAll(engineController.getWorkVars(expandLevel));
@@ -223,7 +202,9 @@ public class UIUtils {
         allVariables.putAll(engineController.getSortedArguments(expandLevel));
 
         // Add output variable (y)
-        allVariables.put("y", engineController.getProgramResult(expandLevel));
+        allVariables.put(ProgramUtils.OUTPUT_NAME, engineController.getProgramResult(expandLevel));
+
+        sortVariableMapByName(allVariables);
 
         return allVariables;
     }
@@ -240,10 +221,29 @@ public class UIUtils {
             int expandLevel) {
 
         Map<String, Integer> allVariables = getAllVariablesMap(engineController, expandLevel);
+        Map<String, Integer> sortedVars = sortVariableMapByName(allVariables);
+        List<VariableDTO> variablesList = getSortedVariableDTOS(sortedVars);
+
+        // Sort variables by name for consistent display
+
+        return variablesList;
+    }
+
+    public static Map<String, Integer> sortVariableMapByName(Map<String, Integer> variableMap) {
+        List<String> sortedVariablesNames = sortAllProgramNames(variableMap.keySet());
+        Map<String, Integer> sortedMap = new LinkedHashMap<>();
+
+        for (String key : sortedVariablesNames) {
+            sortedMap.put(key, variableMap.get(key));
+        }
+        return sortedMap;
+    }
+
+    private static @NotNull List<VariableDTO> getSortedVariableDTOS(Map<String, Integer> allVariablesSorted) {
         List<VariableDTO> variablesList = new ArrayList<>();
 
         // Convert map entries to VariableDTO objects
-        for (Map.Entry<String, Integer> entry : allVariables.entrySet()) {
+        for (Map.Entry<String, Integer> entry : allVariablesSorted.entrySet()) {
             VariableDTO variableDTO = new VariableDTO(
                     new SimpleStringProperty(entry.getKey()),
                     new SimpleIntegerProperty(entry.getValue()),
@@ -252,12 +252,9 @@ public class UIUtils {
             );
             variablesList.add(variableDTO);
         }
-
-        // Sort variables by name for consistent display
-        variablesList.sort((v1, v2) -> v1.name().get().compareToIgnoreCase(v2.name().get()));
-
         return variablesList;
     }
+
     public static void executeRerunFromShowDialog(int expandLevel, Map<String, Integer> arguments) {
         if (appControllerInstance == null) {
             throw new IllegalStateException("AppController instance not set in UIUtils");

@@ -1,6 +1,6 @@
-/* ShowRunView.css - Modern blue/green style matching VariableInputDialog */
+/* ShowRunView.css - Modern style matching light.css */
 
-.root {
+.window {
     -fx-background-color: linear-gradient(to bottom right, #e0f7fa, #b2ebf2);
     -fx-background-radius: 12px;
     -fx-padding: 16px;
@@ -11,7 +11,7 @@
 .header-label {
     -fx-font-weight: bold;
     -fx-font-size: 18px;
-    -fx-text-fill: #1976d2;
+    -fx-text-fill: #343a40;
     -fx-padding: 0 0 8 0;
     -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
 }
@@ -19,96 +19,185 @@
 .section-header {
     -fx-font-weight: bold;
     -fx-font-size: 14px;
-    -fx-text-fill: #1976d2;
+    -fx-text-fill: #343a40;
     -fx-padding: 4 0 4 0;
     -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
 }
 
 .info-label {
-    -fx-text-fill: #222;
+    -fx-text-fill: #495057;
     -fx-font-size: 14px;
     -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
 }
 
 .content-label {
-    -fx-text-fill: #222;
+    -fx-text-fill: #343a40;
     -fx-font-size: 12px;
     -fx-padding: 8 12 8 12;
-    -fx-background-color: #ffffff;
+    -fx-background-color: white;
     -fx-background-radius: 8px;
     -fx-border-color: #25a5a0;
     -fx-border-radius: 8px;
-    -fx-border-width: 2px;
-    -fx-effect: dropshadow(gaussian, rgba(37,165,160,0.08), 2, 0, 0, 1);
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 5);
     -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
 }
 
-/* Variables table styling */
-.variables-table {
+/* Table styling with increased specificity */
+.table-view {
+    -fx-border-color: #e9ecef;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 5);
+    -fx-table-cell-border-color: rgba(197, 225, 224, 0.5);
     -fx-background-color: white;
-    -fx-border-color: #25a5a0;
-    -fx-border-width: 2px;
-    -fx-border-radius: 8px;
-    -fx-effect: dropshadow(gaussian, rgba(37,165,160,0.08), 2, 0, 0, 1);
+    -fx-control-inner-background: white; /* Critical for row colors */
+    -fx-control-inner-background-alt: #f8f9fa; /* Critical for alternating rows */
 }
 
-.variables-table .table-view {
-    -fx-background-color: white;
-    -fx-background-radius: 8px;
+.table-view .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, #25a5a0, #1e8883);
 }
 
-.variables-table .table-column {
-    -fx-background-color: linear-gradient(to bottom, #e0f7fa, #b2ebf2);
-    -fx-text-fill: #1976d2;
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent rgba(197, 225, 224, 0.5) transparent rgba(197, 225, 224, 0.5);
+    -fx-text-fill: white;
+}
+
+.table-view .filler {
+    -fx-background-color: linear-gradient(to bottom, #25a5a0, #1e8883);
+    -fx-border-color: transparent;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
 }
 
-.variables-table .table-row-cell:even {
+.table-view .table-cell {
+    -fx-text-fill: #343a40;
+    -fx-alignment: center-left;
+    -fx-padding: 4px 8px 4px 8px;
+}
+
+/* These won't work without the control-inner-background properties above */
+.table-row-cell:odd {
+    -fx-background-color: #f8f9fa;
+}
+
+.table-row-cell:even {
     -fx-background-color: white;
-    -fx-border-color: transparent transparent #e0f7fa transparent;
-    -fx-border-width: 0 0 1 0;
 }
 
-.variables-table .table-row-cell:odd {
-    -fx-background-color: #f9f9f9;
-    -fx-border-color: transparent transparent #e0f7fa transparent;
-    -fx-border-width: 0 0 1 0;
+.table-row-cell:hover {
+    -fx-background-color: #89c6c3;
+    -fx-text-background-color: #343a40;
 }
 
-.variables-table .table-row-cell:selected {
-    -fx-background-color: #e3f2fd;
-    -fx-text-fill: #1976d2;
+.table-row-cell:selected {
+    -fx-background-color: #2bb8b2;
+    -fx-text-background-color: white;
 }
 
-.variables-table .table-cell {
-    -fx-padding: 8 12 8 12;
-    -fx-alignment: CENTER_LEFT;
-    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+.table-row-cell.highlighted-row,
+.table-row-cell.changed-variable {
+    -fx-background-color: rgba(37, 165, 160, 0.15);
+    -fx-border-color: rgba(37, 165, 160, 0.4);
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
 }
 
-.placeholder-label {
-    -fx-text-fill: #666;
-    -fx-font-style: italic;
-    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+.table-row-cell.highlighted-row:hover,
+.table-row-cell.changed-variable:hover {
+    -fx-background-color: rgba(37, 165, 160, 0.25);
+    -fx-border-color: rgba(37, 165, 160, 0.6);
 }
 
-/* Button styling to match VariableInputDialog */
+.table-row-cell.highlighted-row:selected,
+.table-row-cell.changed-variable:selected {
+    -fx-background-color: rgba(37, 165, 160, 0.35);
+    -fx-text-background-color: white;
+}
+
+.table-row-cell.highlighted-row-debug {
+    -fx-background-color: rgba(103, 58, 183, 0.15);
+    -fx-border-color: rgba(103, 58, 183, 0.4);
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.table-row-cell.highlighted-row-debug:hover {
+    -fx-background-color: rgba(103, 58, 183, 0.25);
+    -fx-border-color: rgba(103, 58, 183, 0.6);
+}
+
+.table-row-cell.highlighted-row-debug:selected {
+    -fx-background-color: rgba(103, 58, 183, 0.35);
+    -fx-text-background-color: white;
+}
+
+/* ScrollPane and ScrollBar Styling - matching light.css */
+.scroll-pane {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: #f8f9fa;
+}
+
+.scroll-pane > .corner {
+    -fx-background-color: linear-gradient(to bottom, #25a5a0, #1e8883);
+}
+
+.scroll-bar {
+    -fx-background-color: linear-gradient(to bottom, #89c6c3, #b8e6e1);
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: linear-gradient(to bottom, #25a5a0, #1e8883);
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(37, 165, 160, 0.3), 4, 0.3, 0, 1);
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: linear-gradient(to bottom, #2bb8b2, #21968f);
+    -fx-effect: dropshadow(gaussian, rgba(37, 165, 160, 0.4), 5, 0.4, 0, 2);
+}
+
+.scroll-bar .thumb:pressed {
+    -fx-background-color: #1a7a76;
+    -fx-effect: dropshadow(gaussian, rgba(37, 165, 160, 0.5), 3, 0.5, 0, 1);
+}
+
+.scroll-bar .increment-button, .scroll-bar .decrement-button {
+    -fx-background-color: linear-gradient(to bottom, #1e8883, #25a5a0);
+    -fx-background-radius: 6px;
+}
+
+.scroll-bar .increment-button:hover, .scroll-bar .decrement-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #21968f, #2bb8b2);
+}
+
+/* Button styling - keeping existing but aligned with light.css colors */
 .button {
-    -fx-background-radius: 20px;
+    -fx-background-radius: 8px;
     -fx-background-color: linear-gradient(to bottom, #25a5a0, #1e8883);
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-font-size: 14px;
-    -fx-padding: 8px 24px;
+    -fx-padding: 8px 16px;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 2, 0, 0, 1);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 3, 0.2, 0, 1);
     -fx-border-width: 0;
     -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
 }
 
 .button:hover {
     -fx-background-color: linear-gradient(to bottom, #2bb8b2, #21968f);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 4, 0.3, 0, 2);
 }
 
 .button:pressed {
@@ -121,27 +210,12 @@
     -fx-effect: none;
 }
 
-/* Legacy pill-button class for compatibility */
-.pill-button {
-    -fx-background-radius: 20px;
-    -fx-background-color: linear-gradient(to bottom, #25a5a0, #1e8883);
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-font-size: 14px;
-    -fx-padding: 8px 24px;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 2, 0, 0, 1);
-    -fx-border-width: 0;
+.placeholder-label {
+    -fx-text-fill: #6c757d;
+    -fx-font-style: italic;
     -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
 }
 
-.pill-button:hover {
-    -fx-background-color: linear-gradient(to bottom, #2bb8b2, #21968f);
-}
-
-.pill-button:pressed {
-    -fx-background-color: #1a7a76;
-}
 
 /* Separator styling */
 .separator {

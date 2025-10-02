@@ -79,10 +79,15 @@ public class ProgramUtils {
         return maxLevel;
     }
 
-    public static @NotNull Set<String> extractAllVariableAndLabelNamesUnsorted(@NotNull Map<String, Integer> contextMap) {
+    public static @NotNull Set<String> extractAllVariableAndLabelNamesUnsorted(@NotNull Map<String, Integer>
+                                                                                       contextMap,
+                                                                               boolean includeLabels) {
         Map<String, Integer> newContextMap = new HashMap<>(contextMap);
         newContextMap.remove(EXIT_LABEL_NAME);
         newContextMap.remove(PC_NAME);
+        if (!includeLabels) {
+            newContextMap.keySet().removeIf(ProgramUtils::isLabel);
+        }
         return new HashSet<>(newContextMap.keySet());
     }
 

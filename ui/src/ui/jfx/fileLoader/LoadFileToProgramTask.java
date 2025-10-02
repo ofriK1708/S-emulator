@@ -27,7 +27,7 @@ public class LoadFileToProgramTask extends Task<ProgramDTO> {
         engineController.LoadProgramFromFile(filePath);
         ProgramDTO program = engineController.getBasicProgram();
         List<String> allVars = UIUtils.sortAllProgramNames(
-                engineController.getAllVariablesAndLabelsNames(0));
+                engineController.getAllVariablesAndLabelsNames(0, true));
         UIUtils.sleep(SLEEP_TIME);
         updateProgress(1, 4);
         UIUtils.sleep(SLEEP_TIME);

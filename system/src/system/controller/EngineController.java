@@ -148,11 +148,11 @@ public class EngineController
         return engine.getAllExecutionStatistics().getLast();
     }
 
-    public @NotNull Set<String> getAllVariablesAndLabelsNames(int expandLevel) {
+    public @NotNull Set<String> getAllVariablesAndLabelsNames(int expandLevel, boolean includeLabels) {
         if (engine == null) {
             throw new IllegalStateException("Program has not been set");
         }
-        return engine.getAllVariablesNamesAndLabels(expandLevel);
+        return engine.getAllVariablesNames(expandLevel, includeLabels);
     }
 
     public @NotNull Map<String, Integer> getSortedArguments(int expandLevel) {

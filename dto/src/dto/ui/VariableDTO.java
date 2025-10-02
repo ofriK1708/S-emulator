@@ -14,9 +14,4 @@ public record VariableDTO(
     public VariableDTO(StringProperty name, IntegerProperty value) {
         this(name, value, new SimpleBooleanProperty(false));
     }
-
-    // New constructor with change tracking
-    public VariableDTO(StringProperty name, IntegerProperty value, boolean hasChanged) {
-        this(name, value, new SimpleBooleanProperty(hasChanged));
-    }
 }
