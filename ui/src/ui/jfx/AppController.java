@@ -721,16 +721,6 @@ public class AppController {
             isFirstDebugStep = true;
             System.out.println("Debug session started - change tracking reset");
 
-
-            // Get current breakpoints BEFORE clearing (we want to preserve them)
-            List<BreakpointDTO> currentBreakpoints = engineController.getAllBreakpoints();
-
-            // Clear only the HIT highlighting, keep breakpoint indicators
-            instructionsTableController.clearBreakpointHitHighlight();
-            // Refresh breakpoint display (shows them from persistent storage)
-            instructionsTableController.updateBreakpoints(currentBreakpoints);
-
-
             if (debugControlsController != null) {
                 debugControlsController.notifyDebugSessionStarted();
             }
@@ -920,6 +910,12 @@ public class AppController {
         programRanAtLeastOnce.set(true);
         debugControlsController.notifyDebugSessionEnded();
         instructionsTableController.clearAllDebugHighlighting();
+        instructionsTableController.clearBreakpointHitHighlight();
+
+        // Get current breakpoints with ACTIVE status (not HIT)
+        List<BreakpointDTO> currentBreakpoints = engineController.getAllBreakpoints();
+        instructionsTableController.updateBreakpoints(currentBreakpoints);
+
         System.out.println("Debug session ended - ready for new execution");
     }
 

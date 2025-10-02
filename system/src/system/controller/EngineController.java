@@ -215,10 +215,11 @@ public class EngineController
 
         engine.startDebugSession(expandLevel, arguments);
         inDebugSession = true;
-        for (BreakpointDTO breakpoint : persistentBreakpoints.values()) {
-            engine.addBreakpoint(breakpoint);
-            System.out.println("Applied breakpoint at line " + breakpoint.lineNumber() +
-                    " to debug session");
+        if (engine.getAllBreakpoints().isEmpty()) {
+            for (BreakpointDTO breakpoint : persistentBreakpoints.values()) {
+                engine.addBreakpoint(breakpoint.withStatus(BreakpointDTO.BreakpointStatus.ACTIVE));
+                System.out.println("Applied breakpoint at line " + breakpoint.lineNumber());
+            }
         }
 
     }
@@ -255,6 +256,13 @@ public class EngineController
         if (engine != null && inDebugSession) {
             engine.stopDebugSession();
             inDebugSession = false;
+        }
+        for (Map.Entry<Integer, BreakpointDTO> entry : persistentBreakpoints.entrySet()) {
+            BreakpointDTO bp = entry.getValue();
+            if (bp.status() == BreakpointDTO.BreakpointStatus.HIT) {
+                persistentBreakpoints.put(entry.getKey(),
+                        bp.withStatus(BreakpointDTO.BreakpointStatus.ACTIVE));
+            }
         }
     }
 

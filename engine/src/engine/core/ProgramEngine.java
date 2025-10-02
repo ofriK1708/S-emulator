@@ -441,7 +441,6 @@ public class ProgramEngine implements Serializable {
         currentDebugPC = 0;
         currentDebugStatistics = null;
         debugMode = true;
-        breakpoints.clear();
         lastBreakpointHit = null;
 
     }
