@@ -148,15 +148,11 @@ public class InstructionTableController {
             row.getProperties().remove("highlightFade");
         }
         if (item != null) {
-
-            if (currentHighlightedVariable == null) {
-                row.getStyleClass().removeAll("highlighted-row");
-
-            }
-
+            // FIXED: Don't remove highlighted-row class unconditionally
             boolean instructionContainsVariable = instructionContainsVariable(item, currentHighlightedVariable);
             boolean debugInstructionHighlight = (row.getIndex() == highlightedInstructionIndex);
 
+            // Apply/remove variable highlighting
             if (instructionContainsVariable) {
                 if (!row.getStyleClass().contains("highlighted-row")) {
                     row.getStyleClass().add("highlighted-row");
@@ -165,12 +161,14 @@ public class InstructionTableController {
             } else {
                 row.getStyleClass().removeAll("highlighted-row");
             }
+
+            // Apply/remove debug instruction highlighting (should not interfere)
             if (debugInstructionHighlight) {
                 if (!row.getStyleClass().contains("highlighted-row-debug")) {
                     row.getStyleClass().add("highlighted-row-debug");
                 }
             } else {
-                row.getStyleClass().removeAll();
+                row.getStyleClass().removeAll("highlighted-row-debug");
             }
         }
     }
