@@ -604,6 +604,7 @@ public class AppController {
             programInstructions.setAll(program.instructions());
             allVariablesDTO.clear();
             argumentsDTO.clear();
+            argumentsLoaded.set(false);
             summaryLineController.updateCounts(program.instructions());
             programVariablesNamesAndLabels.setAll(sortAllProgramNames(engineController.
                     getAllVariablesAndLabelsNames(expandLevel, true)));
