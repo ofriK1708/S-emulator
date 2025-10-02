@@ -1,7 +1,6 @@
 /* Instructions Table Component - Layout and Structure Only */
 /* Theme-dependent styles are now in global light.css and dark.css */
 
-/* Font imports for modern look */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap');
 
 .table-view {
@@ -9,7 +8,7 @@
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
     -fx-padding: 0;
-    /* Base font for the entire table */
+    -fx-table-cell-border-color: rgba(197, 225, 224, 0.5);
     -fx-font-family: "Roboto", "Segoe UI", "Helvetica Neue", sans-serif;
 }
 
@@ -44,9 +43,140 @@
     -fx-font-weight: 400;
 }
 
+/* Alternating row colors */
+.table-row-cell:odd {
+    -fx-background-color: #f5f9fa;
+}
+
+.table-row-cell:even {
+    -fx-background-color: #e7f2f5;
+}
+
+/* Hover effect */
+.table-row-cell:hover {
+    -fx-background-color: #d4f0ee;
+    -fx-text-background-color: #1a7a76;
+}
+
+/* Selected row */
+.table-row-cell:selected {
+    -fx-background-color: #54bebc;
+    -fx-text-background-color: white;
+}
+
+/* Highlighted row styling for variable highlighting */
 /* Highlighted row styling for variable highlighting */
 .table-row-cell.highlighted-row {
     -fx-border-width: 2px;
     -fx-border-radius: 4px;
     -fx-background-radius: 4px;
+}
+
+.table-row-cell.highlighted-row:odd {
+    -fx-background-color: #fff3cd;
+}
+
+.table-row-cell.highlighted-row:even {
+    -fx-background-color: #fff3cd;
+}
+
+.table-row-cell.highlighted-row:hover {
+    -fx-background-color: #ffeaa7;
+}
+
+.table-row-cell.highlighted-row:selected {
+    -fx-background-color: #f39c12;
+    -fx-text-background-color: white;
+}
+
+.table-view:focused {
+    -fx-background-color: transparent;
+    -fx-focus-color: #25a5a0;
+}
+
+/* Scrollbars */
+.table-view .scroll-bar:horizontal,
+.table-view .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.table-view .scroll-bar:horizontal .thumb,
+.table-view .scroll-bar:vertical .thumb {
+    -fx-background-color: #92ccc9;
+    -fx-background-radius: 5em;
+}
+
+.table-view .scroll-bar:horizontal .thumb:hover,
+.table-view .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #25a5a0;
+}
+
+/* Regular breakpoint indicator - red border on the left */
+.breakpoint-row {
+    -fx-border-color: #d32f2f transparent transparent transparent;
+    -fx-border-width: 0 0 0 5;
+    -fx-background-color: #ffebee;
+}
+
+.breakpoint-row:hover {
+    -fx-background-color: #ffcdd2;
+}
+
+/* Breakpoint that was just hit - brighter red */
+.breakpoint-hit-row {
+    -fx-border-color: #c62828 transparent transparent transparent;
+    -fx-border-width: 0 0 0 5;
+    -fx-background-color: #ef5350;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.breakpoint-hit-row .text {
+    -fx-fill: white;
+}
+
+.breakpoint-hit-row.highlighted-row {
+    -fx-background-color: #e53935;
+}
+
+.breakpoint-row.table-row-cell:selected {
+    -fx-background-color: #ffcdd2;
+}
+
+.breakpoint-hit-row.table-row-cell:selected {
+    -fx-background-color: #d32f2f;
+}
+
+/* NEW: Breakpoint button styling */
+.breakpoint-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #cccccc;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+}
+
+.breakpoint-button:hover {
+    -fx-text-fill: #999999;
+    -fx-background-color: rgba(0, 0, 0, 0.05);
+    -fx-background-radius: 10px;
+}
+
+.breakpoint-button.breakpoint-active {
+    -fx-text-fill: #d32f2f;
+}
+
+.breakpoint-button.breakpoint-active:hover {
+    -fx-text-fill: #b71c1c;
+}
+
+.breakpoint-button.breakpoint-hit {
+    -fx-text-fill: #ff5722;
+    -fx-effect: dropshadow(gaussian, rgba(255, 87, 34, 0.6), 5, 0.5, 0, 0);
+}
+
+.breakpoint-button.breakpoint-hit:hover {
+    -fx-text-fill: #e64a19;
 }

@@ -9,6 +9,9 @@
                    minWidth="600.0" stylesheets="@InstructionsTableStyle.css" AnchorPane.bottomAnchor="0.0"
                    AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <columns>
+                <!-- NEW: Breakpoint button column -->
+                <TableColumn fx:id="breakpointColumn" minWidth="40.0" maxWidth="40.0" prefWidth="40.0"
+                             sortable="false" text="BP" resizable="false"/>
                 <TableColumn fx:id="indexColumn" minWidth="5.0" prefWidth="50.0" sortable="false" text="#"/>
                 <TableColumn fx:id="typeColumn" prefWidth="100.0" sortable="false" text="Type"/>
                 <TableColumn fx:id="labelColumn" prefWidth="100.0" sortable="false" text="Label"/>

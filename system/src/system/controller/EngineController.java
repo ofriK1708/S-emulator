@@ -1,4 +1,5 @@
 package system.controller;
+import dto.engine.BreakpointDTO;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
 import engine.core.ProgramEngine;
@@ -334,6 +335,105 @@ public class EngineController
             System.err.println("Error retrieving final variable states: " + e.getMessage());
             // Return empty map as fallback
             return new java.util.HashMap<>();
+        }
+    }
+    // Add these methods to EngineController class (add at the end, around line 400):
+
+    /**
+     * Adds or updates a breakpoint in the current debug session.
+     *
+     * @param breakpoint The breakpoint to add
+     * @return true if breakpoint was added successfully
+     * @throws IllegalStateException if no debug session is active
+     */
+    public boolean addBreakpoint(@NotNull BreakpointDTO breakpoint) {
+        if (engine == null || !inDebugSession) {
+            throw new IllegalStateException("Debug session not active");
+        }
+        return engine.addBreakpoint(breakpoint);
+    }
+
+    /**
+     * Removes a breakpoint at the specified line number.
+     *
+     * @param lineNumber The line number to remove breakpoint from
+     * @return true if breakpoint was removed
+     * @throws IllegalStateException if no debug session is active
+     */
+    public boolean removeBreakpoint(int lineNumber) {
+        if (engine == null || !inDebugSession) {
+            throw new IllegalStateException("Debug session not active");
+        }
+        return engine.removeBreakpoint(lineNumber);
+    }
+
+    /**
+     * Removes all breakpoints from the current debug session.
+     *
+     * @throws IllegalStateException if no debug session is active
+     */
+    public void clearAllBreakpoints() {
+        if (engine == null || !inDebugSession) {
+            throw new IllegalStateException("Debug session not active");
+        }
+        engine.clearAllBreakpoints();
+    }
+
+    /**
+     * Gets all currently set breakpoints in the debug session.
+     *
+     * @return List of all breakpoints
+     * @throws IllegalStateException if no debug session is active
+     */
+    public @NotNull List<BreakpointDTO> getAllBreakpoints() {
+        if (engine == null || !inDebugSession) {
+            throw new IllegalStateException("Debug session not active");
+        }
+        return engine.getAllBreakpoints();
+    }
+
+    /**
+     * Checks if there's a breakpoint at the specified line.
+     *
+     * @param lineNumber The line to check
+     * @return true if an enabled breakpoint exists at this line
+     */
+    public boolean hasBreakpointAt(int lineNumber) {
+        if (engine == null || !inDebugSession) {
+            return false;
+        }
+        return engine.hasBreakpointAt(lineNumber);
+    }
+
+    /**
+     * Gets the line number of the last breakpoint that was hit.
+     *
+     * @return The line number, or null if no breakpoint was hit
+     */
+    public @Nullable Integer getLastBreakpointHit() {
+        if (engine == null || !inDebugSession) {
+            return null;
+        }
+        return engine.getLastBreakpointHit();
+    }
+
+    /**
+     * Toggles a breakpoint at the specified line.
+     * If a breakpoint exists, it's removed. Otherwise, a new one is added.
+     *
+     * @param lineNumber The line number to toggle
+     * @return true if a breakpoint now exists at this line
+     */
+    public boolean toggleBreakpoint(int lineNumber) {
+        if (engine == null || !inDebugSession) {
+            throw new IllegalStateException("Debug session not active");
+        }
+
+        if (hasBreakpointAt(lineNumber)) {
+            removeBreakpoint(lineNumber);
+            return false;
+        } else {
+            return addBreakpoint(BreakpointDTO.createSimple(lineNumber));
         }
     }
 }
