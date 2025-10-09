@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="ui.jfx.dashboard.programs.ProgramsPanelController"
+            styleClass="panel-container, programs-panel">
+
+    <VBox AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
+          spacing="10">
+
+        <padding>
+            <Insets top="10" right="10" bottom="10" left="10"/>
+        </padding>
+
+        <!-- Panel Title -->
+        <Label text="Available Programs" styleClass="panel-title"/>
+
+        <!-- Programs Table -->
+        <TableView fx:id="programsTableView"
+                   VBox.vgrow="ALWAYS"
+                   styleClass="programs-table">
+
+            <columns>
+                <TableColumn fx:id="programNameColumn"
+                             text="Program Name"
+                             prefWidth="150"/>
+                <TableColumn fx:id="uploadedByColumn"
+                             text="Uploaded By"
+                             prefWidth="100"/>
+                <TableColumn fx:id="instructionCountColumn"
+                             text="Instruction Count (L0)"
+                             prefWidth="140"/>
+                <TableColumn fx:id="maxExpandLevelColumn"
+                             text="Max Expand Level"
+                             prefWidth="120"/>
+                <TableColumn fx:id="totalRunsColumn"
+                             text="Total Runs"
+                             prefWidth="90"/>
+                <TableColumn fx:id="avgCreditCostColumn"
+                             text="Avg Credit Cost"
+                             prefWidth="110"/>
+            </columns>
+
+            <placeholder>
+                <Label text="No programs available.\nLoad a program file to get started."
+                       styleClass="placeholder-text"/>
+            </placeholder>
+
+        </TableView>
+
+        <!-- Execute Program Button -->
+        <Button fx:id="executeProgramButton"
+                text="Execute Program"
+                onAction="#handleExecuteProgram"
+                maxWidth="Infinity"
+                styleClass="panel-button, execute-button"
+                disable="true"/>
+
+    </VBox>
+
+</AnchorPane>
