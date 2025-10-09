@@ -6,7 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import org.jetbrains.annotations.NotNull;
-import system.controller.EngineController;
+import system.controller.LocalEngineController;
 import ui.utils.UIUtils;
 
 import java.nio.file.Path;
@@ -25,13 +25,14 @@ public class FileLoaderController {
     @FXML
     private ProgressBar progressBar;
 
-    public void initializeAndRunFileLoaderTaskThread(@NotNull Path filePath, EngineController engineController,
+    public void initializeAndRunFileLoaderTaskThread(@NotNull Path filePath,
+                                                     LocalEngineController localEngineController,
                                                      @NotNull UIAdapterLoadFileTask uiAdapter) {
         fileNameLabel.setText(filePath.toString());
         percentLabel.setText("0%");
         progressBar.setProgress(0);
         LoadFileToProgramTask loadFileToProgramTask = new LoadFileToProgramTask(
-                engineController, filePath, uiAdapter
+                localEngineController, filePath, uiAdapter
         );
         bindTaskToUIComponents(loadFileToProgramTask, uiAdapter.onFinish());
         Thread thread = new Thread(loadFileToProgramTask, "FileLoaderTaskThread");

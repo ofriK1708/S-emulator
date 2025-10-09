@@ -21,7 +21,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import system.controller.EngineController;
+import system.controller.LocalEngineController;
 import ui.jfx.VariableInputDialog.VariableInputDialogController;
 import ui.jfx.cycles.CyclesController;
 import ui.jfx.debugger.DebuggerController;
@@ -124,7 +124,7 @@ public class AppController {
 
     private final StringProperty mainProgramName = new SimpleStringProperty("");
     private final StringProperty currentLoadedProgramName = new SimpleStringProperty("");
-    private final @NotNull EngineController engineController;
+    private final @NotNull LocalEngineController localEngineController;
     private @Nullable ProgramDTO loadedProgram = null;
     private final Map<String, Integer> programArguments = new HashMap<>();
 
@@ -144,7 +144,7 @@ public class AppController {
     private boolean isInDebugResume = false;
 
     public AppController() {
-        this.engineController = new EngineController();
+        this.localEngineController = new LocalEngineController();
         // Set this instance for UIUtils re-run functionality
         UIUtils.setAppControllerInstance(this);
     }
@@ -205,10 +205,10 @@ public class AppController {
      */
     private void handleBreakpointToggle(int lineNumber) {
         try {
-            boolean nowHasBreakpoint = engineController.toggleBreakpoint(lineNumber);
+            boolean nowHasBreakpoint = localEngineController.toggleBreakpoint(lineNumber);
 
             // Refresh breakpoint display
-            List<BreakpointDTO> allBreakpoints = engineController.getAllBreakpoints();
+            List<BreakpointDTO> allBreakpoints = localEngineController.getAllBreakpoints();
             instructionsTableController.updateBreakpoints(allBreakpoints);
 
             if (nowHasBreakpoint) {
@@ -240,7 +240,7 @@ public class AppController {
                     executionStats.executionNumber() + " (expand level: " + expandLevel + ")");
 
             // Use the engine controller to get the final variable states for this execution
-            Map<String, Integer> finalStates = engineController.getFinalVariableStates(expandLevel, arguments);
+            Map<String, Integer> finalStates = localEngineController.getFinalVariableStates(expandLevel, arguments);
 
             System.out.println("Retrieved " + finalStates.size() + " final variable states for execution #" +
                     executionStats.executionNumber());
@@ -321,7 +321,7 @@ public class AppController {
 
         if (inDebugSession) {
             try {
-                engineController.stopDebugSession();
+                localEngineController.stopDebugSession();
             } catch (Exception e) {
                 System.err.println("Warning: Error stopping debug session during rerun reset: " + e.getMessage());
             }
@@ -407,7 +407,7 @@ public class AppController {
                             loadedProgram = program;
                             mainProgramName.set(program.ProgramName());
                             currentLoadedProgramName.set(program.ProgramName());
-                            allSubFunction.putAll(engineController.getFunctionsSet());
+                            allSubFunction.putAll(localEngineController.getFunctionsSet());
                         }
                         loadingStage.close();
                     }
@@ -415,7 +415,7 @@ public class AppController {
 
             loadingStage.setOnShown(event -> fileLoaderController.initializeAndRunFileLoaderTaskThread(
                     file.toPath(),
-                    engineController, uiAdapter));
+                    localEngineController, uiAdapter));
             loadingStage.show();
         } catch (Exception e) {
             e.printStackTrace();
@@ -441,9 +441,9 @@ public class AppController {
     }
 
     private void setStageForLoadedProgram(String functionName) {
-        loadedProgram = engineController.setLoadedProgram(functionName);
+        loadedProgram = localEngineController.setLoadedProgram(functionName);
         currentLoadedProgramName.set(loadedProgram.ProgramName());
-        maxExpandLevel.set(engineController.getMaxExpandLevel());
+        maxExpandLevel.set(localEngineController.getMaxExpandLevel());
         currentExpandLevel.set(0);
         programLoaded.set(true);
         argumentsLoaded.set(false);
@@ -452,17 +452,17 @@ public class AppController {
         programArguments.clear();
         programInstructions.setAll(loadedProgram.instructions());
         derivedInstructions.clear();
-        executionStatistics.setAll(engineController.getAllExecutionStatistics());
+        executionStatistics.setAll(localEngineController.getAllExecutionStatistics());
         programRanAtLeastOnce.set(!executionStatistics.isEmpty());
         instructionsTableController.clearHighlighting();
         derivedInstructionsTableController.clearHighlighting();
         allVariablesDTO.clear();
         argumentsDTO.clear();
         currentCycles.set(0);
-        List<BreakpointDTO> existingBreakpoints = engineController.getAllBreakpoints();
+        List<BreakpointDTO> existingBreakpoints = localEngineController.getAllBreakpoints();
         instructionsTableController.updateBreakpoints(existingBreakpoints);
         summaryLineController.updateCounts(loadedProgram.instructions());
-        programVariablesNamesAndLabels.setAll(sortAllProgramNames(engineController.
+        programVariablesNamesAndLabels.setAll(sortAllProgramNames(localEngineController.
                 getAllVariablesAndLabelsNames(0, true)));
         showSuccess("Function '" + functionName + "' loaded successfully.");
         showInfo("Displaying instructions for function: " + functionName);
@@ -476,7 +476,7 @@ public class AppController {
 
         // If programArguments is empty, populate with default arguments from engine
         if (programArguments.isEmpty()) {
-            programArguments.putAll(engineController.getSortedArguments());
+            programArguments.putAll(localEngineController.getSortedArguments());
         }
 
         // If no arguments are needed, mark as loaded and return
@@ -554,14 +554,14 @@ public class AppController {
             instructionsTableController.clearBreakpointHitHighlight();
 
             // Execute the program using SystemController
-            engineController.runLoadedProgram(expandLevel, programArguments);
-            allVariablesDTO.setAll(UIUtils.getAllVariablesDTOSorted(engineController, expandLevel));
-            executionStatistics.add(engineController.getLastExecutionStatistics());
+            localEngineController.runLoadedProgram(expandLevel, programArguments);
+            allVariablesDTO.setAll(UIUtils.getAllVariablesDTOSorted(localEngineController, expandLevel));
+            executionStatistics.add(localEngineController.getLastExecutionStatistics());
 
-            ProgramDTO executedProgram = engineController.getProgramByExpandLevel(expandLevel);
+            ProgramDTO executedProgram = localEngineController.getProgramByExpandLevel(expandLevel);
             programInstructions.setAll(executedProgram.instructions());
             derivedInstructions.clear();
-            currentCycles.set(engineController.getLastExecutionNumberOfCycles());
+            currentCycles.set(localEngineController.getLastExecutionNumberOfCycles());
             summaryLineController.updateCounts(executedProgram.instructions());
 
             updateProperties();
@@ -599,14 +599,14 @@ public class AppController {
             instructionsTableController.clearHighlighting();
             derivedInstructionsTableController.clearHighlighting();
             currentExpandLevel.set(expandLevel);
-            ProgramDTO program = engineController.getProgramByExpandLevel(expandLevel);
+            ProgramDTO program = localEngineController.getProgramByExpandLevel(expandLevel);
             derivedInstructions.clear();
             programInstructions.setAll(program.instructions());
             allVariablesDTO.clear();
             argumentsDTO.clear();
             argumentsLoaded.set(false);
             summaryLineController.updateCounts(program.instructions());
-            programVariablesNamesAndLabels.setAll(sortAllProgramNames(engineController.
+            programVariablesNamesAndLabels.setAll(sortAllProgramNames(localEngineController.
                     getAllVariablesAndLabelsNames(expandLevel, true)));
             showInfo("Program expanded to level " + expandLevel);
         } catch (Exception e) {
@@ -624,10 +624,10 @@ public class AppController {
         currentExpandLevel.set(0);
         loadedProgram = null;
         programArguments.clear();
-        engineController.clearAllBreakpoints();
+        localEngineController.clearAllBreakpoints();
         instructionsTableController.updateBreakpoints(Collections.emptyList());
 
-        engineController.clearLoadedProgram();
+        localEngineController.clearLoadedProgram();
         executionStatistics.clear();
         programInstructions.clear();
         derivedInstructions.clear();
@@ -640,7 +640,7 @@ public class AppController {
         programVariablesNamesAndLabels.clear();
         allSubFunction.clear();
         previousDebugVariables.clear();
-        engineController.clearAllBreakpoints();
+        localEngineController.clearAllBreakpoints();
         isFirstDebugStep = true;
         inDebugSession = false;
         debugMode.set(false);
@@ -664,15 +664,15 @@ public class AppController {
     // DEBUG METHODS
     public void stopDebugSession() {
         try {
-            engineController.stopDebugSession();
+            localEngineController.stopDebugSession();
 
-            if (engineController.isDebugFinished()) {
+            if (localEngineController.isDebugFinished()) {
                 showInfo("Debug session stopped. Execution was completed.");
             } else {
-                showInfo("Debug session stopped at PC: " + engineController.getCurrentDebugPC());
+                showInfo("Debug session stopped at PC: " + localEngineController.getCurrentDebugPC());
             }
 
-            int currentPC = engineController.getCurrentDebugPC();
+            int currentPC = localEngineController.getCurrentDebugPC();
             highlightCurrentInstruction(currentPC);
             updateDebugVariableState();
             handleExecutionFinished();
@@ -726,7 +726,7 @@ public class AppController {
                 debugControlsController.notifyDebugSessionStarted();
             }
 
-            engineController.startDebugSession(expandLevel, programArguments);
+            localEngineController.startDebugSession(expandLevel, programArguments);
             inDebugSession = true;
 
             highlightCurrentInstruction(0);
@@ -755,7 +755,7 @@ public class AppController {
             return;
         }
 
-        if (engineController.isDebugFinished()) {
+        if (localEngineController.isDebugFinished()) {
             showInfo("Execution finished. Program has completed successfully.");
             return;
         }
@@ -765,14 +765,15 @@ public class AppController {
             instructionsTableController.clearBreakpointHitHighlight();
 
             if (!isFirstDebugStep) {
-                previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
+                previousDebugVariables.putAll(UIUtils.getAllVariablesMap(localEngineController,
+                        currentExpandLevel.get()));
             }
 
             // Execute one instruction
-            engineController.debugStep();
+            localEngineController.debugStep();
 
-            int currentPC = engineController.getCurrentDebugPC();
-            currentCycles.set(engineController.getCurrentDebugCycles());
+            int currentPC = localEngineController.getCurrentDebugPC();
+            currentCycles.set(localEngineController.getCurrentDebugCycles());
             highlightCurrentInstruction(currentPC);
             updateDebugVariableState();
 
@@ -781,13 +782,13 @@ public class AppController {
             }
 
             // Check if we hit a breakpoint at the new PC location
-            if (engineController.hasBreakpointAt(currentPC)) {
+            if (localEngineController.hasBreakpointAt(currentPC)) {
                 instructionsTableController.highlightBreakpointHit(currentPC);
                 showInfo("Breakpoint hit at line " + (currentPC + 1) + ". Execution paused.");
             }
 
-            if (engineController.isDebugFinished()) {
-                executionStatistics.setAll(engineController.getAllExecutionStatistics());
+            if (localEngineController.isDebugFinished()) {
+                executionStatistics.setAll(localEngineController.getAllExecutionStatistics());
                 handleExecutionFinished();
             } else {
                 showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + currentCycles.get());
@@ -800,7 +801,7 @@ public class AppController {
     }
 
     private void updateDebugVariableState() {
-        List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted(engineController,
+        List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted(localEngineController,
                 currentExpandLevel.get());
         List<VariableDTO> allVarWithChangeDetection = FXCollections.observableArrayList();
         allVarNoChangeDetection.stream()
@@ -816,16 +817,16 @@ public class AppController {
             return;
         }
 
-        if (engineController.isDebugFinished()) {
+        if (localEngineController.isDebugFinished()) {
             showInfo("Execution finished. Cannot step backward from final state.");
             return;
         }
 
         try {
-            previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
-            engineController.debugStepBackward();
-            int currentPC = engineController.getCurrentDebugPC();
-            currentCycles.set(engineController.getCurrentDebugCycles());
+            previousDebugVariables.putAll(UIUtils.getAllVariablesMap(localEngineController, currentExpandLevel.get()));
+            localEngineController.debugStepBackward();
+            int currentPC = localEngineController.getCurrentDebugPC();
+            currentCycles.set(localEngineController.getCurrentDebugCycles());
 
             highlightCurrentInstruction(currentPC);
             updateDebugVariableState();
@@ -846,34 +847,34 @@ public class AppController {
             return;
         }
 
-        if (engineController.isDebugFinished()) {
+        if (localEngineController.isDebugFinished()) {
             showInfo("Execution already finished.");
             return;
         }
         if (!isFirstDebugStep) {
             previousDebugVariables.clear();
-            previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
+            previousDebugVariables.putAll(UIUtils.getAllVariablesMap(localEngineController, currentExpandLevel.get()));
         }
 
         isInDebugResume = true;
         try {
-            engineController.debugResume();
+            localEngineController.debugResume();
 
             // Update UI state
-            int currentPC = engineController.getCurrentDebugPC();
-            currentCycles.set(engineController.getCurrentDebugCycles());
+            int currentPC = localEngineController.getCurrentDebugPC();
+            currentCycles.set(localEngineController.getCurrentDebugCycles());
             highlightCurrentInstruction(currentPC);
             updateDebugVariableState();
 
             // Check if we stopped at a breakpoint
-            Integer breakpointHit = engineController.getLastBreakpointHit();
+            Integer breakpointHit = localEngineController.getLastBreakpointHit();
             if (breakpointHit != null) {
                 // Stopped at breakpoint - highlight it
                 instructionsTableController.highlightBreakpointHit(breakpointHit);
                 showInfo("Breakpoint hit at line " + (breakpointHit + 1) +
                         ". Execution paused.\nPC: " + currentPC +
                         ", Total cycles: " + currentCycles.get());
-            } else if (engineController.isDebugFinished()) {
+            } else if (localEngineController.isDebugFinished()) {
                 handleExecutionFinished();
             }
 
@@ -907,14 +908,14 @@ public class AppController {
         programFinished.set(true);
         previousDebugVariables.clear();
         isFirstDebugStep = true;
-        executionStatistics.add(engineController.getLastExecutionStatistics());
+        executionStatistics.add(localEngineController.getLastExecutionStatistics());
         programRanAtLeastOnce.set(true);
         debugControlsController.notifyDebugSessionEnded();
         instructionsTableController.clearAllDebugHighlighting();
         instructionsTableController.clearBreakpointHitHighlight();
 
         // Get current breakpoints with ACTIVE status (not HIT)
-        List<BreakpointDTO> currentBreakpoints = engineController.getAllBreakpoints();
+        List<BreakpointDTO> currentBreakpoints = localEngineController.getAllBreakpoints();
         instructionsTableController.updateBreakpoints(currentBreakpoints);
 
         System.out.println("Debug session ended - ready for new execution");

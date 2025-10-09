@@ -2,19 +2,20 @@ package ui.jfx.fileLoader;
 
 import dto.engine.ProgramDTO;
 import javafx.concurrent.Task;
-import system.controller.EngineController;
+import system.controller.LocalEngineController;
 import ui.utils.UIUtils;
 
 import java.nio.file.Path;
 import java.util.List;
 
 public class LoadFileToProgramTask extends Task<ProgramDTO> {
-    private final EngineController engineController;
+    private final LocalEngineController localEngineController;
     private final Path filePath;
     private final UIAdapterLoadFileTask uiAdapter;
 
-    public LoadFileToProgramTask(EngineController engineController, Path filePath, UIAdapterLoadFileTask uiAdapter) {
-        this.engineController = engineController;
+    public LoadFileToProgramTask(LocalEngineController localEngineController, Path filePath,
+                                 UIAdapterLoadFileTask uiAdapter) {
+        this.localEngineController = localEngineController;
         this.filePath = filePath;
         this.uiAdapter = uiAdapter;
     }
@@ -24,10 +25,10 @@ public class LoadFileToProgramTask extends Task<ProgramDTO> {
         updateMessage("Loading file...");
         updateProgress(0, 4);
         final int SLEEP_TIME = 300;
-        engineController.LoadProgramFromFile(filePath);
-        ProgramDTO program = engineController.getBasicProgram();
+        localEngineController.LoadProgramFromFile(filePath);
+        ProgramDTO program = localEngineController.getBasicProgram();
         List<String> allVars = UIUtils.sortAllProgramNames(
-                engineController.getAllVariablesAndLabelsNames(0, true));
+                localEngineController.getAllVariablesAndLabelsNames(0, true));
         UIUtils.sleep(SLEEP_TIME);
         updateProgress(1, 4);
         UIUtils.sleep(SLEEP_TIME);
@@ -40,7 +41,7 @@ public class LoadFileToProgramTask extends Task<ProgramDTO> {
         updateMessage("Eating cookies and milk...");
         UIUtils.sleep(SLEEP_TIME);
         // update expand levels on UI
-        uiAdapter.expandLevelsAndCyclesHandler(engineController.getMaxExpandLevel());
+        uiAdapter.expandLevelsAndCyclesHandler(localEngineController.getMaxExpandLevel());
         updateProgress(4, 4);
         updateMessage("File loaded successfully");
         UIUtils.sleep(SLEEP_TIME);
