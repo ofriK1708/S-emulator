@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ui.jfx.dashboard.header.DashboardHeaderController"
+      alignment="CENTER_LEFT"
+      spacing="15"
+      styleClass="dashboard-header">
+
+    <padding>
+        <Insets top="10" right="15" bottom="10" left="15"/>
+    </padding>
+
+    <!-- User Name Label -->
+    <Label fx:id="userNameLabel" text="User Name" styleClass="header-label, user-label"/>
+
+    <!-- Load File Button -->
+    <Button fx:id="loadFileButton"
+            text="Load File"
+            onAction="#handleLoadFile"
+            styleClass="header-button, load-file-button"/>
+
+    <!-- File Path Display (grows to fill space) -->
+    <TextField fx:id="filePathField"
+               editable="false"
+               promptText="Currently Loaded File path"
+               styleClass="file-path-field"
+               HBox.hgrow="ALWAYS"/>
+
+    <!-- Spacer -->
+    <Region HBox.hgrow="SOMETIMES"/>
+
+    <!-- Available Credits Label -->
+    <Label text="Available Credits:" styleClass="header-label, credits-label"/>
+
+    <!-- Credits Display -->
+    <TextField fx:id="creditsField"
+               editable="false"
+               text="0"
+               prefWidth="80"
+               alignment="CENTER"
+               styleClass="credits-field"/>
+
+    <!-- Charge Credits Button -->
+    <Button fx:id="chargeCreditsButton"
+            text="Charge Credits"
+            onAction="#handleChargeCredits"
+            styleClass="header-button, charge-credits-button"/>
+
+</HBox>
