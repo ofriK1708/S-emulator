@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import system.http.utils.EndPoints;
 import system.http.utils.Requests;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -21,9 +22,8 @@ public class HttpEngineController extends EngineController {
     @Override
     public void LoadProgramFromFile(@NotNull Path xmlFilePath) throws JAXBException, IOException {
         SProgram program = getSProgramFromFile(xmlFilePath);
-        String jsonRepresentation = gson.toJson(program);
-        System.out.println(jsonRepresentation);
-        Requests.postRunAsync(EndPoints.UPLOAD_PROGRAM, jsonRepresentation, new Callback() {
+        File xmlFile = xmlFilePath.toFile();
+        Requests.postRunAsync(EndPoints.UPLOAD_PROGRAM, xmlFile, new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 System.out.println("Failed to upload program: " + e.getMessage());

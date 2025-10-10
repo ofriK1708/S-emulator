@@ -4,6 +4,7 @@ import dto.engine.BreakpointDTO;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
 import engine.core.syntheticCommand.Quote;
+import engine.exception.FunctionAlreadyExist;
 import engine.exception.FunctionNotFound;
 import engine.exception.LabelNotExist;
 import engine.generated_2.SFunction;
@@ -47,7 +48,6 @@ public class ProgramEngine implements Serializable {
     private final List<Integer> debugCyclesHistory = new ArrayList<>(); // Track cycles per step
     private List<Instruction> currentDebugInstructions = new ArrayList<>();
     private Map<String, Integer> currentDebugContext = new HashMap<>();
-    private final Map<String, Integer> debugArguments = new HashMap<>(); // Store debug arguments
     private int totalDebugCycles = 0; // Monotonic cycle counter
     private @Nullable ExecutionStatistics currentDebugStatistics = null;
 
@@ -59,11 +59,8 @@ public class ProgramEngine implements Serializable {
 
             allFunctionsInMain = buildFunctions(program);
 
-            for (Map.Entry<String, ProgramEngine> entry : allFunctionsInMain.entrySet()) {
-                entry.getValue().finishInitFunction(allFunctionsInMain);
-            }
+            allFunctionsInMain.values().forEach(func -> func.setFunctions(allFunctionsInMain));
 
-//            allFunctionsInMain.forEach((name, function) -> function.finishInitFunction(allFunctionsInMain));
         }
 
         SInstructions sInstructions = program.getSInstructions();
@@ -75,6 +72,37 @@ public class ProgramEngine implements Serializable {
         finishInitialization();
 
     }
+
+    public void finishInitProgram(@NotNull Map<String, ProgramEngine> allFunctionsInSystem)
+            throws FunctionNotFound, FunctionAlreadyExist {
+        for (ProgramEngine function : allFunctionsInMain.values()) {
+            function.addSystemFunctionsAndFinishQuoteInit(allFunctionsInSystem);
+        }
+        this.addSystemFunctionsAndFinishQuoteInit(allFunctionsInSystem);
+    }
+
+    private void addSystemFunctionsAndFinishQuoteInit(@NotNull Map<String, ProgramEngine> allFunctionsInSystem)
+            throws FunctionAlreadyExist, FunctionNotFound {
+        addSystemFunctions(allFunctionsInSystem);
+        for (Quote quote : uninitializedQuotes) {
+            quote.initAndValidateQuote();
+        }
+        uninitializedQuotes.clear();
+    }
+
+    public void addSystemFunctions(@NotNull Map<String, ProgramEngine> allFunctionsInSystem)
+            throws FunctionAlreadyExist {
+        if (allFunctionsInMain == null) {
+            allFunctionsInMain = new HashMap<>();
+        }
+        for (Map.Entry<String, ProgramEngine> func : allFunctionsInSystem.entrySet()) {
+            if (allFunctionsInMain.containsKey(func.getKey())) {
+                throw new FunctionAlreadyExist(this.programName, func.getKey());
+            }
+            allFunctionsInMain.put(func.getKey(), func.getValue());
+        }
+    }
+
 
     public ProgramEngine(@NotNull SFunction function) throws LabelNotExist, FunctionNotFound {
         this.programName = function.getName();
@@ -129,14 +157,6 @@ public class ProgramEngine implements Serializable {
 
     public boolean isVariableInContext(String varName) {
         return originalContextMap.containsKey(varName);
-    }
-
-    private void finishInitFunction(@NotNull Map<String, ProgramEngine> allFunctionsInMain) throws FunctionNotFound {
-        setFunctions(allFunctionsInMain);
-        for (Quote quote : uninitializedQuotes) {
-            quote.initAndValidateQuote();
-        }
-        uninitializedQuotes.clear();
     }
 
 
@@ -434,7 +454,6 @@ public class ProgramEngine implements Serializable {
     private void resetDebugState() {
         debugStateHistory.clear();
         debugCyclesHistory.clear();
-        debugArguments.clear();
         currentDebugInstructions = Collections.emptyList();
         currentDebugContext = Collections.emptyMap();
         totalDebugCycles = 0;
@@ -460,28 +479,9 @@ public class ProgramEngine implements Serializable {
             markBreakpointHit();
         }
         // Execute current instruction
-        Instruction currentInstruction = currentDebugInstructions.get(currentDebugPC);
-
-        try {
-            // Execute instruction
-            currentInstruction.execute(currentDebugContext);
-
-            // Add cycles from this instruction to total (monotonic increment)
-            totalDebugCycles += currentInstruction.getCycles();
-
-            // Update PC from context
-            currentDebugPC = currentDebugContext.get(PC_NAME);
-
-            // Save state after execution with accumulated cycles
-            debugStateHistory.add(new HashMap<>(currentDebugContext));
-            debugCyclesHistory.add(totalDebugCycles);
-
-
-
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Error executing debug instruction at PC=" + currentDebugPC + ": " + e.getMessage(), e);
-        }
+        executeStep();
     }
+
     public void debugStepBackward() {
         if (!debugMode) {
             throw new IllegalStateException("Debug session not started");
@@ -514,26 +514,7 @@ public class ProgramEngine implements Serializable {
 
         // Execute remaining instructions, stopping at breakpoints
         while (currentDebugPC < currentDebugInstructions.size()) {
-            Instruction currentInstruction = currentDebugInstructions.get(currentDebugPC);
-
-            try {
-                // Execute instruction
-                currentInstruction.execute(currentDebugContext);
-
-                // Add cycles
-                totalDebugCycles += currentInstruction.getCycles();
-
-                // Update PC from context (instruction may have modified it)
-                currentDebugPC = currentDebugContext.get(PC_NAME);
-
-                // Save state
-                debugStateHistory.add(new HashMap<>(currentDebugContext));
-                debugCyclesHistory.add(totalDebugCycles);
-
-            } catch (IllegalArgumentException e) {
-                throw new RuntimeException("Error executing debug instruction at PC=" +
-                        currentDebugPC + ": " + e.getMessage(), e);
-            }
+            executeStep();
 
             if (shouldStopAtBreakpoint()) {
                 markBreakpointHit();
@@ -543,6 +524,29 @@ public class ProgramEngine implements Serializable {
         }
 
         System.out.println("Resume completed - reached end of program");
+    }
+
+    private void executeStep() {
+        Instruction currentInstruction = currentDebugInstructions.get(currentDebugPC);
+
+        try {
+            // Execute instruction
+            currentInstruction.execute(currentDebugContext);
+
+            // Add cycles
+            totalDebugCycles += currentInstruction.getCycles();
+
+            // Update PC from context (instruction may have modified it)
+            currentDebugPC = currentDebugContext.get(PC_NAME);
+
+            // Save state
+            debugStateHistory.add(new HashMap<>(currentDebugContext));
+            debugCyclesHistory.add(totalDebugCycles);
+
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Error executing debug instruction at PC=" +
+                    currentDebugPC + ": " + e.getMessage(), e);
+        }
     }
 
     public void stopDebugSession() {
@@ -641,6 +645,7 @@ public class ProgramEngine implements Serializable {
         }
         return debugCyclesHistory.getLast();
     }
+
     public void finalizeDebugExecution() {
         if (debugMode && currentDebugStatistics != null && isDebugFinished()) {
             finalizeDebugStatistics();
@@ -648,14 +653,12 @@ public class ProgramEngine implements Serializable {
     }
 
 
-
     /**
      * Adds or updates a breakpoint at the specified line number.
      *
      * @param breakpoint The breakpoint to add
-     * @return true if breakpoint was added/updated successfully
      */
-    public boolean addBreakpoint(@NotNull BreakpointDTO breakpoint) {
+    public void addBreakpoint(@NotNull BreakpointDTO breakpoint) {
         if (!debugMode) {
             throw new IllegalStateException("Cannot add breakpoints outside of debug session");
         }
@@ -664,28 +667,23 @@ public class ProgramEngine implements Serializable {
         if (breakpoint.lineNumber() < 0 || breakpoint.lineNumber() >= currentDebugInstructions.size()) {
             System.err.println("Invalid breakpoint line: " + breakpoint.lineNumber() +
                     " (valid range: 0-" + (currentDebugInstructions.size() - 1) + ")");
-            return false;
         }
 
         breakpoints.put(breakpoint.lineNumber(), breakpoint);
         System.out.println("Breakpoint added at line " + breakpoint.lineNumber() +
                 (breakpoint.condition() != null ? " with condition: " + breakpoint.condition() : ""));
-        return true;
     }
 
     /**
      * Removes a breakpoint at the specified line number.
      *
      * @param lineNumber The line number to remove breakpoint from
-     * @return true if breakpoint was removed, false if no breakpoint existed
      */
-    public boolean removeBreakpoint(int lineNumber) {
+    public void removeBreakpoint(int lineNumber) {
         BreakpointDTO removed = breakpoints.remove(lineNumber);
         if (removed != null) {
             System.out.println("Breakpoint removed from line " + lineNumber);
-            return true;
         }
-        return false;
     }
 
     /**
@@ -705,17 +703,6 @@ public class ProgramEngine implements Serializable {
      */
     public @NotNull List<BreakpointDTO> getAllBreakpoints() {
         return new ArrayList<>(breakpoints.values());
-    }
-
-    /**
-     * Checks if there's a breakpoint at the specified line.
-     *
-     * @param lineNumber The line to check
-     * @return true if an enabled breakpoint exists at this line
-     */
-    public boolean hasBreakpointAt(int lineNumber) {
-        BreakpointDTO bp = breakpoints.get(lineNumber);
-        return bp != null && bp.enabled();
     }
 
     /**
@@ -740,6 +727,7 @@ public class ProgramEngine implements Serializable {
         return breakpoint != null && breakpoint.enabled();
         // Note: Ignores breakpoint.condition() entirely
     }
+
     /**
      * Updates the breakpoint status to HIT for the current PC.
      */

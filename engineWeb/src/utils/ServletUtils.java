@@ -1,7 +1,7 @@
 package utils;
 
 import jakarta.servlet.ServletContext;
-import logic.ProgramManager;
+import logic.manager.ProgramManager;
 
 public class ServletUtils {
     private final static String PROGRAM_MANAGER_ATTRIBUTE_NAME = "programManager";
