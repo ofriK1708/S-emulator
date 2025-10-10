@@ -33,8 +33,10 @@ public class uploadProgram extends HttpServlet {
             synchronized (this) {
                 if (programManager.isProgramExists(programName)) {
                     resp.setStatus(HttpServletResponse.SC_CONFLICT);
-                    resp.getWriter().println("Failed to upload File! Program with name " + programName + " already " +
-                            "exists");
+                    String fileName = req.getPart(XML_FILE_PART_NAME).getSubmittedFileName();
+                    resp.getWriter().println("Failed to upload the File \"" + fileName + "\"! " +
+                            "A program with the name \"" + programName + "\" already " +
+                            "exists in the system, please choose a different name or file.");
                 } else {
                     // Validate program by trying to create an engine - check for label not exists, etc.
                     try {
@@ -58,7 +60,7 @@ public class uploadProgram extends HttpServlet {
         try {
             XMLHandler xmlHandler = new XMLHandler();
             Part xmlFilePart = req.getPart(XML_FILE_PART_NAME);
-            validateFile(req, resp, xmlFilePart);
+            validateFile(resp, xmlFilePart);
             return xmlHandler.unmarshallFile(xmlFilePart.getInputStream());
         } catch (JAXBException e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -70,7 +72,7 @@ public class uploadProgram extends HttpServlet {
         }
     }
 
-    private void validateFile(HttpServletRequest req, HttpServletResponse resp, Part filePart)
+    private void validateFile(HttpServletResponse resp, Part filePart)
             throws IOException, ServletException {
 
         // 1. Check content type
