@@ -1,0 +1,23 @@
+.summary-line {
+    -fx-background-radius: 10px;
+    -fx-padding: 20px;
+    -fx-alignment: center-left;
+}
+
+.summary-label {
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-weight: normal;
+}
+
+.count-label {
+    -fx-font-weight: bold;
+}
+
+.value-label {
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-background-radius: 8px;
+    -fx-padding: 5px 15px;
+    -fx-font-weight: bold;
+    -fx-min-width: 80px;
+    -fx-alignment: center;
+}

@@ -1,0 +1,21 @@
+/* App Layout Component - Layout and Structure Only */
+/* Theme-dependent styles are in global light.css and dark.css */
+
+.app-layout-root {
+    -fx-pref-width: 1200px;
+    -fx-pref-height: 720px;
+}
+
+.app-main-border {
+    /* Main BorderPane styling will come from global themes */
+}
+
+.app-layout-top {
+    -fx-spacing: 8px;
+    -fx-padding: 8px 12px;
+}
+
+.app-layout-placeholder-label {
+    -fx-font-size: 23px;
+    -fx-font-family: "System", "Segoe UI", "Helvetica Neue", sans-serif;
+}

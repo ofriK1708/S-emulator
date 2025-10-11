@@ -52,6 +52,10 @@ public class AppController {
 
     // Scene reference for theme switching
     private Scene scene;
+    @FXML
+    private HBox executionHeader;
+    @FXML
+    private ui.jfx.execution.header.ExecutionHeaderController executionHeaderController;
 
     @FXML
     private HBox fileHandler;
@@ -137,11 +141,17 @@ public class AppController {
     private final IntegerProperty maxExpandLevel = new SimpleIntegerProperty(0);
     private final IntegerProperty currentExpandLevel = new SimpleIntegerProperty(0);
     private final IntegerProperty currentCycles = new SimpleIntegerProperty(0);
+    private final StringProperty currentUserName = new SimpleStringProperty("Guest User");
+    private final StringProperty screenTitle = new SimpleStringProperty("S-Emulator Execution");
+    private final IntegerProperty availableCredits = new SimpleIntegerProperty(0);
+    private Runnable returnToDashboardCallback = null;
+
     private boolean inDebugSession = false;
     @FXML
     private VBox historyStats;
     private boolean isFirstDebugStep = true;
     private boolean isInDebugResume = false;
+
 
     public AppController() {
         this.localEngineController = new LocalEngineController();
@@ -189,11 +199,163 @@ public class AppController {
                     this::debugResume,
                     this::stopDebugSession
             );
+            initializeExecutionHeader();
 
             System.out.println("AppController initialized with cleaned re-run architecture");
         } else {
             System.err.println("One or more controllers are not injected properly!");
             throw new IllegalStateException("FXML injection failed: required controllers are null.");
+        }
+    }
+
+    private void initializeExecutionHeader() {
+        if (executionHeaderController != null) {
+            // Initialize with all properties AND back callback
+            executionHeaderController.initComponent(
+                    currentUserName,
+                    screenTitle,
+                    availableCredits,
+                    this::handleBackToDashboard  // Add the callback
+            );
+            System.out.println("Execution header initialized with back button");
+        } else {
+            System.err.println("ExecutionHeaderController not injected!");
+        }
+    }
+    /**
+     * Sets the return to dashboard.
+     *
+     */
+
+    public void setReturnToDashboardCallback(Runnable callback) {
+        this.returnToDashboardCallback = callback;
+        System.out.println("AppController: Return to Dashboard callback registered");
+    }
+
+    // Add this method to your existing AppController.java class
+
+    /**
+     * PUBLIC METHOD: Allows external components (like Dashboard) to trigger file loading
+     * using the same file loader mechanism. This reuses all existing validation, callbacks,
+     * and UI adapter logic without duplication.
+     *
+     * @param file The file to load
+     * @param onSuccessCallback Optional callback to execute after successful load (e.g., scene transition)
+     */
+    public void loadProgramFromFileExternal(@NotNull File file, @Nullable Runnable onSuccessCallback) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("fileLoader/fileLoader.fxml"));
+            Parent root = loader.load();
+            FileLoaderController fileLoaderController = loader.getController();
+
+            Stage loadingStage = new Stage();
+            loadingStage.initModality(Modality.APPLICATION_MODAL);
+            loadingStage.setTitle("Loading File");
+            loadingStage.setScene(new Scene(root, 1000, 183));
+
+            UIAdapterLoadFileTask uiAdapter = new UIAdapterLoadFileTask(
+                    programLoaded::set,
+                    argumentsLoaded::set,
+                    programVariablesNamesAndLabels::setAll,
+                    programInstructions::setAll,
+                    derivedInstructions::clear,
+                    summaryLineController::updateCounts,
+                    maxExpandLevel::set,
+                    currentExpandLevel::set,
+                    currentCycles::set,
+                    program -> {
+                        if (program != null) {
+                            UIUtils.showSuccess("File loaded successfully: " + file.getName());
+                            loadedProgram = program;
+                            mainProgramName.set(program.ProgramName());
+                            currentLoadedProgramName.set(program.ProgramName());
+                            allSubFunction.putAll(localEngineController.getFunctionsSet());
+
+                            // Execute success callback (scene transition) if provided
+                            if (onSuccessCallback != null) {
+                                onSuccessCallback.run();
+                            }
+                        }
+                        loadingStage.close();
+                    }
+            );
+
+            loadingStage.setOnShown(event -> fileLoaderController.initializeAndRunFileLoaderTaskThread(
+                    file.toPath(),
+                    localEngineController, uiAdapter));
+            loadingStage.show();
+
+            System.out.println("AppController: External file load triggered for " + file.getName());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Error loading file: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Refactor existing loadProgramFromFile to use the new method
+     */
+    public void loadProgramFromFile(@NotNull File file) {
+        loadProgramFromFileExternal(file, null);
+    }
+
+    @FXML
+    public void handleBackToDashboard() {
+        if (returnToDashboardCallback != null) {
+            // Clean up current state before returning
+            if (inDebugSession) {
+                try {
+                    stopDebugSession();
+                } catch (Exception e) {
+                    System.err.println("Error stopping debug session: " + e.getMessage());
+                }
+            }
+
+            // Execute callback to switch scenes
+            returnToDashboardCallback.run();
+
+            System.out.println("Returning to Dashboard...");
+        } else {
+            System.err.println("Return to Dashboard callback not set");
+            ui.utils.UIUtils.showError("Navigation to Dashboard is not configured");
+        }
+    }
+    /**
+     * Update screen title (for dynamic header)
+     */
+    public void setScreenTitle(String title) {
+        screenTitle.set(title);
+    }
+
+    /**
+     * Update user name in header
+     */
+    public void setUserName(String name) {
+        currentUserName.set(name);
+    }
+
+    /**
+     * Update available credits in header
+     */
+    public void setAvailableCredits(int credits) {
+        availableCredits.set(credits);
+    }
+
+
+    public void handleReturnToDashboard() {
+        if (returnToDashboardCallback != null) {
+            // Clean up current state before returning
+            if (inDebugSession) {
+                stopDebugSession();
+            }
+
+            // Execute callback to switch scenes
+            returnToDashboardCallback.run();
+
+            System.out.println("Returning to Dashboard...");
+        } else {
+            System.err.println("Return to Dashboard callback not set");
         }
     }
 
@@ -380,48 +542,6 @@ public class AppController {
         }
     }
 
-    public void loadProgramFromFile(@NotNull File file) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("fileLoader/fileLoader.fxml"));
-            Parent root = loader.load();
-            FileLoaderController fileLoaderController = loader.getController();
-
-            Stage loadingStage = new Stage();
-            loadingStage.initModality(Modality.APPLICATION_MODAL);
-            loadingStage.setTitle("Loading File");
-            loadingStage.setScene(new Scene(root, 1000, 183));
-
-            UIAdapterLoadFileTask uiAdapter = new UIAdapterLoadFileTask(
-                    programLoaded::set,
-                    argumentsLoaded::set,
-                    programVariablesNamesAndLabels::setAll,
-                    programInstructions::setAll,
-                    derivedInstructions::clear,
-                    summaryLineController::updateCounts,
-                    maxExpandLevel::set,
-                    currentExpandLevel::set,
-                    currentCycles::set,
-                    program -> {
-                        if (program != null) {
-                            UIUtils.showSuccess("File loaded successfully: " + file.getName());
-                            loadedProgram = program;
-                            mainProgramName.set(program.ProgramName());
-                            currentLoadedProgramName.set(program.ProgramName());
-                            allSubFunction.putAll(localEngineController.getFunctionsSet());
-                        }
-                        loadingStage.close();
-                    }
-            );
-
-            loadingStage.setOnShown(event -> fileLoaderController.initializeAndRunFileLoaderTaskThread(
-                    file.toPath(),
-                    localEngineController, uiAdapter));
-            loadingStage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-            showError("Error loading file: " + e.getMessage());
-        }
-    }
 
     public void switchLoadedProgram(String functionName) {
         if (functionName == null || functionName.isEmpty()) {
@@ -967,6 +1087,10 @@ public class AppController {
      */
     private void loadComponentStylesheets() {
         String[] componentStylesheets = {
+                "/ui/jfx/dashboard/Dashboard.css",
+                "/ui/jfx/dashboard/header/DashboardHeader.css",
+                "/ui/jfx/dashboard/history/HistoryPanel.css",
+                "/ui/jfx/dashboard/history/HistoryStats.css",
                 "/ui/jfx/cycles/cycles.css",
                 "/ui/jfx/runControls/RunControls.css",
                 "/ui/jfx/debugger/Debugger.css",

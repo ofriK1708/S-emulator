@@ -49,17 +49,6 @@ public class HistoryPanelController {
     }
 
     private void loadMockData() {
-        // Mock data for demonstration
-        historyList.addAll(
-                new HistoryRecordDTO(1, "Main Program", "MathProgram", "Basic", 0, 42, 156),
-                new HistoryRecordDTO(2, "Helper Function", "Multiply", "Synthetic", 2, 20, 89),
-                new HistoryRecordDTO(3, "Main Program", "MathProgram", "Synthetic", 1, 38, 234),
-                new HistoryRecordDTO(4, "Helper Function", "Add", "Basic", 0, 15, 45),
-                new HistoryRecordDTO(5, "Main Program", "RecursionDemo", "Synthetic", 3, 120, 512),
-                new HistoryRecordDTO(6, "Helper Function", "Factorial", "Synthetic", 2, 24, 178),
-                new HistoryRecordDTO(7, "Main Program", "SimpleCalculator", "Basic", 0, 99, 67),
-                new HistoryRecordDTO(8, "Helper Function", "Power", "Synthetic", 1, 64, 134)
-        );
     }
 
     public void initComponent(StringProperty selectedUser) {

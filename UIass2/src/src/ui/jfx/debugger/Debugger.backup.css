@@ -1,0 +1,51 @@
+/* Base container */
+
+/* Debugger pill-style buttons, matching RunControls look */
+.pill-button {
+    -fx-background-radius: 20px;
+    -fx-font-family: "Segoe UI Emoji", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 3, 0, 0, 1);
+    -fx-background-color: black;
+}
+
+/* Stop button: red text/icon */
+.debug-stop {
+    -fx-text-fill: #e53935;
+}
+
+.debug-stop:hover {
+    fx-background-color: #111;
+    -fx-effect: dropshadow(gaussian, #e5393588, 6, 0, 0, 2);
+}
+
+/* Resume button: green text/icon */
+.debug-resume {
+    -fx-text-fill: #00f800;
+}
+
+.debug-resume:hover {
+    fx-background-color: #111; /* slightly lighter black */
+    -fx-text-fill: #39ff14; /* brighter green */
+    -fx-effect: dropshadow(gaussian, #00f80088, 6, 0, 0, 2);
+}
+
+/* Step over/back: white text/icon, green shadow */
+.debug-stepOver, .debug-stepBackward {
+    -fx-text-fill: white;
+}
+
+.debug-stepOver:hover, .debug-stepBackward:hover {
+    -fx-effect: dropshadow(gaussian, #25a5a088, 6, 0, 0, 2);
+}
+
+/* Button text style */
+.button-text {
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: inherit;
+}

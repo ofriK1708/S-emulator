@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+<HBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" spacing="20.0" styleClass="summary-line"
+      stylesheets="@SummaryLine.css" xmlns="http://javafx.com/javafx/24.0.1"
+      fx:controller="ui.jfx.summaryLine.SummaryLineController">
+    <HBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" spacing="20.0" stylesheets="@SummaryLine.css"
+          HBox.hgrow="ALWAYS" xmlns="http://javafx.com/javafx/24.0.1">
+        <padding>
+            <Insets bottom="8.0" left="12.0" right="12.0" top="8.0"/>
+        </padding>
+        <children>
+            <Label styleClass="summary-label" text="Loaded program:"/>
+            <Label fx:id="programLoadedLabel" styleClass="value-label"/>
+            <Label alignment="CENTER" styleClass="summary-label" text="Synthetic Instructions:">
+                <font>
+                    <Font size="14.0"/>
+                </font>
+            </Label>
+            <Label fx:id="syntheticCountLabel" alignment="CENTER" styleClass="value-label" text="0">
+                <font>
+                    <Font size="14.0"/>
+                </font>
+            </Label>
+            <Label alignment="CENTER" styleClass="summary-label" text="Basic Instructions:">
+                <font>
+                    <Font size="14.0"/>
+                </font>
+            </Label>
+            <Label fx:id="basicCountLabel" alignment="CENTER" styleClass="value-label" text="0">
+                <font>
+                    <Font size="14.0"/>
+                </font>
+            </Label>
+        </children>
+    </HBox>
+</HBox>

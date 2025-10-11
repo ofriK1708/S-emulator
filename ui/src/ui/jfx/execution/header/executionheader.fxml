@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ui.jfx.execution.header.ExecutionHeaderController"
+      alignment="CENTER_LEFT"
+      spacing="15"
+      styleClass="execution-header"
+      minHeight="60"
+      prefHeight="60">
+
+    <padding>
+        <Insets top="10" right="15" bottom="10" left="15"/>
+    </padding>
+
+    <!-- User Name Label -->
+    <Label fx:id="userNameLabel"
+           text="Guest User"
+           styleClass="header-label, user-label"/>
+
+    <!-- Spacer -->
+    <Region HBox.hgrow="ALWAYS"/>
+
+    <!-- Screen Title (CENTER) -->
+    <Label fx:id="screenTitleLabel"
+           text="S-Emulator - Execution"
+           styleClass="header-title, screen-title"
+           style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+    <!-- Spacer -->
+    <Region HBox.hgrow="ALWAYS"/>
+
+    <!-- Available Credits Label (RIGHT) -->
+    <Label text="Available Credits:"
+           styleClass="header-label, credits-label"/>
+
+    <!-- Credits Display -->
+    <Label fx:id="creditsValueLabel"
+           text="0"
+           prefWidth="60"
+           alignment="CENTER"
+           styleClass="credits-value"
+           style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2196F3;"/>
+
+</HBox>

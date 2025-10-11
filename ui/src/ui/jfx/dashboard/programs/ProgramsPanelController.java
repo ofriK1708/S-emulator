@@ -56,21 +56,13 @@ public class ProgramsPanelController {
 
     private void loadMockData() {
         // Mock data for demonstration
-        programsList.addAll(
-                new ProgramDashboardDTO("MathProgram", "Alice", 45, 3, 127, 2.5),
-                new ProgramDashboardDTO("RecursionDemo", "Bob", 62, 5, 89, 3.8),
-                new ProgramDashboardDTO("SimpleCalculator", "Charlie", 38, 2, 215, 1.9),
-                new ProgramDashboardDTO("DataProcessor", "Alice", 78, 4, 54, 4.2),
-                new ProgramDashboardDTO("SortingAlgorithm", "Bob", 95, 6, 31, 5.1)
-        );
-    }
+        }
 
     @FXML
     private void handleExecuteProgram() {
-        ProgramDashboardDTO selected = programsTableView.getSelectionModel().getSelectedItem();
-        if (selected != null && executeProgramCallback != null) {
-            executeProgramCallback.accept(selected.getProgramName());
-            System.out.println("Execute program requested: " + selected.getProgramName());
+        ProgramDashboardDTO selectedProgram = programsTableView.getSelectionModel().getSelectedItem();
+        if (selectedProgram != null && executeProgramCallback != null) {
+            executeProgramCallback.accept(selectedProgram.programName().get());
         }
     }
 

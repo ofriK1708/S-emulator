@@ -53,22 +53,12 @@ public class FunctionsPanelController {
     }
 
     private void loadMockData() {
-        // Mock data for demonstration
-        functionsList.addAll(
-                new FunctionDTO("Add", "MathProgram", "Alice", 15, 2),
-                new FunctionDTO("Multiply", "MathProgram", "Bob", 22, 3),
-                new FunctionDTO("Factorial", "RecursionDemo", "Alice", 18, 4),
-                new FunctionDTO("Fibonacci", "RecursionDemo", "Charlie", 25, 5),
-                new FunctionDTO("Power", "MathProgram", "Bob", 20, 3)
-        );
     }
 
     @FXML
     private void handleExecuteFunction() {
         FunctionDTO selected = functionsTableView.getSelectionModel().getSelectedItem();
         if (selected != null && executeFunctionCallback != null) {
-            executeFunctionCallback.accept(selected.getFunctionName());
-            System.out.println("Execute function requested: " + selected.getFunctionName());
         }
     }
 

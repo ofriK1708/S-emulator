@@ -6,7 +6,8 @@
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="ui.jfx.dashboard.DashboardController"
-            styleClass="dashboard-root">
+            styleClass="dashboard-root"
+            stylesheets="@dashboard.css">
 
     <!-- Header Section: User Name, File Path, Credits -->
     <top>

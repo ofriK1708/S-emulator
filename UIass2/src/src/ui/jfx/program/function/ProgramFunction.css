@@ -1,0 +1,77 @@
+/* Program Function Component - Layout and Structure Only */
+/* Theme-dependent styles are now in global light.css and dark.css */
+
+/* Base container styling */
+.buttons-HBox {
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 12px;
+    -fx-spacing: 12px;
+    -fx-alignment: center-left;
+}
+
+/* Shared pill button styles */
+.pill-button {
+    -fx-background-radius: 20px;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+}
+
+/* Toggle button support */
+.pill-button:selected {
+    -fx-border-width: 2px;
+    -fx-border-radius: 20px;
+}
+
+/* Label styling - distinct from buttons */
+.info-label {
+    -fx-alignment: center;
+    -fx-font-size: 12px;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-cursor: default;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+}
+
+/* Program selector button (special styling) */
+.pf-collapse {
+    -fx-min-width: 120px;
+}
+
+.pf-change {
+    -fx-min-width: 120px;
+}
+
+/* Degree info label styling */
+.pf-degree {
+    -fx-min-width: 150px;
+    -fx-text-alignment: center;
+    -fx-content-display: center;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+    -fx-max-height: 50px;
+    -fx-line-spacing: 4px;
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 16px;
+}
+
+/* Program/function selector row */
+.root .program-function,
+.root .function-bar {
+    -fx-background-color: transparent;
+    -fx-padding: 0 12 8 12;
+}
+
+.root .program-function .button,
+.root .function-bar .button {
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 6 14 6 14;
+}
+
+.radio-choice-box {
+    -fx-font-size: 12px;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+}

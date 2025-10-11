@@ -1,0 +1,22 @@
+/* Run Controls Component - Layout and Structure Only */
+/* Theme-dependent styles are now in global light.css and dark.css */
+.pill-button {
+    -fx-background-radius: 20px;
+    -fx-font-family: "Segoe UI Emoji", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+}
+/* Toggle button support */
+.pill-button:selected {
+    -fx-border-width: 2;
+    -fx-border-radius: 20px;
+}
+
+/* Pill label styling */
+.pill-label {
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}

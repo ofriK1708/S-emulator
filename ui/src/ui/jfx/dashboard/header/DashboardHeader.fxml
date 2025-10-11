@@ -9,7 +9,8 @@
       fx:controller="ui.jfx.dashboard.header.DashboardHeaderController"
       alignment="CENTER_LEFT"
       spacing="15"
-      styleClass="dashboard-header">
+      styleClass="dashboard-header"
+      stylesheets="dashboardheader.css">
 
     <padding>
         <Insets top="10" right="15" bottom="10" left="15"/>

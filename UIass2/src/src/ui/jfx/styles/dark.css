@@ -1,0 +1,662 @@
+/* ===== DARK THEME ===== */
+/* Global CSS variables for colors */
+.root {
+    /* Primary colors */
+    -fx-primary-bg: #23272b;
+    -fx-secondary-bg: #1a1d20;
+    -fx-surface-bg: #2c3034;
+    -fx-text-primary: #e9ecef;
+    -fx-text-secondary: #dee2e6;
+    -fx-text-accent: #4dabf7;
+
+    /* Remove default JavaFX focus borders and scroll pane borders */
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+
+    /* Button colors */
+    -fx-green-primary: #1e8883;
+    -fx-green-secondary: #25a5a0;
+    -fx-green-hover-primary: #21968f;
+    -fx-green-hover-secondary: #2bb8b2;
+    -fx-green-pressed: #176a66;
+    -fx-green-disabled: #495057;
+
+    -fx-blue-primary: #1976d2;
+    -fx-blue-secondary: #2196f3;
+    -fx-blue-hover-primary: #1e88e5;
+    -fx-blue-hover-secondary: #42a5f5;
+    -fx-blue-pressed: #1565c0;
+    -fx-blue-disabled: #495057;
+
+    -fx-grey-primary: #343a40;
+    -fx-grey-secondary: #23272b;
+    -fx-grey-hover-primary: #343a40;
+    -fx-grey-hover-secondary: #495057;
+    -fx-grey-pressed: #495057;
+    -fx-grey-disabled: #6c757d;
+
+    -fx-vibrant-green-primary: #28a745;
+    -fx-vibrant-green-secondary: #20c997;
+    -fx-vibrant-green-hover-primary: #34ce57;
+    -fx-vibrant-green-hover-secondary: #40e0d0;
+    -fx-vibrant-green-pressed: #1e7e34;
+    -fx-vibrant-green-text: #e9ecef;
+
+    /* Special button colors */
+    -fx-debug-bg: #000000;
+    -fx-debug-stop-color: #ff6b6b;
+    -fx-debug-resume-color: #51cf66;
+    -fx-debug-resume-bright: #69db7c;
+    -fx-debug-step-color: #e9ecef;
+    -fx-debug-hover-bg: #212529;
+
+    /* Shadow colors */
+    -fx-shadow-light: rgba(0, 0, 0, 0.18);
+    -fx-shadow-medium: rgba(0, 0, 0, 0.35);
+    -fx-shadow-dark: rgba(0, 0, 0, 0.45);
+}
+
+/* ===== COMPONENT THEME STYLES ===== */
+
+/* Cycles Component */
+.cycles-root {
+    -fx-background-color: linear-gradient(to bottom right, -fx-primary-bg, -fx-secondary-bg);
+}
+
+.cycles-hbox {
+    -fx-background-color: -fx-surface-bg;
+    -fx-effect: dropshadow(gaussian, -fx-shadow-medium, 10, 0.1, 0, 4);
+}
+
+.cycles-label {
+    -fx-text-fill: -fx-text-secondary;
+}
+
+.value-label {
+    -fx-background-color: -fx-secondary-bg;
+    -fx-text-fill: -fx-text-accent;
+    -fx-effect: innershadow(gaussian, -fx-shadow-light, 2, 0, 0, 1);
+}
+
+.cycles-button {
+    -fx-background-color: linear-gradient(to bottom, -fx-text-accent, -fx-blue-secondary);
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, -fx-shadow-medium, 4, 0, 0, 2);
+}
+
+.cycles-button:hover {
+    -fx-background-color: linear-gradient(to bottom, -fx-blue-hover-primary, -fx-blue-hover-secondary);
+}
+
+.cycles-button:pressed {
+    -fx-background-color: -fx-blue-pressed;
+}
+
+/* Base container styling for program function */
+.buttons-HBox {
+    -fx-background-color: linear-gradient(to bottom right, -fx-primary-bg, -fx-secondary-bg);
+    -fx-effect: dropshadow(gaussian, -fx-shadow-dark, 7, 0, 0, 2);
+}
+
+/* Shared pill button styles */
+.pill-button {
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, -fx-shadow-medium, 3, 0, 0, 1);
+}
+
+/* Green pill buttons (Collapse/Expand) */
+.pill-green {
+    -fx-background-color: linear-gradient(to bottom, -fx-green-primary, -fx-green-secondary);
+    -fx-text-fill: white;
+}
+
+.pill-green:hover {
+    -fx-background-color: linear-gradient(to bottom, -fx-green-hover-primary, -fx-green-hover-secondary);
+    -fx-effect: dropshadow(gaussian, -fx-shadow-dark, 4, 0, 0, 2);
+}
+
+.pill-green:pressed {
+    -fx-background-color: -fx-green-pressed;
+}
+
+.pill-green:selected {
+    -fx-background-color: -fx-green-pressed;
+    -fx-border-color: white;
+}
+
+.pill-green:disabled {
+    -fx-background-color: linear-gradient(to bottom, -fx-green-disabled, #495057);
+    -fx-opacity: 0.5;
+    -fx-effect: none;
+}
+
+/* Blue pill buttons */
+.pill-blue {
+    -fx-background-color: linear-gradient(to bottom, -fx-blue-primary, -fx-blue-secondary);
+    -fx-text-fill: white;
+}
+
+.pill-blue:hover {
+    -fx-background-color: linear-gradient(to bottom, -fx-blue-hover-primary, -fx-blue-hover-secondary);
+    -fx-effect: dropshadow(gaussian, rgba(33, 150, 243, 0.25), 4, 0, 0, 2);
+}
+
+.pill-blue:pressed {
+    -fx-background-color: -fx-blue-pressed;
+}
+
+.pill-blue:selected {
+    -fx-background-color: -fx-blue-pressed;
+    -fx-border-color: white;
+}
+
+.pill-blue:disabled {
+    -fx-background-color: linear-gradient(to bottom, -fx-blue-disabled, -fx-grey-primary);
+    -fx-opacity: 0.5;
+    -fx-effect: none;
+}
+
+/* Grey pill buttons */
+.pill-grey {
+    -fx-background-color: linear-gradient(to bottom, -fx-grey-primary, -fx-grey-secondary);
+    -fx-text-fill: white;
+}
+
+.pill-grey:hover {
+    -fx-background-color: linear-gradient(to bottom, -fx-grey-hover-primary, -fx-grey-hover-secondary);
+    -fx-effect: dropshadow(gaussian, rgba(92, 92, 92, 0.3), 4, 0, 0, 2);
+}
+
+.pill-grey:pressed {
+    -fx-background-color: -fx-grey-pressed;
+}
+
+.pill-grey:selected {
+    -fx-background-color: -fx-grey-pressed;
+    -fx-border-color: white;
+}
+
+.pill-grey:disabled {
+    -fx-background-color: linear-gradient(to bottom, -fx-grey-disabled, #545b62);
+    -fx-opacity: 0.5;
+    -fx-effect: none;
+}
+
+/* Vibrant green for "Start new run" button */
+.pill-vibrant-green {
+    -fx-background-color: linear-gradient(to bottom, -fx-vibrant-green-primary, -fx-vibrant-green-secondary);
+    -fx-text-fill: -fx-vibrant-green-text;
+}
+
+.pill-vibrant-green:hover {
+    -fx-background-color: linear-gradient(to bottom, -fx-vibrant-green-hover-primary, -fx-vibrant-green-hover-secondary);
+    -fx-effect: dropshadow(gaussian, rgba(67, 234, 122, 0.25), 4, 0, 0, 2);
+}
+
+.pill-vibrant-green:pressed {
+    -fx-background-color: -fx-vibrant-green-pressed;
+}
+
+.pill-vibrant-green:selected {
+    -fx-background-color: -fx-vibrant-green-pressed;
+    -fx-border-color: white;
+}
+
+.pill-vibrant-green:disabled {
+    -fx-background-color: linear-gradient(to bottom, #495057, #343a40);
+    -fx-opacity: 0.5;
+    -fx-effect: none;
+}
+
+/* Label styling - distinct from buttons */
+.info-label {
+    -fx-text-fill: white;
+}
+
+.staus-label {
+    -fx-text-fill: white;
+}
+
+.pf-degree {
+    -fx-effect: dropshadow(gaussian, -fx-shadow-light, 2, 0, 0, 1);
+    -fx-background-color: linear-gradient(to bottom, -fx-grey-primary, -fx-grey-secondary);
+}
+
+/* HighSelectionButton text color */
+.menu-button > .label {
+    -fx-text-fill: white;
+}
+
+/* Program/function selector row */
+.root .program-function,
+.root .function-bar {
+    -fx-background-color: transparent;
+}
+
+.root .program-function .button,
+.root .function-bar .button {
+    -fx-background-color: linear-gradient(to bottom, -fx-grey-primary, -fx-grey-secondary);
+    -fx-text-fill: white;
+}
+
+.root .program-function .button:hover,
+.root .function-bar .button:hover {
+    -fx-background-color: linear-gradient(to bottom, -fx-grey-hover-primary, -fx-grey-hover-secondary);
+}
+
+.pane-mode {
+    -fx-text-fill: white;
+}
+
+/* Debug button specific styles */
+.debug-pill-button, .debug-stop, .debug-resume, .debug-stepOver, .debug-stepBackward {
+    -fx-background-color: -fx-debug-bg !important;
+    -fx-effect: dropshadow(gaussian, -fx-shadow-medium, 3, 0, 0, 1);
+}
+
+.debug-stop:disabled, .debug-resume:disabled, .debug-stepOver:disabled, .debug-stepBackward:disabled {
+    -fx-background-color: -fx-debug-bg !important;
+    -fx-opacity: 0.5;
+    -fx-effect: none;
+}
+
+.debug-stop {
+    -fx-text-fill: -fx-debug-stop-color;
+}
+
+.debug-stop:hover {
+    /*-fx-background-color: -fx-debug-hover-bg !important;*/
+    -fx-effect: dropshadow(gaussian, #ff6b6b88, 6, 0, 0, 2);
+}
+
+.debug-resume {
+    -fx-text-fill: -fx-debug-resume-color;
+}
+
+.debug-resume:hover {
+    /*-fx-background-color: -fx-debug-hover-bg !important;*/
+    -fx-text-fill: -fx-debug-resume-bright;
+    -fx-effect: dropshadow(gaussian, #51cf6688, 6, 0, 0, 2);
+}
+
+.debug-stepOver, .debug-stepBackward {
+    -fx-text-fill: -fx-debug-step-color;
+}
+
+.debug-stepOver:hover, .debug-stepBackward:hover {
+    /*-fx-background-color: -fx-debug-hover-bg !important;*/
+    -fx-effect: dropshadow(gaussian, #1e888388, 6, 0, 0, 2);
+}
+
+/* Green-black button variants */
+.button-green-black {
+    -fx-background-color: -fx-debug-bg !important;
+    -fx-text-fill: -fx-debug-resume-color;
+}
+
+.button-green-black:hover {
+    -fx-background-color: -fx-debug-hover-bg;
+    -fx-text-fill: -fx-debug-resume-bright;
+    -fx-effect: dropshadow(gaussian, #51cf6688, 6, 0, 0, 2);
+}
+
+.button-green-black:pressed,
+.button-green-black:selected {
+    -fx-background-color: #212529;
+    -fx-text-fill: -fx-debug-resume-color;
+    -fx-border-color: -fx-debug-resume-color;
+}
+
+.button-green-black:disabled {
+    -fx-background-color: #495057;
+    -fx-text-fill: #51cf66;
+    -fx-opacity: 0.5;
+    -fx-effect: none;
+}
+
+.button-black-green {
+    -fx-background-color: -fx-debug-resume-color !important;
+    -fx-text-fill: -fx-debug-bg;
+}
+
+.button-black-green:hover {
+    -fx-background-color: -fx-debug-resume-bright;
+    -fx-text-fill: -fx-debug-bg;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 8, 0.8, 0, 2);
+}
+
+.button-black-green:pressed,
+.button-black-green:selected {
+    -fx-background-color: #20c997;
+    -fx-text-fill: -fx-debug-bg;
+    -fx-border-color: -fx-debug-bg;
+}
+
+.button-black-green:disabled {
+    -fx-background-color: #51cf66;
+    -fx-text-fill: #212529;
+    -fx-opacity: 0.5;
+    -fx-effect: none;
+}
+
+/* Text color utilities */
+.green-text {
+    -fx-text-fill: -fx-debug-resume-color;
+}
+
+.black-text {
+    -fx-text-fill: -fx-debug-bg;
+}
+
+/* Pill label styling */
+.pill-label {
+    -fx-text-fill: -fx-text-primary;
+    -fx-effect: dropshadow(gaussian, -fx-shadow-medium, 1, 0, 0, 1);
+}
+
+/* Table Components - Instructions, Variables, Statistics */
+.table-view {
+    -fx-border-color: -fx-secondary-bg;
+    -fx-effect: dropshadow(gaussian, -fx-shadow-medium, 10, 0, 0, 5);
+    -fx-table-cell-border-color: rgba(52, 58, 64, 0.5);
+}
+
+.table-view .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, -fx-green-primary, -fx-green-secondary);
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-border-color: transparent rgba(52, 58, 64, 0.5) transparent rgba(52, 58, 64, 0.5);
+    -fx-text-fill: white;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: white;
+}
+
+.table-view .table-cell {
+    -fx-text-fill: -fx-text-primary;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: -fx-primary-bg;
+}
+
+.table-row-cell:even {
+    -fx-background-color: -fx-secondary-bg;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: -fx-green-disabled;
+    -fx-text-background-color: -fx-text-primary;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: -fx-green-hover-primary;
+    -fx-text-background-color: white;
+}
+
+.table-row-cell.highlighted-row,
+.table-row-cell.changed-variable {
+    -fx-background-color: rgba(37, 165, 160, 0.15);
+    -fx-border-color: rgba(37, 165, 160, 0.4);
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.table-row-cell.highlighted-row:hover,
+.table-row-cell.changed-variable:hover {
+    -fx-background-color: rgba(37, 165, 160, 0.25);
+    -fx-border-color: rgba(37, 165, 160, 0.6);
+}
+
+.table-row-cell.highlighted-row:selected,
+.table-row-cell.changed-variable:selected {
+    -fx-background-color: rgba(37, 165, 160, 0.35);
+    -fx-text-background-color: white;
+}
+
+/* New debug highlighted row styles */
+.table-row-cell.highlighted-row-debug {
+    -fx-background-color: rgba(103, 58, 183, 0.15); /* Purple */
+    -fx-border-color: rgba(103, 58, 183, 0.4);
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.table-row-cell.highlighted-row-debug:hover {
+    -fx-background-color: rgba(103, 58, 183, 0.25);
+    -fx-border-color: rgba(103, 58, 183, 0.6);
+}
+
+.table-row-cell.highlighted-row-debug:selected {
+    -fx-background-color: rgba(103, 58, 183, 0.35);
+    -fx-text-background-color: white;
+}
+
+/* File Handler Component */
+.hbox {
+    -fx-background-color: -fx-primary-bg;
+}
+
+/*.button {*/
+/*    -fx-background-color: linear-gradient(to bottom, -fx-blue-primary, -fx-blue-secondary);*/
+/*    -fx-text-fill: white;*/
+/*    -fx-effect: dropshadow(gaussian, -fx-blue-pressed, 4, 0.2, 0, 2);*/
+/*}*/
+
+/*.button:hover {*/
+/*    -fx-background-color: linear-gradient(to bottom, -fx-blue-hover-primary, -fx-blue-hover-secondary);*/
+/*}*/
+
+.blue-teal-button {
+    -fx-background-color: linear-gradient(to bottom, -fx-green-secondary, -fx-green-primary);
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, -fx-green-pressed, 3, 0.2, 0, 1);
+}
+
+.blue-teal-button:hover {
+    -fx-background-color: linear-gradient(to bottom, -fx-green-hover-secondary, -fx-green-hover-primary);
+}
+
+.text-field {
+    -fx-background-color: -fx-surface-bg;
+    -fx-text-fill: -fx-text-primary;
+    -fx-border-color: -fx-grey-primary;
+}
+
+.text-field-wide {
+    -fx-background-color: -fx-surface-bg;
+    -fx-text-fill: -fx-text-primary;
+    -fx-border-color: -fx-grey-primary;
+}
+
+.clear-button {
+    -fx-background-color: linear-gradient(to bottom, -fx-grey-primary, -fx-grey-secondary);
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, -fx-grey-pressed, 2, 0.1, 0, 1);
+}
+
+.clear-button:hover {
+    -fx-background-color: linear-gradient(to bottom, -fx-grey-hover-primary, -fx-grey-hover-secondary);
+}
+
+.clear-button:pressed {
+    -fx-background-color: -fx-grey-pressed;
+}
+
+.file-path-label {
+    -fx-background-color: -fx-surface-bg;
+    -fx-text-fill: -fx-text-primary;
+    -fx-border-color: -fx-grey-primary;
+}
+
+/* File name and path display labels */
+/*.label {*/
+/*    -fx-text-fill: -fx-text-primary;*/
+/*}*/
+
+/* Summary Line Component */
+.summary-line {
+    -fx-background-color: -fx-surface-bg;
+    -fx-effect: dropshadow(gaussian, -fx-shadow-medium, 10, 0.1, 0, 4);
+}
+
+.summary-label {
+    -fx-text-fill: -fx-text-secondary;
+}
+
+.count-label {
+    -fx-text-fill: -fx-text-accent;
+}
+
+.value-label {
+    -fx-background-color: -fx-secondary-bg;
+    -fx-text-fill: -fx-text-accent;
+    -fx-effect: innershadow(gaussian, -fx-shadow-light, 2, 0, 0, 1);
+}
+
+/* App Layout - Main Components Theme Styles */
+.app-main-border {
+    -fx-background-color: -fx-primary-bg;
+}
+
+/* TitledPane Styling */
+.titled-pane {
+    -fx-background-color: -fx-surface-bg;
+    -fx-border-color: -fx-secondary-bg;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.titled-pane > .title {
+    -fx-background-color: linear-gradient(to bottom, -fx-green-primary, -fx-green-secondary);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px 8px 0 0;
+    -fx-border-radius: 8px 8px 0 0;
+}
+
+.titled-pane > .title > .text {
+    -fx-fill: white;
+    -fx-text-fill: white;
+}
+
+.titled-pane > .title > .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.titled-pane > .title > .arrow-button > .arrow {
+    -fx-background-color: white;
+}
+
+.titled-pane > .content {
+    -fx-background-color: -fx-surface-bg;
+    -fx-border-color: -fx-secondary-bg;
+    -fx-background-radius: 0 0 8px 8px;
+    -fx-border-radius: 0 0 8px 8px;
+}
+
+/* ScrollPane Styling */
+.scroll-pane {
+    -fx-background-color: -fx-primary-bg;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: -fx-primary-bg;
+}
+
+.scroll-pane > .corner {
+    -fx-background-color: -fx-secondary-bg;
+}
+
+/* ScrollBar Styling */
+.scroll-bar {
+    -fx-background-color: -fx-secondary-bg;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: -fx-grey-primary;
+    -fx-background-radius: 4px;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: -fx-grey-hover-primary;
+}
+
+.scroll-bar .thumb:pressed {
+    -fx-background-color: -fx-grey-pressed;
+}
+
+.scroll-bar .increment-button, .scroll-bar .decrement-button {
+    -fx-background-color: -fx-secondary-bg;
+}
+
+.scroll-bar .increment-button:hover, .scroll-bar .decrement-button:hover {
+    -fx-background-color: -fx-grey-disabled;
+}
+
+/* SplitPane Styling */
+.split-pane {
+    -fx-background-color: -fx-primary-bg;
+}
+
+.split-pane-divider {
+    -fx-background-color: -fx-grey-primary;
+    -fx-border-color: -fx-secondary-bg;
+}
+
+/* VBox and HBox containers */
+.vbox, .hbox {
+    -fx-background-color: transparent;
+}
+
+/* GridPane styling */
+.grid-pane {
+    -fx-background-color: transparent;
+}
+
+/* Toggle Button Styling - Green on Black theme */
+.toggle-button {
+    -fx-background-color: -fx-debug-bg;
+    -fx-text-fill: -fx-debug-resume-color;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-padding: 6px 16px;
+    -fx-cursor: hand;
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", "Arial", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 3, 0.2, 0, 1);
+}
+
+.toggle-button:hover {
+    -fx-background-color: -fx-debug-hover-bg;
+    -fx-text-fill: -fx-debug-resume-bright;
+    -fx-effect: dropshadow(gaussian, #00f80088, 6, 0.4, 0, 2);
+}
+
+.toggle-button:pressed {
+    -fx-background-color: #222;
+    -fx-text-fill: -fx-debug-resume-color;
+}
+
+.toggle-button:selected {
+    -fx-background-color: #222;
+    -fx-text-fill: -fx-debug-resume-color;
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.3), 3, 0, 0, 2);
+    -fx-border-width: 2;
+    -fx-border-color: -fx-debug-resume-color;
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+}
+
+.toggle-button:selected:hover {
+    -fx-background-color: -fx-debug-hover-bg;
+    -fx-text-fill: -fx-debug-resume-bright;
+    -fx-effect: dropshadow(gaussian, #00f80088, 6, 0.4, 0, 2);
+}

@@ -1,0 +1,21 @@
+/* Base container */
+
+/* Debugger Component - Layout and Structure Only */
+/* Theme-dependent styles are now in global light.css and dark.css */
+
+/* Debugger pill-style buttons, matching RunControls look */
+.pill-button {
+    -fx-background-radius: 20px;
+    -fx-font-family: "Segoe UI Emoji", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+}
+
+/* Button text style */
+.button-text {
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}

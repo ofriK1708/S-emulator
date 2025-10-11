@@ -17,6 +17,8 @@
                     <padding>
                         <Insets bottom="8" left="12" right="12" top="8"/>
                     </padding>
+                    <fx:include fx:id="executionHeader"
+                                source="execution/header/ExecutionHeader.fxml"/>
                     <fx:include fx:id="fileHandler" source="fileHandler/fileHandler.fxml"/>
                     <fx:include fx:id="programFunction" source="program/function/programFunction.fxml"/>
                 </VBox>
@@ -65,6 +67,14 @@
                                                     <VBox alignment="CENTER" minWidth="-Infinity" spacing="8.0">
                                                         <fx:include fx:id="runControls"
                                                                     source="runControls/runControls.fxml"/>
+                                                        <Button text="← Back to Dashboard"
+                                                                onAction="#handleBackToDashboard"
+                                                                styleClass="back-to-dashboard-button"
+                                                                maxWidth="Infinity">
+                                                            <VBox.margin>
+                                                                <Insets top="10"/>
+                                                            </VBox.margin>
+                                                        </Button>
                                                     </VBox>
                                                 </content>
                                             </TitledPane>

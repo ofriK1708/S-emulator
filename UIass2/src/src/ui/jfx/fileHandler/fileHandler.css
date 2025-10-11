@@ -1,0 +1,65 @@
+/* File Handler Component - Layout and Structure Only */
+/* Theme-dependent styles are now in global light.css and dark.css */
+
+.hbox {
+    -fx-padding: 20px;
+    -fx-spacing: 10px;
+}
+
+.button {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 20px;
+    -fx-cursor: hand;
+    -fx-border-width: 0;
+}
+
+.blue-teal-button {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-padding: 6px 12px;
+}
+
+.text-field {
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 13px;
+    -fx-border-width: 1px;
+}
+
+.text-field-wide {
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 13px;
+    -fx-border-width: 1px;
+    -fx-min-width: 250px;
+}
+
+.text-field:disabled {
+    -fx-opacity: 0.7;
+}
+
+.clear-button {
+    -fx-font-size: 12px;
+    -fx-font-weight: normal;
+    -fx-background-radius: 6px;
+    -fx-padding: 4px 10px;
+    -fx-min-width: 60px;
+    -fx-max-height: 28px;
+}
+
+.text-field-container {
+    -fx-background-color: transparent;
+    -fx-padding: 0px;
+}
+
+.file-path-label {
+    -fx-padding: 6px 12px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+}

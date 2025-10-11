@@ -1,0 +1,30 @@
+.summary-line {
+    -fx-background-color: white;
+    -fx-background-radius: 10px;
+    -fx-padding: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0.1, 0, 4);
+    -fx-alignment: center-left;
+}
+
+.summary-label {
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-text-fill: #495057;
+    -fx-font-weight: normal;
+}
+
+.count-label {
+    -fx-text-fill: #007bff;
+    -fx-font-weight: bold;
+}
+
+.value-label {
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-background-color: #f1f3f5;
+    -fx-background-radius: 8px;
+    -fx-padding: 5px 15px;
+    -fx-text-fill: #0d6efd;
+    -fx-font-weight: bold;
+    -fx-min-width: 80px;
+    -fx-alignment: center;
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.05), 2, 0, 0, 1);
+}

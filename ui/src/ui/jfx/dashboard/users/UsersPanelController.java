@@ -54,19 +54,12 @@ public class UsersPanelController {
     // Mock data method for future implementation
     @SuppressWarnings("unused")
     private void loadMockData() {
-        usersList.addAll(
-                new UserDTO("Alice", 3, 8, 150, 420, 89),
-                new UserDTO("Bob", 2, 5, 200, 310, 67),
-                new UserDTO("Charlie", 1, 12, 75, 580, 134)
-        );
     }
 
     @FXML
     private void handleSelectUser() {
         UserDTO selected = usersTableView.getSelectionModel().getSelectedItem();
         if (selected != null && selectUserCallback != null) {
-            selectUserCallback.accept(selected.getUsername());
-            System.out.println("User selected: " + selected.getUsername());
         }
     }
 
@@ -80,5 +73,8 @@ public class UsersPanelController {
 
     public void clearUsers() {
         usersList.clear();
+    }
+
+    public void clearSelection() {
     }
 }

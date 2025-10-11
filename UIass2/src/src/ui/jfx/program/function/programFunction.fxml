@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Program\function header bar exactly as in the mock -->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.controlsfx.control.ToggleSwitch?>
+<?import java.lang.*?>
+<HBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" alignment="CENTER_LEFT" spacing="8" styleClass="buttons-HBox"
+      stylesheets="@ProgramFunction.css" xmlns="http://javafx.com/javafx/24.0.1"
+      fx:controller="ui.jfx.program.function.ProgramFunctionController">
+
+    <padding>
+        <Insets bottom="6" left="8" right="8" top="6" />
+    </padding>
+
+    <MenuButton fx:id="programFunctionSelect" layoutX="18.0" layoutY="20.0" maxHeight="28" minWidth="-Infinity"
+                mnemonicParsing="false" text="Program\function selector">
+        <styleClass>
+            <String fx:value="pill-button"/>
+            <String fx:value="pill-green"/>
+        </styleClass>
+    </MenuButton>
+
+    <!-- Small green pill: Collapse (decrements level by 1) -->
+    <Button fx:id="collapseButton" maxHeight="28" minWidth="-Infinity" mnemonicParsing="false"
+            onAction="#handleCollapse" styleClass="pill-button, pill-green, pf-collapse" text="Collapse"/>
+
+    <!-- Small gray info pill: Current / Maximum degree -->
+    <Label fx:id="degreeInfoLabel" alignment="CENTER" maxHeight="50" minWidth="-Infinity"
+           styleClass="info-label, pf-degree" text="Current /&#10;Maximum degree"/>
+
+    <!-- Small green pill: Expand (increments level by 1) -->
+    <Button fx:id="expandButton" maxHeight="28" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleExpand"
+            styleClass="pill-button, pill-green" text="Expand"/>
+
+    <!-- New Change button: Opens dialog for manual level entry -->
+    <Button fx:id="chooseLevelButton" maxHeight="28" minWidth="-Infinity" mnemonicParsing="false"
+            onAction="#handleChooseExpandLevel" styleClass="pill-button, pill-green, pf-change"
+            text="Choose expand Level"/>
+
+    <!-- UPDATED: Changed from Button to MenuButton for variable selection dropdown -->
+    <MenuButton fx:id="highlightSelectionButton" maxHeight="28" minWidth="130" mnemonicParsing="false"
+                text="Highlight Variable / Label">
+        <styleClass>
+            <String fx:value="pill-button"/>
+            <String fx:value="pill-green"/>
+        </styleClass>
+    </MenuButton>
+    <MenuButton mnemonicParsing="false" text="Choose Theme">
+        <items>
+            <RadioMenuItem mnemonicParsing="false" selected="true" text="Light (default)">
+                <toggleGroup>
+                    <ToggleGroup fx:id="themes"/>
+                </toggleGroup>
+            </RadioMenuItem>
+            <RadioMenuItem mnemonicParsing="false" text="Dark" toggleGroup="$themes"/>
+            <RadioMenuItem mnemonicParsing="false" text="Mac is the best (for Aviad ;) )" toggleGroup="$themes"/>
+            <RadioMenuItem mnemonicParsing="false" text="Windows is the worst (for Aviad ;) )" toggleGroup="$themes"/>
+        </items>
+        <styleClass>
+            <String fx:value="pill-button"/>
+            <String fx:value="pill-green"/>
+        </styleClass>
+    </MenuButton>
+    <VBox alignment="CENTER" spacing="5.0">
+        <children>
+            <HBox alignment="CENTER">
+                <children>
+                    <Label styleClass="info-label" text="Expand / Collapse Mode"/>
+                </children>
+            </HBox>
+            <HBox alignment="CENTER" spacing="10.0" styleClass="radio-choice-box">
+                <children>
+                    <RadioButton fx:id="autoPaneMode" mnemonicParsing="false" onAction="#handleAutoModeSelected"
+                                 styleClass="info-label" text="Auto">
+                        <toggleGroup>
+                            <ToggleGroup fx:id="paneMode"/>
+                        </toggleGroup>
+                    </RadioButton>
+                    <RadioButton fx:id="manualPaneMode" mnemonicParsing="false" onAction="#handleManualModeSelected"
+                                 selected="true" styleClass="info-label" text="Manual" toggleGroup="$paneMode"/>
+                </children>
+            </HBox>
+        </children>
+        <styleClass>
+            <String fx:value="pill-green"/>
+            <String fx:value="pill-button"/>
+        </styleClass>
+    </VBox>
+    <VBox alignment="CENTER" spacing="5.0">
+        <children>
+            <HBox alignment="CENTER" styleClass="radio-choice-box">
+                <children>
+                    <Label styleClass="info-label" text="Animations"/>
+                    <ToggleSwitch fx:id="animationToggle" selected="true"/>
+                </children>
+            </HBox>
+        </children>
+        <styleClass>
+            <String fx:value="pill-button"/>
+            <String fx:value="pill-green"/>
+        </styleClass>
+    </VBox>
+
+</HBox>
