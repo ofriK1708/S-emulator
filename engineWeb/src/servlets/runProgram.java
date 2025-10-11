@@ -28,6 +28,11 @@ public class runProgram extends HttpServlet {
         String programName = runAndExpandParams.programName();
         int expandLevel = runAndExpandParams.expandLevel();
         ProgramEngine currentEngine = runAndExpandParams.pm().getProgramOrFunctionEngine(programName);
+        if (expandLevel < 0 || expandLevel > currentEngine.getMaxExpandLevel()) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write("Error! expand level must be between 0 to " + currentEngine.getMaxExpandLevel());
+            return;
+        }
         Type type = new TypeToken<Map<String, Integer>>() {
         }.getType();
         Map<String, Integer> args = gson.fromJson(req.getReader(), type);

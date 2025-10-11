@@ -5,8 +5,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import logic.manager.ProgramManager;
 
+import static utils.ServletConstants.*;
+
 public class ServletUtils {
-    private final static String PROGRAM_MANAGER_ATTRIBUTE_NAME = "programManager";
     private static final Object programManagerLock = new Object();
 
     public static ProgramManager getProgramManager(ServletContext servletContext) {
@@ -20,10 +21,10 @@ public class ServletUtils {
 
     public static runAndExpandParams validateAndGetParams(HttpServletRequest req, HttpServletResponse resp)
             throws Exception {
-        String programName = req.getParameter("programName");
+        String programName = req.getParameter(PROGRAM_NAME_PARAM);
         int expandLevel;
         try {
-            expandLevel = Integer.parseInt(req.getParameter("expandLevel"));
+            expandLevel = Integer.parseInt(req.getParameter(EXPAND_LEVEL_PARAM));
         } catch (NumberFormatException e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "expandLevel parameter is missing or not a number");
             throw e;

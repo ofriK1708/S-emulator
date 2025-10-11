@@ -10,23 +10,25 @@ import utils.ServletUtils;
 
 import java.io.IOException;
 
+import static utils.ServletConstants.*;
+
 @WebServlet(name = "SystemInfo", urlPatterns = "/SystemInfo")
 public class getSystemInfo extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String itemToGet = req.getParameter("item");
+        String infoToGet = req.getParameter(INFO_PARAM);
         resp.setContentType("text/html;charset=utf-8");
         ProgramManager pm = ServletUtils.getProgramManager(getServletContext());
-        switch (itemToGet) {
-            case "programsNames":
+        switch (infoToGet) {
+            case PROGRAMS_NAMES_INFO:
                 resp.getWriter().println(pm.getProgramNames());
                 resp.setStatus(HttpServletResponse.SC_OK);
                 break;
-            case "functionsNames":
+            case FUNCTIONS_NAMES_INFO:
                 resp.getWriter().println(pm.getFunctionNames());
                 resp.setStatus(HttpServletResponse.SC_OK);
                 break;
-            case "allNames":
+            case ALL_NAMES_INFO:
                 resp.getWriter().println("Programs: " + pm.getProgramNames() + "\nFunctions: " +
                         pm.getFunctionNames());
                 resp.setStatus(HttpServletResponse.SC_OK);

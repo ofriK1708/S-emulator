@@ -29,8 +29,13 @@ public class expandProgram extends HttpServlet {
         String programName = runAndExpandParams.programName();
         int expandLevel = runAndExpandParams.expandLevel();
         ProgramManager pm = runAndExpandParams.pm();
-
         ProgramEngine currentEngine = pm.getProgramOrFunctionEngine(programName);
+        if (expandLevel < 0 || expandLevel > currentEngine.getMaxExpandLevel()) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write("Error! expand level must be between 0 to " + currentEngine.getMaxExpandLevel());
+            return;
+        }
+
         ProgramDTO programDTO = currentEngine.toDTO(expandLevel);
         String json = gson.toJson(programDTO);
         resp.getWriter().write(json);
