@@ -41,7 +41,7 @@ public class uploadProgram extends HttpServlet {
                     // Validate program by trying to create an engine - check for label not exists, etc.
                     try {
                         ProgramEngine engine = new ProgramEngine(program);
-                        engine.finishInitProgram(programManager.getFunctions());
+                        engine.finishInitProgram(programManager.getFunctionsAndPrograms());
                         programManager.addProgram(programName, engine);
                         resp.setStatus(HttpServletResponse.SC_OK);
                         resp.getWriter().println("Program " + programName + " uploaded successfully");

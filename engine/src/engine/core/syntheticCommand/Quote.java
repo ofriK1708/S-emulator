@@ -65,7 +65,7 @@ public class Quote extends Instruction {
     public void initAndValidateQuote() throws FunctionNotFound {
         String funcName = args.get(functionNameArgumentName);
         allArgsString = args.get(functionArgumentsArgumentName) == null ? "" : args.get(functionArgumentsArgumentName);
-        Map<String, ProgramEngine> functions = mainFunction.getAllFunctionsInMain();
+        Map<String, ProgramEngine> functions = mainFunction.getFunctionsAndProgramsInSystem();
         if (functions == null) {
             mainFunction.addToUninitializedQuotes(this);
             return;

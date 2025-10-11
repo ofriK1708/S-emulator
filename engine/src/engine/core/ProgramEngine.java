@@ -33,10 +33,11 @@ public class ProgramEngine implements Serializable {
     private @NotNull List<Instruction> originalInstructions;
     private final List<Set<String>> labelsByExpandLevel = new ArrayList<>();
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
-    private Map<String, ProgramEngine> allFunctionsInMain;
+    private @Nullable Map<String, ProgramEngine> functionsAndProgramsInSystem;
+    private @Nullable Map<String, ProgramEngine> functionsInSystem = null;
     private @NotNull Set<String> originalLabels;
     private @Nullable SFunction originalSFunction = null;
-    private String funcName;
+    private @Nullable String funcName;
     private final Map<Integer, BreakpointDTO> breakpoints = new HashMap<>(); // line -> breakpoint
     private @Nullable Integer lastBreakpointHit = null; // Track which breakpoint was just hit
 
@@ -57,9 +58,9 @@ public class ProgramEngine implements Serializable {
 
         if (program.getSFunctions() != null) {
 
-            allFunctionsInMain = buildFunctions(program);
+            functionsAndProgramsInSystem = buildFunctions(program);
 
-            allFunctionsInMain.values().forEach(func -> func.setFunctions(allFunctionsInMain));
+            functionsAndProgramsInSystem.values().forEach(func -> func.setFunctions(functionsAndProgramsInSystem));
 
         }
 
@@ -75,10 +76,11 @@ public class ProgramEngine implements Serializable {
 
     public void finishInitProgram(@NotNull Map<String, ProgramEngine> allFunctionsInSystem)
             throws FunctionNotFound, FunctionAlreadyExist {
-        for (ProgramEngine function : allFunctionsInMain.values()) {
-            function.addSystemFunctionsAndFinishQuoteInit(allFunctionsInSystem);
-        }
         this.addSystemFunctionsAndFinishQuoteInit(allFunctionsInSystem);
+        assert functionsAndProgramsInSystem != null;
+        for (Map.Entry<String, ProgramEngine> function : functionsAndProgramsInSystem.entrySet()) {
+            function.getValue().addSystemFunctionsAndFinishQuoteInit(allFunctionsInSystem);
+        }
     }
 
     private void addSystemFunctionsAndFinishQuoteInit(@NotNull Map<String, ProgramEngine> allFunctionsInSystem)
@@ -92,17 +94,23 @@ public class ProgramEngine implements Serializable {
 
     public void addSystemFunctions(@NotNull Map<String, ProgramEngine> allFunctionsInSystem)
             throws FunctionAlreadyExist {
-        if (allFunctionsInMain == null) {
-            allFunctionsInMain = new HashMap<>();
+        if (functionsAndProgramsInSystem == null) {
+            functionsAndProgramsInSystem = new HashMap<>();
+        }
+        if (functionsInSystem == null) {
+            functionsInSystem = new HashMap<>(allFunctionsInSystem);
         }
         for (Map.Entry<String, ProgramEngine> func : allFunctionsInSystem.entrySet()) {
-            if (allFunctionsInMain.containsKey(func.getKey())) {
+            // Prevent having functions with the same name as the main program and vice versa
+            if (functionsAndProgramsInSystem.containsKey(func.getKey()) || func.getKey().equals(programName)) {
                 throw new FunctionAlreadyExist(this.programName, func.getKey());
             }
-            allFunctionsInMain.put(func.getKey(), func.getValue());
+            functionsAndProgramsInSystem.put(func.getKey(), func.getValue());
+            if (func.getValue().isFunction()) {
+                functionsInSystem.put(func.getKey(), func.getValue());
+            }
         }
     }
-
 
     public ProgramEngine(@NotNull SFunction function) throws LabelNotExist, FunctionNotFound {
         this.programName = function.getName();
@@ -147,8 +155,8 @@ public class ProgramEngine implements Serializable {
         return programName;
     }
 
-    public Map<String, ProgramEngine> getAllFunctionsInMain() {
-        return allFunctionsInMain;
+    public @Nullable Map<String, ProgramEngine> getFunctionsAndProgramsInSystem() {
+        return functionsAndProgramsInSystem;
     }
 
     public void addToUninitializedQuotes(Quote quote) {
@@ -161,7 +169,7 @@ public class ProgramEngine implements Serializable {
 
 
     private void setFunctions(@NotNull Map<String, ProgramEngine> allFunctionsInMain) {
-        this.allFunctionsInMain = allFunctionsInMain.entrySet().stream()
+        this.functionsAndProgramsInSystem = allFunctionsInMain.entrySet().stream()
                 .filter(entry -> !entry.getKey().equals(programName))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
@@ -283,6 +291,10 @@ public class ProgramEngine implements Serializable {
 
     public void run(@NotNull Map<String, Integer> arguments, boolean saveToStats) {
         run(0, arguments, saveToStats);
+    }
+
+    public void run(@NotNull Map<String, Integer> arguments, int expandLevel) {
+        run(expandLevel, arguments, true);
     }
 
     private void clearPreviousRunData(int expandLevel) {
@@ -416,7 +428,7 @@ public class ProgramEngine implements Serializable {
         return ProgramUtils.extractSortedWorkVars(contextMapsByExpandLevel.get(expandLevel));
     }
 
-    public String getFuncName() {
+    public @Nullable String getFuncName() {
         return funcName;
     }
 
@@ -619,11 +631,15 @@ public class ProgramEngine implements Serializable {
         }
     }
 
+    public boolean isFunction() {
+        return funcName != null;
+    }
+
     public @NotNull Map<String, String> getAllFunctionNamesAndStrName() {
-        if (allFunctionsInMain == null) {
+        if (functionsAndProgramsInSystem == null) {
             return Collections.emptyMap();
         }
-        return allFunctionsInMain.entrySet().stream().collect(Collectors.toMap(
+        return functionsAndProgramsInSystem.entrySet().stream().collect(Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> entry.getValue().getFuncName()
         ));
@@ -633,10 +649,10 @@ public class ProgramEngine implements Serializable {
         if (name.equals(programName)) {
             return this;
         }
-        if (allFunctionsInMain == null || !allFunctionsInMain.containsKey(name)) {
+        if (functionsAndProgramsInSystem == null || !functionsAndProgramsInSystem.containsKey(name)) {
             throw new IllegalArgumentException("Function " + name + " does not exist in program " + programName);
         }
-        return allFunctionsInMain.get(name);
+        return functionsAndProgramsInSystem.get(name);
     }
 
     public int getLastDebugCycles() {
