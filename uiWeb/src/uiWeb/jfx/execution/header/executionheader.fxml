@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<HBox xmlns:fx="http://javafx.com/fxml"
+      xmlns="http://javafx.com/javafx"
+      fx:controller="uiWeb.jfx.execution.header.ExecutionHeaderController"
+      alignment="CENTER_LEFT"
+      spacing="15"
+      styleClass="execution-header"
+      stylesheets="@executionheader.css"
+      minHeight="60"
+      prefHeight="60">
+
+    <padding>
+        <Insets top="10" right="15" bottom="10" left="15"/>
+    </padding>
+
+    <!-- Back to Dashboard Button (LEFT) -->
+    <Button fx:id="backToDashboardButton"
+            text="← Back to Dashboard"
+            onAction="#handleBackToDashboard"
+            styleClass="header-button, back-button"/>
+
+    <!-- User Name Label -->
+    <Label fx:id="userNameLabel"
+           text="Guest User"
+           styleClass="header-label, user-label"/>
+
+    <!-- Spacer -->
+    <Region HBox.hgrow="ALWAYS"/>
+
+    <!-- Screen Title (CENTER) -->
+    <Label fx:id="screenTitleLabel"
+           text="S-Emulator - Execution"
+           styleClass="header-title, screen-title"/>
+
+    <!-- Spacer -->
+    <Region HBox.hgrow="ALWAYS"/>
+
+    <!-- Available Credits Label (RIGHT) -->
+    <Label text="Available Credits:"
+           styleClass="header-label, credits-label"/>
+
+    <!-- Credits Display -->
+    <Label fx:id="creditsValueLabel"
+           text="0"
+           styleClass="credits-value"/>
+
+</HBox>

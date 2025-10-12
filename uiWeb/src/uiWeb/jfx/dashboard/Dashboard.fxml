@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            xmlns="http://javafx.com/javafx"
+            fx:controller="uiWeb.jfx.dashboard.DashboardController"
+            styleClass="dashboard-root"
+            stylesheets="@dashboard.css">
+
+    <!-- Header Section: User Name, File Path, Credits -->
+    <top>
+        <fx:include fx:id="headerSection" source="header/DashboardHeader.fxml"/>
+    </top>
+
+    <!-- Main Content Area -->
+    <center>
+        <GridPane hgap="10" vgap="10" styleClass="dashboard-content">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <!-- Column constraints: Left column 25%, Right column 75% -->
+            <columnConstraints>
+                <ColumnConstraints percentWidth="25" minWidth="200"/>
+                <ColumnConstraints percentWidth="75" minWidth="400"/>
+            </columnConstraints>
+
+            <!-- Row constraints: Top row 50%, Bottom row 50% -->
+            <rowConstraints>
+                <RowConstraints percentHeight="50" minHeight="250"/>
+                <RowConstraints percentHeight="50" minHeight="250"/>
+            </rowConstraints>
+
+            <!-- Top-Left: Available Users Panel -->
+            <fx:include fx:id="usersPanel"
+                        source="users/UsersPanel.fxml"
+                        GridPane.columnIndex="0"
+                        GridPane.rowIndex="0"/>
+
+            <!-- Top-Right: Available Programs Panel -->
+            <fx:include fx:id="programsPanel"
+                        source="programs/ProgramsPanel.fxml"
+                        GridPane.columnIndex="1"
+                        GridPane.rowIndex="0"/>
+
+            <!-- Bottom-Left: Users History/Statistics Panel -->
+            <fx:include fx:id="historyPanel"
+                        source="history/HistoryPanel.fxml"
+                        GridPane.columnIndex="0"
+                        GridPane.rowIndex="1"/>
+
+            <!-- Bottom-Right: Available Functions Panel -->
+            <fx:include fx:id="functionsPanel"
+                        source="functions/FunctionsPanel.fxml"
+                        GridPane.columnIndex="1"
+                        GridPane.rowIndex="1"/>
+
+        </GridPane>
+    </center>
+
+</BorderPane>
