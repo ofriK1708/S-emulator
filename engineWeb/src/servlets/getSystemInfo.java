@@ -15,6 +15,13 @@ import static utils.ServletConstants.*;
 @WebServlet(name = "SystemInfo", urlPatterns = "/SystemInfo")
 public class getSystemInfo extends HttpServlet {
     @Override
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setContentType("text/html;charset=utf-8");
+        resp.getWriter().println(getAllSystemInfoOptionsNames());
+        resp.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String infoToGet = req.getParameter(INFO_PARAM);
         resp.setContentType("text/html;charset=utf-8");

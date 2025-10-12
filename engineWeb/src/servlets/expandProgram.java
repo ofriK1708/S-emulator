@@ -19,16 +19,16 @@ public class expandProgram extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Gson gson = new Gson();
         resp.setContentType("application/json;charset=UTF-8");
-        ServletUtils.runAndExpandParams runAndExpandParams;
+        ServletUtils.expandParams expandParams;
         try {
-            runAndExpandParams = ServletUtils.validateAndGetParams(req, resp);
+            expandParams = ServletUtils.getAndValidateExpandParams(req, resp);
         } catch (Exception ignored) {
             return;
         }
 
-        String programName = runAndExpandParams.programName();
-        int expandLevel = runAndExpandParams.expandLevel();
-        ProgramManager pm = runAndExpandParams.pm();
+        String programName = expandParams.programName();
+        int expandLevel = expandParams.expandLevel();
+        ProgramManager pm = expandParams.pm();
         ProgramEngine currentEngine = pm.getProgramOrFunctionEngine(programName);
         if (expandLevel < 0 || expandLevel > currentEngine.getMaxExpandLevel()) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);

@@ -1,9 +1,16 @@
 package utils;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import logic.manager.ProgramManager;
+import org.jetbrains.annotations.NotNull;
+
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 
 import static utils.ServletConstants.*;
 
@@ -19,7 +26,7 @@ public class ServletUtils {
         return (ProgramManager) servletContext.getAttribute("programManager");
     }
 
-    public static runAndExpandParams validateAndGetParams(HttpServletRequest req, HttpServletResponse resp)
+    public static expandParams getAndValidateExpandParams(HttpServletRequest req, HttpServletResponse resp)
             throws Exception {
         String programName = req.getParameter(PROGRAM_NAME_PARAM);
         int expandLevel;
@@ -35,9 +42,30 @@ public class ServletUtils {
                     "programName parameter is missing or program doesn't exist");
             throw new IllegalArgumentException();
         }
-        return new runAndExpandParams(programName, expandLevel, pm);
+        return new expandParams(programName, expandLevel, pm);
     }
 
-    public record runAndExpandParams(String programName, int expandLevel, ProgramManager pm) {
+    public static runAndDebugParams getAndValidateRunAndDebugParams(HttpServletRequest req, HttpServletResponse resp)
+            throws Exception {
+        Gson gson = new Gson();
+        Type argumentsMapType = new TypeToken<Map<String, Integer>>() {
+        }.getType();
+        expandParams expParams = getAndValidateExpandParams(req, resp);
+        Map<String, Integer> arguments = new HashMap<>();
+        String argumentsJsonStr = req.getParameter(ARGUMENTS);
+
+        // some programs don't require arguments
+        if (argumentsJsonStr != null && argumentsJsonStr.isEmpty()) {
+            arguments = gson.fromJson(argumentsJsonStr, argumentsMapType);
+        }
+
+        return new runAndDebugParams(expParams.programName, expParams.expandLevel, expParams.pm, arguments);
+    }
+
+    public record expandParams(@NotNull String programName, int expandLevel, @NotNull ProgramManager pm) {
+    }
+
+    public record runAndDebugParams(@NotNull String programName, int expandLevel, @NotNull ProgramManager pm,
+                                    @NotNull Map<String, Integer> arguments) {
     }
 }

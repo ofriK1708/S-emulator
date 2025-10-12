@@ -10,30 +10,29 @@ import jakarta.servlet.http.HttpServletResponse;
 import utils.ServletUtils;
 
 import java.io.IOException;
-import java.util.Map;
 
-@WebServlet(name = "runProgram", urlPatterns = "/runProgram")
-public class runProgram extends HttpServlet {
+@WebServlet(name = "startDebugProgram", urlPatterns = "/debugger/start")
+public class startDebugProgram extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Gson gson = new Gson();
         ServletUtils.runAndDebugParams runAndDebugParams;
         try {
-            runAndDebugParams = ServletUtils.getAndValidateRunAndDebugParams(req, resp);
-        } catch (Exception ignored) {
+            runAndDebugParams =
+                    ServletUtils.getAndValidateRunAndDebugParams(req, resp);
+        } catch (Exception e) {
             return;
         }
-        String programName = runAndDebugParams.programName();
         int expandLevel = runAndDebugParams.expandLevel();
-        ProgramEngine currentEngine = runAndDebugParams.pm().getProgramOrFunctionEngine(programName);
-        if (expandLevel < 0 || expandLevel > currentEngine.getMaxExpandLevel()) {
+        ProgramEngine engine = runAndDebugParams.pm().getProgramOrFunctionEngine(runAndDebugParams.programName());
+        if (expandLevel < 0 || expandLevel > engine.getMaxExpandLevel()) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("Error! expand level must be between 0 to " + currentEngine.getMaxExpandLevel());
+            resp.getWriter().write("Error! expand level must be between 0 to " + engine.getMaxExpandLevel());
             return;
         }
-        Map<String, Integer> args = runAndDebugParams.arguments();
-        currentEngine.run(args, expandLevel);
+        engine.startDebugSession(expandLevel, runAndDebugParams.arguments());
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.getWriter().println("Program " + programName + " executed successfully");
+        resp.getWriter().println("Debug session for program " + runAndDebugParams.programName() +
+                " started successfully");
     }
 }

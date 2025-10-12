@@ -21,6 +21,13 @@ import static utils.ServletConstants.*;
 @WebServlet(name = "getProgramInfo", urlPatterns = "/programInfo")
 public class getProgramInfo extends HttpServlet {
     @Override
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setContentType("text/html;charset=utf-8");
+        resp.getWriter().println(getAllProgramInfoOptionsNames());
+        resp.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         int expandLevel = -1;
         Gson gson = new Gson();
@@ -88,14 +95,10 @@ public class getProgramInfo extends HttpServlet {
                 resp.getWriter().println(gson.toJson(currentEngine.getLastExecutionCycles()));
                 resp.setStatus(HttpServletResponse.SC_OK);
                 break;
-            case ALL_PROGRAM_INFO_OPTIONS:
-                resp.getWriter().println(gson.toJson(getAllProgramInfoOptionsNames()));
-                resp.setStatus(HttpServletResponse.SC_OK);
-                break;
             default:
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
                         "info parameter is missing or invalid, if you want to see all available options," +
-                                " please enter '" + ALL_PROGRAM_INFO_OPTIONS + "' as the info parameter");
+                                "please send an OPTIONS request to this URL");
                 break;
         }
     }

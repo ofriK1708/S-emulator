@@ -16,7 +16,18 @@ public class ServletConstants {
     public static final String ALL_EXECUTION_STATISTICS = "allExecutionStatistics";
     public static final String LAST_EXECUTION_STATISTICS = "lastExecutionStatistics";
     public static final String LAST_EXECUTION_CYCLES = "lastExecutionCycles";
-    public static final String ALL_PROGRAM_INFO_OPTIONS = "programInfoOptions";
+    public static final String DEBUG_ACTION_PARAM = "debugAction";
+    public static final String DEBUG_ACTION_STEP_OVER = "stepOver";
+    public static final String DEBUG_ACTION_STEP_BACK = "stepBack";
+    public static final String DEBUG_ACTION_RESUME = "resume";
+    public static final String DEBUG_ACTION_STOP = "pause";
+
+    public static String getAllSystemInfoOptionsNames() {
+        return "[" +
+                PROGRAMS_NAMES_INFO + ", " +
+                FUNCTIONS_NAMES_INFO + ", " +
+                ALL_NAMES_INFO + "]";
+    }
 
     public static String getAllProgramInfoOptionsNames() {
         return "[" +
