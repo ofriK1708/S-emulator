@@ -56,6 +56,6 @@ public interface EngineController {
 
     boolean isDebugFinished();
 
-
+    @NotNull Map<String, Integer> getFinalVariableStates(int expandLevel, @NotNull Map<String, Integer> arguments);
 
 }
