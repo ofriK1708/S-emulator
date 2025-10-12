@@ -1,35 +1,61 @@
 package system.controller;
 
-import engine.generated_2.SProgram;
+import dto.engine.ExecutionStatisticsDTO;
+import dto.engine.ProgramDTO;
+import engine.exception.FunctionNotFound;
+import engine.exception.LabelNotExist;
 import jakarta.xml.bind.JAXBException;
 import org.jetbrains.annotations.NotNull;
-import system.file.processing.XMLHandler;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static system.utils.systemUtils.validateFile;
+public interface EngineController {
+    void LoadProgramFromFile(@NotNull Path xmlFilePath) throws LabelNotExist, JAXBException, IOException,
+            FunctionNotFound;
 
-public abstract class EngineController implements EngineProgramManager
-{
-    private final @NotNull XMLHandler xmlHandler;
+    ProgramDTO getBasicProgram() throws IOException;
 
-    protected EngineController() {
-        try {
-            this.xmlHandler = new XMLHandler();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize XMLHandler " + e.getMessage());
-        }
-    }
+    int getMaxExpandLevel();
 
-    protected @NotNull SProgram getSProgramFromFile(@NotNull Path xmlFilePath)
-            throws JAXBException, IOException
-    {
-        if (!xmlFilePath.getFileName().toString().endsWith(".xml"))
-        {
-            throw new IllegalArgumentException("File must be an XML file");
-        }
-        validateFile(xmlFilePath);
-        return xmlHandler.unmarshallFile(xmlFilePath);
-    }
+    void runLoadedProgram(int expandLevel, @NotNull Map<String, Integer> arguments);
+
+    int getLastExecutionNumberOfCycles();
+
+    @NotNull ProgramDTO getProgramByExpandLevel(int expandLevel);
+
+    ExecutionStatisticsDTO getLastExecutionStatistics();
+
+    @NotNull Set<String> getAllVariablesAndLabelsNames(int expandLevel, boolean includeLabels);
+
+    @NotNull Map<String, Integer> getSortedArguments(int expandLevel);
+
+    @NotNull Map<String, Integer> getSortedArguments();
+
+    // @NotNull Map<String, String> getFunctionsSet(); not sure if needed
+    @NotNull Integer getProgramResult(int expandLevel);
+
+    @NotNull Map<String, Integer> getWorkVars(int expandLevel);
+
+    List<ExecutionStatisticsDTO> getAllExecutionStatistics();
+
+    void startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments);
+
+    void debugStep();
+
+    void debugStepBackward();
+
+    void debugResume();
+
+    void stopDebugSession();
+
+    int getCurrentDebugPC();
+
+    boolean isDebugFinished();
+
+
+
 }

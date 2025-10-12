@@ -12,7 +12,7 @@ import java.io.IOException;
 
 import static utils.ServletConstants.*;
 
-@WebServlet(name = "SystemInfo", urlPatterns = "/SystemInfo")
+@WebServlet(name = "SystemInfo", urlPatterns = "/systemInfo")
 public class getSystemInfo extends HttpServlet {
     @Override
     protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

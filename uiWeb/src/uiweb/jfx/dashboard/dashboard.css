@@ -1,0 +1,240 @@
+/* Root container */
+.dashboard-root {
+    -fx-background-color: #f4f4f4;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Dashboard content grid */
+.dashboard-content {
+    -fx-background-color: #f4f4f4;
+    -fx-padding: 10px;
+}
+
+/* ============================================ */
+/* Dashboard Header Styles                     */
+/* ============================================ */
+.dashboard-header {
+    -fx-background-color: #2c3e50;
+    -fx-border-color: #34495e;
+    -fx-border-width: 0 0 2px 0;
+    -fx-padding: 10px 15px;
+}
+
+.dashboard-header .header-label {
+    -fx-text-fill: #ecf0f1;
+    -fx-font-size: 14px;
+    -fx-font-weight: normal;
+}
+
+.dashboard-header .user-label {
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+}
+
+.dashboard-header .credits-label {
+    -fx-font-weight: bold;
+}
+
+.dashboard-header .header-button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-background-radius: 4px;
+}
+
+.dashboard-header .header-button:hover {
+    -fx-background-color: #2980b9;
+}
+
+.dashboard-header .header-button:pressed {
+    -fx-background-color: #21618c;
+}
+
+.dashboard-header .file-path-field,
+.dashboard-header .credits-field {
+    -fx-background-color: #34495e;
+    -fx-text-fill: #ecf0f1;
+    -fx-font-size: 13px;
+    -fx-padding: 6px 10px;
+    -fx-border-color: #2c3e50;
+    -fx-border-radius: 3px;
+    -fx-background-radius: 3px;
+}
+
+.dashboard-header .credits-field {
+    -fx-alignment: center;
+    -fx-font-weight: bold;
+}
+
+/* ============================================ */
+/* Panel Container Styles                      */
+/* ============================================ */
+.panel-container {
+    -fx-background-color: white;
+    -fx-border-color: #ddd;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 6, 0, 0, 2);
+}
+
+.panel-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 5px 0;
+}
+
+/* ============================================ */
+/* Table Styles                                */
+/* ============================================ */
+.programs-table,
+.functions-table,
+.history-table {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+}
+
+.programs-table .table-row-cell,
+.functions-table .table-row-cell,
+.history-table .table-row-cell {
+    -fx-cell-size: 32px;
+}
+
+.programs-table .table-row-cell:selected,
+.functions-table .table-row-cell:selected,
+.history-table .table-row-cell:selected {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+
+.programs-table .table-row-cell:hover,
+.functions-table .table-row-cell:hover,
+.history-table .table-row-cell:hover {
+    -fx-background-color: #ecf0f1;
+}
+
+.programs-table .table-column-header,
+.functions-table .table-column-header,
+.history-table .table-column-header {
+    -fx-background-color: #34495e;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-padding: 8px;
+}
+
+/* ============================================ */
+/* Users Panel Styles                          */
+/* ============================================ */
+.users-panel .users-list {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+}
+
+.users-panel .users-list .list-cell {
+    -fx-padding: 10px;
+    -fx-font-size: 14px;
+}
+
+.users-panel .users-list .list-cell:selected {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+
+.users-panel .users-list .list-cell:hover {
+    -fx-background-color: #ecf0f1;
+}
+
+/* ============================================ */
+/* Button Styles                               */
+/* ============================================ */
+.panel-button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+}
+
+.panel-button:hover {
+    -fx-background-color: #2980b9;
+}
+
+.panel-button:pressed {
+    -fx-background-color: #21618c;
+}
+
+.panel-button:disabled {
+    -fx-background-color: #95a5a6;
+    -fx-text-fill: #ecf0f1;
+    -fx-cursor: default;
+    -fx-opacity: 0.6;
+}
+
+.execute-button {
+    -fx-background-color: #27ae60;
+}
+
+.execute-button:hover {
+    -fx-background-color: #229954;
+}
+
+.execute-button:pressed {
+    -fx-background-color: #1e8449;
+}
+
+.unselect-button {
+    -fx-background-color: #e74c3c;
+}
+
+.unselect-button:hover {
+    -fx-background-color: #c0392b;
+}
+
+.unselect-button:pressed {
+    -fx-background-color: #a93226;
+}
+
+/* ============================================ */
+/* Placeholder Text                            */
+/* ============================================ */
+.placeholder-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7f8c8d;
+    -fx-font-style: italic;
+    -fx-text-alignment: center;
+}
+
+/* ============================================ */
+/* Scrollbar Styling                           */
+/* ============================================ */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical,
+.scroll-bar:horizontal {
+    -fx-background-color: #f4f4f4;
+}
+
+.scroll-bar:vertical .thumb,
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: #bdc3c7;
+    -fx-background-radius: 4px;
+}
+
+.scroll-bar:vertical .thumb:hover,
+.scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: #95a5a6;
+}

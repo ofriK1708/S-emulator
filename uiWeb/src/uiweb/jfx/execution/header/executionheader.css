@@ -1,0 +1,72 @@
+/* ===================================================
+   Execution Screen - Main Layout Styles
+   =================================================== */
+
+.execution-main-border {
+    -fx-background-color: -fx-background;
+    -fx-padding: 0;
+}
+
+/* Split Pane */
+.split-pane {
+    -fx-background-color: -fx-background;
+}
+
+.split-pane .split-pane-divider {
+    -fx-background-color: -fx-box-border;
+    -fx-padding: 0 1 0 1;
+}
+
+/* Titled Panes */
+.titled-pane {
+    -fx-background-color: -fx-control-inner-background;
+    -fx-border-color: -fx-box-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.titled-pane > .title {
+    -fx-background-color: -fx-control-inner-background;
+    -fx-background-radius: 5 5 0 0;
+    -fx-padding: 8 10 8 10;
+}
+
+.titled-pane > .title > .text {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-fill: -fx-text-base-color;
+}
+
+.titled-pane > .content {
+    -fx-background-color: -fx-control-inner-background;
+    -fx-border-color: -fx-box-border;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 10;
+}
+
+/* Scroll Panes */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .scroll-bar {
+    -fx-background-color: -fx-control-inner-background;
+}
+
+/* Grid Pane */
+.grid-pane {
+    -fx-background-color: transparent;
+    -fx-hgap: 10;
+    -fx-vgap: 10;
+}
+
+/* VBox and HBox */
+.vbox, .hbox {
+    -fx-background-color: transparent;
+}

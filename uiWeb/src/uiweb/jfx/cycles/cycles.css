@@ -1,0 +1,34 @@
+/* Cycles Component - Layout and Structure Only */
+/* Theme-dependent styles are now in global light.css and dark.css */
+.cycles-root {
+    -fx-padding: 20px;
+}
+
+.cycles-hbox {
+    -fx-background-radius: 10px;
+    -fx-padding: 20px;
+    -fx-alignment: center-left;
+}
+
+.cycles-label {
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-weight: bold;
+}
+
+.value-label {
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-background-radius: 8px;
+    -fx-padding: 5px 15px;
+    -fx-font-weight: bold;
+    -fx-min-width: 80px;
+    -fx-alignment: center;
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.05), 2, 0, 0, 1);
+}
+
+.cycles-button {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 16px;
+    -fx-background-radius: 8px;
+    -fx-cursor: hand;
+}

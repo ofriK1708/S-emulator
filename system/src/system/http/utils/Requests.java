@@ -3,6 +3,10 @@ package system.http.utils;
 import okhttp3.*;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Objects;
+
+import static utils.ServletConstants.*;
 
 public class Requests {
     private final static OkHttpClient HTTP_CLIENT = new OkHttpClient.Builder().build();
@@ -43,5 +47,26 @@ public class Requests {
         Call call = HTTP_CLIENT.newCall(request);
 
         call.enqueue(callback);
+    }
+
+    public static Response getProgramInfoSync(String finalUrl, String info, String programName, int expandLevel)
+            throws IOException {
+        HttpUrl url = Objects.requireNonNull(HttpUrl.parse(finalUrl)).newBuilder()
+                .addQueryParameter(INFO_PARAM, info)
+                .addQueryParameter(PROGRAM_NAME_PARAM, programName)
+                .addQueryParameter(EXPAND_LEVEL_PARAM, String.valueOf(expandLevel))
+                .build();
+        System.out.println("about to send request to: " + url);
+        Request request = new Request.Builder()
+                .url(finalUrl)
+                .build();
+
+        Call call = HTTP_CLIENT.newCall(request);
+
+        return call.execute();
+    }
+
+    public static Response getProgramInfoSync(String finalUrl, String info, String programName) throws IOException {
+        return getProgramInfoSync(finalUrl, info, programName, -1);
     }
 }

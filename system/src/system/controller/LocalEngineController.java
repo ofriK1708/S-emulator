@@ -11,6 +11,7 @@ import engine.utils.ProgramUtils;
 import jakarta.xml.bind.JAXBException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import system.file.processing.XMLHandler;
 
 import java.io.IOException;
 import java.io.Serial;
@@ -19,14 +20,24 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class LocalEngineController extends EngineController {
+import static system.utils.systemUtils.validateFile;
+
+public class LocalEngineController implements EngineController {
     public static @NotNull Predicate<String> validArgumentValueCheck = ProgramUtils.validArgumentCheck;
     private final Map<Integer, BreakpointDTO> persistentBreakpoints = new HashMap<>();
+    private final @NotNull XMLHandler xmlHandler;
     private @Nullable ProgramEngine engine;
     private ProgramEngine mainEngine;
     private String mainEngineName;
     private int maxExpandLevel = 0;
 
+    public LocalEngineController() {
+        try {
+            this.xmlHandler = new XMLHandler();
+        } catch (JAXBException e) {
+            throw new RuntimeException("Failed to initialize XMLHandler " + e.getMessage());
+        }
+    }
     // Add these fields to Debugger:
     private boolean inDebugSession = false;
 
@@ -56,8 +67,13 @@ public class LocalEngineController extends EngineController {
     @Override
     public void LoadProgramFromFile(@NotNull Path xmlFilePath)
             throws LabelNotExist, JAXBException, IOException, FunctionNotFound {
-        SProgram program = getSProgramFromFile(xmlFilePath);
+        if (!xmlFilePath.getFileName().toString().endsWith(".xml")) {
+            throw new IllegalArgumentException("File must be an XML file");
+        }
+        validateFile(xmlFilePath);
+        SProgram program = xmlHandler.unmarshallFile(xmlFilePath);
         createEngine(program);
+
     }
 
 
