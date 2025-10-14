@@ -183,12 +183,12 @@ public class LocalEngineController implements EngineController {
 
         engine.startDebugSession(expandLevel, arguments);
         inDebugSession = true;
-        if (engine.getAllBreakpoints().isEmpty()) {
-            for (BreakpointDTO breakpoint : persistentBreakpoints.values()) {
-                engine.addBreakpoint(breakpoint.withStatus(BreakpointDTO.BreakpointStatus.ACTIVE));
-                System.out.println("Applied breakpoint at line " + breakpoint.lineNumber());
-            }
-        }
+//        if (engine.getAllBreakpoints().isEmpty()) {
+//            for (BreakpointDTO breakpoint : persistentBreakpoints.values()) {
+//                engine.addBreakpoint(breakpoint.withStatus(BreakpointDTO.BreakpointStatus.ACTIVE));
+//                System.out.println("Applied breakpoint at line " + breakpoint.lineNumber());
+//            }
+//        }
 
     }
 
@@ -346,10 +346,7 @@ public class LocalEngineController implements EngineController {
         // Store in persistent collection (always works)
         persistentBreakpoints.put(breakpoint.lineNumber(), breakpoint);
 
-        // If in active debug session, also update engine
-        if (inDebugSession && engine.isInDebugMode()) {
-            engine.addBreakpoint(breakpoint);
-        }
+
 
         System.out.println("Breakpoint set at line " + breakpoint.lineNumber() +
                 (inDebugSession ? " (active in current session)" : " (will activate in next debug session)"));
@@ -366,10 +363,6 @@ public class LocalEngineController implements EngineController {
 
         BreakpointDTO removed = persistentBreakpoints.remove(lineNumber);
 
-        // If in active debug session, also remove from engine
-        if (inDebugSession && engine.isInDebugMode()) {
-            engine.removeBreakpoint(lineNumber);
-        }
 
         if (removed != null) {
             System.out.println("Breakpoint removed from line " + lineNumber);
@@ -387,9 +380,6 @@ public class LocalEngineController implements EngineController {
         int count = persistentBreakpoints.size();
         persistentBreakpoints.clear();
 
-        if (inDebugSession && engine.isInDebugMode()) {
-            engine.clearAllBreakpoints();
-        }
 
         System.out.println("Cleared " + count + " breakpoint(s)");
     }
@@ -422,12 +412,6 @@ public class LocalEngineController implements EngineController {
      * Gets the line number of the last breakpoint that was hit.
      * Only meaningful during debug session.
      */
-    public @Nullable Integer getLastBreakpointHit() {
-        if (engine == null || !inDebugSession) {
-            return null;
-        }
-        return engine.getLastBreakpointHit();
-    }
 
     /**
      * Toggles a breakpoint at the specified line.
