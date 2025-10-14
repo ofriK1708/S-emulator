@@ -1,4 +1,4 @@
-package uiWeb.jfx.execution.header;
+package uiweb.jfx.execution.header;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.StringProperty;

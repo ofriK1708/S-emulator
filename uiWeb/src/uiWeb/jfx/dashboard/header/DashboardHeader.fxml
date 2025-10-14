@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.Region?>
 <HBox xmlns:fx="http://javafx.com/fxml"
       xmlns="http://javafx.com/javafx"
-      fx:controller="uiWeb.jfx.dashboard.header.DashboardHeaderController"
+      fx:controller="uiweb.jfx.dashboard.header.DashboardHeaderController"
       alignment="CENTER_LEFT"
       spacing="15"
       styleClass="dashboard-header"

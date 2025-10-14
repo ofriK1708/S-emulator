@@ -1,9 +1,9 @@
-package uiWeb.jfx.fileLoader;
+package uiweb.jfx.fileLoader;
 
 import dto.engine.ProgramDTO;
 import javafx.concurrent.Task;
 import system.controller.EngineController;
-import uiWeb.utils.UIUtils;
+import uiweb.utils.UIUtils;
 
 import java.nio.file.Path;
 import java.util.List;

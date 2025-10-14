@@ -1,4 +1,4 @@
-package uiWeb.jfx.summaryLine;
+package uiweb.jfx.summaryLine;
 
 import dto.engine.InstructionDTO;
 import engine.utils.CommandType;

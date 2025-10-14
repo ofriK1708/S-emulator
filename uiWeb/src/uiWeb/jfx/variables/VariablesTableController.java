@@ -1,4 +1,4 @@
-package uiWeb.jfx.variables;
+package uiweb.jfx.variables;
 
 import dto.ui.VariableDTO;
 import javafx.animation.FadeTransition;
@@ -10,8 +10,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import org.jetbrains.annotations.NotNull;
-import uiWeb.utils.AnimatedTableRow;
-import uiWeb.utils.UIUtils;
+import uiweb.utils.AnimatedTableRow;
+import uiweb.utils.UIUtils;
 
 /**
  * Displays variables in a table format with change highlighting for debug mode.

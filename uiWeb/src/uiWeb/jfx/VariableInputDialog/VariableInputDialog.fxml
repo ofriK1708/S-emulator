@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" spacing="10" stylesheets="@VariableInputDialog.css"
       xmlns="http://javafx.com/javafx/17.0.12"
-      fx:controller="uiWeb.jfx.VariableInputDialog.VariableInputDialogController">
+      fx:controller="uiweb.jfx.VariableInputDialog.VariableInputDialogController">
     <children>
         <Label styleClass="instruction-label"
                text="Press Enter to save your values, any missing values will be set to 0."/>

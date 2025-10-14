@@ -7,7 +7,7 @@
 <?import javafx.scene.text.Font?>
 <?import java.lang.String?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" stylesheets="@RunControls.css"
-      xmlns="http://javafx.com/javafx/24.0.1" fx:controller="uiWeb.jfx.runControls.RunControlsController">
+      xmlns="http://javafx.com/javafx/24.0.1" fx:controller="uiweb.jfx.runControls.RunControlsController">
     <children>
         <HBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
               spacing="20.0">

@@ -1,4 +1,4 @@
-package uiWeb.jfx.dashboard.programs;
+package uiweb.jfx.dashboard.programs;
 
 import dto.ui.ProgramDashboardDTO;
 import javafx.collections.FXCollections;

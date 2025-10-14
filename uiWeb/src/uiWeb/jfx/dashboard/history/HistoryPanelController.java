@@ -1,4 +1,4 @@
-package uiWeb.jfx.dashboard.history;
+package uiweb.jfx.dashboard.history;
 
 import dto.ui.HistoryRecordDTO;
 import javafx.beans.property.StringProperty;

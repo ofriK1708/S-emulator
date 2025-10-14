@@ -1,4 +1,4 @@
-package uiWeb.jfx.cycles;
+package uiweb.jfx.cycles;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.fxml.FXML;

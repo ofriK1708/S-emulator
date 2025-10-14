@@ -6,7 +6,7 @@
 <?import javafx.scene.text.Font?>
 <HBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" spacing="20.0" styleClass="summary-line"
       stylesheets="@SummaryLine.css" xmlns="http://javafx.com/javafx/24.0.1"
-      fx:controller="uiWeb.jfx.summaryLine.SummaryLineController">
+      fx:controller="uiweb.jfx.summaryLine.SummaryLineController">
     <HBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" spacing="20.0" stylesheets="@SummaryLine.css"
           HBox.hgrow="ALWAYS" xmlns="http://javafx.com/javafx/24.0.1">
         <padding>

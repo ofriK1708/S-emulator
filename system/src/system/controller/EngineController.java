@@ -58,4 +58,7 @@ public interface EngineController {
 
     @NotNull Map<String, Integer> getFinalVariableStates(int expandLevel, @NotNull Map<String, Integer> arguments);
 
+    int getCurrentDebugCycles();
+
+    void clearLoadedProgram();
 }

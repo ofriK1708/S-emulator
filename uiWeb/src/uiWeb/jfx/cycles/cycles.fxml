@@ -6,7 +6,7 @@
 <HBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" maxHeight="-Infinity" maxWidth="1.7976931348623157E308"
       minHeight="0.0"
       minWidth="0.0" spacing="30.0" styleClass="hbox" stylesheets="@cycles.css"
-      xmlns="http://javafx.com/javafx/24.0.1" fx:controller="uiWeb.jfx.cycles.CyclesController">
+      xmlns="http://javafx.com/javafx/24.0.1" fx:controller="uiweb.jfx.cycles.CyclesController">
     <HBox alignment="CENTER" maxWidth="1.7976931348623157E308" spacing="15.0" HBox.hgrow="ALWAYS">
         <children>
             <Label alignment="CENTER" maxWidth="1.7976931348623157E308" styleClass="cycles-label" text="cycles"

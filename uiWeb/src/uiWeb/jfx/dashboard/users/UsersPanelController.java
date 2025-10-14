@@ -1,4 +1,4 @@
-package uiWeb.jfx.dashboard.users;
+package uiweb.jfx.dashboard.users;
 
 import dto.ui.UserDTO;
 import javafx.collections.FXCollections;

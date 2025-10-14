@@ -1,6 +1,5 @@
-package uiWeb.jfx;
+package uiweb.jfx;
 
-import dto.engine.BreakpointDTO;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
@@ -23,33 +22,30 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import system.controller.EngineController;
 import system.controller.LocalEngineController;
-import uiWeb.jfx.VariableInputDialog.VariableInputDialogController;
-import uiWeb.jfx.cycles.CyclesController;
-import uiWeb.jfx.debugger.DebuggerController;
-import uiWeb.jfx.execution.header.ExecutionHeaderController;
-import uiWeb.jfx.fileLoader.FileLoaderController;
-import uiWeb.jfx.fileLoader.UIAdapterLoadFileTask;
-import uiWeb.jfx.instruction.InstructionTableController;
-import uiWeb.jfx.program.function.PaneMode;
-import uiWeb.jfx.program.function.ProgramFunctionController;
-import uiWeb.jfx.program.function.Theme;
-import uiWeb.jfx.runControls.RunControlsController;
-import uiWeb.jfx.summaryLine.SummaryLineController;
-import uiWeb.jfx.variables.VariablesTableController;
-import uiWeb.utils.UIUtils;
+import uiweb.jfx.VariableInputDialog.VariableInputDialogController;
+import uiweb.jfx.cycles.CyclesController;
+import uiweb.jfx.debugger.DebuggerController;
+import uiweb.jfx.execution.header.ExecutionHeaderController;
+import uiweb.jfx.fileLoader.FileLoaderController;
+import uiweb.jfx.fileLoader.UIAdapterLoadFileTask;
+import uiweb.jfx.instruction.InstructionTableController;
+import uiweb.jfx.program.function.PaneMode;
+import uiweb.jfx.program.function.ProgramFunctionController;
+import uiweb.jfx.runControls.RunControlsController;
+import uiweb.jfx.summaryLine.SummaryLineController;
+import uiweb.jfx.variables.VariablesTableController;
+import uiweb.utils.UIUtils;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static uiWeb.utils.UIUtils.*;
+import static uiweb.utils.UIUtils.*;
 
 public class AppController {
 
     private final Map<String, Integer> previousDebugVariables = new HashMap<>();
-    // Arguments and variables
     private final ListProperty<VariableDTO> allVariablesDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
     private final ListProperty<VariableDTO> previousVariablesDTO =
@@ -57,8 +53,7 @@ public class AppController {
     private final ListProperty<VariableDTO> argumentsDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
     private final BooleanProperty argumentsLoaded = new SimpleBooleanProperty(false);
-    private final ObjectProperty<Theme> selectedTheme = new SimpleObjectProperty<>(Theme.LIGHT);
-    // Core system controller
+
     private final ListProperty<InstructionDTO> programInstructions =
             new SimpleListProperty<>(FXCollections.observableArrayList());
     private final ListProperty<InstructionDTO> derivedInstructions =
@@ -85,8 +80,9 @@ public class AppController {
     private final StringProperty currentUserName = new SimpleStringProperty("Guest User");
     private final StringProperty screenTitle = new SimpleStringProperty("S-Emulator Execution");
     private final IntegerProperty availableCredits = new SimpleIntegerProperty(0);
-    // Scene reference for theme switching
+
     private Scene scene;
+
     @FXML
     private HBox executionHeader;
     @FXML
@@ -131,52 +127,47 @@ public class AppController {
     private VariablesTableController allVarsTableController;
     @FXML
     private DebuggerController debugControlsController;
+
     private @Nullable ProgramDTO loadedProgram = null;
     private Runnable returnToDashboardCallback = null;
-
     private boolean inDebugSession = false;
     @FXML
     private VBox historyStats;
     private boolean isFirstDebugStep = true;
     private boolean isInDebugResume = false;
 
-
     public AppController() {
         this.engineController = new LocalEngineController();
-        // Set this instance for UIUtils re-run functionality
         UIUtils.setAppControllerInstance(this);
     }
 
     @FXML
     public void initialize() {
         if (cyclesController != null && programFunctionController != null &&
-                instructionsTableController != null && derivedInstructionsTableController != null && argumentsTableController != null &&
-                allVarsTableController != null && debugControlsController != null && runControlsController != null
-                && summaryLineController != null) {
+                instructionsTableController != null && derivedInstructionsTableController != null &&
+                argumentsTableController != null && allVarsTableController != null &&
+                debugControlsController != null && runControlsController != null &&
+                summaryLineController != null) {
 
-
-            runControlsController.initComponent(this::RunProgram, this::prepareForTakingArguments, programLoaded,
-                    argumentsLoaded);
+            runControlsController.initComponent(this::RunProgram, this::prepareForTakingArguments,
+                    programLoaded, argumentsLoaded);
             summaryLineController.initComponent(currentLoadedProgramName);
             cyclesController.initComponent(currentCycles);
-            instructionsTableController.initializeMainInstructionTable(programInstructions, derivedInstructions,
-                    isAnimationsOn);
-            instructionsTableController.initializeBreakpointSupport(this::handleBreakpointToggle);
+            instructionsTableController.initializeMainInstructionTable(programInstructions,
+                    derivedInstructions, isAnimationsOn);
             derivedInstructionsTableController.markAsDerivedInstructionsTable();
             derivedInstructionsTableController.setDerivedInstructionsTable(derivedInstructions, isAnimationsOn);
             argumentsTableController.initArgsTable(argumentsDTO, isAnimationsOn);
             allVarsTableController.initAllVarsTable(allVariablesDTO, isAnimationsOn);
 
-
             debugControlsController.initComponent(
                     this::debugStep,
-                    this::debugStepBackward,
                     this::debugResume,
                     this::stopDebugSession
             );
             initializeExecutionHeader();
 
-            System.out.println("AppController initialized with cleaned re-run architecture");
+            System.out.println("AppController initialized with cleaned architecture");
         } else {
             System.err.println("One or more controllers are not injected properly!");
             throw new IllegalStateException("FXML injection failed: required controllers are null.");
@@ -185,12 +176,11 @@ public class AppController {
 
     private void initializeExecutionHeader() {
         if (executionHeaderController != null) {
-            // Initialize with all properties AND back callback
             executionHeaderController.initComponent(
                     currentUserName,
                     screenTitle,
                     availableCredits,
-                    this::handleBackToDashboard  // Add the callback
+                    this::handleBackToDashboard
             );
             System.out.println("Execution header initialized with back button");
         } else {
@@ -198,26 +188,11 @@ public class AppController {
         }
     }
 
-    /**
-     * Sets the return to dashboard.
-     *
-     */
-
     public void setReturnToDashboardCallback(Runnable callback) {
         this.returnToDashboardCallback = callback;
         System.out.println("AppController: Return to Dashboard callback registered");
     }
 
-    // Add this method to your existing AppController.java class
-
-    /**
-     * PUBLIC METHOD: Allows external components (like Dashboard) to trigger file loading
-     * using the same file loader mechanism. This reuses all existing validation, callbacks,
-     * and UI adapter logic without duplication.
-     *
-     * @param file              The file to load
-     * @param onSuccessCallback Optional callback to execute after successful load (e.g., scene transition)
-     */
     public void loadProgramFromFileExternal(@NotNull File file, @Nullable Runnable onSuccessCallback) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("fileLoader/fileLoader.fxml"));
@@ -245,9 +220,7 @@ public class AppController {
                             loadedProgram = program;
                             mainProgramName.set(program.ProgramName());
                             currentLoadedProgramName.set(program.ProgramName());
-                            allSubFunction.putAll(engineController.getFunctionsSet());
 
-                            // Execute success callback (scene transition) if provided
                             if (onSuccessCallback != null) {
                                 onSuccessCallback.run();
                             }
@@ -257,8 +230,7 @@ public class AppController {
             );
 
             loadingStage.setOnShown(event -> fileLoaderController.initializeAndRunFileLoaderTaskThread(
-                    file.toPath(),
-                    engineController, uiAdapter));
+                    file.toPath(), engineController, uiAdapter));
             loadingStage.show();
 
             System.out.println("AppController: External file load triggered for " + file.getName());
@@ -269,9 +241,6 @@ public class AppController {
         }
     }
 
-    /**
-     * Refactor existing loadProgramFromFile to use the new method
-     */
     public void loadProgramFromFile(@NotNull File file) {
         loadProgramFromFileExternal(file, null);
     }
@@ -279,7 +248,6 @@ public class AppController {
     @FXML
     public void handleBackToDashboard() {
         if (returnToDashboardCallback != null) {
-            // Clean up current state before returning
             if (inDebugSession) {
                 try {
                     stopDebugSession();
@@ -287,98 +255,47 @@ public class AppController {
                     System.err.println("Error stopping debug session: " + e.getMessage());
                 }
             }
-
-            // Execute callback to switch scenes
             returnToDashboardCallback.run();
-
             System.out.println("Returning to Dashboard...");
         } else {
             System.err.println("Return to Dashboard callback not set");
-            uiWeb.utils.UIUtils.showError("Navigation to Dashboard is not configured");
+            uiweb.utils.UIUtils.showError("Navigation to Dashboard is not configured");
         }
     }
 
-    /**
-     * Update screen title (for dynamic header)
-     */
     public void setScreenTitle(String title) {
         screenTitle.set(title);
     }
 
-    /**
-     * Update user name in header
-     */
     public void setUserName(String name) {
         currentUserName.set(name);
     }
 
-    /**
-     * Update available credits in header
-     */
     public void setAvailableCredits(int credits) {
         availableCredits.set(credits);
     }
 
-
     public void handleReturnToDashboard() {
         if (returnToDashboardCallback != null) {
-            // Clean up current state before returning
             if (inDebugSession) {
                 stopDebugSession();
             }
-
-            // Execute callback to switch scenes
             returnToDashboardCallback.run();
-
             System.out.println("Returning to Dashboard...");
         } else {
             System.err.println("Return to Dashboard callback not set");
         }
     }
+    // Continuation of AppController.java
 
-    /**
-     * Handles breakpoint toggle request from the instruction table.
-     * Called when user right-clicks on an instruction line.
-     *
-     * @param lineNumber The line number where user wants to toggle breakpoint
-     */
-    private void handleBreakpointToggle(int lineNumber) {
-        try {
-            boolean nowHasBreakpoint = engineController.toggleBreakpoint(lineNumber);
-
-            // Refresh breakpoint display
-            List<BreakpointDTO> allBreakpoints = engineController.getAllBreakpoints();
-            instructionsTableController.updateBreakpoints(allBreakpoints);
-
-            if (nowHasBreakpoint) {
-                showInfo("Breakpoint set at line " + (lineNumber + 1));
-            } else {
-                showInfo("Breakpoint removed from line " + (lineNumber + 1));
-            }
-
-        } catch (Exception e) {
-            System.err.println("Error toggling breakpoint: " + e.getMessage());
-            showError("Error toggling breakpoint: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Retrieves the final variable states for a given execution.
-     * This method is called by HistoryStatsController to get variable data for the Show dialog.
-     *
-     * @param executionStats The execution statistics for which to retrieve variable states
-     * @return Map of variable names to their final values from that execution
-     */
     private @NotNull Map<String, Integer> getFinalVariableStates(@NotNull ExecutionStatisticsDTO executionStats) {
         try {
-            // Extract execution parameters
             int expandLevel = executionStats.expandLevel();
             Map<String, Integer> arguments = executionStats.arguments();
 
             System.out.println("Retrieving final variable states for execution #" +
                     executionStats.executionNumber() + " (expand level: " + expandLevel + ")");
 
-            // Use the engine controller to get the final variable states for this execution
             Map<String, Integer> finalStates = engineController.getFinalVariableStates(expandLevel, arguments);
 
             System.out.println("Retrieved " + finalStates.size() + " final variable states for execution #" +
@@ -393,14 +310,6 @@ public class AppController {
         }
     }
 
-    /**
-     * PUBLIC METHOD: Handle re-run request from Show dialog.
-     * This prepares the system state for re-run by expanding to the correct level
-     * and pre-populating arguments.
-     *
-     * @param expandLevel       The expand level from the selected execution
-     * @param previousArguments The arguments from the selected execution
-     */
     public void handleRerunRequest(int expandLevel, @NotNull Map<String, Integer> previousArguments) {
         if (!programLoaded.get()) {
             showError("No program loaded");
@@ -411,22 +320,15 @@ public class AppController {
             System.out.println("Preparing re-run with expand level " + expandLevel +
                     " and arguments: " + previousArguments);
 
-            // IMPORTANT: Preserve the current debug mode before reset
             boolean wasInDebugMode = debugMode.get();
             System.out.println("Preserving debug mode state: " + wasInDebugMode);
 
-            // Step 1: Reset system state for new run (preserve execution statistics and debug mode)
             resetForRerun(wasInDebugMode);
-
-            // Step 2: Expand program to the required level from the previous run
             expandProgramToLevel(expandLevel);
 
-            // Step 3: Pre-populate arguments from the previous run
             programArguments.clear();
             programArguments.putAll(previousArguments);
 
-            // Step 4: Trigger the normal Set Run dialog flow with pre-populated arguments
-            // This will open the dialog, allow user to confirm/edit, then proceed with execution
             prepareForTakingArguments();
             if (wasInDebugMode) {
                 debugMode.set(true);
@@ -436,9 +338,7 @@ public class AppController {
                 startRegularExecution();
             }
 
-
-            System.out.println("Re-run preparation completed. Set Run dialog should open with pre-populated arguments" +
-                    ".");
+            System.out.println("Re-run preparation completed");
             System.out.println("Debug mode preserved: " + debugMode.get());
 
         } catch (Exception e) {
@@ -448,7 +348,6 @@ public class AppController {
     }
 
     private void resetForRerun(boolean preserveDebugMode) {
-        // Reset execution state properties (but preserve debug mode if requested)
         programRunning.set(false);
         programFinished.set(false);
 
@@ -471,37 +370,28 @@ public class AppController {
             }
         }
 
-        // Reset debug state tracking for new execution
         previousDebugVariables.clear();
         isFirstDebugStep = true;
-
-        // Clear UI data (but preserve program instructions and metadata)
         allVariablesDTO.clear();
-
-        // Reset arguments loaded state so the dialog will appear
         argumentsLoaded.set(false);
         argumentsDTO.clear();
-
-        // Reset cycles counter
         currentCycles.set(0);
 
-        // Clear instruction highlighting
         instructionsTableController.highlightVariable(null);
         instructionsTableController.clearAllDebugHighlighting();
-        instructionsTableController.clearBreakpointHitHighlight();
         derivedInstructionsTableController.highlightVariable(null);
 
-        System.out.println("System state reset completed for rerun (statistics and debug mode preserved)");
+        System.out.println("System state reset completed for rerun");
     }
 
     private void bindTitlePanesExpansion() {
         runControlsTitledPane.expandedProperty().bind(Bindings.and(programLoaded, programRunning.not()));
-        debugControlsTitledPane.expandedProperty().bind(Bindings.and(programLoaded, Bindings.and(debugMode,
-                programFinished.not())));
+        debugControlsTitledPane.expandedProperty().bind(Bindings.and(programLoaded,
+                Bindings.and(debugMode, programFinished.not())));
         variablesTitledPane.expandedProperty().bind(Bindings.and(programLoaded,
                 Bindings.or(argumentsLoaded, Bindings.or(programFinished, debugMode))));
-        statisticsTitledPane.expandedProperty().bind(Bindings.and(programLoaded, Bindings.and(programRunning.not(),
-                programRanAtLeastOnce)));
+        statisticsTitledPane.expandedProperty().bind(Bindings.and(programLoaded,
+                Bindings.and(programRunning.not(), programRanAtLeastOnce)));
     }
 
     private void unbindTitlePanesExpansion() {
@@ -518,7 +408,6 @@ public class AppController {
             unbindTitlePanesExpansion();
         }
     }
-
 
     public void switchLoadedProgram(String functionName) {
         if (functionName == null || functionName.isEmpty()) {
@@ -538,7 +427,8 @@ public class AppController {
     }
 
     private void setStageForLoadedProgram(String functionName) {
-        loadedProgram = engineController.setLoadedProgram(functionName);
+       // loadedProgram = engineController.set(functionName);
+
         currentLoadedProgramName.set(loadedProgram.ProgramName());
         maxExpandLevel.set(engineController.getMaxExpandLevel());
         currentExpandLevel.set(0);
@@ -556,8 +446,6 @@ public class AppController {
         allVariablesDTO.clear();
         argumentsDTO.clear();
         currentCycles.set(0);
-        List<BreakpointDTO> existingBreakpoints = engineController.getAllBreakpoints();
-        instructionsTableController.updateBreakpoints(existingBreakpoints);
         summaryLineController.updateCounts(loadedProgram.instructions());
         programVariablesNamesAndLabels.setAll(sortAllProgramNames(engineController.
                 getAllVariablesAndLabelsNames(0, true)));
@@ -571,27 +459,21 @@ public class AppController {
             return;
         }
 
-        // If programArguments is empty, populate with default arguments from engine
         if (programArguments.isEmpty()) {
             programArguments.putAll(engineController.getSortedArguments());
         }
 
-        // If no arguments are needed, mark as loaded and return
         if (programArguments.isEmpty()) {
             argumentsLoaded.set(true);
-            showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() + "\nNo variables required" +
-                    ".");
+            showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() +
+                    "\nNo variables required.");
             return;
         }
 
-        // Open the arguments dialog (will be pre-populated if coming from re-run)
         getArgumentsFromUser();
-
-        // After dialog closes, update UI and mark arguments as loaded
         argumentsLoaded.set(true);
         argumentsDTO.setAll(UIUtils.formatArgumentsToVariableDTO(programArguments));
 
-        // Show appropriate success message based on whether this is a rerun and current mode
         if (argumentsHaveNonZeroValues(programArguments)) {
             String modeText = debugMode.get() ? "Debug" : "Regular";
             showSuccess("Re-run arguments configured successfully!\n" +
@@ -648,11 +530,8 @@ public class AppController {
             int expandLevel = currentExpandLevel.get();
             programRunning.set(true);
 
-            instructionsTableController.clearBreakpointHitHighlight();
-
-            // Execute the program using SystemController
             engineController.runLoadedProgram(expandLevel, programArguments);
-            allVariablesDTO.setAll(UIUtils.getAllVariablesDTOSorted(engineController, expandLevel));
+            allVariablesDTO.setAll(UIUtils.getAllVariablesDTOSorted((LocalEngineController) engineController, expandLevel));
             executionStatistics.add(engineController.getLastExecutionStatistics());
 
             ProgramDTO executedProgram = engineController.getProgramByExpandLevel(expandLevel);
@@ -711,6 +590,9 @@ public class AppController {
             showError("Error expanding program: " + e.getMessage());
         }
     }
+    // Debug Methods - Continuation of AppController.java
+
+// Debug Methods - Continuation of AppController.java
 
     public void clearLoadedProgram() {
         programLoaded.set(false);
@@ -721,8 +603,6 @@ public class AppController {
         currentExpandLevel.set(0);
         loadedProgram = null;
         programArguments.clear();
-        engineController.clearAllBreakpoints();
-        instructionsTableController.updateBreakpoints(Collections.emptyList());
 
         engineController.clearLoadedProgram();
         executionStatistics.clear();
@@ -737,7 +617,6 @@ public class AppController {
         programVariablesNamesAndLabels.clear();
         allSubFunction.clear();
         previousDebugVariables.clear();
-        engineController.clearAllBreakpoints();
         isFirstDebugStep = true;
         inDebugSession = false;
         debugMode.set(false);
@@ -795,10 +674,8 @@ public class AppController {
                 System.out.println("Variable changed: " + name + " from " + previousValue + " to " + value);
             }
         } else if (isFirstDebugStep) {
-            // On the first step, consider non-zero and non-argument variables as changed
             hasChanged = value != 0 && !ProgramUtils.isArgument(name);
         }
-
 
         return new VariableDTO(
                 new SimpleStringProperty(name),
@@ -858,15 +735,11 @@ public class AppController {
         }
 
         try {
-            // Clear previous breakpoint hit highlighting
-            instructionsTableController.clearBreakpointHitHighlight();
-
             if (!isFirstDebugStep) {
-                previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController,
+                previousDebugVariables.putAll(UIUtils.getAllVariablesMap((LocalEngineController) engineController,
                         currentExpandLevel.get()));
             }
 
-            // Execute one instruction
             engineController.debugStep();
 
             int currentPC = engineController.getCurrentDebugPC();
@@ -876,12 +749,6 @@ public class AppController {
 
             if (isFirstDebugStep) {
                 isFirstDebugStep = false;
-            }
-
-            // Check if we hit a breakpoint at the new PC location
-            if (engineController.hasBreakpointAt(currentPC)) {
-                instructionsTableController.highlightBreakpointHit(currentPC);
-                showInfo("Breakpoint hit at line " + (currentPC + 1) + ". Execution paused.");
             }
 
             if (engineController.isDebugFinished()) {
@@ -898,7 +765,7 @@ public class AppController {
     }
 
     private void updateDebugVariableState() {
-        List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted(engineController,
+        List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted((LocalEngineController) engineController,
                 currentExpandLevel.get());
         List<VariableDTO> allVarWithChangeDetection = FXCollections.observableArrayList();
         allVarNoChangeDetection.stream()
@@ -906,36 +773,6 @@ public class AppController {
                 .forEach(allVarWithChangeDetection::add);
 
         allVariablesDTO.setAll(allVarWithChangeDetection);
-    }
-
-    public void debugStepBackward() {
-        if (!inDebugSession) {
-            showError("No debug session active");
-            return;
-        }
-
-        if (engineController.isDebugFinished()) {
-            showInfo("Execution finished. Cannot step backward from final state.");
-            return;
-        }
-
-        try {
-            previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
-            engineController.debugStepBackward();
-            int currentPC = engineController.getCurrentDebugPC();
-            currentCycles.set(engineController.getCurrentDebugCycles());
-
-            highlightCurrentInstruction(currentPC);
-            updateDebugVariableState();
-
-            showInfo("Stepped backward to PC: " + currentPC +
-                    ", Total execution cycles: " + currentCycles.get());
-
-        } catch (Exception e) {
-            System.err.println("Error during debug step backward: " + e.getMessage());
-            showError("Error during debug step backward: " + e.getMessage());
-            endDebugSession();
-        }
     }
 
     public void debugResume() {
@@ -950,28 +787,19 @@ public class AppController {
         }
         if (!isFirstDebugStep) {
             previousDebugVariables.clear();
-            previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
+            previousDebugVariables.putAll(UIUtils.getAllVariablesMap((LocalEngineController) engineController, currentExpandLevel.get()));
         }
 
         isInDebugResume = true;
         try {
             engineController.debugResume();
 
-            // Update UI state
             int currentPC = engineController.getCurrentDebugPC();
             currentCycles.set(engineController.getCurrentDebugCycles());
             highlightCurrentInstruction(currentPC);
             updateDebugVariableState();
 
-            // Check if we stopped at a breakpoint
-            Integer breakpointHit = engineController.getLastBreakpointHit();
-            if (breakpointHit != null) {
-                // Stopped at breakpoint - highlight it
-                instructionsTableController.highlightBreakpointHit(breakpointHit);
-                showInfo("Breakpoint hit at line " + (breakpointHit + 1) +
-                        ". Execution paused.\nPC: " + currentPC +
-                        ", Total cycles: " + currentCycles.get());
-            } else if (engineController.isDebugFinished()) {
+            if (engineController.isDebugFinished()) {
                 handleExecutionFinished();
             }
 
@@ -980,7 +808,6 @@ public class AppController {
             showError("Error during debug resume: " + e.getMessage());
             endDebugSession();
         } finally {
-            // ADDED: Always reset flag
             isInDebugResume = false;
         }
     }
@@ -1009,83 +836,11 @@ public class AppController {
         programRanAtLeastOnce.set(true);
         debugControlsController.notifyDebugSessionEnded();
         instructionsTableController.clearAllDebugHighlighting();
-        instructionsTableController.clearBreakpointHitHighlight();
-
-        // Get current breakpoints with ACTIVE status (not HIT)
-        List<BreakpointDTO> currentBreakpoints = engineController.getAllBreakpoints();
-        instructionsTableController.updateBreakpoints(currentBreakpoints);
 
         System.out.println("Debug session ended - ready for new execution");
     }
 
-    public void onThemeSelect(Theme theme) {
-        selectedTheme.set(theme);
-        applyTheme(theme);
-        showInfo("Theme changed to: " + theme);
-        System.out.println("Theme changed to: " + theme);
-    }
-
-    /**
-     * Apply the selected theme to the scene
-     */
-    private void applyTheme(Theme theme) {
-        if (scene == null) {
-            System.err.println("Scene not set - cannot apply theme");
-            return;
-        }
-
-        // Remove existing theme stylesheets
-        scene.getStylesheets().removeIf(stylesheet ->
-                stylesheet.contains("/styles/light.css") ||
-                        stylesheet.contains("/styles/dark.css") ||
-                        stylesheet.contains("/styles/mac.css") ||
-                        stylesheet.contains("/styles/windows.css"));
-
-        // Add component CSS files (always loaded)
-        loadComponentStylesheets();
-
-        // Add the selected theme stylesheet
-        String themeStylesheet = getClass().getResource("/uiWeb/jfx/styles/" +
-                theme.getDisplayName().toLowerCase() + ".css").toExternalForm();
-        scene.getStylesheets().add(themeStylesheet);
-
-        System.out.println("Applied " + theme + " theme with stylesheet: " + themeStylesheet);
-    }
-
-    /**
-     * Load all component stylesheets that contain layout and structural styles
-     */
-    private void loadComponentStylesheets() {
-        String[] componentStylesheets = {
-                "/uiWeb/jfx/dashboard/Dashboard.css",
-                "/uiWeb/jfx/dashboard/header/DashboardHeader.css",
-                "/uiWeb/jfx/dashboard/history/HistoryPanel.css",
-                "/uiWeb/jfx/dashboard/history/HistoryStats.css",
-                "/uiWeb/jfx/cycles/cycles.css",
-                "/uiWeb/jfx/runControls/RunControls.css",
-                "/uiWeb/jfx/debugger/Debugger.css",
-                "/uiWeb/jfx/summaryLine/SummaryLine.css",
-                "/uiWeb/jfx/fileHandler/fileHandler.css",
-                "/uiWeb/jfx/variables/variablesTable.css",
-                "/uiWeb/jfx/statistics/Statistics.css",
-                "/uiWeb/jfx/instruction/InstructionsTableStyle.css"
-        };
-
-        for (String stylesheet : componentStylesheets) {
-            try {
-                String stylesheetUrl = getClass().getResource(stylesheet).toExternalForm();
-                if (!scene.getStylesheets().contains(stylesheetUrl)) {
-                    scene.getStylesheets().add(stylesheetUrl);
-                }
-            } catch (Exception e) {
-                System.err.println("Warning: Could not load stylesheet: " + stylesheet);
-            }
-        }
-    }
-
     public void setScene(Scene scene) {
         this.scene = scene;
-        // Apply the selected theme to the new scene
-        applyTheme(selectedTheme.get());
     }
 }

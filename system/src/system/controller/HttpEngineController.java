@@ -141,4 +141,19 @@ public class HttpEngineController implements EngineController {
     public boolean isDebugFinished() {
         return false;
     }
+
+    @Override
+    public @NotNull Map<String, Integer> getFinalVariableStates(int expandLevel, @NotNull Map<String, Integer> arguments) {
+        return Map.of();
+    }
+
+    @Override
+    public int getCurrentDebugCycles() {
+        return 0;
+    }
+
+    @Override
+    public void clearLoadedProgram() {
+
+    }
 }

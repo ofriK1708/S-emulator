@@ -1,4 +1,4 @@
-package uiWeb.jfx.program.function;
+package uiweb.jfx.program.function;
 
 import javafx.beans.property.*;
 import javafx.event.ActionEvent;
@@ -8,7 +8,7 @@ import javafx.scene.layout.HBox;
 import org.controlsfx.control.ToggleSwitch;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import uiWeb.utils.UIUtils;
+import uiweb.utils.UIUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -20,21 +20,21 @@ public class ProgramFunctionController {
     final IntegerProperty currentLevel = new SimpleIntegerProperty();
     final IntegerProperty maxLevel = new SimpleIntegerProperty();
     private final StringProperty mainFunctionName = new SimpleStringProperty();
+
     @FXML
     public RadioButton autoPaneMode;
     public ToggleSwitch animationToggle;
     @FXML
     public ToggleGroup paneMode;
     @FXML
-    public MenuButton highlightSelectionButton; // Changed from Button to MenuButton
+    public MenuButton highlightSelectionButton;
     @FXML
     public RadioButton manualPaneMode;
-    @FXML
-    public ToggleGroup themes;
+
     Consumer<Integer> onExpandLevelChangeCallback;
-    Consumer<String> onVariableSelectionCallback; // NEW: Callback for variable selection
+    Consumer<String> onVariableSelectionCallback;
     Consumer<PaneMode> onPaneModeChangeCallback;
-    Consumer<Theme> onThemeSelectCallback;
+
     @FXML
     private Button collapseButton;
     @FXML
@@ -42,13 +42,13 @@ public class ProgramFunctionController {
     @FXML
     private Button expandButton;
     @FXML
-    private Button chooseLevelButton;     // New Change button
+    private Button chooseLevelButton;
     @FXML
     private MenuButton programFunctionSelect;
     @FXML
     private HBox root;
-    private Consumer<String> onFunctionSelectedCallback;
 
+    private Consumer<String> onFunctionSelectedCallback;
 
     @FXML
     void initialize() {
@@ -65,14 +65,11 @@ public class ProgramFunctionController {
                               @NotNull StringProperty mainFunctionName,
                               @NotNull MapProperty<String, String> allSubFunctions,
                               @NotNull Consumer<String> onFunctionSelectedCallback,
-                              @NotNull Consumer<Theme> onThemeSelectCallback,
-                              @NotNull BooleanProperty isAnimationsOn) { // NEW: Add variable selection
-        // callback
+                              @NotNull BooleanProperty isAnimationsOn) {
         this.onExpandLevelChangeCallback = onExpandLevelChangeCallback;
         this.onVariableSelectionCallback = OnVariableSelectionCallback;
-        this.onThemeSelectCallback = onThemeSelectCallback;
-
         this.onPaneModeChangeCallback = onPaneModeChangeCallback;
+
         collapseButton.disableProperty().bind(
                 programLoadedProperty.not()
                         .or(currentExpandLevelProperty.isEqualTo(0)));
@@ -84,7 +81,6 @@ public class ProgramFunctionController {
         chooseLevelButton.disableProperty().bind(
                 programLoadedProperty.not());
 
-        // NEW: Bind HighSelectionButton to programRanAtLeastOnce
         highlightSelectionButton.disableProperty().bind(
                 programLoadedProperty.not());
 
@@ -95,30 +91,19 @@ public class ProgramFunctionController {
         );
         currentLevel.bind(currentExpandLevelProperty);
         maxLevel.bind(MaxExpandLevelProperty);
-        programVariables.addListener((obs,
-                                      oldList, newList) ->
+        programVariables.addListener((obs, oldList, newList) ->
                 updateVariableDropdown(newList)
         );
         this.mainFunctionName.bind(mainFunctionName);
         this.onFunctionSelectedCallback = onFunctionSelectedCallback;
-        allSubFunctions.addListener((obs,
-                                     oldFuncMap, newFuncMap) ->
+        allSubFunctions.addListener((obs, oldFuncMap, newFuncMap) ->
                 populateFunctionsMenu(newFuncMap));
-        themes.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
-            if (newToggle != null) {
-                RadioMenuItem selectThemeButton = (RadioMenuItem) newToggle;
-                String themeName = selectThemeButton.getText();
-                onThemeSelect(themeName);
-            }
-        });
+
         isAnimationsOn.bind(animationToggle.selectedProperty());
     }
 
-
     /**
      * Updates the dropdown menu with available execution variables
-     *
-     * @param variables List of VariableDTO objects from ExecutionVariableController
      */
     public void updateVariableDropdown(@Nullable List<String> variables) {
         highlightSelectionButton.getItems().clear();
@@ -132,7 +117,7 @@ public class ProgramFunctionController {
 
         // Add "Clear Highlighting" option
         MenuItem clearItem = new MenuItem("Clear Highlighting");
-        clearItem.setOnAction(e -> onVariableSelectionCallback.accept(null)); // null means clear highlighting
+        clearItem.setOnAction(e -> onVariableSelectionCallback.accept(null));
 
         highlightSelectionButton.getItems().add(clearItem);
         highlightSelectionButton.getItems().add(new SeparatorMenuItem());
@@ -148,31 +133,7 @@ public class ProgramFunctionController {
         }
     }
 
-    private void onThemeSelect(String themeName) {
-        Theme selectedTheme;
-        switch (themeName.toLowerCase()) {
-            case "light (default)":
-                selectedTheme = Theme.LIGHT;
-                break;
-            case "dark":
-                selectedTheme = Theme.DARK;
-                break;
-            case "mac is the best (for aviad ;) )":
-                selectedTheme = Theme.MAC_IS_THE_BEST;
-                break;
-            case "windows is the worst (for aviad ;) )":
-                selectedTheme = Theme.WINDOWS_IS_THE_WORST;
-                break;
-            default:
-                System.out.println("Unknown theme selected: " + themeName);
-                return;
-        }
-        onThemeSelectCallback.accept(selectedTheme);
-    }
-
     private void populateFunctionsMenu(@NotNull Map<String, String> allSubFunctions) {
-
-        // Add main function
         programFunctionSelect.getItems().clear();
 
         if (allSubFunctions.isEmpty()) {
@@ -186,9 +147,8 @@ public class ProgramFunctionController {
 
         programFunctionSelect.getItems().add(mainFunctionItem);
 
-        // Add sub-functions if available
         if (!allSubFunctions.isEmpty()) {
-            programFunctionSelect.getItems().add(new SeparatorMenuItem()); // Separator for clarity
+            programFunctionSelect.getItems().add(new SeparatorMenuItem());
 
             for (Map.Entry<String, String> entry : allSubFunctions.entrySet()) {
                 MenuItem subFunctionItem = new MenuItem(entry.getValue());
@@ -216,7 +176,6 @@ public class ProgramFunctionController {
     private void handleChooseExpandLevel(ActionEvent event) {
         System.out.println("Change button pressed");
 
-        // Create input dialog for manual level entry
         TextInputDialog dialog = new TextInputDialog("current level: " + currentLevel.get());
         dialog.setTitle("Change Program Level");
         dialog.setHeaderText("Please enter the expand level you would like to change to:");
@@ -236,7 +195,6 @@ public class ProgramFunctionController {
     private void handleAutoModeSelected(ActionEvent event) {
         if (autoPaneMode.isSelected()) {
             System.out.println("Auto mode selected");
-            // Notify listener about the mode change
             onPaneModeChangeCallback.accept(PaneMode.AUTO);
         }
     }
@@ -245,7 +203,6 @@ public class ProgramFunctionController {
     private void handleManualModeSelected(ActionEvent event) {
         if (manualPaneMode.isSelected()) {
             System.out.println("Manual mode selected");
-            // Notify listener about the mode change
             onPaneModeChangeCallback.accept(PaneMode.MANUAL);
         }
     }

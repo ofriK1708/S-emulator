@@ -6,9 +6,9 @@
 <ScrollPane xmlns:fx="http://javafx.com/fxml/1"
             fitToHeight="true"
             fitToWidth="true"
-            stylesheets="@styles/execution.css"
+            stylesheets="@styles/style.css"
             xmlns="http://javafx.com/javafx/24.0.1"
-            fx:controller="uiWeb.jfx.AppController">
+            fx:controller="uiweb.jfx.AppController">
     <content>
         <BorderPane maxHeight="1.7976931348623157E308"
                     maxWidth="1.7976931348623157E308"
@@ -22,7 +22,7 @@
                     <padding>
                         <Insets bottom="8" left="12" right="12" top="8"/>
                     </padding>
-                    <!-- Execution Header with Back Button -->
+                    <!-- Execution Header-->
                     <fx:include fx:id="executionHeader"
                                 source="execution/header/executionheader.fxml"/>
 
@@ -174,13 +174,22 @@
                                                                 GridPane.rowIndex="3"
                                                                 GridPane.valignment="CENTER"
                                                                 GridPane.vgrow="ALWAYS"/>
-
-                                                    <Button fx:id="backToDashboardButton"
-                                                            text="← Back to Dashboard"
-                                                            onAction="#handleBackToDashboard"
-                                                            styleClass="header-button, back-button"/>
                                                 </children>
                                             </GridPane>
+                                        </content>
+                                    </TitledPane>
+
+                                    <!-- Statistics Section -->
+                                    <TitledPane fx:id="statisticsTitledPane"
+                                                alignment="CENTER"
+                                                text="Execution Statistics"
+                                                VBox.vgrow="ALWAYS">
+                                        <content>
+                                            <VBox alignment="CENTER" spacing="8.0">
+                                                <!-- Statistics content would go here -->
+                                                <Label text="Execution history will appear here after running the program"
+                                                       styleClass="placeholder-text"/>
+                                            </VBox>
                                         </content>
                                     </TitledPane>
                                 </VBox>

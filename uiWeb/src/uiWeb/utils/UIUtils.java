@@ -1,4 +1,4 @@
-package uiWeb.utils;
+package uiweb.utils;
 
 import dto.engine.ExecutionStatisticsDTO;
 import dto.ui.VariableDTO;
@@ -16,7 +16,8 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
 import system.controller.LocalEngineController;
-import ui.jfx.statistics.ShowRunController;
+import uiweb.jfx.AppController;
+//import uiweb.jfx.statistics.ShowRunController;
 
 import java.util.*;
 
@@ -26,14 +27,14 @@ public class UIUtils {
             Comparator.comparingInt(str -> Integer.parseInt(str.substring(1)));
     public static boolean showInfoAndSuccess = false;
     // Reference to AppController for re-run functionality
-    private static uiWeb.jfx.AppController appControllerInstance = null;
+    private static uiweb.jfx.AppController appControllerInstance = null;
 
     // for later use if needed
     public static void setShowInfoAndSuccess(boolean showInfoAndSuccess) {
         UIUtils.showInfoAndSuccess = showInfoAndSuccess;
     }
 
-    public static void setAppControllerInstance(uiWeb.jfx.AppController appController) {
+    public static void setAppControllerInstance(AppController appController) {
         appControllerInstance = appController;
         System.out.println("AppController instance set for UIUtils re-run functionality");
     }
@@ -120,8 +121,8 @@ public class UIUtils {
             Parent root = loader.load();
 
             // Get the controller and initialize it with data
-            ShowRunController controller = loader.getController();
-            controller.initializeWithData(executionStats, finalVariableStates);
+//            ShowRunController controller = loader.getController();
+//            controller.initializeWithData(executionStats, finalVariableStates);
 
             // Create and configure the dialog stage
             Stage dialogStage = new Stage();

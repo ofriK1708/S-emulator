@@ -1,4 +1,4 @@
-package uiWeb.jfx;
+package uiweb.jfx;
 
 public enum ProgramRunType {
     REGULAR,

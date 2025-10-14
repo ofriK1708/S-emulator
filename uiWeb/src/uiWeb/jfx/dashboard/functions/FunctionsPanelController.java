@@ -1,4 +1,4 @@
-package uiWeb.jfx.dashboard.functions;
+package uiweb.jfx.dashboard.functions;
 
 import dto.ui.FunctionDTO;
 import javafx.collections.FXCollections;

@@ -6,10 +6,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
-import static utils.ServletConstants.*;
+//import static utils.ServletConstants.*;
 
 public class Requests {
     private final static OkHttpClient HTTP_CLIENT = new OkHttpClient.Builder().build();
+    private static final String INFO_PARAM = "1nfo" ;
+    private static final String PROGRAM_NAME_PARAM = "programName";
+    private static final String EXPAND_LEVEL_PARAM = "expandLevel";
 
     public static void getRunAsync(String finalUrl, Callback callback) {
         Request request = new Request.Builder()
