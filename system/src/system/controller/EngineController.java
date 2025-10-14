@@ -17,6 +17,8 @@ public interface EngineController {
     void LoadProgramFromFile(@NotNull Path xmlFilePath) throws LabelNotExist, JAXBException, IOException,
             FunctionNotFound;
 
+    void loadProgram(String programName);
+
     ProgramDTO getBasicProgram() throws IOException;
 
     int getMaxExpandLevel();

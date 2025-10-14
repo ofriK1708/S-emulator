@@ -22,7 +22,9 @@ public class expandProgram extends HttpServlet {
         ServletUtils.expandParams expandParams;
         try {
             expandParams = ServletUtils.getAndValidateExpandParams(req, resp);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write("Error! " + e.getMessage());
             return;
         }
 
@@ -36,7 +38,7 @@ public class expandProgram extends HttpServlet {
             return;
         }
 
-        ProgramDTO programDTO = currentEngine.toDTO(expandLevel);
+        ProgramDTO programDTO = currentEngine.getProgramByExpandLevelDTO(expandLevel);
         String json = gson.toJson(programDTO);
         resp.getWriter().write(json);
     }

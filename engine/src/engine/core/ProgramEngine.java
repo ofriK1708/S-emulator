@@ -1,8 +1,9 @@
 package engine.core;
 
-import dto.engine.BreakpointDTO;
 import dto.engine.ExecutionStatisticsDTO;
+import dto.engine.FunctionMetadata;
 import dto.engine.ProgramDTO;
+import dto.engine.ProgramMetadata;
 import engine.core.syntheticCommand.Quote;
 import engine.exception.FunctionAlreadyExist;
 import engine.exception.FunctionNotFound;
@@ -25,6 +26,7 @@ import static engine.utils.ProgramUtils.*;
 public class ProgramEngine implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
+    private final String mainProgramName;
     private final String programName;
     private final Map<String, Integer> originalContextMap = new HashMap<>();
     private final List<Map<String, Integer>> contextMapsByExpandLevel = new ArrayList<>();
@@ -38,8 +40,7 @@ public class ProgramEngine implements Serializable {
     private @NotNull Set<String> originalLabels;
     private @Nullable SFunction originalSFunction = null;
     private @Nullable String funcName;
-    private final Map<Integer, BreakpointDTO> breakpoints = new HashMap<>(); // line -> breakpoint
-    private @Nullable Integer lastBreakpointHit = null; // Track which breakpoint was just hit
+    private final float averageCycles = 0;
 
 
     // Enhanced debugger fields with proper state management:
@@ -54,11 +55,11 @@ public class ProgramEngine implements Serializable {
 
 
     public ProgramEngine(@NotNull SProgram program) throws LabelNotExist, FunctionNotFound {
-        this.programName = program.getName();
+        this.programName = this.mainProgramName = program.getName();
 
         if (program.getSFunctions() != null) {
 
-            functionsAndProgramsInSystem = buildFunctions(program);
+            functionsAndProgramsInSystem = buildFunctions(program, mainProgramName);
 
             functionsAndProgramsInSystem.values().forEach(func -> func.setFunctions(functionsAndProgramsInSystem));
 
@@ -112,9 +113,10 @@ public class ProgramEngine implements Serializable {
         }
     }
 
-    public ProgramEngine(@NotNull SFunction function) throws LabelNotExist, FunctionNotFound {
+    public ProgramEngine(@NotNull SFunction function,
+                         @NotNull String mainProgramName) throws LabelNotExist, FunctionNotFound {
         this.programName = function.getName();
-
+        this.mainProgramName = mainProgramName;
         funcName = function.getUserString();
 
         SInstructions sInstructions = function.getSInstructions();
@@ -138,13 +140,14 @@ public class ProgramEngine implements Serializable {
                 .collect(Collectors.toSet());
     }
 
-    private @NotNull Map<String, ProgramEngine> buildFunctions(@NotNull SProgram program)
+    private @NotNull Map<String, ProgramEngine> buildFunctions(@NotNull SProgram program,
+                                                               @NotNull String mainProgramName)
             throws LabelNotExist, FunctionNotFound {
         Map<String, ProgramEngine> functionMap = new HashMap<>();
         List<SFunction> sFunctions = program.getSFunctions().getSFunction();
 
         for (SFunction sFunc : sFunctions) {
-            ProgramEngine engine = new ProgramEngine(sFunc);
+            ProgramEngine engine = new ProgramEngine(sFunc, mainProgramName);
             functionMap.put(engine.getProgramName(), engine);
         }
 
@@ -349,7 +352,7 @@ public class ProgramEngine implements Serializable {
         return ProgramUtils.getMaxExpandLevel(originalInstructions);
     }
 
-    public @NotNull ProgramDTO toDTO(int expandLevel) {
+    public @NotNull ProgramDTO getProgramByExpandLevelDTO(int expandLevel) {
         expand(expandLevel);
         Map<String, Integer> argsMap = ProgramUtils.extractSortedArguments(contextMapsByExpandLevel.get(expandLevel));
         List<Instruction> instructionsAtLevel = instructionExpansionLevels.get(expandLevel);
@@ -361,6 +364,10 @@ public class ProgramEngine implements Serializable {
                         .mapToObj(i -> instructionsAtLevel.get(i).toDTO(i))
                         .toList()
         );
+    }
+
+    public @NotNull ProgramDTO getBasicProgramDTO() {
+        return getProgramByExpandLevelDTO(0);
     }
 
     public @NotNull List<ExecutionStatisticsDTO> getAllExecutionStatistics() {
@@ -472,8 +479,6 @@ public class ProgramEngine implements Serializable {
         currentDebugPC = 0;
         currentDebugStatistics = null;
         debugMode = true;
-        lastBreakpointHit = null;
-
     }
 
     public void debugStep() {
@@ -516,12 +521,12 @@ public class ProgramEngine implements Serializable {
             throw new IllegalStateException("Debug session not started");
         }
 
+        // Reset breakpoint statuses at start of resume
 
         // Execute remaining instructions, stopping at breakpoints
         while (currentDebugPC < currentDebugInstructions.size()) {
             executeStep();
-
-       }
+        }
 
         System.out.println("Resume completed - reached end of program");
     }
@@ -653,6 +658,28 @@ public class ProgramEngine implements Serializable {
     public void finalizeDebugExecution() {
         if (debugMode && currentDebugStatistics != null && isDebugFinished()) {
             finalizeDebugStatistics();
+        }
+    }
+
+    // TODO - implement user management and replace userFiller
+    public @NotNull ProgramMetadata programToMetadata() {
+        if (!isFunction()) {
+            String userFiller = "remove_me"; // Placeholder until user management is implemented
+            return new ProgramMetadata(programName, userFiller,
+                    originalInstructions.size(), getMaxExpandLevel(),
+                    executionStatisticsList.size(), averageCycles);
+        } else {
+            throw new IllegalStateException("Cannot get metadata for a function from a program");
+        }
+    }
+
+    public @NotNull FunctionMetadata functionToMetadata() {
+        if (isFunction()) {
+            String userFiller = "remove_me"; // Placeholder until user management is implemented
+            return new FunctionMetadata(programName, mainProgramName, userFiller,
+                    originalInstructions.size(), getMaxExpandLevel());
+        } else {
+            throw new IllegalStateException("Cannot get metadata for a program from a function");
         }
     }
 

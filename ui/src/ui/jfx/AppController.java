@@ -1,6 +1,5 @@
 package ui.jfx;
 
-import dto.engine.BreakpointDTO;
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
@@ -168,7 +167,6 @@ public class AppController {
             cyclesController.initComponent(currentCycles);
             instructionsTableController.initializeMainInstructionTable(programInstructions, derivedInstructions,
                     isAnimationsOn);
-            instructionsTableController.initializeBreakpointSupport(this::handleBreakpointToggle);
             derivedInstructionsTableController.markAsDerivedInstructionsTable();
             derivedInstructionsTableController.setDerivedInstructionsTable(derivedInstructions, isAnimationsOn);
             argumentsTableController.initArgsTable(argumentsDTO, isAnimationsOn);
@@ -194,32 +192,6 @@ public class AppController {
         } else {
             System.err.println("One or more controllers are not injected properly!");
             throw new IllegalStateException("FXML injection failed: required controllers are null.");
-        }
-    }
-
-    /**
-     * Handles breakpoint toggle request from the instruction table.
-     * Called when user right-clicks on an instruction line.
-     *
-     * @param lineNumber The line number where user wants to toggle breakpoint
-     */
-    private void handleBreakpointToggle(int lineNumber) {
-        try {
-            boolean nowHasBreakpoint = localEngineController.toggleBreakpoint(lineNumber);
-
-            // Refresh breakpoint display
-            List<BreakpointDTO> allBreakpoints = localEngineController.getAllBreakpoints();
-            instructionsTableController.updateBreakpoints(allBreakpoints);
-
-            if (nowHasBreakpoint) {
-                showInfo("Breakpoint set at line " + (lineNumber + 1));
-            } else {
-                showInfo("Breakpoint removed from line " + (lineNumber + 1));
-            }
-
-        } catch (Exception e) {
-            System.err.println("Error toggling breakpoint: " + e.getMessage());
-            showError("Error toggling breakpoint: " + e.getMessage());
         }
     }
 
@@ -459,8 +431,6 @@ public class AppController {
         allVariablesDTO.clear();
         argumentsDTO.clear();
         currentCycles.set(0);
-        List<BreakpointDTO> existingBreakpoints = localEngineController.getAllBreakpoints();
-        instructionsTableController.updateBreakpoints(existingBreakpoints);
         summaryLineController.updateCounts(loadedProgram.instructions());
         programVariablesNamesAndLabels.setAll(sortAllProgramNames(localEngineController.
                 getAllVariablesAndLabelsNames(0, true)));
@@ -624,7 +594,6 @@ public class AppController {
         currentExpandLevel.set(0);
         loadedProgram = null;
         programArguments.clear();
-        localEngineController.clearAllBreakpoints();
         instructionsTableController.updateBreakpoints(Collections.emptyList());
 
         localEngineController.clearLoadedProgram();
@@ -640,7 +609,6 @@ public class AppController {
         programVariablesNamesAndLabels.clear();
         allSubFunction.clear();
         previousDebugVariables.clear();
-        localEngineController.clearAllBreakpoints();
         isFirstDebugStep = true;
         inDebugSession = false;
         debugMode.set(false);
@@ -781,12 +749,6 @@ public class AppController {
                 isFirstDebugStep = false;
             }
 
-            // Check if we hit a breakpoint at the new PC location
-            if (localEngineController.hasBreakpointAt(currentPC)) {
-                instructionsTableController.highlightBreakpointHit(currentPC);
-                showInfo("Breakpoint hit at line " + (currentPC + 1) + ". Execution paused.");
-            }
-
             if (localEngineController.isDebugFinished()) {
                 executionStatistics.setAll(localEngineController.getAllExecutionStatistics());
                 handleExecutionFinished();
@@ -866,18 +828,6 @@ public class AppController {
             highlightCurrentInstruction(currentPC);
             updateDebugVariableState();
 
-            // Check if we stopped at a breakpoint
-            Integer breakpointHit = localEngineController.getLastBreakpointHit();
-            if (breakpointHit != null) {
-                // Stopped at breakpoint - highlight it
-                instructionsTableController.highlightBreakpointHit(breakpointHit);
-                showInfo("Breakpoint hit at line " + (breakpointHit + 1) +
-                        ". Execution paused.\nPC: " + currentPC +
-                        ", Total cycles: " + currentCycles.get());
-            } else if (localEngineController.isDebugFinished()) {
-                handleExecutionFinished();
-            }
-
         } catch (Exception e) {
             e.printStackTrace();
             showError("Error during debug resume: " + e.getMessage());
@@ -915,8 +865,6 @@ public class AppController {
         instructionsTableController.clearBreakpointHitHighlight();
 
         // Get current breakpoints with ACTIVE status (not HIT)
-        List<BreakpointDTO> currentBreakpoints = localEngineController.getAllBreakpoints();
-        instructionsTableController.updateBreakpoints(currentBreakpoints);
 
         System.out.println("Debug session ended - ready for new execution");
     }

@@ -1,5 +1,7 @@
 package logic.manager;
 
+import dto.engine.FunctionMetadata;
+import dto.engine.ProgramMetadata;
 import engine.core.ProgramEngine;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -7,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ProgramManager {
     @NotNull
@@ -40,11 +43,14 @@ public class ProgramManager {
                 }
             }
         }
+
     }
 
-    public Map<String, ProgramEngine> getPrograms() {
+    public Set<ProgramMetadata> getProgramsMetadata() {
         synchronized (programsAndFunctionsListLock) {
-            return programs;
+            return programs.values().stream()
+                    .map(ProgramEngine::programToMetadata)
+                    .collect(Collectors.toSet());
         }
     }
 
@@ -60,9 +66,11 @@ public class ProgramManager {
         }
     }
 
-    public Map<String, ProgramEngine> getFunctions() {
+    public Set<FunctionMetadata> getFunctionsMetadata() {
         synchronized (programsAndFunctionsListLock) {
-            return functions;
+            return functions.values().stream()
+                    .map(ProgramEngine::functionToMetadata)
+                    .collect(Collectors.toSet());
         }
     }
 

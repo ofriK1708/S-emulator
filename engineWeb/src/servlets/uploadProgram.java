@@ -1,5 +1,7 @@
 package servlets;
 
+import com.google.gson.Gson;
+import dto.system.LoadProgramResultDTO;
 import engine.core.ProgramEngine;
 import engine.generated_2.SProgram;
 import jakarta.servlet.ServletException;
@@ -26,6 +28,7 @@ public class uploadProgram extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         SProgram program = getSProgramFromRequest(req, resp);
+        Gson json = new Gson();
         if (program != null) {
             ProgramManager programManager = ServletUtils.getProgramManager(getServletContext());
             String programName = program.getName();
@@ -44,7 +47,11 @@ public class uploadProgram extends HttpServlet {
                         engine.finishInitProgram(programManager.getFunctionsAndPrograms());
                         programManager.addProgram(programName, engine);
                         resp.setStatus(HttpServletResponse.SC_OK);
-                        resp.getWriter().println("Program " + programName + " uploaded successfully");
+                        resp.setContentType("application/json");
+                        LoadProgramResultDTO resultDTO = new LoadProgramResultDTO(
+                                programManager.getProgramsMetadata(), programManager.getFunctionsMetadata());
+                        resp.getWriter().println(json.toJson(resultDTO));
+                        System.out.println("Program " + programName + " uploaded successfully.");
 
                     } catch (Exception e) {
                         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -64,14 +71,26 @@ public class uploadProgram extends HttpServlet {
             return xmlHandler.unmarshallFile(xmlFilePart.getInputStream());
         } catch (JAXBException e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.setContentType("text/plain");
             resp.getWriter().println("Failed to parse XML file: " + e.getMessage());
             return null;
         } catch (ServletException | IOException e) {
+            resp.setContentType("text/plain");
             resp.getWriter().println("Failed to process uploaded file: " + e.getMessage());
             return null;
         }
     }
 
+    /**
+     * Validates the uploaded file to ensure it is an XML file. two checks are performed:
+     * 1. Content type check: The content type of the uploaded file is checked to be "application/xml" or "text/xml".
+     * 2. File extension check: The file name is checked to ensure it ends with ".xml".
+     *
+     * @param resp     The HttpServletResponse to set error status if validation fails.
+     * @param filePart The uploaded file part to validate.
+     * @throws IOException      If an I/O error occurs during validation.
+     * @throws ServletException If the file is not a valid XML file.
+     */
     private void validateFile(HttpServletResponse resp, Part filePart)
             throws IOException, ServletException {
 
