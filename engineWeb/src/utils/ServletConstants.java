@@ -7,6 +7,8 @@ public class ServletConstants {
     public static final String FUNCTIONS_NAMES_INFO = "functionsNames";
     public static final String ALL_NAMES_INFO = "allNames";
     public static final String PROGRAM_NAME_PARAM = "programName";
+    public static final String BASIC_PROGRAM = "basicProgram";
+    public static final String PROGRAM_BY_EXPAND_LEVEL = "programByExpandLevel";
     public static final String EXPAND_LEVEL_PARAM = "expandLevel";
     public static final String MAX_EXPAND_LEVEL = "maxExpandLevel";
     public static final String ALL_VARIABLES_AND_LABELS = "allVariablesAndLabels";

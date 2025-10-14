@@ -1,6 +1,5 @@
 package servlets;
 
-import com.google.gson.Gson;
 import engine.core.ProgramEngine;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -16,11 +15,12 @@ import java.util.Map;
 public class runProgram extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Gson gson = new Gson();
         ServletUtils.runAndDebugParams runAndDebugParams;
         try {
             runAndDebugParams = ServletUtils.getAndValidateRunAndDebugParams(req, resp);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write("Error! " + e.getMessage());
             return;
         }
         String programName = runAndDebugParams.programName();

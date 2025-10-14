@@ -49,6 +49,12 @@ public class getProgramInfo extends HttpServlet {
         }
         System.out.println("current program: " + currentEngine.getProgramName() + ", info requested: " + infoToGet);
         switch (infoToGet) {
+            case BASIC_PROGRAM:
+                resp.getWriter().println(gson.toJson(currentEngine.getBasicProgramDTO()));
+                break;
+            case PROGRAM_BY_EXPAND_LEVEL:
+                resp.getWriter().println(gson.toJson(currentEngine.getProgramByExpandLevelDTO(expandLevel)));
+                break;
             case MAX_EXPAND_LEVEL:
                 resp.getWriter().println(gson.toJson(currentEngine.getMaxExpandLevel()));
                 resp.setStatus(HttpServletResponse.SC_OK);

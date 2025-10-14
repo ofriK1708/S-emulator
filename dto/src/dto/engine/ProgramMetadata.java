@@ -1,6 +1,11 @@
 package dto.engine;
 
-public record ProgramMetadata(String name, String uploadedBy, int numOfInstructions, int maxLevel,
+import org.jetbrains.annotations.NotNull;
+
+public record ProgramMetadata(@NotNull String name,
+                              @NotNull String uploadedBy,
+                              int numOfInstructions,
+                              int maxExpandLevel,
                               int numberOfExecutions,
                               float averageCycles) {
 }

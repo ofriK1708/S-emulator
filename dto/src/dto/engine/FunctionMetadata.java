@@ -1,5 +1,10 @@
 package dto.engine;
 
-public record FunctionMetadata(String name, String ProgramContext, String uploadedBy, int numOfInstructions,
-                               int maxLevel) {
+import org.jetbrains.annotations.NotNull;
+
+public record FunctionMetadata(@NotNull String name,
+                               @NotNull String ProgramContext,
+                               @NotNull String uploadedBy,
+                               int numOfInstructions,
+                               int maxExpandLevel) {
 }

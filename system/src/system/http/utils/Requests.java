@@ -10,13 +10,13 @@ import java.util.Objects;
 
 public class Requests {
     private final static OkHttpClient HTTP_CLIENT = new OkHttpClient.Builder().build();
-    private static final String INFO_PARAM = "1nfo" ;
+    private static final String INFO_PARAM = "1nfo";
     private static final String PROGRAM_NAME_PARAM = "programName";
     private static final String EXPAND_LEVEL_PARAM = "expandLevel";
 
-    public static void getRunAsync(String finalUrl, Callback callback) {
+    public static void getRunAsync(String serverEndpoint, Callback callback) {
         Request request = new Request.Builder()
-                .url(finalUrl)
+                .url(serverEndpoint)
                 .build();
 
         Call call = HTTP_CLIENT.newCall(request);
@@ -24,9 +24,9 @@ public class Requests {
         call.enqueue(callback);
     }
 
-    public static void postRunAsync(String finalUrl, String jsonBody, Callback callback) {
+    public static void uploadFileAsync(String serverEndpoint, String jsonBody, Callback callback) {
         Request request = new Request.Builder()
-                .url(finalUrl)
+                .url(serverEndpoint)
                 .post(RequestBody.create(jsonBody, MediaType.parse("application/json")))
                 .build();
 
@@ -35,7 +35,7 @@ public class Requests {
         call.enqueue(callback);
     }
 
-    public static void postRunAsync(String finalUrl, File xmlFile, Callback callback) {
+    public static void uploadFileAsync(String serverEndpoint, File xmlFile, Callback callback) {
         RequestBody fileBody = RequestBody.create(xmlFile, MediaType.parse("application/xml"));
         MultipartBody requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
@@ -43,7 +43,7 @@ public class Requests {
                 .build();
 
         Request request = new Request.Builder()
-                .url(finalUrl)
+                .url(serverEndpoint)
                 .post(requestBody)
                 .build();
 
@@ -52,16 +52,16 @@ public class Requests {
         call.enqueue(callback);
     }
 
-    public static Response getProgramInfoSync(String finalUrl, String info, String programName, int expandLevel)
+    public static Response getProgramInfoSync(String serverEndpoint, String info, String programName, int expandLevel)
             throws IOException {
-        HttpUrl url = Objects.requireNonNull(HttpUrl.parse(finalUrl)).newBuilder()
+        HttpUrl url = Objects.requireNonNull(HttpUrl.parse(serverEndpoint)).newBuilder()
                 .addQueryParameter(INFO_PARAM, info)
                 .addQueryParameter(PROGRAM_NAME_PARAM, programName)
                 .addQueryParameter(EXPAND_LEVEL_PARAM, String.valueOf(expandLevel))
                 .build();
         System.out.println("about to send request to: " + url);
         Request request = new Request.Builder()
-                .url(finalUrl)
+                .url(serverEndpoint)
                 .build();
 
         Call call = HTTP_CLIENT.newCall(request);
@@ -69,7 +69,33 @@ public class Requests {
         return call.execute();
     }
 
-    public static Response getProgramInfoSync(String finalUrl, String info, String programName) throws IOException {
-        return getProgramInfoSync(finalUrl, info, programName, -1);
+    /* Overloaded method without expandLevel parameter */
+    public static Response getProgramInfoSync(String serverEndpoint, String info, String programName) throws IOException {
+        return getProgramInfoSync(serverEndpoint, info, programName, -1);
+    }
+
+    public static Response postRunProgramSync(String serverEndpoint, String currentLoadedProgramName, int expandLevel,
+                                              String jsonArguments) throws IOException {
+        HttpUrl url = Objects.requireNonNull(HttpUrl.parse(serverEndpoint)).newBuilder()
+                .addQueryParameter(PROGRAM_NAME_PARAM, currentLoadedProgramName)
+                .addQueryParameter(EXPAND_LEVEL_PARAM, String.valueOf(expandLevel))
+                .build();
+
+        System.out.println("about to send request to: " + url);
+
+        RequestBody body = RequestBody.create(jsonArguments, MediaType.parse("application/json"));
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        Call call = HTTP_CLIENT.newCall(request);
+
+        return call.execute();
+    }
+
+    public static Response postDebugProgramSync(String serverEndpoint, String currentLoadedProgramName, int expandLevel,
+                                                String jsonArguments) throws IOException {
+        return postRunProgramSync(serverEndpoint, currentLoadedProgramName, expandLevel, jsonArguments);
     }
 }

@@ -1,8 +1,9 @@
 package engine.core;
 
-import dto.engine.BreakpointDTO;
 import dto.engine.ExecutionStatisticsDTO;
+import dto.engine.FunctionMetadata;
 import dto.engine.ProgramDTO;
+import dto.engine.ProgramMetadata;
 import engine.core.syntheticCommand.Quote;
 import engine.exception.FunctionAlreadyExist;
 import engine.exception.FunctionNotFound;
@@ -25,6 +26,7 @@ import static engine.utils.ProgramUtils.*;
 public class ProgramEngine implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
+    private final String mainProgramName;
     private final String programName;
     private final Map<String, Integer> originalContextMap = new HashMap<>();
     private final List<Map<String, Integer>> contextMapsByExpandLevel = new ArrayList<>();
@@ -38,8 +40,7 @@ public class ProgramEngine implements Serializable {
     private @NotNull Set<String> originalLabels;
     private @Nullable SFunction originalSFunction = null;
     private @Nullable String funcName;
-    private final Map<Integer, BreakpointDTO> breakpoints = new HashMap<>(); // line -> breakpoint
-    private @Nullable Integer lastBreakpointHit = null; // Track which breakpoint was just hit
+    private final float averageCycles = 0;
 
 
     // Enhanced debugger fields with proper state management:
@@ -54,11 +55,11 @@ public class ProgramEngine implements Serializable {
 
 
     public ProgramEngine(@NotNull SProgram program) throws LabelNotExist, FunctionNotFound {
-        this.programName = program.getName();
+        this.programName = this.mainProgramName = program.getName();
 
         if (program.getSFunctions() != null) {
 
-            functionsAndProgramsInSystem = buildFunctions(program);
+            functionsAndProgramsInSystem = buildFunctions(program, mainProgramName);
 
             functionsAndProgramsInSystem.values().forEach(func -> func.setFunctions(functionsAndProgramsInSystem));
 
@@ -112,9 +113,10 @@ public class ProgramEngine implements Serializable {
         }
     }
 
-    public ProgramEngine(@NotNull SFunction function) throws LabelNotExist, FunctionNotFound {
+    public ProgramEngine(@NotNull SFunction function,
+                         @NotNull String mainProgramName) throws LabelNotExist, FunctionNotFound {
         this.programName = function.getName();
-
+        this.mainProgramName = mainProgramName;
         funcName = function.getUserString();
 
         SInstructions sInstructions = function.getSInstructions();
@@ -138,13 +140,14 @@ public class ProgramEngine implements Serializable {
                 .collect(Collectors.toSet());
     }
 
-    private @NotNull Map<String, ProgramEngine> buildFunctions(@NotNull SProgram program)
+    private @NotNull Map<String, ProgramEngine> buildFunctions(@NotNull SProgram program,
+                                                               @NotNull String mainProgramName)
             throws LabelNotExist, FunctionNotFound {
         Map<String, ProgramEngine> functionMap = new HashMap<>();
         List<SFunction> sFunctions = program.getSFunctions().getSFunction();
 
         for (SFunction sFunc : sFunctions) {
-            ProgramEngine engine = new ProgramEngine(sFunc);
+            ProgramEngine engine = new ProgramEngine(sFunc, mainProgramName);
             functionMap.put(engine.getProgramName(), engine);
         }
 
@@ -349,7 +352,7 @@ public class ProgramEngine implements Serializable {
         return ProgramUtils.getMaxExpandLevel(originalInstructions);
     }
 
-    public @NotNull ProgramDTO toDTO(int expandLevel) {
+    public @NotNull ProgramDTO getProgramByExpandLevelDTO(int expandLevel) {
         expand(expandLevel);
         Map<String, Integer> argsMap = ProgramUtils.extractSortedArguments(contextMapsByExpandLevel.get(expandLevel));
         List<Instruction> instructionsAtLevel = instructionExpansionLevels.get(expandLevel);
@@ -361,6 +364,10 @@ public class ProgramEngine implements Serializable {
                         .mapToObj(i -> instructionsAtLevel.get(i).toDTO(i))
                         .toList()
         );
+    }
+
+    public @NotNull ProgramDTO getBasicProgramDTO() {
+        return getProgramByExpandLevelDTO(0);
     }
 
     public @NotNull List<ExecutionStatisticsDTO> getAllExecutionStatistics() {
@@ -472,8 +479,6 @@ public class ProgramEngine implements Serializable {
         currentDebugPC = 0;
         currentDebugStatistics = null;
         debugMode = true;
-        lastBreakpointHit = null;
-
     }
 
     public void debugStep() {
@@ -485,11 +490,6 @@ public class ProgramEngine implements Serializable {
             return; // Already at the end
         }
 
-        // Reset any previous breakpoint HIT statuses before stepping
-        resetBreakpointStatuses();
-        if (shouldStopAtBreakpoint()) {
-            markBreakpointHit();
-        }
         // Execute current instruction
         executeStep();
     }
@@ -522,17 +522,10 @@ public class ProgramEngine implements Serializable {
         }
 
         // Reset breakpoint statuses at start of resume
-        resetBreakpointStatuses();
 
         // Execute remaining instructions, stopping at breakpoints
         while (currentDebugPC < currentDebugInstructions.size()) {
             executeStep();
-
-            if (shouldStopAtBreakpoint()) {
-                markBreakpointHit();
-                System.out.println("Resume stopped at breakpoint at line " + currentDebugPC);
-                return; // Stop execution here
-            }
         }
 
         System.out.println("Resume completed - reached end of program");
@@ -668,106 +661,26 @@ public class ProgramEngine implements Serializable {
         }
     }
 
-
-    /**
-     * Adds or updates a breakpoint at the specified line number.
-     *
-     * @param breakpoint The breakpoint to add
-     */
-    public void addBreakpoint(@NotNull BreakpointDTO breakpoint) {
-        if (!debugMode) {
-            throw new IllegalStateException("Cannot add breakpoints outside of debug session");
-        }
-
-        // Validate line number
-        if (breakpoint.lineNumber() < 0 || breakpoint.lineNumber() >= currentDebugInstructions.size()) {
-            System.err.println("Invalid breakpoint line: " + breakpoint.lineNumber() +
-                    " (valid range: 0-" + (currentDebugInstructions.size() - 1) + ")");
-        }
-
-        breakpoints.put(breakpoint.lineNumber(), breakpoint);
-        System.out.println("Breakpoint added at line " + breakpoint.lineNumber() +
-                (breakpoint.condition() != null ? " with condition: " + breakpoint.condition() : ""));
-    }
-
-    /**
-     * Removes a breakpoint at the specified line number.
-     *
-     * @param lineNumber The line number to remove breakpoint from
-     */
-    public void removeBreakpoint(int lineNumber) {
-        BreakpointDTO removed = breakpoints.remove(lineNumber);
-        if (removed != null) {
-            System.out.println("Breakpoint removed from line " + lineNumber);
+    // TODO - implement user management and replace userFiller
+    public @NotNull ProgramMetadata programToMetadata() {
+        if (!isFunction()) {
+            String userFiller = "remove_me"; // Placeholder until user management is implemented
+            return new ProgramMetadata(programName, userFiller,
+                    originalInstructions.size(), getMaxExpandLevel(),
+                    executionStatisticsList.size(), averageCycles);
+        } else {
+            throw new IllegalStateException("Cannot get metadata for a function from a program");
         }
     }
 
-    /**
-     * Removes all breakpoints.
-     */
-    public void clearAllBreakpoints() {
-        int count = breakpoints.size();
-        breakpoints.clear();
-        lastBreakpointHit = null;
-        System.out.println("Cleared " + count + " breakpoint(s)");
-    }
-
-    /**
-     * Gets all currently set breakpoints.
-     *
-     * @return List of all breakpoints (defensive copy)
-     */
-    public @NotNull List<BreakpointDTO> getAllBreakpoints() {
-        return new ArrayList<>(breakpoints.values());
-    }
-
-    /**
-     * Gets the breakpoint that was last hit during execution.
-     *
-     * @return The line number of the last hit breakpoint, or null if none
-     */
-    public @Nullable Integer getLastBreakpointHit() {
-        return lastBreakpointHit;
-    }
-
-    /**
-     * Checks if execution should stop at the current PC due to a breakpoint.
-     * Evaluates conditions if present.
-     */
-    private boolean shouldStopAtBreakpoint() {
-        if (!debugMode || currentDebugPC >= currentDebugInstructions.size()) {
-            return false;
+    public @NotNull FunctionMetadata functionToMetadata() {
+        if (isFunction()) {
+            String userFiller = "remove_me"; // Placeholder until user management is implemented
+            return new FunctionMetadata(programName, mainProgramName, userFiller,
+                    originalInstructions.size(), getMaxExpandLevel());
+        } else {
+            throw new IllegalStateException("Cannot get metadata for a program from a function");
         }
-
-        BreakpointDTO breakpoint = breakpoints.get(currentDebugPC);
-        return breakpoint != null && breakpoint.enabled();
-        // Note: Ignores breakpoint.condition() entirely
-    }
-
-    /**
-     * Updates the breakpoint status to HIT for the current PC.
-     */
-    private void markBreakpointHit() {
-        BreakpointDTO breakpoint = breakpoints.get(currentDebugPC);
-        if (breakpoint != null) {
-            // Update status to HIT
-            breakpoints.put(currentDebugPC, breakpoint.withStatus(BreakpointDTO.BreakpointStatus.HIT));
-            lastBreakpointHit = currentDebugPC;
-            System.out.println("Breakpoint hit at line " + currentDebugPC);
-        }
-    }
-
-    /**
-     * Resets all breakpoint HIT statuses back to ACTIVE.
-     */
-    private void resetBreakpointStatuses() {
-        for (Map.Entry<Integer, BreakpointDTO> entry : breakpoints.entrySet()) {
-            BreakpointDTO bp = entry.getValue();
-            if (bp.status() == BreakpointDTO.BreakpointStatus.HIT) {
-                breakpoints.put(entry.getKey(), bp.withStatus(BreakpointDTO.BreakpointStatus.ACTIVE));
-            }
-        }
-        lastBreakpointHit = null;
     }
 
 }
