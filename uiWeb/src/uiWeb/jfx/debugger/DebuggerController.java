@@ -1,4 +1,4 @@
-package uiweb.jfx.debugger;
+package uiWeb.jfx.debugger;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;

@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml"
             xmlns="http://javafx.com/javafx"
-            fx:controller="uiweb.jfx.dashboard.programs.ProgramsPanelController"
+            fx:controller="uiWeb.jfx.dashboard.programs.ProgramsPanelController"
             styleClass="panel-container, programs-panel">
 
     <VBox AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"

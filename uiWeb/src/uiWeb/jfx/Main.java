@@ -1,4 +1,4 @@
-package uiweb.jfx;
+package uiWeb.jfx;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -6,7 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
-import uiweb.jfx.dashboard.DashboardController;
+import uiWeb.jfx.dashboard.DashboardController;
 
 import java.net.URL;
 

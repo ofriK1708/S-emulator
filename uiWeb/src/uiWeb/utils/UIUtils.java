@@ -1,4 +1,4 @@
-package uiweb.utils;
+package uiWeb.utils;
 
 import dto.engine.ExecutionStatisticsDTO;
 import dto.ui.VariableDTO;
@@ -16,8 +16,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
 import system.controller.LocalEngineController;
-import uiweb.jfx.AppController;
-//import uiweb.jfx.statistics.ShowRunController;
+import uiWeb.jfx.AppController;
 
 import java.util.*;
 
@@ -27,7 +26,7 @@ public class UIUtils {
             Comparator.comparingInt(str -> Integer.parseInt(str.substring(1)));
     public static boolean showInfoAndSuccess = false;
     // Reference to AppController for re-run functionality
-    private static uiweb.jfx.AppController appControllerInstance = null;
+    private static uiWeb.jfx.AppController appControllerInstance = null;
 
     // for later use if needed
     public static void setShowInfoAndSuccess(boolean showInfoAndSuccess) {

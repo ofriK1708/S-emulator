@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" minHeight="100.0" xmlns="http://javafx.com/javafx/24.0.1"
-            fx:controller="uiweb.jfx.instruction.InstructionTableController">
+            fx:controller="uiWeb.jfx.instruction.InstructionTableController">
     <children>
         <TableView fx:id="instructionTable" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                    minWidth="600.0" stylesheets="@InstructionsTableStyle.css" AnchorPane.bottomAnchor="0.0"

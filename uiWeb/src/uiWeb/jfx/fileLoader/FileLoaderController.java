@@ -1,4 +1,4 @@
-package uiweb.jfx.fileLoader;
+package uiWeb.jfx.fileLoader;
 
 import dto.engine.ProgramDTO;
 import javafx.beans.binding.Bindings;
@@ -7,7 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import org.jetbrains.annotations.NotNull;
 import system.controller.EngineController;
-import uiweb.utils.UIUtils;
+import uiWeb.utils.UIUtils;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -26,7 +26,7 @@ public class FileLoaderController {
     private ProgressBar progressBar;
 
     public void initializeAndRunFileLoaderTaskThread(@NotNull Path filePath, EngineController engineController,
-                                                     uiweb.jfx.fileLoader.UIAdapterLoadFileTask uiAdapter) {
+                                                     uiWeb.jfx.fileLoader.UIAdapterLoadFileTask uiAdapter) {
         fileNameLabel.setText(filePath.toString());
         percentLabel.setText("0%");
         progressBar.setProgress(0);

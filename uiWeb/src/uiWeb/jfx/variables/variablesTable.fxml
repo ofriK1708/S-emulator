@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12"
-            fx:controller="uiweb.jfx.variables.VariablesTableController">
+            fx:controller="uiWeb.jfx.variables.VariablesTableController">
     <children>
         <TableView fx:id="variablesTable" layoutX="10.0" layoutY="5.0" styleClass="table-view"
                    stylesheets="@variablesTable.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"

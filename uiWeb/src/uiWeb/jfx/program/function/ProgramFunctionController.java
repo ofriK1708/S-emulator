@@ -1,4 +1,4 @@
-package uiweb.jfx.program.function;
+package uiWeb.jfx.program.function;
 
 import javafx.beans.property.*;
 import javafx.event.ActionEvent;
@@ -8,7 +8,7 @@ import javafx.scene.layout.HBox;
 import org.controlsfx.control.ToggleSwitch;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import uiweb.utils.UIUtils;
+import uiWeb.utils.UIUtils;
 
 import java.util.List;
 import java.util.Map;

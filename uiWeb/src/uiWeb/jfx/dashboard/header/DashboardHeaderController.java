@@ -1,4 +1,4 @@
-package uiweb.jfx.dashboard.header;
+package uiWeb.jfx.dashboard.header;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.StringProperty;

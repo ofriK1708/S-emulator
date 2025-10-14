@@ -1,4 +1,4 @@
-package uiweb.jfx.dashboard;
+package uiWeb.jfx.dashboard;
 
 import javafx.beans.property.*;
 import javafx.fxml.FXML;
@@ -9,12 +9,12 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
-import uiweb.jfx.AppController;
-import uiweb.jfx.dashboard.functions.FunctionsPanelController;
-import uiweb.jfx.dashboard.header.DashboardHeaderController;
-import uiweb.jfx.dashboard.history.HistoryPanelController;
-import uiweb.jfx.dashboard.programs.ProgramsPanelController;
-import uiweb.jfx.dashboard.users.UsersPanelController;
+import uiWeb.jfx.AppController;
+import uiWeb.jfx.dashboard.functions.FunctionsPanelController;
+import uiWeb.jfx.dashboard.header.DashboardHeaderController;
+import uiWeb.jfx.dashboard.history.HistoryPanelController;
+import uiWeb.jfx.dashboard.programs.ProgramsPanelController;
+import uiWeb.jfx.dashboard.users.UsersPanelController;
 
 import java.io.File;
 import java.net.URL;

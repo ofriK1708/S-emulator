@@ -1,4 +1,4 @@
-package uiweb.jfx.runControls;
+package uiWeb.jfx.runControls;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -9,7 +9,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import uiweb.jfx.ProgramRunType;
+import uiWeb.jfx.ProgramRunType;
 
 import java.util.function.Consumer;
 

@@ -1,4 +1,4 @@
-package uiweb.jfx.VariableInputDialog;
+package uiWeb.jfx.VariableInputDialog;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -10,7 +10,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
-import uiweb.utils.UIUtils;
+import uiWeb.utils.UIUtils;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package uiweb.utils;
+package uiWeb.utils;
 
 import javafx.animation.FadeTransition;
 import javafx.beans.property.BooleanProperty;

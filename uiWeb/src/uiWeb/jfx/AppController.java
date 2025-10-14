@@ -1,4 +1,4 @@
-package uiweb.jfx;
+package uiWeb.jfx;
 
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.InstructionDTO;
@@ -22,26 +22,26 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import system.controller.EngineController;
 import system.controller.LocalEngineController;
-import uiweb.jfx.VariableInputDialog.VariableInputDialogController;
-import uiweb.jfx.cycles.CyclesController;
-import uiweb.jfx.debugger.DebuggerController;
-import uiweb.jfx.execution.header.ExecutionHeaderController;
-import uiweb.jfx.fileLoader.FileLoaderController;
-import uiweb.jfx.fileLoader.UIAdapterLoadFileTask;
-import uiweb.jfx.instruction.InstructionTableController;
-import uiweb.jfx.program.function.PaneMode;
-import uiweb.jfx.program.function.ProgramFunctionController;
-import uiweb.jfx.runControls.RunControlsController;
-import uiweb.jfx.summaryLine.SummaryLineController;
-import uiweb.jfx.variables.VariablesTableController;
-import uiweb.utils.UIUtils;
+import uiWeb.jfx.VariableInputDialog.VariableInputDialogController;
+import uiWeb.jfx.cycles.CyclesController;
+import uiWeb.jfx.debugger.DebuggerController;
+import uiWeb.jfx.execution.header.ExecutionHeaderController;
+import uiWeb.jfx.fileLoader.FileLoaderController;
+import uiWeb.jfx.fileLoader.UIAdapterLoadFileTask;
+import uiWeb.jfx.instruction.InstructionTableController;
+import uiWeb.jfx.program.function.PaneMode;
+import uiWeb.jfx.program.function.ProgramFunctionController;
+import uiWeb.jfx.runControls.RunControlsController;
+import uiWeb.jfx.summaryLine.SummaryLineController;
+import uiWeb.jfx.variables.VariablesTableController;
+import uiWeb.utils.UIUtils;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static uiweb.utils.UIUtils.*;
+import static uiWeb.utils.UIUtils.*;
 
 public class AppController {
 
@@ -259,7 +259,7 @@ public class AppController {
             System.out.println("Returning to Dashboard...");
         } else {
             System.err.println("Return to Dashboard callback not set");
-            uiweb.utils.UIUtils.showError("Navigation to Dashboard is not configured");
+            uiWeb.utils.UIUtils.showError("Navigation to Dashboard is not configured");
         }
     }
 

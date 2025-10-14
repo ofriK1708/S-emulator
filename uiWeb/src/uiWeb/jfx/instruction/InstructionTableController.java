@@ -1,4 +1,4 @@
-package uiweb.jfx.instruction;
+package uiWeb.jfx.instruction;
 
 import dto.engine.InstructionDTO;
 import javafx.animation.FadeTransition;
@@ -7,11 +7,13 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import uiweb.utils.AnimatedTableRow;
-import uiweb.utils.UIUtils;
+import uiWeb.utils.AnimatedTableRow;
+import uiWeb.utils.UIUtils;
 
 import java.util.List;
 import java.util.regex.Pattern;

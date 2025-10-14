@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" spacing="20" styleClass="root"
       stylesheets="@fileLoader.css" xmlns="http://javafx.com/javafx/24.0.1"
-      fx:controller="uiweb.jfx.fileLoader.FileLoaderController">
+      fx:controller="uiWeb.jfx.fileLoader.FileLoaderController">
     <padding>
         <Insets bottom="30.0" left="30.0" right="30.0" top="30.0"/>
     </padding>

@@ -1,4 +1,4 @@
-package uiweb.jfx.program.function;
+package uiWeb.jfx.program.function;
 
 public enum Theme {
     LIGHT("Light"),

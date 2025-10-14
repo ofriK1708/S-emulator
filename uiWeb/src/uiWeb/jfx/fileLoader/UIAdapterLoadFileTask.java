@@ -1,4 +1,4 @@
-package uiweb.jfx.fileLoader;
+package uiWeb.jfx.fileLoader;
 
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;

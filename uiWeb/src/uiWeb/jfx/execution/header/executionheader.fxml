@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <HBox xmlns:fx="http://javafx.com/fxml"
       xmlns="http://javafx.com/javafx"
-      fx:controller="uiweb.jfx.execution.header.ExecutionHeaderController"
+      fx:controller="uiWeb.jfx.execution.header.ExecutionHeaderController"
       alignment="CENTER_LEFT"
       spacing="15"
       styleClass="execution-header"
