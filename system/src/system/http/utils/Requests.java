@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public class Requests {
     private final static OkHttpClient HTTP_CLIENT = new OkHttpClient.Builder().build();
-    private static final String INFO_PARAM = "1nfo";
+    private static final String INFO_PARAM = "info";
     private static final String PROGRAM_NAME_PARAM = "programName";
     private static final String EXPAND_LEVEL_PARAM = "expandLevel";
 
