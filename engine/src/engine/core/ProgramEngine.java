@@ -9,7 +9,6 @@ import engine.exception.FunctionAlreadyExist;
 import engine.exception.FunctionNotFound;
 import engine.exception.LabelNotExist;
 import engine.generated_2.SFunction;
-import engine.generated_2.SInstruction;
 import engine.generated_2.SInstructions;
 import engine.generated_2.SProgram;
 import engine.utils.ProgramUtils;
@@ -26,18 +25,13 @@ import static engine.utils.ProgramUtils.*;
 public class ProgramEngine implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
+    private final InstructionSequence instructionSequence;
     private final String mainProgramName;
     private final String programName;
-    private final Map<String, Integer> originalContextMap = new HashMap<>();
-    private final List<Map<String, Integer>> contextMapsByExpandLevel = new ArrayList<>();
     private final List<Quote> uninitializedQuotes = new ArrayList<>();
-    private final List<List<Instruction>> instructionExpansionLevels = new ArrayList<>();
-    private @NotNull List<Instruction> originalInstructions;
-    private final List<Set<String>> labelsByExpandLevel = new ArrayList<>();
     private final List<ExecutionStatistics> executionStatisticsList = new ArrayList<>();
     private @Nullable Map<String, ProgramEngine> functionsAndProgramsInSystem;
     private @Nullable Map<String, ProgramEngine> functionsInSystem = null;
-    private @NotNull Set<String> originalLabels;
     private @Nullable SFunction originalSFunction = null;
     private @Nullable String funcName;
     private final float averageCycles = 0;
@@ -65,14 +59,7 @@ public class ProgramEngine implements Serializable {
 
         }
 
-        SInstructions sInstructions = program.getSInstructions();
-
-        originalInstructions = buildInstructions(sInstructions);
-
-        originalLabels = buildLabels(sInstructions);
-
-        finishInitialization();
-
+        instructionSequence = InstructionSequence.createFrom(program, this);
     }
 
     public void finishInitProgram(@NotNull Map<String, ProgramEngine> allFunctionsInSystem)
@@ -130,15 +117,6 @@ public class ProgramEngine implements Serializable {
         originalSFunction = function;
     }
 
-    private static @NotNull Set<String> buildLabels(@NotNull SInstructions sInstructions) {
-        return sInstructions.getSInstruction().stream()
-                .map(SInstruction::getSLabel)
-                .filter(Objects::nonNull)
-                .filter(label -> !label.isBlank())
-                .map(String::trim)
-                .filter(label -> label.startsWith("L"))
-                .collect(Collectors.toSet());
-    }
 
     private @NotNull Map<String, ProgramEngine> buildFunctions(@NotNull SProgram program,
                                                                @NotNull String mainProgramName)
@@ -177,16 +155,6 @@ public class ProgramEngine implements Serializable {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private @NotNull List<Instruction> buildInstructions(@NotNull SInstructions sInstructions) throws FunctionNotFound {
-        List<Instruction> instructions = new ArrayList<>();
-        List<SInstruction> sInstructionList = sInstructions.getSInstruction();
-        for (int i = 0; i < sInstructionList.size(); i++) {
-            SInstruction sInstruction = sInstructionList.get(i);
-            instructions.add(Instruction.createInstruction(sInstruction, this, i));
-        }
-        return instructions;
-    }
-
     /**
      * Get the output value after execution at a specific expansion level.
      * used for debugging program, because output is changing during execution
@@ -206,51 +174,6 @@ public class ProgramEngine implements Serializable {
      */
     public Integer getOutput() {
         return contextMapsByExpandLevel.getLast().get(ProgramUtils.OUTPUT_NAME);
-    }
-
-    private void finishInitialization() throws LabelNotExist {
-        instructionExpansionLevels.add(originalInstructions);
-        labelsByExpandLevel.add(originalLabels);
-        initializeContextMap();
-        contextMapsByExpandLevel.add(new HashMap<>(originalContextMap));
-    }
-
-
-    private void initializeContextMap() throws LabelNotExist {
-        originalContextMap.clear();
-        originalContextMap.put(ProgramUtils.OUTPUT_NAME, 0);
-        originalContextMap.put(Instruction.ProgramCounterName, 0); // Program Counter
-        for (int instruction_index = 0; instruction_index < originalInstructions.size(); instruction_index++) {
-            Instruction instruction = originalInstructions.get(instruction_index);
-            originalContextMap.put(instruction.getMainVarName().trim(), 0);
-            if (!instruction.getLabel().isEmpty()) {
-                originalContextMap.put(instruction.getLabel().trim(), instruction_index);
-            }
-            for (Map.Entry<String, String> argsEntry : instruction.getArgs().entrySet()) {
-                if (argsEntry.getKey().equals(Quote.functionArgumentsArgumentName)) {
-                    ProgramUtils.initAllVariablesFromQuoteArguments(argsEntry.getValue(), originalContextMap);
-                } else {
-                    String argValueName = argsEntry.getValue().trim();
-                    if (!originalContextMap.containsKey(argValueName)) {
-                        if (ProgramUtils.isNumberedLabel(argValueName) && !validateLabel(argValueName)) {
-                            throw new LabelNotExist(
-                                    instruction.getClass().getSimpleName(),
-                                    instruction_index + 1,
-                                    argValueName);
-
-                        } else if (ProgramUtils.isSingleValidArgument(argValueName)) {
-                            originalContextMap.put(argValueName.trim(), 0);
-                        }
-                    }
-                    if (argValueName.equals(ProgramUtils.EXIT_LABEL_NAME)) {
-                        originalContextMap.put(argValueName, originalInstructions.size()); // EXIT label is set to
-                        // the end of the program
-                        originalLabels.add(argValueName);
-                    }
-                }
-            }
-        }
-        fillUnusedLabels();
     }
 
     private void fillUnusedLabels() {
@@ -308,44 +231,6 @@ public class ProgramEngine implements Serializable {
             }
         }
         currentContextMap.put(Instruction.ProgramCounterName, 0); // Reset PC
-    }
-
-    private void expand(int level) {
-        if (level > 0) {
-            for (int currLevel = instructionExpansionLevels.size(); currLevel <= level; currLevel++) {
-                List<Instruction> tempExpanded = new ArrayList<>();
-                List<Instruction> previouslyExpanded = instructionExpansionLevels.getLast();
-                Map<String, Integer> latestContextMap = new HashMap<>(contextMapsByExpandLevel.getLast());
-                for (int i = 0; i < previouslyExpanded.size(); i++) {
-                    Instruction instruction = previouslyExpanded.get(i);
-                    List<Instruction> furtherExpanded = instruction.expand(latestContextMap, i);
-                    tempExpanded.addAll(furtherExpanded);
-                }
-                instructionExpansionLevels.add(tempExpanded);
-                contextMapsByExpandLevel.add(latestContextMap);
-                updateLabelsAfterExpanding();
-            }
-        }
-    }
-
-    private void updateLabelsAfterExpanding() {
-        List<Instruction> LatestExpanded = instructionExpansionLevels.getLast();
-        Map<String, Integer> latestContextMap = contextMapsByExpandLevel.getLast();
-        Set<String> latestLabels = new HashSet<>(labelsByExpandLevel.getLast());
-        // update context map with new labels and their indices
-        LatestExpanded.stream()
-                .filter(instr -> !instr.getLabel().isBlank())
-                .forEach(instr -> latestContextMap.put(instr.getLabel(), LatestExpanded.indexOf(instr)));
-        // update EXIT label to point to the end of the expanded program
-        if (latestLabels.contains(EXIT_LABEL_NAME)) {
-            latestContextMap.put(EXIT_LABEL_NAME, LatestExpanded.size());
-        }
-        // add any new labels introduced during expansion
-        latestContextMap.keySet()
-                .stream()
-                .filter(var -> var.startsWith("L"))
-                .forEach(latestLabels::add);
-        labelsByExpandLevel.add(latestLabels);
     }
 
     public int getMaxExpandLevel() {
