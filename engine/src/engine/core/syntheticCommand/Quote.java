@@ -1,5 +1,7 @@
 package engine.core.syntheticCommand;
 
+import dto.engine.ExecutionResult;
+import engine.core.FunctionManager;
 import engine.core.Instruction;
 import engine.core.ProgramEngine;
 import engine.core.basicCommand.Neutral;
@@ -15,7 +17,7 @@ public class Quote extends Instruction {
     private boolean isFinishedInitialization = false;
     public final static String functionNameArgumentName = "functionName";
     public final static String functionArgumentsArgumentName = "functionArguments";
-    private final @NotNull ProgramEngine mainProgram;
+    private final @NotNull FunctionManager functionManager;
     private ProgramEngine functionToRun;
     private String allArgsString;
     private List<String> funcArgsNames;
@@ -23,25 +25,25 @@ public class Quote extends Instruction {
     private int subFunctionsCycles;
     private int executedCycles = 0;
 
-    public Quote(String mainVarName, Map<String, String> args, String label, @NotNull ProgramEngine mainProgram,
+    public Quote(String mainVarName, Map<String, String> args, String label, @NotNull FunctionManager functionManager,
                  int quoteIndex) throws FunctionNotFound {
         super(mainVarName, args, label);
-        this.mainProgram = mainProgram;
+        this.functionManager = functionManager;
         this.quoteIndex = quoteIndex;
         initAndValidateQuote();
     }
 
     public Quote(String mainVarName, Map<String, String> args, String label, @NotNull Instruction derivedFrom,
-                 int derivedFromIndex, @NotNull ProgramEngine mainProgram) throws FunctionNotFound {
+                 int derivedFromIndex, @NotNull FunctionManager functionManager) throws FunctionNotFound {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
-        this.mainProgram = mainProgram;
+        this.functionManager = functionManager;
         initAndValidateQuote();
     }
 
     public Quote(String mainVarName, String label, @NotNull Quote quote, @NotNull Instruction derivedFrom,
                  int derivedFromIndex) {
         super(mainVarName, quote.args, label, derivedFrom, derivedFromIndex);
-        this.mainProgram = quote.mainProgram;
+        this.functionManager = quote.functionManager;
         this.functionToRun = quote.functionToRun;
         this.allArgsString = quote.allArgsString;
         this.funcArgsNames = new ArrayList<>(quote.funcArgsNames);
@@ -57,19 +59,19 @@ public class Quote extends Instruction {
     public void initAndValidateQuote() throws FunctionNotFound {
         String funcName = args.get(functionNameArgumentName);
         allArgsString = args.get(functionArgumentsArgumentName) == null ? "" : args.get(functionArgumentsArgumentName);
-        Map<String, ProgramEngine> functions = mainProgram.getFunctionsAndProgramsInSystem();
-        if (functions == null) {
-            mainProgram.addToUninitializedQuotes(this);
+        if (!functionManager.isFinishedInit()) {
+            functionManager.addToUninitializedQuotes(this);
             return;
         }
+        Map<String, ProgramEngine> functions = functionManager.getAllFunctionsAndProgramsInSystem();
 
-        if (!functions.containsKey(funcName) && !mainProgram.getProgramName().equals(funcName)) {
-            throw new FunctionNotFound(quoteIndex, mainProgram.getProgramName(), funcName);
+        if (!functions.containsKey(funcName) && !functionManager.getMainProgramName().equals(funcName)) {
+            throw new FunctionNotFound(quoteIndex, functionManager.getMainProgramName(), funcName);
         }
 
         isFinishedInitialization = true;
-        functionToRun = funcName.equals(mainProgram.getProgramName()) ?
-                mainProgram : functions.get(funcName);
+        functionToRun = funcName.equals(functionManager.getMainProgramName()) ?
+                functionManager.getMainProgramEngine() : functions.get(funcName);
 
         if (allArgsString.isBlank()) {
             funcArgsNames = List.of();
@@ -84,7 +86,7 @@ public class Quote extends Instruction {
         subfunctionCalls.clear();
         for (String argName : funcArgsNames) {
             if (ProgramUtils.isFunctionCall(argName)) {
-                Quote functionCall = Instruction.createQuoteFromString(argName, mainProgram, quoteIndex);
+                Quote functionCall = Instruction.createQuoteFromString(argName, functionManager, quoteIndex);
                 subfunctionCalls.add(functionCall);
             }
         }
@@ -110,11 +112,11 @@ public class Quote extends Instruction {
 
     public int executeAndGetResult(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException {
         List<Integer> arguments = getArgumentsValues(contextMap);
-        Map<String, Integer> functionToRunNeededArguments = functionToRun.getSortedArguments();
+        Map<String, Integer> functionToRunNeededArguments = functionToRun.getSortedArgumentsMap();
         prepareArguments(functionToRunNeededArguments, arguments);
-        functionToRun.run(functionToRunNeededArguments, false);
-        executedCycles = functionToRun.getTotalCycles(functionToRunNeededArguments);
-        return functionToRun.getOutput();
+        ExecutionResult result = functionToRun.run(functionToRunNeededArguments, false);
+        executedCycles = result.cycleCount();
+        return result.output();
     }
 
     private @NotNull List<Integer> getArgumentsValues(@NotNull Map<String, Integer> contextMap) {

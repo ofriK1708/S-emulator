@@ -261,7 +261,7 @@ public class HttpEngineController implements EngineController {
                 //noinspection DataFlowIssue
                 return Integer.parseInt(response.body().string());
             } else {
-                throw new IOException("Failed to get program result: " + response.body());
+                throw new IOException("Failed to get program output: " + response.body());
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

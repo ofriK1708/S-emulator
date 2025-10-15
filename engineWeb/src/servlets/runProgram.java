@@ -1,5 +1,7 @@
 package servlets;
 
+import com.google.gson.Gson;
+import dto.engine.ExecutionResult;
 import engine.core.ProgramEngine;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,6 +17,8 @@ import java.util.Map;
 public class runProgram extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Gson gson = new Gson();
+        resp.setContentType("application/json");
         ServletUtils.runAndDebugParams runAndDebugParams;
         try {
             runAndDebugParams = ServletUtils.getAndValidateRunAndDebugParams(req, resp);
@@ -32,8 +36,8 @@ public class runProgram extends HttpServlet {
             return;
         }
         Map<String, Integer> args = runAndDebugParams.arguments();
-        currentEngine.run(args, expandLevel);
+        ExecutionResult executionResult = currentEngine.run(expandLevel, args);
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.getWriter().println("Program " + programName + " executed successfully");
+        resp.getWriter().write(gson.toJson(executionResult));
     }
 }

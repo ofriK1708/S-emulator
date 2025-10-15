@@ -1,7 +1,7 @@
 package engine.core.syntheticCommand;
 
+import engine.core.FunctionManager;
 import engine.core.Instruction;
-import engine.core.ProgramEngine;
 import engine.core.basicCommand.Neutral;
 import engine.exception.FunctionNotFound;
 import engine.utils.CommandType;
@@ -14,15 +14,15 @@ import java.util.Map;
 
 public class JumpEqualFunction extends Instruction {
     private final static String labelArgumentName = "JEFunctionLabel";
-    private final @NotNull ProgramEngine mainEngine;
+    private final @NotNull FunctionManager functionManager;
     private final @NotNull Quote functionQuoteToCheck;
 
     public JumpEqualFunction(String mainVarName, Map<String, String> args,
-                             String label, @NotNull ProgramEngine mainFunction,
+                             String label, @NotNull FunctionManager functionManager,
                              int quoteIndex) throws FunctionNotFound {
         super(mainVarName, args, label);
-        this.mainEngine = mainFunction;
-        functionQuoteToCheck = new Quote("", this.args, "", mainEngine, quoteIndex);
+        this.functionManager = functionManager;
+        functionQuoteToCheck = new Quote("", this.args, "", functionManager, quoteIndex);
     }
 
     @Override
@@ -62,10 +62,12 @@ public class JumpEqualFunction extends Instruction {
         List<Instruction> expandedInstructions = new ArrayList<>();
         String freeWorkVar = ProgramUtils.getNextFreeWorkVariableName(contextMap);
         if (!label.isBlank()) {
-            expandedInstructions.add(new Neutral(ProgramUtils.OUTPUT_NAME, Map.of(), label, this, originalInstructionIndex));
+            expandedInstructions.add(new Neutral(ProgramUtils.OUTPUT_NAME, Map.of(), label,
+                    this, originalInstructionIndex));
         }
         try {
-            expandedInstructions.add(new Quote(freeWorkVar, args, label, this, originalInstructionIndex, mainEngine));
+            expandedInstructions.add(new Quote(freeWorkVar, args, label, this,
+                    originalInstructionIndex, functionManager));
         } catch (FunctionNotFound e) {
             throw new RuntimeException(e);
         }

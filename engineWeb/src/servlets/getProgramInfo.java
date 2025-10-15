@@ -66,13 +66,9 @@ public class getProgramInfo extends HttpServlet {
                 resp.setStatus(HttpServletResponse.SC_OK);
                 break;
             case ARGUMENTS:
-                Map<String, Integer> sortedArguments = currentEngine.getSortedArguments(expandLevel);
+                Map<String, Integer> sortedArguments = currentEngine.getSortedArgumentsMap(expandLevel);
                 String jsonArgs = gson.toJson(sortedArguments);
                 resp.getWriter().println(jsonArgs);
-                resp.setStatus(HttpServletResponse.SC_OK);
-                break;
-            case PROGRAM_RESULT:
-                resp.getWriter().println(gson.toJson(currentEngine.getOutput(expandLevel)));
                 resp.setStatus(HttpServletResponse.SC_OK);
                 break;
             case WORK_VARS:

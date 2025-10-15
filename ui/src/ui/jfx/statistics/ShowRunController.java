@@ -8,7 +8,10 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -89,7 +92,7 @@ public class ShowRunController {
         executionInfoLabel.setText("Execution #" + executionStats.executionNumber());
         expandLevelLabel.setText("Expand Level: " + executionStats.expandLevel());
         cyclesLabel.setText("Cycles: " + executionStats.cyclesUsed());
-        resultLabel.setText("Result: " + executionStats.result());
+        resultLabel.setText("Result: " + executionStats.output());
     }
 
     /**

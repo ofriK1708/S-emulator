@@ -48,7 +48,7 @@ public abstract class Instruction implements Command, Serializable {
     }
 
     public static @NotNull Instruction createInstruction(@NotNull SInstruction sInstruction,
-                                                         @NotNull ProgramEngine engine,
+                                                         @NotNull FunctionManager functionManager,
                                                          int instructionIndex) throws FunctionNotFound {
 
         Map<String, String> args = Optional.ofNullable(sInstruction.getSInstructionArguments())
@@ -75,8 +75,9 @@ public abstract class Instruction implements Command, Serializable {
             case "JUMP_ZERO" -> new JumpZero(mainVarName, args, labelName);
             case "JUMP_EQUAL_CONSTANT" -> new JumpEqualConstant(mainVarName, args, labelName);
             case "JUMP_EQUAL_VARIABLE" -> new JumpEqualVariable(mainVarName, args, labelName);
-            case "QUOTE" -> new Quote(mainVarName, args, labelName, engine, instructionIndex);
-            case "JUMP_EQUAL_FUNCTION" -> new JumpEqualFunction(mainVarName, args, labelName, engine, instructionIndex);
+            case "QUOTE" -> new Quote(mainVarName, args, labelName, functionManager, instructionIndex);
+            case "JUMP_EQUAL_FUNCTION" ->
+                    new JumpEqualFunction(mainVarName, args, labelName, functionManager, instructionIndex);
             default -> throw new IllegalArgumentException("Unknown instruction type: " + sInstruction.getName());
         };
     }
@@ -90,7 +91,7 @@ public abstract class Instruction implements Command, Serializable {
     }
 
     protected static @NotNull Quote createQuoteFromString(@NotNull String argName,
-                                                          @NotNull ProgramEngine mainFunction,
+                                                          @NotNull FunctionManager functionManager,
                                                           int instructionIndex) {
         String functionCallContent = ProgramUtils.extractFunctionContent(argName);
         List<String> parts = ProgramUtils.splitArgs(functionCallContent);
@@ -100,7 +101,7 @@ public abstract class Instruction implements Command, Serializable {
         quoteArgs.put(Quote.functionNameArgumentName, functionName);
         quoteArgs.put(Quote.functionArgumentsArgumentName, functionArgs);
         try {
-            return new Quote("", quoteArgs, "", mainFunction, instructionIndex);
+            return new Quote("", quoteArgs, "", functionManager, instructionIndex);
         } catch (FunctionNotFound e) {
             throw new RuntimeException(e);
         }
@@ -173,13 +174,18 @@ public abstract class Instruction implements Command, Serializable {
             @NotNull Instruction derivedFrom,
             int derivedFromIndex) {
 
-        List<Instruction> functionInstructions = function.getFunctionInstructions();
+        List<Instruction> functionInstructions = null;
+        try {
+            functionInstructions = function.getTempFunctionInstructions();
+        } catch (Exception ignored) {
+        }
         Map<String, String> allReplacements = new HashMap<>(argsReplacements);
         setupConflictAvoidanceReplacements(mainContextMap, argsReplacements, allReplacements, function);
         String endLabel = ProgramUtils.getNextFreeLabelName(mainContextMap);
         allReplacements.put(ProgramUtils.EXIT_LABEL_NAME, endLabel);
 
         // now we can go and replace all the old variables with new ones, after we made sure they won't mix
+        //noinspection DataFlowIssue
         for (Instruction instruction : functionInstructions) {
             // first we set the derived from info
             instruction.setDerivedFrom(derivedFrom);
@@ -201,7 +207,6 @@ public abstract class Instruction implements Command, Serializable {
                 allReplacements.get(ProgramUtils.OUTPUT_NAME)), allReplacements.get(ProgramUtils.EXIT_LABEL_NAME),
                 derivedFrom, derivedFromIndex));
 
-        function.resetFunction();
         return functionInstructions;
     }
 

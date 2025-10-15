@@ -136,14 +136,14 @@ public class LocalEngineController implements EngineController {
         if (engine == null) {
             throw new IllegalStateException("Program has not been set");
         }
-        return engine.getSortedArguments(expandLevel);
+        return engine.getSortedArgumentsMap(expandLevel);
     }
 
     public @NotNull Map<String, Integer> getSortedArguments() {
         if (engine == null) {
             throw new IllegalStateException("Program has not been set");
         }
-        return engine.getSortedArguments();
+        return engine.getSortedArgumentsMap();
     }
 
     public @NotNull Map<String, String> getFunctionsSet() {
@@ -246,12 +246,6 @@ public class LocalEngineController implements EngineController {
 
     // NEW DEBUG FUNCTIONALITY - Added at the end as requested
 
-    public int getLastDebugCycles() {
-        if (engine == null) {
-            throw new IllegalStateException("Program has not been set");
-        }
-        return engine.getLastDebugCycles();
-    }
 
     /**
      * Retrieves the final variable states for a given execution configuration.
@@ -289,7 +283,7 @@ public class LocalEngineController implements EngineController {
             finalStates.putAll(engine.getSortedWorkVars(expandLevel));
 
             // Add arguments (x1, x2, etc.) - these might have changed during execution
-            finalStates.putAll(engine.getSortedArguments(expandLevel));
+            finalStates.putAll(engine.getSortedArgumentsMap(expandLevel));
 
             // Add output variable (y)
             finalStates.put(ProgramUtils.OUTPUT_NAME, engine.getOutput(expandLevel));

@@ -3,6 +3,7 @@ package engine.core;
 import engine.core.syntheticCommand.Quote;
 import engine.exception.FunctionNotFound;
 import engine.exception.LabelNotExist;
+import engine.generated_2.SFunction;
 import engine.generated_2.SInstruction;
 import engine.generated_2.SProgram;
 import engine.utils.ProgramUtils;
@@ -12,6 +13,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static engine.utils.ProgramUtils.EXIT_LABEL_NAME;
+import static engine.utils.ProgramUtils.extractAllVariableAndLabelNamesUnsorted;
 
 /**
  * Represents the final, read-only sequence of executable instructions for a program or function.
@@ -28,6 +30,7 @@ public final class InstructionSequence {
     private final List<List<Instruction>> instructionExpansionLevels = new ArrayList<>();
     private final List<Map<String, Integer>> contextMapsByExpandLevel = new ArrayList<>();
     private final List<Set<String>> labelsByExpandLevel = new ArrayList<>();
+    private int maxExpandLevel = -1;
 
     /**
      * Private constructor to enforce immutability and controlled creation.
@@ -39,7 +42,7 @@ public final class InstructionSequence {
     private InstructionSequence(@NotNull List<Instruction> originalInstructions, @NotNull Set<String> originalLabels)
             throws LabelNotExist {
         this.originalInstructions = List.copyOf(originalInstructions);
-        this.originalLabels = Set.copyOf(originalLabels);
+        this.originalLabels = originalLabels;
         finishInitialization();
     }
 
@@ -48,27 +51,63 @@ public final class InstructionSequence {
      * This is the entry point for parsing and expanding instructions.
      *
      * @param sProgram The JAXB-generated program object from the XML.
-     * @param engine   The program engine that provides context, like existing functions.
+     * @param functionManager The manager containing all available functions for resolution.
      * @return A new, immutable InstructionSequence.
      * @throws FunctionNotFound if a function call within the program cannot be resolved.
      */
-    public static InstructionSequence createFrom(@NotNull SProgram sProgram, @NotNull ProgramEngine engine)
+    public static InstructionSequence createFrom(@NotNull SProgram sProgram, @NotNull FunctionManager functionManager)
             throws FunctionNotFound, LabelNotExist {
-        List<SInstruction> rawInstructions = sProgram.getSInstructions().getSInstruction();
-        List<Instruction> originalInstructions = buildInstructions(rawInstructions, engine);
-        Set<String> originalLabels = buildLabels(rawInstructions);
+        ParsedComponents components = parseRawInstructions(sProgram.getSInstructions().getSInstruction(),
+                functionManager);
 
-        return new InstructionSequence(originalInstructions, originalLabels);
+        return new InstructionSequence(components.originalInstructions(), components.originalLabels());
+    }
+
+    public static InstructionSequence createFrom(@NotNull SFunction sFunction, @NotNull FunctionManager functionManager)
+            throws FunctionNotFound, LabelNotExist {
+        ParsedComponents components = parseRawInstructions(sFunction.getSInstructions().getSInstruction(),
+                functionManager);
+
+        return new InstructionSequence(components.originalInstructions(), components.originalLabels());
+    }
+
+    private static @NotNull ParsedComponents parseRawInstructions(@NotNull List<SInstruction> rawInstructions,
+                                                                  @NotNull FunctionManager functionManager)
+            throws FunctionNotFound {
+        List<Instruction> originalInstructions = buildInstructions(rawInstructions, functionManager);
+        Set<String> originalLabels = buildLabels(rawInstructions);
+        return new ParsedComponents(originalInstructions, originalLabels);
     }
 
     private static @NotNull List<Instruction> buildInstructions(@NotNull List<SInstruction> rawInstructions,
-                                                                @NotNull ProgramEngine engine) throws FunctionNotFound {
+                                                                @NotNull FunctionManager functionManager) throws FunctionNotFound {
         List<Instruction> instructions = new ArrayList<>();
         for (int i = 0; i < rawInstructions.size(); i++) {
             SInstruction sInstruction = rawInstructions.get(i);
-            instructions.add(Instruction.createInstruction(sInstruction, engine, i));
+            instructions.add(Instruction.createInstruction(sInstruction, functionManager, i));
         }
         return instructions;
+    }
+
+    void expandToMax() {
+        if (maxExpandLevel == -1) {
+            maxExpandLevel = ProgramUtils.getMaxExpandLevel(originalInstructions);
+        }
+        if (maxExpandLevel > 0) {
+            for (int currLevel = instructionExpansionLevels.size(); currLevel <= maxExpandLevel; currLevel++) {
+                List<Instruction> tempExpanded = new ArrayList<>();
+                List<Instruction> previouslyExpanded = instructionExpansionLevels.getLast();
+                Map<String, Integer> latestContextMap = new HashMap<>(contextMapsByExpandLevel.getLast());
+                for (int i = 0; i < previouslyExpanded.size(); i++) {
+                    Instruction instruction = previouslyExpanded.get(i);
+                    List<Instruction> furtherExpanded = instruction.expand(latestContextMap, i);
+                    tempExpanded.addAll(furtherExpanded);
+                }
+                instructionExpansionLevels.add(tempExpanded);
+                contextMapsByExpandLevel.add(latestContextMap);
+                updateLabelsAfterExpanding();
+            }
+        }
     }
 
     private static @NotNull Set<String> buildLabels(@NotNull List<SInstruction> rawInstructions) {
@@ -86,7 +125,6 @@ public final class InstructionSequence {
         labelsByExpandLevel.add(originalLabels);
         initializeContextMap();
         contextMapsByExpandLevel.add(new HashMap<>(originalContextMap));
-        expand(ProgramUtils.getMaxExpandLevel(originalInstructions));
     }
 
     private void initializeContextMap() throws LabelNotExist {
@@ -140,22 +178,9 @@ public final class InstructionSequence {
         return originalLabels.contains(labelName);
     }
 
-    private void expand(int maxExpandLevel) {
-        if (maxExpandLevel > 0) {
-            for (int currLevel = instructionExpansionLevels.size(); currLevel <= maxExpandLevel; currLevel++) {
-                List<Instruction> tempExpanded = new ArrayList<>();
-                List<Instruction> previouslyExpanded = instructionExpansionLevels.getLast();
-                Map<String, Integer> latestContextMap = new HashMap<>(contextMapsByExpandLevel.getLast());
-                for (int i = 0; i < previouslyExpanded.size(); i++) {
-                    Instruction instruction = previouslyExpanded.get(i);
-                    List<Instruction> furtherExpanded = instruction.expand(latestContextMap, i);
-                    tempExpanded.addAll(furtherExpanded);
-                }
-                instructionExpansionLevels.add(tempExpanded);
-                contextMapsByExpandLevel.add(latestContextMap);
-                updateLabelsAfterExpanding();
-            }
-        }
+    /****************************** public getters and utility methods *****************************/
+    public boolean isVariableInContext(String varName) {
+        return originalContextMap.containsKey(varName);
     }
 
     private void updateLabelsAfterExpanding() {
@@ -183,5 +208,69 @@ public final class InstructionSequence {
                 .forEach(latestLabels::add);
 
         labelsByExpandLevel.add(latestLabels);
+    }
+
+    public List<List<Instruction>> getInstructionExpansionLevels() {
+        return instructionExpansionLevels;
+    }
+
+    public List<Map<String, Integer>> getContextMapsByExpandLevel() {
+        return contextMapsByExpandLevel;
+    }
+
+    public Map<String, Integer> getContextMapCopy(int expandLevel) {
+        return new HashMap<>(contextMapsByExpandLevel.get(expandLevel));
+    }
+
+    public Set<String> getSortedArgumentsNames() {
+        return ProgramUtils.extractSortedArguments(originalContextMap).keySet();
+    }
+
+    public List<Instruction> getInstructionsCopy(int expandLevel) {
+        if (expandLevel < 0 || expandLevel >= instructionExpansionLevels.size()) {
+            throw new IllegalArgumentException("Invalid expand level: " + expandLevel);
+        }
+        return new ArrayList<>(instructionExpansionLevels.get(expandLevel));
+    }
+
+    public List<Instruction> getInstructionsCopy() {
+        return getInstructionsCopy(0);
+    }
+
+    public Set<String> getLabels(int expandLevel) {
+        return ProgramUtils.extractLabels(labelsByExpandLevel, expandLevel);
+    }
+
+    public @NotNull Set<String> getAllVariablesNames(int expandLevel, boolean includeLabels) {
+        if (expandLevel < 0 || expandLevel >= labelsByExpandLevel.size()) {
+            throw new IllegalArgumentException("Expand level out of bounds");
+        }
+        return extractAllVariableAndLabelNamesUnsorted(contextMapsByExpandLevel.get(expandLevel), includeLabels);
+    }
+
+    public @NotNull Map<String, Integer> getSortedArgumentsMap(int expandLevel) {
+        return ProgramUtils.extractSortedArguments(contextMapsByExpandLevel.get(expandLevel));
+    }
+
+    public @NotNull Map<String, Integer> getSortedWorkVars(int expandLevel) {
+        if (expandLevel < 0 || expandLevel >= contextMapsByExpandLevel.size()) {
+            throw new IllegalArgumentException("Expand level out of bounds");
+        }
+        return ProgramUtils.extractSortedWorkVars(contextMapsByExpandLevel.get(expandLevel));
+    }
+
+    public int getMaxExpandLevel() {
+        if (maxExpandLevel == -1) {
+            maxExpandLevel = ProgramUtils.getMaxExpandLevel(originalInstructions);
+        }
+        return maxExpandLevel;
+    }
+
+    public int getOriginalInstructionCount() {
+        return originalInstructions.size();
+    }
+
+    private record ParsedComponents(List<Instruction> originalInstructions, Set<String> originalLabels) {
+
     }
 }

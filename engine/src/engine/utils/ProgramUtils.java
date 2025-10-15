@@ -1,6 +1,7 @@
 package engine.utils;
 
 import engine.core.Instruction;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -79,6 +80,7 @@ public class ProgramUtils {
         return maxLevel;
     }
 
+    @Contract(pure = true)
     public static @NotNull Set<String> extractAllVariableAndLabelNamesUnsorted(@NotNull Map<String, Integer>
                                                                                        contextMap,
                                                                                boolean includeLabels) {
@@ -91,14 +93,17 @@ public class ProgramUtils {
         return new HashSet<>(newContextMap.keySet());
     }
 
+    @Contract(pure = true)
     public static @NotNull Map<String, Integer> extractSortedWorkVars(@NotNull Map<String, Integer> contextMap) {
         return getVariableIntegerMap(contextMap, WORK_VAR_PREFIX);
     }
 
+    @Contract(pure = true)
     public static @NotNull Map<String, Integer> extractSortedArguments(@NotNull Map<String, Integer> contextMap) {
         return getVariableIntegerMap(contextMap, ARG_PREFIX);
     }
 
+    @Contract(pure = true)
     private static @NotNull Map<String, Integer> getVariableIntegerMap(@NotNull Map<String, Integer> contextMap,
                                                                        @NotNull String argPrefix) {
         Map<String, Integer> sortedArguments = new LinkedHashMap<>();
@@ -109,6 +114,7 @@ public class ProgramUtils {
         return sortedArguments;
     }
 
+    @Contract(pure = true)
     public static @NotNull Set<String> extractLabels(@NotNull List<Set<String>> labelsByExpandLevel, int expandLevel) {
         if (expandLevel < 0 || expandLevel >= labelsByExpandLevel.size()) {
             throw new IllegalArgumentException("Invalid expand level: " + expandLevel);

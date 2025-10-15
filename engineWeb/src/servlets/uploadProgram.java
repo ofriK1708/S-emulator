@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import utils.ServletUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 
 @WebServlet(name = "uploadProgram", urlPatterns = "/uploadProgram")
@@ -43,8 +44,7 @@ public class uploadProgram extends HttpServlet {
                 } else {
                     // Validate program by trying to create an engine - check for label not exists, etc.
                     try {
-                        ProgramEngine engine = new ProgramEngine(program);
-                        engine.finishInitProgram(programManager.getFunctionsAndPrograms());
+                        ProgramEngine engine = new ProgramEngine(program, programManager.getFunctionsAndPrograms());
                         programManager.addProgram(programName, engine);
                         resp.setStatus(HttpServletResponse.SC_OK);
                         resp.setContentType("application/json");
@@ -56,6 +56,7 @@ public class uploadProgram extends HttpServlet {
                     } catch (Exception e) {
                         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                         resp.getWriter().println("Failed to upload program " + programName + ": " + e.getMessage());
+                        System.out.println(Arrays.toString(e.getStackTrace()));
                     }
                 }
             }

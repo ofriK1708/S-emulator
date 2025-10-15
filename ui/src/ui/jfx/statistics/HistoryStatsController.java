@@ -55,7 +55,7 @@ public class HistoryStatsController {
         expandLevelColumn.setCellValueFactory(cellData ->
                 new ReadOnlyObjectWrapper<>(cellData.getValue().expandLevel()));
         resultColumn.setCellValueFactory(cellData ->
-                new ReadOnlyObjectWrapper<>(cellData.getValue().result()));
+                new ReadOnlyObjectWrapper<>(cellData.getValue().output()));
         cyclesUsedColumn.setCellValueFactory(cellData ->
                 new ReadOnlyObjectWrapper<>(cellData.getValue().cyclesUsed()));
         argumentColumn.setCellValueFactory(cellData ->
