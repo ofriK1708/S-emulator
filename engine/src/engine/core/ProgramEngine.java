@@ -88,14 +88,20 @@ public class ProgramEngine {
     public ExecutionResult run(int expandLevel,
                                @NotNull Map<String, Integer> arguments,
                                boolean saveToStats) {
-        ProgramRunner runner = ProgramRunner.createFrom(instructionSequence);
+        List<Instruction> executedInstructions = instructionSequence.getInstructionsCopy(expandLevel);
+        Map<String, Integer> executedMap = instructionSequence.getContextMapCopy(expandLevel);
+        ProgramRunner runner = ProgramRunner.createFrom(executedInstructions, executedMap);
         ExecutionResult result = runner.run(expandLevel, arguments);
+        averageCycles = getAverageCycles(result.cycleCount(),
+                executionStatisticsManager.getExecutionCount());
         if (saveToStats) {
             executionStatisticsManager.addExecutionStatistics(result, arguments);
         }
-        averageCycles = (averageCycles * (executionStatisticsManager.getExecutionCount() - 1)
-                + result.cycleCount()) / executionStatisticsManager.getExecutionCount();
         return result;
+    }
+
+    private float getAverageCycles(int newCycles, int numberOfRuns) {
+        return (averageCycles * numberOfRuns + newCycles) / numberOfRuns;
     }
 
     public @NotNull ExecutionResult run(int expandLevel, @NotNull Map<String, Integer> arguments) {
