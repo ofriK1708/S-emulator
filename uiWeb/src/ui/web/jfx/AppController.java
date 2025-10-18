@@ -12,6 +12,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -127,7 +128,8 @@ public class AppController {
     private VariablesTableController allVarsTableController;
     @FXML
     private DebuggerController debugControlsController;
-
+    @FXML
+    private Button backToDashboardButton;
     private @Nullable ProgramDTO loadedProgram = null;
     private Runnable returnToDashboardCallback = null;
     private boolean inDebugSession = false;
@@ -160,11 +162,17 @@ public class AppController {
             argumentsTableController.initArgsTable(argumentsDTO, isAnimationsOn);
             allVarsTableController.initAllVarsTable(allVariablesDTO, isAnimationsOn);
 
-            debugControlsController.initComponent(
-                    this::debugStep,
-                    this::debugResume,
-                    this::stopDebugSession
-            );
+            // Set back button callback in DebuggerController
+            if (debugControlsController != null) {
+                System.out.println("Back to Dashboard callback registered with DebuggerController");
+                debugControlsController.initComponent(
+                        this::debugStep,
+                        this::debugResume,
+                        this::stopDebugSession
+                );
+
+            }
+
             initializeExecutionHeader();
 
             System.out.println("AppController initialized with cleaned architecture");
@@ -179,8 +187,7 @@ public class AppController {
             executionHeaderController.initComponent(
                     currentUserName,
                     screenTitle,
-                    availableCredits,
-                    this::handleBackToDashboard
+                    availableCredits
             );
             System.out.println("Execution header initialized with back button");
         } else {
@@ -245,23 +252,6 @@ public class AppController {
         loadProgramFromFileExternal(file, null);
     }
 
-    @FXML
-    public void handleBackToDashboard() {
-        if (returnToDashboardCallback != null) {
-            if (inDebugSession) {
-                try {
-                    stopDebugSession();
-                } catch (Exception e) {
-                    System.err.println("Error stopping debug session: " + e.getMessage());
-                }
-            }
-            returnToDashboardCallback.run();
-            System.out.println("Returning to Dashboard...");
-        } else {
-            System.err.println("Return to Dashboard callback not set");
-            UIUtils.showError("Navigation to Dashboard is not configured");
-        }
-    }
 
     public void setScreenTitle(String title) {
         screenTitle.set(title);
@@ -843,4 +833,23 @@ public class AppController {
     public void setScene(Scene scene) {
         this.scene = scene;
     }
+
+    @FXML
+    private void handleBackToDashboard() {
+        if (returnToDashboardCallback != null) {
+            if (inDebugSession) {
+                try {
+                    stopDebugSession();
+                } catch (Exception e) {
+                    System.err.println("Error stopping debug session: " + e.getMessage());
+                }
+            }
+            returnToDashboardCallback.run();
+            System.out.println("Returning to Dashboard from execution screen...");
+        } else {
+            System.err.println("Return to Dashboard callback not set");
+            UIUtils.showError("Navigation to Dashboard is not configured");
+        }
+    }
+
 }

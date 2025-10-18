@@ -32,7 +32,8 @@ public class DebuggerController {
     }
 
     /**
-     * Initialize the debugger controller - only handles debug session controls
+     * Initialize the debugger controller - handles debug session controls only
+     * Note: Back to Dashboard button has been moved to main execution layout
      */
     public void initComponent(
             @NotNull Runnable debugStepCallback,

@@ -6,7 +6,7 @@
 <HBox xmlns:fx="http://javafx.com/fxml"
       xmlns="http://javafx.com/javafx"
       fx:controller="ui.web.jfx.execution.header.ExecutionHeaderController"
-      alignment="CENTER_LEFT"
+      alignment="CENTER"
       spacing="15"
       styleClass="execution-header"
       stylesheets="@executionheader.css"
@@ -17,13 +17,7 @@
         <Insets top="10" right="15" bottom="10" left="15"/>
     </padding>
 
-    <!-- Back to Dashboard Button (LEFT) -->
-    <Button fx:id="backToDashboardButton"
-            text="← Back to Dashboard"
-            onAction="#handleBackToDashboard"
-            styleClass="header-button, back-button"/>
-
-    <!-- User Name Label -->
+    <!-- User Name Label (LEFT) -->
     <Label fx:id="userNameLabel"
            text="Guest User"
            styleClass="header-label, user-label"/>
@@ -39,13 +33,13 @@
     <!-- Spacer -->
     <Region HBox.hgrow="ALWAYS"/>
 
-    <!-- Available Credits Label (RIGHT) -->
-    <Label text="Available Credits:"
-           styleClass="header-label, credits-label"/>
-
-    <!-- Credits Display -->
-    <Label fx:id="creditsValueLabel"
-           text="0"
-           styleClass="credits-value"/>
+    <!-- Available Credits Section (RIGHT) -->
+    <HBox alignment="CENTER" spacing="8">
+        <Label text="Available Credits:"
+               styleClass="header-label, credits-label"/>
+        <Label fx:id="creditsValueLabel"
+               text="0"
+               styleClass="credits-value"/>
+    </HBox>
 
 </HBox>
