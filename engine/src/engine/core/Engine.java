@@ -15,16 +15,41 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class ProgramEngine {
+public class Engine {
 
     private final String programName;
     private final String mainProgramName;
     private final InstructionSequence instructionSequence;
     private final ExecutionStatisticsManager executionStatisticsManager = new ExecutionStatisticsManager();
-    private @Nullable SFunction originalSFunction = null;
+    private final @NotNull FunctionManager functionManager;
+    private @Nullable SFunction originalSFunction;
     private @Nullable String funcName;
-    private final FunctionManager functionManager;
     private float averageCycles = 0;
+
+    private Engine(@NotNull SProgram program,
+                   @NotNull Map<String, Engine> allFunctionAndProgramsInSystem)
+            throws LabelNotExist, FunctionNotFound, FunctionAlreadyExist {
+        this.programName = this.mainProgramName = program.getName();
+        // only for main program
+        functionManager = FunctionManager.createForProgram(program, allFunctionAndProgramsInSystem,
+                this, mainProgramName);
+        instructionSequence = InstructionSequence.createFrom(program, functionManager);
+        functionManager.finishInitialization();
+        instructionSequence.expandToMax();
+    }
+
+    private Engine(@NotNull SFunction function,
+                   @NotNull String mainProgramName,
+                   @NotNull FunctionManager functionManager) throws LabelNotExist {
+        this.programName = function.getName();
+        this.mainProgramName = mainProgramName;
+        funcName = function.getUserString();
+
+        instructionSequence = InstructionSequence.createFrom(function, functionManager);
+        this.functionManager = functionManager;
+
+        originalSFunction = function;
+    }
 
     /**
      * Constructor for ProgramEngine. Initializes the program engine with the given SProgram
@@ -36,14 +61,10 @@ public class ProgramEngine {
      * @throws FunctionNotFound     if a function in the program is not found in the system
      * @throws FunctionAlreadyExist if a function in the program already exists in the system
      */
-    public ProgramEngine(@NotNull SProgram program,
-                         @NotNull Map<String, ProgramEngine> allFunctionAndProgramsInSystem)
+    public static Engine createMainProgramEngine(@NotNull SProgram program,
+                                                 @NotNull Map<String, Engine> allFunctionAndProgramsInSystem)
             throws LabelNotExist, FunctionNotFound, FunctionAlreadyExist {
-        this.programName = this.mainProgramName = program.getName();
-        functionManager = FunctionManager.createFrom(program, allFunctionAndProgramsInSystem, this,
-                mainProgramName);
-        instructionSequence = InstructionSequence.createFrom(program, functionManager);
-        instructionSequence.expandToMax();
+        return new Engine(program, allFunctionAndProgramsInSystem);
     }
 
     /**
@@ -52,32 +73,25 @@ public class ProgramEngine {
      *
      * @param function        the SFunction to initialize the engine with
      * @param mainProgramName the name of the main program
+     * @param functionManager the FunctionManager managing functions in the main program
      * @throws LabelNotExist    if a label in the function does not exist
-     * @throws FunctionNotFound if a function in the function is not found in the system
      */
-    public ProgramEngine(@NotNull SFunction function,
-                         @NotNull String mainProgramName,
-                         @NotNull ProgramEngine mainProgramEngine) throws LabelNotExist, FunctionNotFound {
-        this.programName = function.getName();
-        this.mainProgramName = mainProgramName;
-        this.functionManager = new FunctionManager(mainProgramName, mainProgramEngine);
-        funcName = function.getUserString();
-
-        instructionSequence = InstructionSequence.createFrom(function, functionManager);
-
-        originalSFunction = function;
-    }
-
-    public Map<String, ProgramEngine> getFunctionsAndProgramsInSystem() {
-        return functionManager.getAllFunctionsAndProgramsInSystem();
-    }
-
-    public FunctionManager getFunctionManager() {
-        return functionManager;
+    public static Engine createFunctionEngine(@NotNull SFunction function,
+                                              @NotNull String mainProgramName,
+                                              @NotNull FunctionManager functionManager)
+            throws LabelNotExist {
+        return new Engine(function, mainProgramName, functionManager);
     }
 
     public String getProgramName() {
         return programName;
+    }
+
+    public void addProgramAndFunctionsToSystem(@NotNull Map<String, Engine> allFunctionsAndProgramsInSystem,
+                                               @NotNull Map<String, Engine> functionsInSystem) {
+
+        functionManager.addProgramAndFunctionsToSystem(allFunctionsAndProgramsInSystem,
+                functionsInSystem);
     }
 
 
@@ -180,10 +194,10 @@ public class ProgramEngine {
 
 
     @Contract(pure = true)
-    protected @NotNull List<Instruction> getTempFunctionInstructions() throws LabelNotExist, FunctionNotFound {
+    protected @NotNull List<Instruction> getTempFunctionBasicInstructions() throws LabelNotExist {
         if (originalSFunction != null) {
             InstructionSequence temp = InstructionSequence.createFrom(originalSFunction, functionManager);
-            return temp.getInstructionsCopy();
+            return temp.getBasicInstructionsCopy();
         } else {
             throw new IllegalStateException("Not a function");
         }

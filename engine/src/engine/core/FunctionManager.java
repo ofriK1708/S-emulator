@@ -9,129 +9,146 @@ import engine.generated_2.SProgram;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class FunctionManager {
-    private @NotNull
-    final ProgramEngine mainProgramEngine;
+    private final @NotNull Engine mainProgramEngine;
     private final @NotNull String mainProgramName;
-    private final @NotNull Map<String, ProgramEngine> functionsInCurrentProgram;
-    private final List<Quote> uninitializedQuotes = new ArrayList<>();
-    private @Nullable Map<String, ProgramEngine> allFunctionsAndProgramsInSystem = null;
-    private boolean isFinishedInit = false;
+    private final @NotNull Map<String, Engine> allFunctionsAndProgramsInSystem;
+    private final @NotNull List<Quote> uninitializedQuotes = new ArrayList<>();
+    private final @NotNull Map<String, Engine> functionsInCurrentProgram;
+    private boolean initialised = false;
 
-    public FunctionManager(@NotNull String mainProgramName, @NotNull ProgramEngine mainProgramEngine) {
-        this.mainProgramEngine = mainProgramEngine;
-        this.functionsInCurrentProgram = new HashMap<>();
-        this.mainProgramName = mainProgramName;
-    }
+    private FunctionManager(@NotNull SProgram sMainProgram,
+                            @NotNull Map<String, Engine> allFunctionsAndProgramsInSystem,
+                            @NotNull Engine mainProgramEngine,
+                            @NotNull String mainProgramName)
+            throws FunctionNotFound, FunctionAlreadyExist, LabelNotExist {
 
-    private FunctionManager(@NotNull Map<String, ProgramEngine> functionsInCurrentProgram,
-                            @NotNull Map<String, ProgramEngine> allFunctionsAndProgramsInSystem,
-                            @NotNull ProgramEngine mainProgramEngine,
-                            @NotNull String mainProgramName) throws FunctionNotFound, FunctionAlreadyExist {
-        this.functionsInCurrentProgram = functionsInCurrentProgram;
+        this.functionsInCurrentProgram = buildFunctions(sMainProgram, mainProgramName,
+                mainProgramEngine, allFunctionsAndProgramsInSystem);
+        this.allFunctionsAndProgramsInSystem = allFunctionsAndProgramsInSystem;
         this.mainProgramName = mainProgramName;
         this.mainProgramEngine = mainProgramEngine;
-        finishInitFunctionManager(allFunctionsAndProgramsInSystem);
+        checkForNameConflicts(allFunctionsAndProgramsInSystem, mainProgramName);
 
     }
 
-    public static FunctionManager createFrom(@NotNull SProgram program,
-                                             @NotNull Map<String, ProgramEngine> allFunctionsAndProgramsInSystem,
-                                             @NotNull ProgramEngine mainProgramEngine,
-                                             String mainProgramName)
+    /**
+     * Create a FunctionManager for the given SProgram.
+     * create manger for the main program
+     * In charge of building and managing functions defined in the program.
+     *
+     * @param sProgram                        the SProgram containing function definitions
+     * @param allFunctionsAndProgramsInSystem a map of all functions and programs in the system
+     * @param mainProgramEngine               the ProgramEngine of the main program
+     * @param mainProgramName                 the name of the main program
+     * @return a FunctionManager instance for the given SProgram
+     * @throws LabelNotExist        if a label referenced in an instruction does not exist
+     * @throws FunctionNotFound     if an unknown function - not known in system or current program is called
+     * @throws FunctionAlreadyExist if there is a name conflict with functions or programs in the system
+     */
+    public static FunctionManager createForProgram(@NotNull SProgram sProgram,
+                                                   @NotNull Map<String, Engine> allFunctionsAndProgramsInSystem,
+                                                   @NotNull Engine mainProgramEngine,
+                                                   String mainProgramName)
             throws LabelNotExist, FunctionNotFound, FunctionAlreadyExist {
 
-        Map<String, ProgramEngine> functionsInCurrentProgram = buildFunctions(program, mainProgramName,
-                mainProgramEngine);
-
-        functionsInCurrentProgram.values().forEach(func ->
-                func.getFunctionManager().setFunctions(functionsInCurrentProgram, func.getProgramName()));
-
-        return new FunctionManager(functionsInCurrentProgram, allFunctionsAndProgramsInSystem, mainProgramEngine,
+        return new FunctionManager(sProgram, allFunctionsAndProgramsInSystem, mainProgramEngine,
                 mainProgramName);
 
     }
 
-    private static @NotNull Map<String, ProgramEngine> buildFunctions(@NotNull SProgram program,
-                                                                      @NotNull String mainProgramName,
-                                                                      @NotNull ProgramEngine mainProgramEngine)
+    public void finishInitialization() throws FunctionNotFound {
+        finishInitQuotes();
+        initialised = true;
+    }
+
+    public boolean isInitialised() {
+        return initialised;
+    }
+
+    /**
+     * Build the functions defined in the given SProgram.
+     *
+     * @param program           the SProgram containing function definitions
+     * @param mainProgramName   the name of the main program
+     * @param mainProgramEngine the ProgramEngine of the main program
+     * @return a map of function names to their corresponding ProgramEngine instances
+     * @throws LabelNotExist    if a label referenced in a function does not exist
+     * @throws FunctionNotFound if a function is not found during the building process
+     */
+
+    private @NotNull Map<String, Engine> buildFunctions(@NotNull SProgram program,
+                                                        @NotNull String mainProgramName,
+                                                        @NotNull Engine mainProgramEngine,
+                                                        @NotNull Map<String, Engine>
+                                                                allFunctionsAndProgramsInSystem)
             throws LabelNotExist, FunctionNotFound {
-        Map<String, ProgramEngine> functionMap = new HashMap<>();
+        Map<String, Engine> functionMap = new HashMap<>();
         List<SFunction> sFunctions = program.getSFunctions().getSFunction();
 
         for (SFunction sFunc : sFunctions) {
-            ProgramEngine engine = new ProgramEngine(sFunc, mainProgramName, mainProgramEngine);
+            Engine engine = Engine.createFunctionEngine(sFunc, mainProgramName, this);
             functionMap.put(engine.getProgramName(), engine);
         }
 
         return functionMap;
     }
 
-    public boolean isFinishedInit() {
-        return isFinishedInit;
-    }
-
+    /**
+     * Add a quote that needs to be initialized after all functions are set.
+     *
+     * @param quote the quote to be added
+     */
     public void addToUninitializedQuotes(Quote quote) {
         uninitializedQuotes.add(quote);
     }
 
-    void setFunctions(@NotNull Map<String, ProgramEngine> allFunctionsInMain,
-                      @NotNull String programName) {
-        this.allFunctionsAndProgramsInSystem = allFunctionsInMain.entrySet().stream()
-                .filter(entry -> !entry.getKey().equals(programName))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    public void finishInitFunctionManager(@NotNull Map<String, ProgramEngine> allFunctionAndProgramsInSystem)
-            throws FunctionNotFound, FunctionAlreadyExist {
-        this.addSystemFunctionsAndFinishInitQuote(allFunctionAndProgramsInSystem, mainProgramName);
-        for (Map.Entry<String, ProgramEngine> function : functionsInCurrentProgram.entrySet()) {
-            function.getValue().getFunctionManager().addSystemFunctionsAndFinishInitQuote(allFunctionAndProgramsInSystem,
-                    function.getValue().getProgramName());
-        }
-    }
-
-    private void addSystemFunctionsAndFinishInitQuote(@NotNull Map<String, ProgramEngine> allFunctionAndProgramsInSystem,
-                                                      @NotNull String functionName)
-            throws FunctionAlreadyExist, FunctionNotFound {
-        addSystemFunctionsAndPrograms(allFunctionAndProgramsInSystem, functionName);
-        isFinishedInit = true;
+    private void finishInitQuotes() throws FunctionNotFound {
         for (Quote quote : uninitializedQuotes) {
-            quote.initAndValidateQuote();
+            quote.validateAndFinishInit();
         }
         uninitializedQuotes.clear();
     }
 
-    public void addSystemFunctionsAndPrograms(@NotNull Map<String, ProgramEngine> allFunctionAndProgramsInSystem,
-                                              @NotNull String functionName)
+    public void checkForNameConflicts(@NotNull Map<String, Engine> allFunctionAndProgramsInSystem,
+                                      @NotNull String functionName)
             throws FunctionAlreadyExist {
 
-        if (this.allFunctionsAndProgramsInSystem == null) {
-            this.allFunctionsAndProgramsInSystem = new HashMap<>(functionsInCurrentProgram);
-        }
-
-        for (Map.Entry<String, ProgramEngine> engineEntry : allFunctionAndProgramsInSystem.entrySet()) {
+        for (String functionNameInSystem : allFunctionAndProgramsInSystem.keySet()) {
             // Prevent having functions with the same name as the main program and vice versa
-            if (functionsInCurrentProgram.containsKey(engineEntry.getKey()) ||
-                    engineEntry.getKey().equals(mainProgramName)) {
+            if (functionsInCurrentProgram.containsKey(functionNameInSystem) ||
+                    functionNameInSystem.equals(mainProgramName)) {
                 throw new FunctionAlreadyExist(mainProgramName, functionName);
             }
-            allFunctionsAndProgramsInSystem.put(engineEntry.getKey(), engineEntry.getValue());
         }
     }
 
-    public Map<String, ProgramEngine> getAllFunctionsAndProgramsInSystem() {
-        return Objects.requireNonNullElseGet(allFunctionsAndProgramsInSystem, HashMap::new);
+    public void addProgramAndFunctionsToSystem(@NotNull Map<String, Engine> allFunctionsAndProgramsInSystem,
+                                               @NotNull Map<String, Engine> functionsInSystem) {
+        allFunctionsAndProgramsInSystem.put(mainProgramName, mainProgramEngine);
+        allFunctionsAndProgramsInSystem.putAll(functionsInCurrentProgram);
+        functionsInSystem.putAll(functionsInCurrentProgram);
     }
 
     public @NotNull String getMainProgramName() {
         return mainProgramName;
     }
 
-    public @NotNull ProgramEngine getMainProgramEngine() {
-        return mainProgramEngine;
+    /**
+     * Get a function by its name. First checks in current program's functions,
+     * then in the system-wide functions.
+     * if not found, returns null.
+     *
+     * @param programName the name of the function to retrieve
+     * @return the ProgramEngine of the function, or null if not found
+     */
+    public @Nullable Engine getFunction(@NotNull String programName) {
+        return functionsInCurrentProgram.getOrDefault(programName,
+                allFunctionsAndProgramsInSystem.get(programName));
     }
 }

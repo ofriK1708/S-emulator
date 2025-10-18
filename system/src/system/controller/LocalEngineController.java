@@ -2,7 +2,7 @@ package system.controller;
 
 import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
-import engine.core.ProgramEngine;
+import engine.core.Engine;
 import engine.exception.FunctionNotFound;
 import engine.exception.LabelNotExist;
 import engine.generated_2.SProgram;
@@ -24,8 +24,8 @@ import static system.utils.systemUtils.validateFile;
 public class LocalEngineController implements EngineController {
     public static @NotNull Predicate<String> validArgumentValueCheck = ProgramUtils.validArgumentCheck;
     private final @NotNull XMLHandler xmlHandler;
-    private @Nullable ProgramEngine engine;
-    private ProgramEngine mainEngine;
+    private @Nullable Engine engine;
+    private Engine mainEngine;
     private String mainEngineName;
     private int maxExpandLevel = 0;
 
@@ -40,7 +40,7 @@ public class LocalEngineController implements EngineController {
     private boolean inDebugSession = false;
 
     private void createEngine(@NotNull SProgram program) throws LabelNotExist, FunctionNotFound {
-        engine = new ProgramEngine(program);
+        engine = new Engine(program);
         mainEngine = engine;
         mainEngineName = engine.getProgramName();
         maxExpandLevel = engine.getMaxExpandLevel();

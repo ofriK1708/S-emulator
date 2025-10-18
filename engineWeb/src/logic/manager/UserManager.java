@@ -1,9 +1,12 @@
-package logic.file.xml.user;
+package logic.manager;
+
+import logic.User;
 
 import java.util.Map;
 
-public class userManager {
+public class UserManager {
     Map<String, User> users;
+
 
     public synchronized void addUser(String username) {
         User user = new User(username);

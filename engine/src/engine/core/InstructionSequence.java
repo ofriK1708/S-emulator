@@ -1,7 +1,6 @@
 package engine.core;
 
 import engine.core.syntheticCommand.Quote;
-import engine.exception.FunctionNotFound;
 import engine.exception.LabelNotExist;
 import engine.generated_2.SFunction;
 import engine.generated_2.SInstruction;
@@ -50,13 +49,12 @@ public final class InstructionSequence {
      * Factory method to create an InstructionSequence from a raw SProgram.
      * This is the entry point for parsing and expanding instructions.
      *
-     * @param sProgram The JAXB-generated program object from the XML.
+     * @param sProgram        The JAXB-generated program object from the XML.
      * @param functionManager The manager containing all available functions for resolution.
      * @return A new, immutable InstructionSequence.
-     * @throws FunctionNotFound if a function call within the program cannot be resolved.
      */
     public static InstructionSequence createFrom(@NotNull SProgram sProgram, @NotNull FunctionManager functionManager)
-            throws FunctionNotFound, LabelNotExist {
+            throws LabelNotExist {
         ParsedComponents components = parseRawInstructions(sProgram.getSInstructions().getSInstruction(),
                 functionManager);
 
@@ -64,7 +62,7 @@ public final class InstructionSequence {
     }
 
     public static InstructionSequence createFrom(@NotNull SFunction sFunction, @NotNull FunctionManager functionManager)
-            throws FunctionNotFound, LabelNotExist {
+            throws LabelNotExist {
         ParsedComponents components = parseRawInstructions(sFunction.getSInstructions().getSInstruction(),
                 functionManager);
 
@@ -72,15 +70,14 @@ public final class InstructionSequence {
     }
 
     private static @NotNull ParsedComponents parseRawInstructions(@NotNull List<SInstruction> rawInstructions,
-                                                                  @NotNull FunctionManager functionManager)
-            throws FunctionNotFound {
+                                                                  @NotNull FunctionManager functionManager) {
         List<Instruction> originalInstructions = buildInstructions(rawInstructions, functionManager);
         Set<String> originalLabels = buildLabels(rawInstructions);
         return new ParsedComponents(originalInstructions, originalLabels);
     }
 
     private static @NotNull List<Instruction> buildInstructions(@NotNull List<SInstruction> rawInstructions,
-                                                                @NotNull FunctionManager functionManager) throws FunctionNotFound {
+                                                                @NotNull FunctionManager functionManager) {
         List<Instruction> instructions = new ArrayList<>();
         for (int i = 0; i < rawInstructions.size(); i++) {
             SInstruction sInstruction = rawInstructions.get(i);
@@ -233,7 +230,7 @@ public final class InstructionSequence {
         return new ArrayList<>(instructionExpansionLevels.get(expandLevel));
     }
 
-    public List<Instruction> getInstructionsCopy() {
+    public List<Instruction> getBasicInstructionsCopy() {
         return getInstructionsCopy(0);
     }
 

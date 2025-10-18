@@ -2,7 +2,6 @@ package servlets;
 
 import com.google.gson.Gson;
 import dto.system.LoadProgramResultDTO;
-import engine.core.ProgramEngine;
 import engine.generated_2.SProgram;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -28,38 +27,37 @@ public class uploadProgram extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        SProgram program = getSProgramFromRequest(req, resp);
+        SProgram sProgram = getSProgramFromRequest(req, resp);
         Gson json = new Gson();
-        if (program != null) {
+        if (sProgram != null) {
             ProgramManager programManager = ServletUtils.getProgramManager(getServletContext());
-            String programName = program.getName();
-            System.out.println("Received program: " + program);
+            String programName = sProgram.getName();
+            System.out.println("Received sProgram: " + sProgram);
             synchronized (this) {
                 if (programManager.isProgramExists(programName)) {
                     resp.setStatus(HttpServletResponse.SC_CONFLICT);
                     String fileName = req.getPart(XML_FILE_PART_NAME).getSubmittedFileName();
                     resp.getWriter().println("Failed to upload the File \"" + fileName + "\"! " +
-                            "A program with the name \"" + programName + "\" already " +
+                            "A sProgram with the name \"" + programName + "\" already " +
                             "exists in the system, please choose a different name or file.");
                 } else {
-                    // Validate program by trying to create an engine - check for label not exists, etc.
                     try {
-                        ProgramEngine engine = new ProgramEngine(program, programManager.getFunctionsAndPrograms());
-                        programManager.addProgram(programName, engine);
-                        resp.setStatus(HttpServletResponse.SC_OK);
-                        resp.setContentType("application/json");
-                        LoadProgramResultDTO resultDTO = new LoadProgramResultDTO(
-                                programManager.getProgramsMetadata(), programManager.getFunctionsMetadata());
-                        resp.getWriter().println(json.toJson(resultDTO));
-                        System.out.println("Program " + programName + " uploaded successfully.");
+                        // Validate sProgram by trying to create an engine - check for label not exists, etc.
+                        programManager.addProgram(programName, sProgram);
 
                     } catch (Exception e) {
                         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        resp.getWriter().println("Failed to upload program " + programName + ": " + e.getMessage());
+                        resp.getWriter().println("Failed to upload sProgram " + programName + ": " + e.getMessage());
                         System.out.println(Arrays.toString(e.getStackTrace()));
                     }
                 }
             }
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setContentType("application/json");
+            LoadProgramResultDTO resultDTO = new LoadProgramResultDTO(
+                    programManager.getProgramsMetadata(), programManager.getFunctionsMetadata());
+            resp.getWriter().println(json.toJson(resultDTO));
+            System.out.println("Program " + programName + " uploaded successfully.");
         }
     }
 

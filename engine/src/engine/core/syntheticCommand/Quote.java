@@ -1,9 +1,9 @@
 package engine.core.syntheticCommand;
 
 import dto.engine.ExecutionResult;
+import engine.core.Engine;
 import engine.core.FunctionManager;
 import engine.core.Instruction;
-import engine.core.ProgramEngine;
 import engine.core.basicCommand.Neutral;
 import engine.exception.FunctionNotFound;
 import engine.utils.CommandType;
@@ -18,28 +18,35 @@ public class Quote extends Instruction {
     public final static String functionNameArgumentName = "functionName";
     public final static String functionArgumentsArgumentName = "functionArguments";
     private final @NotNull FunctionManager functionManager;
-    private ProgramEngine functionToRun;
+    private Engine functionToRun;
     private String allArgsString;
     private List<String> funcArgsNames;
     private final List<Quote> subfunctionCalls = new ArrayList<>();
-    private int subFunctionsCycles;
     private int executedCycles = 0;
 
-    public Quote(String mainVarName, Map<String, String> args, String label, @NotNull FunctionManager functionManager,
-                 int quoteIndex) throws FunctionNotFound {
+    private Quote(@NotNull String mainVarName, @NotNull Map<String, String> args,
+                  @NotNull String label, @NotNull FunctionManager functionManager,
+                  int quoteIndex, boolean isFinishedInitialization) throws FunctionNotFound {
         super(mainVarName, args, label);
         this.functionManager = functionManager;
         this.quoteIndex = quoteIndex;
-        initAndValidateQuote();
+        if (!isFinishedInitialization) {
+            functionManager.addToUninitializedQuotes(this);
+        } else {
+            validateAndFinishInit();
+        }
     }
 
-    public Quote(String mainVarName, Map<String, String> args, String label, @NotNull Instruction derivedFrom,
-                 int derivedFromIndex, @NotNull FunctionManager functionManager) throws FunctionNotFound {
-        super(mainVarName, args, label, derivedFrom, derivedFromIndex);
-        this.functionManager = functionManager;
-        initAndValidateQuote();
-    }
-
+    /**
+     * Copy constructor for Quote.
+     * used when expanding a quote - to create a new quote based on the original one
+     *
+     * @param mainVarName      the main variable name to store the result
+     * @param label            the label for the quote
+     * @param quote            the original quote to copy from
+     * @param derivedFrom      the instruction from which this quote is derived
+     * @param derivedFromIndex the index of the instruction from which this quote is derived
+     */
     public Quote(String mainVarName, String label, @NotNull Quote quote, @NotNull Instruction derivedFrom,
                  int derivedFromIndex) {
         super(mainVarName, quote.args, label, derivedFrom, derivedFromIndex);
@@ -48,31 +55,64 @@ public class Quote extends Instruction {
         this.allArgsString = quote.allArgsString;
         this.funcArgsNames = new ArrayList<>(quote.funcArgsNames);
         this.subfunctionCalls.addAll(quote.subfunctionCalls);
-        //this.subFunctionsCycles = quote.subFunctionsCycles;
         this.isFinishedInitialization = quote.isFinishedInitialization;
+    }
+
+    /**
+     * Factory method to create an initial Quote.
+     * used when creating a new Quote - every time an instructions sequence is created
+     *
+     * @param mainVarName     the main variable name to store the result
+     * @param args            the arguments map for the quote
+     * @param label           the label for the quote
+     * @param functionManager the function manager to retrieve functions
+     * @param quoteIndex      the index of the quote in the program
+     * @return the created Quote instance
+     */
+    public static Quote createInitialQuote(@NotNull String mainVarName, @NotNull Map<String, String> args,
+                                           @NotNull String label, @NotNull FunctionManager functionManager,
+                                           int quoteIndex) {
+        try {
+            return new Quote(mainVarName, args, label, functionManager, quoteIndex, functionManager.isInitialised());
+        } catch (FunctionNotFound ignored) {
+            // this should not happen here, as we are not initializing yet
+            throw new RuntimeException("Unexpected FunctionNotFound during initial Quote creation");
+        }
+    }
+
+    /**
+     * Factory method to create a sub-function Quote.
+     * used when creating a Quote for a sub-function call within another Quote
+     * this happens after initialization
+     *
+     * @param mainVarName     the main variable name to store the result
+     * @param args            the arguments map for the quote
+     * @param label           the label for the quote
+     * @param functionManager the function manager to retrieve functions
+     * @param quoteIndex      the index of the quote in the program
+     * @return the created Quote instance
+     * @throws FunctionNotFound if the function to run is not found
+     */
+    public static Quote createSubFunctionQuote(@NotNull String mainVarName, @NotNull Map<String, String> args,
+                                               @NotNull String label, @NotNull FunctionManager functionManager,
+                                               int quoteIndex) throws FunctionNotFound {
+        return new Quote(mainVarName, args, label, functionManager, quoteIndex, true);
     }
 
     public int getExecutedCycles() {
         return executedCycles;
     }
 
-    public void initAndValidateQuote() throws FunctionNotFound {
+    public void validateAndFinishInit() throws FunctionNotFound {
         String funcName = args.get(functionNameArgumentName);
         allArgsString = args.get(functionArgumentsArgumentName) == null ? "" : args.get(functionArgumentsArgumentName);
-        if (!functionManager.isFinishedInit()) {
-            functionManager.addToUninitializedQuotes(this);
-            return;
-        }
-        Map<String, ProgramEngine> functions = functionManager.getAllFunctionsAndProgramsInSystem();
+        functionToRun = functionManager.getFunction(funcName);
 
-        if (!functions.containsKey(funcName) && !functionManager.getMainProgramName().equals(funcName)) {
-            throw new FunctionNotFound(quoteIndex, functionManager.getMainProgramName(), funcName);
+        if (functionToRun == null) {
+            throw new FunctionNotFound(quoteIndex, getStringRepresentation(), functionManager.getMainProgramName(),
+                    funcName);
         }
-
         isFinishedInitialization = true;
-        functionToRun = funcName.equals(functionManager.getMainProgramName()) ?
-                functionManager.getMainProgramEngine() : functions.get(funcName);
-
         if (allArgsString.isBlank()) {
             funcArgsNames = List.of();
         } else {
@@ -82,11 +122,11 @@ public class Quote extends Instruction {
         initSubfunctionCalls();
     }
 
-    private void initSubfunctionCalls() {
+    private void initSubfunctionCalls() throws FunctionNotFound {
         subfunctionCalls.clear();
         for (String argName : funcArgsNames) {
             if (ProgramUtils.isFunctionCall(argName)) {
-                Quote functionCall = Instruction.createQuoteFromString(argName, functionManager, quoteIndex);
+                Quote functionCall = Instruction.createSubFunctionCall(argName, functionManager, quoteIndex);
                 subfunctionCalls.add(functionCall);
             }
         }
@@ -256,7 +296,11 @@ public class Quote extends Instruction {
             } else {
                 funcArgsNames = ProgramUtils.splitArgs(updatedArguments);
             }
-            initSubfunctionCalls();
+            try {
+                initSubfunctionCalls();
+            } catch (FunctionNotFound ignored) {
+                // this should not happen as the functions are already validated
+            }
         }
     }
 }

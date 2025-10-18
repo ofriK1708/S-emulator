@@ -49,7 +49,7 @@ public abstract class Instruction implements Command, Serializable {
 
     public static @NotNull Instruction createInstruction(@NotNull SInstruction sInstruction,
                                                          @NotNull FunctionManager functionManager,
-                                                         int instructionIndex) throws FunctionNotFound {
+                                                         int instructionIndex) {
 
         Map<String, String> args = Optional.ofNullable(sInstruction.getSInstructionArguments())
                 .map(SInstructionArguments::getSInstructionArgument)
@@ -75,7 +75,7 @@ public abstract class Instruction implements Command, Serializable {
             case "JUMP_ZERO" -> new JumpZero(mainVarName, args, labelName);
             case "JUMP_EQUAL_CONSTANT" -> new JumpEqualConstant(mainVarName, args, labelName);
             case "JUMP_EQUAL_VARIABLE" -> new JumpEqualVariable(mainVarName, args, labelName);
-            case "QUOTE" -> new Quote(mainVarName, args, labelName, functionManager, instructionIndex);
+            case "QUOTE" -> Quote.createInitialQuote(mainVarName, args, labelName, functionManager, instructionIndex);
             case "JUMP_EQUAL_FUNCTION" ->
                     new JumpEqualFunction(mainVarName, args, labelName, functionManager, instructionIndex);
             default -> throw new IllegalArgumentException("Unknown instruction type: " + sInstruction.getName());
@@ -90,9 +90,9 @@ public abstract class Instruction implements Command, Serializable {
         this.derivedFromIndex = derivedFromIndex;
     }
 
-    protected static @NotNull Quote createQuoteFromString(@NotNull String argName,
+    protected static @NotNull Quote createSubFunctionCall(@NotNull String argName,
                                                           @NotNull FunctionManager functionManager,
-                                                          int instructionIndex) {
+                                                          int instructionIndex) throws FunctionNotFound {
         String functionCallContent = ProgramUtils.extractFunctionContent(argName);
         List<String> parts = ProgramUtils.splitArgs(functionCallContent);
         String functionName = parts.getFirst().trim();
@@ -100,11 +100,7 @@ public abstract class Instruction implements Command, Serializable {
         Map<String, String> quoteArgs = new HashMap<>();
         quoteArgs.put(Quote.functionNameArgumentName, functionName);
         quoteArgs.put(Quote.functionArgumentsArgumentName, functionArgs);
-        try {
-            return new Quote("", quoteArgs, "", functionManager, instructionIndex);
-        } catch (FunctionNotFound e) {
-            throw new RuntimeException(e);
-        }
+        return Quote.createSubFunctionQuote("", quoteArgs, "", functionManager, instructionIndex);
     }
 
     public String getMainVarName() {
@@ -168,7 +164,7 @@ public abstract class Instruction implements Command, Serializable {
 
     protected @NotNull List<Instruction> getUpdatedFunctionInstructions(
             @NotNull Map<String, Integer> mainContextMap,
-            @NotNull ProgramEngine function,
+            @NotNull Engine function,
             @NotNull String outputVar,
             @NotNull Map<String, String> argsReplacements,
             @NotNull Instruction derivedFrom,
@@ -176,7 +172,7 @@ public abstract class Instruction implements Command, Serializable {
 
         List<Instruction> functionInstructions = null;
         try {
-            functionInstructions = function.getTempFunctionInstructions();
+            functionInstructions = function.getTempFunctionBasicInstructions();
         } catch (Exception ignored) {
         }
         Map<String, String> allReplacements = new HashMap<>(argsReplacements);
@@ -213,7 +209,7 @@ public abstract class Instruction implements Command, Serializable {
     private void setupConflictAvoidanceReplacements(@NotNull Map<String, Integer> mainContextMap,
                                                     @NotNull Map<String, String> argsReplacements,
                                                     @NotNull Map<String, String> allReplacements,
-                                                    @NotNull ProgramEngine function) {
+                                                    @NotNull Engine function) {
 
         /* first we need to reserve a new work variable for the output of the function,
          * so we won't mix it with any other variable in the main program */

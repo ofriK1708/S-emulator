@@ -166,6 +166,12 @@ public class ProgramUtils {
         return argName.substring(1, argName.length() - 1); // Remove parentheses
     }
 
+    /**
+     * Splits the input string into arguments, considering nested parentheses for composition.
+     *
+     * @param input the input string to split
+     * @return a list of split arguments
+     */
     public static @NotNull List<String> splitArgs(@NotNull String input) {
         List<String> result = new ArrayList<>();
         StringBuilder current = new StringBuilder();

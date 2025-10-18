@@ -3,7 +3,6 @@ package engine.core.syntheticCommand;
 import engine.core.FunctionManager;
 import engine.core.Instruction;
 import engine.core.basicCommand.Neutral;
-import engine.exception.FunctionNotFound;
 import engine.utils.CommandType;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
@@ -19,10 +18,10 @@ public class JumpEqualFunction extends Instruction {
 
     public JumpEqualFunction(String mainVarName, Map<String, String> args,
                              String label, @NotNull FunctionManager functionManager,
-                             int quoteIndex) throws FunctionNotFound {
+                             int quoteIndex) {
         super(mainVarName, args, label);
         this.functionManager = functionManager;
-        functionQuoteToCheck = new Quote("", this.args, "", functionManager, quoteIndex);
+        functionQuoteToCheck = Quote.createInitialQuote("", this.args, "", functionManager, quoteIndex);
     }
 
     @Override
@@ -65,14 +64,12 @@ public class JumpEqualFunction extends Instruction {
             expandedInstructions.add(new Neutral(ProgramUtils.OUTPUT_NAME, Map.of(), label,
                     this, originalInstructionIndex));
         }
-        try {
-            expandedInstructions.add(new Quote(freeWorkVar, args, label, this,
-                    originalInstructionIndex, functionManager));
-        } catch (FunctionNotFound e) {
-            throw new RuntimeException(e);
-        }
-        expandedInstructions.add(new JumpEqualVariable(mainVarName, Map.of(JumpEqualVariable.labelArgumentName,
-                args.get(labelArgumentName), JumpEqualVariable.variableArgumentName, freeWorkVar), "", this, originalInstructionIndex));
+        expandedInstructions.add(new Quote(freeWorkVar, label, functionQuoteToCheck, this,
+                originalInstructionIndex));
+        expandedInstructions.add(new JumpEqualVariable(mainVarName, Map.of(
+                JumpEqualVariable.labelArgumentName, args.get(labelArgumentName),
+                JumpEqualVariable.variableArgumentName, freeWorkVar),
+                "", this, originalInstructionIndex));
         return expandedInstructions;
     }
 

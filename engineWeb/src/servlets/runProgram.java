@@ -2,7 +2,7 @@ package servlets;
 
 import com.google.gson.Gson;
 import dto.engine.ExecutionResult;
-import engine.core.ProgramEngine;
+import engine.core.Engine;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -29,7 +29,7 @@ public class runProgram extends HttpServlet {
         }
         String programName = runAndDebugParams.programName();
         int expandLevel = runAndDebugParams.expandLevel();
-        ProgramEngine currentEngine = runAndDebugParams.pm().getProgramOrFunctionEngine(programName);
+        Engine currentEngine = runAndDebugParams.pm().getProgramOrFunctionEngine(programName);
         if (expandLevel < 0 || expandLevel > currentEngine.getMaxExpandLevel()) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write("Error! expand level must be between 0 to " + currentEngine.getMaxExpandLevel());

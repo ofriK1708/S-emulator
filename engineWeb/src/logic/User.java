@@ -1,4 +1,4 @@
-package logic.file.xml.user;
+package logic;
 
 public record User(String name) {
 }

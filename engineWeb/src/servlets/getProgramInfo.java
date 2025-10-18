@@ -2,7 +2,7 @@ package servlets;
 
 import com.google.gson.Gson;
 import dto.engine.ExecutionStatisticsDTO;
-import engine.core.ProgramEngine;
+import engine.core.Engine;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -38,7 +38,7 @@ public class getProgramInfo extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "programName parameter is missing or invalid");
             return;
         }
-        ProgramEngine currentEngine = pm.getProgramOrFunctionEngine(programName);
+        Engine currentEngine = pm.getProgramOrFunctionEngine(programName);
         resp.setContentType("application/json;charset=UTF-8");
         if (isExpandLevelRequired(infoToGet)) {
             try {
@@ -105,7 +105,7 @@ public class getProgramInfo extends HttpServlet {
         }
     }
 
-    private int getAndValidateExpandLevel(HttpServletRequest req, HttpServletResponse resp, ProgramEngine engine)
+    private int getAndValidateExpandLevel(HttpServletRequest req, HttpServletResponse resp, Engine engine)
             throws IOException {
         int expandLevel;
         String expandLevelStr = req.getParameter(EXPAND_LEVEL_PARAM);

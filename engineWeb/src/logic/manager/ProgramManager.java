@@ -2,113 +2,117 @@ package logic.manager;
 
 import dto.engine.FunctionMetadata;
 import dto.engine.ProgramMetadata;
-import engine.core.ProgramEngine;
+import engine.core.Engine;
+import engine.exception.FunctionAlreadyExist;
+import engine.exception.FunctionNotFound;
+import engine.exception.LabelNotExist;
+import engine.generated_2.SProgram;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 public class ProgramManager {
     @NotNull
-    private final Map<String, ProgramEngine> programs = new HashMap<>();
+    private final Map<String, Engine> programs = new HashMap<>();
     @NotNull
-    private final Map<String, ProgramEngine> functions = new HashMap<>();
+    private final Map<String, Engine> functions = new HashMap<>();
     @NotNull
-    private final Map<String, ProgramEngine> functionsAndPrograms = new HashMap<>();
-    @NotNull
-    private final Object programsAndFunctionsListLock = new Object();
-    @NotNull
-    private final Object currentProgramLock = new Object();
-    @Nullable
-    private ProgramEngine currentProgram;
+    private final Map<String, Engine> functionsAndPrograms = new HashMap<>();
 
-    public void addProgram(String programName, ProgramEngine program) {
-        synchronized (programsAndFunctionsListLock) {
-            programs.put(programName, program);
-            functionsAndPrograms.put(programName, program);
-            Map<String, ProgramEngine> allFunctionsAndPrograms = program.getFunctionsAndProgramsInSystem();
-            if (allFunctionsAndPrograms != null) {
-                for (Map.Entry<String, ProgramEngine> entry : allFunctionsAndPrograms.entrySet()) {
-                    String functionName = entry.getKey();
-                    ProgramEngine functionProgram = entry.getValue();
-                    if (!functionsAndPrograms.containsKey(functionName)) {
-                        functionsAndPrograms.put(functionName, functionProgram);
-                        if (functionProgram.isFunction()) {
-                            functions.put(functionName, functionProgram);
-                        }
-                    }
-                }
-            }
+    @NotNull
+    private final ReadWriteLock programsAndFunctionsLock = new ReentrantReadWriteLock();
+    @NotNull
+    private final Lock readLock = programsAndFunctionsLock.readLock();
+    @NotNull
+    private final Lock writeLock = programsAndFunctionsLock.writeLock();
+
+    public void addProgram(String programName, SProgram sProgram)
+            throws LabelNotExist, FunctionNotFound, FunctionAlreadyExist {
+        writeLock.lock();
+        try {
+            Engine mainProgramEngine = Engine.createMainProgramEngine(sProgram, functionsAndPrograms);
+            mainProgramEngine.addProgramAndFunctionsToSystem(functionsAndPrograms, functions);
+            programs.put(programName, mainProgramEngine);
+        } finally {
+            writeLock.unlock();
         }
 
     }
 
     public Set<ProgramMetadata> getProgramsMetadata() {
-        synchronized (programsAndFunctionsListLock) {
+        readLock.lock();
+        try {
             return programs.values().stream()
-                    .map(ProgramEngine::programToMetadata)
+                    .map(Engine::programToMetadata)
                     .collect(Collectors.toSet());
+        } finally {
+            readLock.unlock();
         }
     }
 
     public Set<String> getProgramNames() {
-        synchronized (programsAndFunctionsListLock) {
+        readLock.lock();
+        try {
             return programs.keySet();
+        } finally {
+            readLock.unlock();
         }
     }
 
-    public Map<String, ProgramEngine> getFunctionsAndPrograms() {
-        synchronized (programsAndFunctionsListLock) {
+    public Map<String, Engine> getFunctionsAndPrograms() {
+        readLock.lock();
+        try {
             return functionsAndPrograms;
+        } finally {
+            readLock.unlock();
         }
     }
 
     public Set<FunctionMetadata> getFunctionsMetadata() {
-        synchronized (programsAndFunctionsListLock) {
+        readLock.lock();
+        try {
             return functions.values().stream()
-                    .map(ProgramEngine::functionToMetadata)
+                    .map(Engine::functionToMetadata)
                     .collect(Collectors.toSet());
+        } finally {
+            readLock.unlock();
         }
     }
 
     public Set<String> getFunctionNames() {
-        synchronized (programsAndFunctionsListLock) {
+        readLock.lock();
+        try {
             return functions.keySet();
+        } finally {
+            readLock.unlock();
         }
     }
 
     public boolean isProgramExists(String programName) {
-        synchronized (programsAndFunctionsListLock) {
+        readLock.lock();
+        try {
             return programs.containsKey(programName);
+        } finally {
+            readLock.unlock();
         }
     }
 
-    public ProgramEngine getProgramOrFunctionEngine(String name) {
-        synchronized (programsAndFunctionsListLock) {
+    public Engine getProgramOrFunctionEngine(String name) {
+        readLock.lock();
+        try {
             if (functionsAndPrograms.containsKey(name)) {
                 return functionsAndPrograms.get(name);
             } else {
                 throw new IllegalStateException("Program or function " + name + " not found!");
             }
-        }
-    }
-
-    public ProgramEngine getCurrentProgram() {
-        synchronized (currentProgramLock) {
-            return currentProgram;
-        }
-    }
-
-    public void setCurrentProgram(String programName) {
-        synchronized (currentProgramLock) {
-            if (programs.containsKey(programName)) {
-                currentProgram = programs.get(programName);
-            } else {
-                throw new IllegalStateException("Program " + programName + " not found!");
-            }
+        } finally {
+            readLock.unlock();
         }
     }
 }
