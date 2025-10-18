@@ -1,6 +1,5 @@
 package ui.web.jfx;
 
-import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
 import dto.ui.VariableDTO;

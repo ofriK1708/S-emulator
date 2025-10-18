@@ -1,6 +1,9 @@
 package engine.core;
 
-import dto.engine.*;
+import dto.engine.ExecutionResultDTO;
+import dto.engine.FunctionMetadata;
+import dto.engine.ProgramDTO;
+import dto.engine.ProgramMetadata;
 import engine.exception.FunctionAlreadyExist;
 import engine.exception.FunctionNotFound;
 import engine.exception.LabelNotExist;
@@ -20,11 +23,11 @@ public class Engine {
     private final String programName;
     private final String mainProgramName;
     private final InstructionSequence instructionSequence;
-    private final ExecutionStatisticsManager executionStatisticsManager = new ExecutionStatisticsManager();
     private final @NotNull FunctionManager functionManager;
     private @Nullable SFunction originalSFunction;
     private @Nullable String funcName;
     private float averageCycles = 0;
+    private int numberOfExecutions = 0;
 
     private Engine(@NotNull SProgram program,
                    @NotNull Map<String, Engine> allFunctionAndProgramsInSystem)
@@ -53,13 +56,13 @@ public class Engine {
 
     /**
      * Constructor for ProgramEngine. Initializes the program engine with the given SProgram
-     * and a map of all functions in the system.
+     * and a map of all functions in the server.
      *
      * @param program                        the SProgram to initialize the engine with
-     * @param allFunctionAndProgramsInSystem a map of all functions and programs in the system
+     * @param allFunctionAndProgramsInSystem a map of all functions and programs in the server
      * @throws LabelNotExist        if a label in the program does not exist
-     * @throws FunctionNotFound     if a function in the program is not found in the system
-     * @throws FunctionAlreadyExist if a function in the program already exists in the system
+     * @throws FunctionNotFound     if a function in the program is not found in the server
+     * @throws FunctionAlreadyExist if a function in the program already exists in the server
      */
     public static Engine createMainProgramEngine(@NotNull SProgram program,
                                                  @NotNull Map<String, Engine> allFunctionAndProgramsInSystem)
@@ -99,37 +102,28 @@ public class Engine {
         return instructionSequence.isVariableInContext(varName);
     }
 
-    public ExecutionResult run(int expandLevel,
-                               @NotNull Map<String, Integer> arguments,
-                               boolean saveToStats) {
+    public ExecutionResultDTO run(int expandLevel, @NotNull Map<String, Integer> arguments) {
         List<Instruction> executedInstructions = instructionSequence.getInstructionsCopy(expandLevel);
         Map<String, Integer> executedMap = instructionSequence.getContextMapCopy(expandLevel);
         ProgramRunner runner = ProgramRunner.createFrom(executedInstructions, executedMap);
-        ExecutionResult result = runner.run(expandLevel, arguments);
-        averageCycles = getAverageCycles(result.cycleCount(),
-                executionStatisticsManager.getExecutionCount());
-        if (saveToStats) {
-            executionStatisticsManager.addExecutionStatistics(result, arguments);
-        }
+        ExecutionResultDTO result = runner.run(expandLevel, arguments);
+        averageCycles = calcAverageCycles(result.cycleCount());
+        numberOfExecutions++;
+
         return result;
     }
 
-    private float getAverageCycles(int newCycles, int numberOfRuns) {
-        return (averageCycles * numberOfRuns + newCycles) / numberOfRuns;
+    public ExecutionResultDTO run(@NotNull Map<String, Integer> arguments) {
+        return run(0, arguments);
     }
 
-    public @NotNull ExecutionResult run(int expandLevel, @NotNull Map<String, Integer> arguments) {
-        return run(expandLevel, arguments, true);
-    }
-
-    public @NotNull ExecutionResult run(@NotNull Map<String, Integer> arguments, boolean saveToStats) {
-        return run(0, arguments, saveToStats);
+    private float calcAverageCycles(int newCycles) {
+        return (averageCycles * numberOfExecutions + newCycles) / numberOfExecutions + 1;
     }
 
     public @NotNull ProgramDebugger startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments) {
         ProgramDebugger debugger = ProgramDebugger.create(
                 instructionSequence,
-                executionStatisticsManager,
                 expandLevel);
         debugger.startDebugSession(expandLevel, arguments);
         return debugger;
@@ -151,16 +145,9 @@ public class Engine {
         return getProgramByExpandLevelDTO(0);
     }
 
-    public @NotNull List<ExecutionStatisticsDTO> getAllExecutionStatistics() {
-        return executionStatisticsManager.getExecutionStatisticsDTOList();
-    }
 
     public @NotNull List<String> getSortedProgramArgsNames() {
         return new ArrayList<>(instructionSequence.getSortedArgumentsNames());
-    }
-
-    public int getLastExecutionCycles() {
-        return executionStatisticsManager.getLastExecutionCycles();
     }
 
     public @NotNull Set<String> getAllVariablesNames(int expandLevel, boolean includeLabels) {
@@ -214,7 +201,7 @@ public class Engine {
             String userFiller = "remove_me"; // Placeholder until user management is implemented
             return new ProgramMetadata(programName, userFiller,
                     instructionSequence.getOriginalInstructionCount(), instructionSequence.getMaxExpandLevel(),
-                    executionStatisticsManager.getExecutionCount(), averageCycles);
+                    numberOfExecutions, averageCycles);
         } else {
             throw new IllegalStateException("Cannot get metadata for a function from a program");
         }

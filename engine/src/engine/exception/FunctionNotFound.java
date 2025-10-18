@@ -3,7 +3,7 @@ package engine.exception;
 public class FunctionNotFound extends Exception {
     public FunctionNotFound(int instructionIndex, String instruction, String atFunction, String unknownFunctionCalled) {
         super(String.format("Error at instruction #%d %s at function/program '%s': " +
-                        "trying to call '%s'. This function does not exist in the program or in the system.",
+                        "trying to call '%s'. This function does not exist in the program or in the server.",
                 instructionIndex + 1, instruction, atFunction, unknownFunctionCalled));
 
     }

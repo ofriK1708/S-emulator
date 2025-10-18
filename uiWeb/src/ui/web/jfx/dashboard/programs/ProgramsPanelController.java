@@ -1,9 +1,10 @@
 package ui.web.jfx.dashboard.programs;
 
-import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
-import dto.ui.ProgramDashboardDTO;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -14,8 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import system.controller.EngineController;
 
 import java.util.function.Consumer;
-
-import static com.sun.javafx.util.Utils.sum;
 
 /**
  * Controller for the Programs Panel.

@@ -1,6 +1,5 @@
 package ui.jfx;
 
-import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.InstructionDTO;
 import dto.engine.ProgramDTO;
 import dto.ui.VariableDTO;
@@ -109,7 +108,7 @@ public class AppController {
     private final BooleanProperty argumentsLoaded = new SimpleBooleanProperty(false);
     private final ObjectProperty<Theme> selectedTheme = new SimpleObjectProperty<>(Theme.LIGHT);
 
-    // Core system controller
+    // Core server controller
     private final ListProperty<InstructionDTO> programInstructions =
             new SimpleListProperty<>(FXCollections.observableArrayList());
     private final ListProperty<InstructionDTO> derivedInstructions =
@@ -228,7 +227,7 @@ public class AppController {
 
     /**
      * PUBLIC METHOD: Handle re-run request from Show dialog.
-     * This prepares the system state for re-run by expanding to the correct level
+     * This prepares the server state for re-run by expanding to the correct level
      * and pre-populating arguments.
      *
      * @param expandLevel       The expand level from the selected execution
@@ -248,7 +247,7 @@ public class AppController {
             boolean wasInDebugMode = debugMode.get();
             System.out.println("Preserving debug mode state: " + wasInDebugMode);
 
-            // Step 1: Reset system state for new run (preserve execution statistics and debug mode)
+            // Step 1: Reset server state for new run (preserve execution statistics and debug mode)
             resetForRerun(wasInDebugMode);
 
             // Step 2: Expand program to the required level from the previous run

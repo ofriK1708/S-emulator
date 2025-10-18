@@ -1,5 +1,7 @@
 package servlets;
 
+import com.google.gson.Gson;
+import dto.server.UserDTO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -24,14 +26,17 @@ public class Register extends HttpServlet {
         }
         username = username.trim();
         UserManager userManager = ServletUtils.getUserManager(getServletContext());
+        Gson gson = new Gson();
         synchronized (this) {
             if (userManager.isUserExists(username)) {
                 resp.setStatus(HttpServletResponse.SC_CONFLICT);
-                resp.getWriter().write("User with that username already exists, please choose another username.");
+                resp.getWriter().write("User with the username '" + username + "' already exists. " +
+                        "Please choose a different username.");
             } else {
-                userManager.addUser(username);
+                UserDTO userDTO = userManager.addUser(username);
                 resp.setStatus(HttpServletResponse.SC_OK);
-                resp.getWriter().write("User registered successfully.");
+                resp.setContentType("application/json");
+                resp.getWriter().write(gson.toJson(userDTO));
                 req.getSession().setAttribute(USERNAME, username);
             }
         }

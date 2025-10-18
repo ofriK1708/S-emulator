@@ -2,6 +2,7 @@ package engine.core.syntheticCommand;
 
 import engine.core.Instruction;
 import engine.core.basicCommand.Increase;
+import engine.utils.ArchitectureType;
 import engine.utils.CommandType;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +13,8 @@ import java.util.Map;
 
 public class ConstantAssignment extends Instruction
 {
+    public static final ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_II;
+    public static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     public final static String valueArgumentName = "constantValue";
     public static int expandLevel = -1;
 

@@ -6,9 +6,12 @@ import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import logic.User;
 import logic.manager.ProgramManager;
 import logic.manager.UserManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.lang.reflect.Type;
@@ -21,7 +24,7 @@ public class ServletUtils {
     private static final Object programManagerLock = new Object();
     private static final Object userManagerLock = new Object();
 
-    public static ProgramManager getProgramManager(ServletContext servletContext) {
+    public static @NotNull ProgramManager getProgramManager(ServletContext servletContext) {
         synchronized (programManagerLock) {
             if (servletContext.getAttribute(PROGRAM_MANAGER_ATTRIBUTE_NAME) == null) {
                 servletContext.setAttribute(PROGRAM_MANAGER_ATTRIBUTE_NAME, new ProgramManager());
@@ -30,7 +33,7 @@ public class ServletUtils {
         return (ProgramManager) servletContext.getAttribute("programManager");
     }
 
-    public static UserManager getUserManager(ServletContext servletContext) {
+    public static @NotNull UserManager getUserManager(ServletContext servletContext) {
         synchronized (userManagerLock) {
             if (servletContext.getAttribute(USER_MANAGER_ATTRIBUTE_NAME) == null) {
                 servletContext.setAttribute(USER_MANAGER_ATTRIBUTE_NAME, new UserManager());
@@ -39,11 +42,17 @@ public class ServletUtils {
         return (UserManager) servletContext.getAttribute(USER_MANAGER_ATTRIBUTE_NAME);
     }
 
+    public static @Nullable User getUsername(HttpServletRequest request, ServletContext servletContext) {
+        HttpSession session = request.getSession(false);
+        String username = session != null ? session.getAttribute(USERNAME).toString() : null;
+        return getUserManager(servletContext).getUser(username);
+    }
+
     /**
      * Extracts and validates 'programName' and 'expandLevel' from the request parameters.
      * Throws IllegalArgumentException with a user-friendly message if validation fails.
      */
-    public static expandParams getAndValidateExpandParams(HttpServletRequest req, HttpServletResponse resp)
+    public static @NotNull expandParams getAndValidateExpandParams(HttpServletRequest req, HttpServletResponse resp)
             throws IllegalArgumentException {
         String programName = req.getParameter(PROGRAM_NAME_PARAM);
         int expandLevel;
@@ -69,7 +78,8 @@ public class ServletUtils {
      * and the 'arguments' map from the JSON request body.
      * Throws IllegalArgumentException with a user-friendly message if validation fails.
      */
-    public static runAndDebugParams getAndValidateRunAndDebugParams(HttpServletRequest req, HttpServletResponse resp)
+    public static @NotNull runAndDebugParams getAndValidateRunAndDebugParams(HttpServletRequest req,
+                                                                             HttpServletResponse resp)
             throws Exception { // Can still throw IOException
         Gson gson = new Gson();
         Type argumentsMapType = new TypeToken<Map<String, Integer>>() {

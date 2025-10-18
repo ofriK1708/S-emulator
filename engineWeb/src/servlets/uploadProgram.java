@@ -1,7 +1,7 @@
 package servlets;
 
 import com.google.gson.Gson;
-import dto.system.LoadProgramResultDTO;
+import dto.server.LoadProgramResultDTO;
 import engine.generated_2.SProgram;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -39,7 +39,7 @@ public class uploadProgram extends HttpServlet {
                     String fileName = req.getPart(XML_FILE_PART_NAME).getSubmittedFileName();
                     resp.getWriter().println("Failed to upload the File \"" + fileName + "\"! " +
                             "A sProgram with the name \"" + programName + "\" already " +
-                            "exists in the system, please choose a different name or file.");
+                            "exists in the server, please choose a different name or file.");
                 } else {
                     try {
                         // Validate sProgram by trying to create an engine - check for label not exists, etc.

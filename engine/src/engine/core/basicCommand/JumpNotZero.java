@@ -1,6 +1,7 @@
 package engine.core.basicCommand;
 
 import engine.core.Instruction;
+import engine.utils.ArchitectureType;
 import engine.utils.CommandType;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,6 +10,8 @@ import java.util.Map;
 
 public class JumpNotZero extends Instruction
 {
+    public static final ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_I;
+    public static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     public static final String labelArgumentName = "JNZLabel";
     private static final int expandLevel = 0;
 

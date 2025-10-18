@@ -323,17 +323,17 @@ public class DashboardController {
     }
 
     /**
-     * Load available users from system
+     * Load available users from server
      */
     private void loadAvailableUsers() {
-        // TODO: Integrate with user management system
+        // TODO: Integrate with user management server
     }
 
     /**
      * Load user execution history
      */
     private void loadUserHistory(@NotNull String username) {
-        // TODO: Integrate with history management system
+        // TODO: Integrate with history management server
         System.out.println("Dashboard: Loading history for user '" + username + "'");
         historyPanelController.refreshHistory();
     }

@@ -1,11 +1,12 @@
 package engine.core.syntheticCommand;
 
-import dto.engine.ExecutionResult;
+import dto.engine.ExecutionResultDTO;
 import engine.core.Engine;
 import engine.core.FunctionManager;
 import engine.core.Instruction;
 import engine.core.basicCommand.Neutral;
 import engine.exception.FunctionNotFound;
+import engine.utils.ArchitectureType;
 import engine.utils.CommandType;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +14,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class Quote extends Instruction {
+    public static final ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_IV;
+    public static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     private int quoteIndex = -1;
     private boolean isFinishedInitialization = false;
     public final static String functionNameArgumentName = "functionName";
@@ -154,7 +157,7 @@ public class Quote extends Instruction {
         List<Integer> arguments = getArgumentsValues(contextMap);
         Map<String, Integer> functionToRunNeededArguments = functionToRun.getSortedArgumentsMap();
         prepareArguments(functionToRunNeededArguments, arguments);
-        ExecutionResult result = functionToRun.run(functionToRunNeededArguments, false);
+        ExecutionResultDTO result = functionToRun.run(functionToRunNeededArguments);
         executedCycles = result.cycleCount();
         return result.output();
     }

@@ -1,6 +1,5 @@
 package ui.web.jfx.dashboard.users;
 
-import dto.ui.UserDTO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;

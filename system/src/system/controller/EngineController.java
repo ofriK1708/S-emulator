@@ -1,6 +1,5 @@
 package system.controller;
 
-import dto.engine.ExecutionStatisticsDTO;
 import dto.engine.ProgramDTO;
 import engine.exception.FunctionNotFound;
 import engine.exception.LabelNotExist;

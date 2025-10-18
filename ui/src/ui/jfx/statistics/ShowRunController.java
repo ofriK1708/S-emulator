@@ -1,6 +1,5 @@
 package ui.jfx.statistics;
 
-import dto.engine.ExecutionStatisticsDTO;
 import dto.ui.VariableDTO;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleIntegerProperty;

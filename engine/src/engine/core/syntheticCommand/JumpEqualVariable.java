@@ -3,6 +3,7 @@ package engine.core.syntheticCommand;
 import engine.core.Instruction;
 import engine.core.basicCommand.Decrease;
 import engine.core.basicCommand.Neutral;
+import engine.utils.ArchitectureType;
 import engine.utils.CommandType;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +15,8 @@ import java.util.Map;
 
 public class JumpEqualVariable extends Instruction
 {
+    public static final ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_III;
+    public static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     public static final String labelArgumentName = "JEVariableLabel";
     public static final String variableArgumentName = "variableName";
     private static int expandLevel;

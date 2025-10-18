@@ -4,6 +4,7 @@ import engine.core.Instruction;
 import engine.core.basicCommand.Decrease;
 import engine.core.basicCommand.JumpNotZero;
 import engine.core.basicCommand.Neutral;
+import engine.utils.ArchitectureType;
 import engine.utils.CommandType;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +15,8 @@ import java.util.Map;
 
 public class JumpEqualConstant extends Instruction
 {
+    public static final ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_III;
+    public static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     public final String labelArgumentName = "JEConstantLabel";
     public final String constantArgumentName = "constantValue";
     private static int expandLevel = -1;

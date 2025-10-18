@@ -43,13 +43,13 @@ public class FunctionManager {
      * In charge of building and managing functions defined in the program.
      *
      * @param sProgram                        the SProgram containing function definitions
-     * @param allFunctionsAndProgramsInSystem a map of all functions and programs in the system
+     * @param allFunctionsAndProgramsInSystem a map of all functions and programs in the server
      * @param mainProgramEngine               the ProgramEngine of the main program
      * @param mainProgramName                 the name of the main program
      * @return a FunctionManager instance for the given SProgram
      * @throws LabelNotExist        if a label referenced in an instruction does not exist
-     * @throws FunctionNotFound     if an unknown function - not known in system or current program is called
-     * @throws FunctionAlreadyExist if there is a name conflict with functions or programs in the system
+     * @throws FunctionNotFound     if an unknown function - not known in server or current program is called
+     * @throws FunctionAlreadyExist if there is a name conflict with functions or programs in the server
      */
     public static FunctionManager createForProgram(@NotNull SProgram sProgram,
                                                    @NotNull Map<String, Engine> allFunctionsAndProgramsInSystem,
@@ -141,7 +141,7 @@ public class FunctionManager {
 
     /**
      * Get a function by its name. First checks in current program's functions,
-     * then in the system-wide functions.
+     * then in the server-wide functions.
      * if not found, returns null.
      *
      * @param programName the name of the function to retrieve

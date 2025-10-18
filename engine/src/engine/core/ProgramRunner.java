@@ -1,7 +1,7 @@
 package engine.core;
 
 
-import dto.engine.ExecutionResult;
+import dto.engine.ExecutionResultDTO;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -28,8 +28,8 @@ public class ProgramRunner {
     }
 
     @Contract(pure = true)
-    public ExecutionResult run(int expandLevel,
-                               @NotNull Map<String, Integer> arguments) {
+    public ExecutionResultDTO run(int expandLevel,
+                                  @NotNull Map<String, Integer> arguments) {
         int cyclesCounter = 0;
         executedContextMap.putAll(arguments);
         while (executedContextMap.get(Instruction.ProgramCounterName) < executedInstructions.size()) {
@@ -42,7 +42,7 @@ public class ProgramRunner {
                 throw new RuntimeException("Error executing instruction at PC=" + currentPC + ": " + e.getMessage(), e);
             }
         }
-        return new ExecutionResult(
+        return new ExecutionResultDTO(
                 ProgramUtils.extractSortedArguments(executedContextMap),
                 ProgramUtils.extractSortedWorkVars(executedContextMap),
                 executedContextMap.get(ProgramUtils.OUTPUT_NAME),
@@ -52,7 +52,7 @@ public class ProgramRunner {
     }
 
     @Contract(pure = true)
-    public ExecutionResult run(@NotNull Map<String, Integer> arguments) {
+    public ExecutionResultDTO run(@NotNull Map<String, Integer> arguments) {
         return run(0, arguments);
     }
 }

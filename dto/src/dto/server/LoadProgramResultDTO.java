@@ -1,4 +1,4 @@
-package dto.system;
+package dto.server;
 
 import dto.engine.FunctionMetadata;
 import dto.engine.ProgramMetadata;

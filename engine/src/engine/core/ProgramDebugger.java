@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static engine.utils.ProgramUtils.OUTPUT_NAME;
 import static engine.utils.ProgramUtils.PC_NAME;
 
 public class ProgramDebugger {
@@ -20,8 +19,6 @@ public class ProgramDebugger {
     final List<Instruction> currentDebugInstructions;
     private @NotNull
     final Map<String, Integer> currentDebugContext;
-    private @NotNull
-    final ExecutionStatisticsManager executionStatisticsManager;
     private @NotNull Map<String, Integer> debugArguments = new HashMap<>();
     private boolean debugMode = false;
     private int currentDebugPC = 0;
@@ -29,24 +26,20 @@ public class ProgramDebugger {
 
     private ProgramDebugger(@NotNull List<Instruction> currentDebugInstructions,
                             @NotNull Map<String, Integer> currentDebugContext,
-                            @NotNull ExecutionStatisticsManager executionStatisticsManager,
                             int debugExpandLevel) {
         this.currentDebugInstructions = currentDebugInstructions;
         this.currentDebugContext = currentDebugContext;
         this.debugExpandLevel = debugExpandLevel;
-        this.executionStatisticsManager = executionStatisticsManager;
 
     }
 
     public static ProgramDebugger create(@NotNull InstructionSequence instructionSequence,
-                                         @NotNull ExecutionStatisticsManager executionStatisticsManager,
                                          int expandLevel) {
         Map<String, Integer> currentDebugContext = instructionSequence.getContextMapCopy(expandLevel);
         List<Instruction> currentDebugInstructions = instructionSequence.getInstructionsCopy(expandLevel);
         return new ProgramDebugger(
                 currentDebugInstructions,
                 currentDebugContext,
-                executionStatisticsManager,
                 expandLevel);
 
     }
@@ -67,7 +60,6 @@ public class ProgramDebugger {
         }
 
         if (currentDebugPC >= currentDebugInstructions.size()) {
-            saveToDebugStats();
             System.out.println("Debug session completed - reached end of program");
             return;
         }
@@ -109,7 +101,6 @@ public class ProgramDebugger {
         while (currentDebugPC < currentDebugInstructions.size()) {
             executeStep();
         }
-        saveToDebugStats();
         System.out.println("Resume completed - reached end of program");
     }
 
@@ -139,26 +130,11 @@ public class ProgramDebugger {
     public void stopDebugSession() {
         if (debugMode) {
             // Finalize statistics even if session was stopped manually
-            saveToDebugStats();
         }
 
         debugMode = false;
     }
 
-    // New method to finalize debug statistics:
-    public void saveToDebugStats() {
-        if (!debugMode) {
-            throw new IllegalStateException("Debug session not active");
-        }
-
-        executionStatisticsManager.addExecutionStatistics(
-                debugExpandLevel,
-                debugArguments,
-                currentDebugContext.get(OUTPUT_NAME),
-                totalDebugCycles
-        );
-
-    }
 
     public int getCurrentDebugPC() {
         return debugMode ? currentDebugPC : -1;

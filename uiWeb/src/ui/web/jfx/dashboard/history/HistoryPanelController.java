@@ -1,6 +1,5 @@
 package ui.web.jfx.dashboard.history;
 
-import dto.ui.HistoryRecordDTO;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

@@ -1,6 +1,5 @@
 package ui.utils;
 
-import dto.engine.ExecutionStatisticsDTO;
 import dto.ui.VariableDTO;
 import engine.utils.ProgramUtils;
 import javafx.animation.FadeTransition;
