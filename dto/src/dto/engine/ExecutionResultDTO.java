@@ -14,8 +14,7 @@ public record ExecutionResultDTO(boolean isMainProgram,
                                  int expandLevel,
                                  int cycleCount) {
     public static ExecutionResultDTO from(ExecutionResultValuesDTO valuesDTO, boolean isMainProgram,
-                                          String programName, ArchitectureType architectureType,
-                                          int expandLevel, int cycleCount) {
+                                          String programName, ArchitectureType architectureType) {
         return new ExecutionResultDTO(
                 isMainProgram,
                 programName,
@@ -23,8 +22,8 @@ public record ExecutionResultDTO(boolean isMainProgram,
                 valuesDTO.arguments(),
                 valuesDTO.variables(),
                 valuesDTO.output(),
-                expandLevel,
-                cycleCount
+                valuesDTO.expandLevel(),
+                valuesDTO.cycleCount()
         );
     }
 }

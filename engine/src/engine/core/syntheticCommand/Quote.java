@@ -14,8 +14,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class Quote extends Instruction {
-    public static final ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_IV;
-    public static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
+    private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_IV;
+    private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     private int quoteIndex = -1;
     private boolean isFinishedInitialization = false;
     public final static String functionNameArgumentName = "functionName";
@@ -59,6 +59,16 @@ public class Quote extends Instruction {
         this.funcArgsNames = new ArrayList<>(quote.funcArgsNames);
         this.subfunctionCalls.addAll(quote.subfunctionCalls);
         this.isFinishedInitialization = quote.isFinishedInitialization;
+    }
+
+    @Override
+    public int getArchitectureCreditsCost() {
+        return ARCHITECTURE_CREDITS_COST;
+    }
+
+    @Override
+    public @NotNull ArchitectureType getArchitectureType() {
+        return ARCHITECTURE_TYPE;
     }
 
     /**

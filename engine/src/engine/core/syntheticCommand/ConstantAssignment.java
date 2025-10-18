@@ -13,8 +13,8 @@ import java.util.Map;
 
 public class ConstantAssignment extends Instruction
 {
-    public static final ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_II;
-    public static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
+    private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_II;
+    private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     public final static String valueArgumentName = "constantValue";
     public static int expandLevel = -1;
 
@@ -22,6 +22,16 @@ public class ConstantAssignment extends Instruction
     {
         super(mainVarName, args, labelName);
         expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
+    }
+
+    @Override
+    public int getArchitectureCreditsCost() {
+        return ARCHITECTURE_CREDITS_COST;
+    }
+
+    @Override
+    public @NotNull ArchitectureType getArchitectureType() {
+        return ARCHITECTURE_TYPE;
     }
 
     @Override

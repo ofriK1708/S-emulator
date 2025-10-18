@@ -11,8 +11,8 @@ import java.util.Map;
 
 public class Increase extends Instruction
 {
-    public static final ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_I;
-    public static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
+    private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_I;
+    private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     private static final int expandLevel = 0;
 
     public Increase(String mainVarName, Map<String, String> args, String labelName)

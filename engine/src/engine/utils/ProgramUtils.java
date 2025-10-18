@@ -1,5 +1,6 @@
 package engine.utils;
 
+import engine.core.Command;
 import engine.core.Instruction;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +26,20 @@ public class ProgramUtils {
             return false;
         }
     };
+
+    public static int calculateTotalCreditsCost(@NotNull List<Instruction> instructions) {
+        return instructions.stream()
+                .mapToInt(Command::getArchitectureCreditsCost)
+                .sum();
+    }
+
+    public static @NotNull ArchitectureType calcMinimumArchitectureLevelNeeded(@NotNull List<Instruction> instructions) {
+        Optional<ArchitectureType> minimumArchNeeded = instructions.stream()
+                .map(Command::getArchitectureType)
+                .max(Comparator.comparingInt(ArchitectureType::getCreditsCost));
+        return minimumArchNeeded.orElseThrow(() ->
+                new IllegalStateException("Unexpected error calculating architecture type"));
+    }
 
     public static @NotNull String getNextFreeLabelName(@NotNull Map<String, Integer> contextMap) {
         int labelIndex = 1;

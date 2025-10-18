@@ -1,9 +1,6 @@
 package engine.core;
 
-import dto.engine.ExecutionResultDTO;
-import dto.engine.FunctionMetadata;
-import dto.engine.ProgramDTO;
-import dto.engine.ProgramMetadata;
+import dto.engine.*;
 import engine.exception.FunctionAlreadyExist;
 import engine.exception.FunctionNotFound;
 import engine.exception.LabelNotExist;
@@ -38,7 +35,7 @@ public class Engine {
                 this, mainProgramName);
         instructionSequence = InstructionSequence.createFrom(program, functionManager);
         functionManager.finishInitialization();
-        instructionSequence.expandToMax();
+        instructionSequence.finalizeInitialization();
     }
 
     private Engine(@NotNull SFunction function,
@@ -77,7 +74,7 @@ public class Engine {
      * @param function        the SFunction to initialize the engine with
      * @param mainProgramName the name of the main program
      * @param functionManager the FunctionManager managing functions in the main program
-     * @throws LabelNotExist    if a label in the function does not exist
+     * @throws LabelNotExist if a label in the function does not exist
      */
     public static Engine createFunctionEngine(@NotNull SFunction function,
                                               @NotNull String mainProgramName,
@@ -106,11 +103,13 @@ public class Engine {
         List<Instruction> executedInstructions = instructionSequence.getInstructionsCopy(expandLevel);
         Map<String, Integer> executedMap = instructionSequence.getContextMapCopy(expandLevel);
         ProgramRunner runner = ProgramRunner.createFrom(executedInstructions, executedMap);
-        ExecutionResultDTO result = runner.run(expandLevel, arguments);
-        averageCycles = calcAverageCycles(result.cycleCount());
+        ExecutionResultValuesDTO valuesResult = runner.run(expandLevel, arguments);
+        averageCycles = calcAverageCycles(valuesResult.cycleCount());
         numberOfExecutions++;
 
-        return result;
+        return ExecutionResultDTO.from(
+                valuesResult, isMainProgram(), getRepresentationName(),
+                instructionSequence.getMinimumArchitectureTypeNeededAtExpandLevel(expandLevel));
     }
 
     public ExecutionResultDTO run(@NotNull Map<String, Integer> arguments) {
@@ -191,7 +190,15 @@ public class Engine {
     }
 
     public boolean isFunction() {
-        return funcName != null;
+        return !isMainProgram();
+    }
+
+    public boolean isMainProgram() {
+        return funcName == null;
+    }
+
+    public String getRepresentationName() {
+        return isFunction() ? funcName : programName;
     }
 
 

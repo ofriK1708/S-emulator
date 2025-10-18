@@ -15,8 +15,8 @@ import java.util.Map;
 
 public class JumpEqualVariable extends Instruction
 {
-    public static final ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_III;
-    public static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
+    private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_III;
+    private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     public static final String labelArgumentName = "JEVariableLabel";
     public static final String variableArgumentName = "variableName";
     private static int expandLevel;
@@ -27,7 +27,16 @@ public class JumpEqualVariable extends Instruction
         expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
 
-    @SuppressWarnings("SameParameterValue")
+    @Override
+    public int getArchitectureCreditsCost() {
+        return ARCHITECTURE_CREDITS_COST;
+    }
+
+    @Override
+    public @NotNull ArchitectureType getArchitectureType() {
+        return ARCHITECTURE_TYPE;
+    }
+
     protected JumpEqualVariable(String mainVarName, Map<String, String> args, @Nullable String label, @NotNull Instruction derivedFrom, int derivedFromIndex) {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }

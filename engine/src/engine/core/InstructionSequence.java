@@ -5,6 +5,7 @@ import engine.exception.LabelNotExist;
 import engine.generated_2.SFunction;
 import engine.generated_2.SInstruction;
 import engine.generated_2.SProgram;
+import engine.utils.ArchitectureType;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +23,7 @@ import static engine.utils.ProgramUtils.extractAllVariableAndLabelNamesUnsorted;
  * </p>
  */
 public final class InstructionSequence {
-
+    // region -- Fields --
     private final Map<String, Integer> originalContextMap = new HashMap<>();
     private final @NotNull List<Instruction> originalInstructions;
     private final @NotNull Set<String> originalLabels;
@@ -30,6 +31,8 @@ public final class InstructionSequence {
     private final List<Map<String, Integer>> contextMapsByExpandLevel = new ArrayList<>();
     private final List<Set<String>> labelsByExpandLevel = new ArrayList<>();
     private int maxExpandLevel = -1;
+    private final List<Integer> creditsCostByExpandLevel = new ArrayList<>();
+    private final List<ArchitectureType> minumumArchitectureTypeNeededByExpandLevel = new ArrayList<>();
 
     /**
      * Private constructor to enforce immutability and controlled creation.
@@ -42,7 +45,16 @@ public final class InstructionSequence {
             throws LabelNotExist {
         this.originalInstructions = List.copyOf(originalInstructions);
         this.originalLabels = originalLabels;
-        finishInitialization();
+        continueInitialization();
+    }
+    // endregion
+    // region -- Constructors and Initialization --
+
+    private void continueInitialization() throws LabelNotExist {
+        instructionExpansionLevels.add(originalInstructions);
+        labelsByExpandLevel.add(originalLabels);
+        initializeContextMap();
+        contextMapsByExpandLevel.add(new HashMap<>(originalContextMap));
     }
 
     /**
@@ -86,27 +98,6 @@ public final class InstructionSequence {
         return instructions;
     }
 
-    void expandToMax() {
-        if (maxExpandLevel == -1) {
-            maxExpandLevel = ProgramUtils.getMaxExpandLevel(originalInstructions);
-        }
-        if (maxExpandLevel > 0) {
-            for (int currLevel = instructionExpansionLevels.size(); currLevel <= maxExpandLevel; currLevel++) {
-                List<Instruction> tempExpanded = new ArrayList<>();
-                List<Instruction> previouslyExpanded = instructionExpansionLevels.getLast();
-                Map<String, Integer> latestContextMap = new HashMap<>(contextMapsByExpandLevel.getLast());
-                for (int i = 0; i < previouslyExpanded.size(); i++) {
-                    Instruction instruction = previouslyExpanded.get(i);
-                    List<Instruction> furtherExpanded = instruction.expand(latestContextMap, i);
-                    tempExpanded.addAll(furtherExpanded);
-                }
-                instructionExpansionLevels.add(tempExpanded);
-                contextMapsByExpandLevel.add(latestContextMap);
-                updateLabelsAfterExpanding();
-            }
-        }
-    }
-
     private static @NotNull Set<String> buildLabels(@NotNull List<SInstruction> rawInstructions) {
         return rawInstructions.stream()
                 .map(SInstruction::getSLabel)
@@ -117,11 +108,23 @@ public final class InstructionSequence {
                 .collect(Collectors.toSet());
     }
 
-    private void finishInitialization() throws LabelNotExist {
-        instructionExpansionLevels.add(originalInstructions);
-        labelsByExpandLevel.add(originalLabels);
-        initializeContextMap();
-        contextMapsByExpandLevel.add(new HashMap<>(originalContextMap));
+    public void finalizeInitialization() {
+        expandToMax();
+        calcMinimumArchitectureForEachExpandLevel();
+        calculateCreditsCostForEachExpandLevel();
+    }
+
+    /**
+     * Fills in any labels that were defined but not used in the original context map.
+     * Unused labels are initialized with a value of -1 to indicate they are not used.
+     */
+    private void fillUnusedLabels() {
+        for (String label : originalLabels) {
+            if (!originalContextMap.containsKey(label)) {
+                originalContextMap.put(label.trim(), -1); // Initialize unused labels with -1 to indicate they are
+                // not used
+            }
+        }
     }
 
     private void initializeContextMap() throws LabelNotExist {
@@ -160,13 +163,26 @@ public final class InstructionSequence {
         }
         fillUnusedLabels();
     }
+    // endregion
+    // region -- Private helpers --
 
-    // this can happen when a label is defined but never used
-    private void fillUnusedLabels() {
-        for (String label : originalLabels) {
-            if (!originalContextMap.containsKey(label)) {
-                originalContextMap.put(label.trim(), -1); // Initialize unused labels with -1 to indicate they are
-                // not used
+    private void expandToMax() {
+        if (maxExpandLevel == -1) {
+            maxExpandLevel = ProgramUtils.getMaxExpandLevel(originalInstructions);
+        }
+        if (maxExpandLevel > 0) {
+            for (int currLevel = instructionExpansionLevels.size(); currLevel <= maxExpandLevel; currLevel++) {
+                List<Instruction> tempExpanded = new ArrayList<>();
+                List<Instruction> previouslyExpanded = instructionExpansionLevels.getLast();
+                Map<String, Integer> latestContextMap = new HashMap<>(contextMapsByExpandLevel.getLast());
+                for (int i = 0; i < previouslyExpanded.size(); i++) {
+                    Instruction instruction = previouslyExpanded.get(i);
+                    List<Instruction> furtherExpanded = instruction.expand(latestContextMap, i);
+                    tempExpanded.addAll(furtherExpanded);
+                }
+                instructionExpansionLevels.add(tempExpanded);
+                contextMapsByExpandLevel.add(latestContextMap);
+                updateLabelsAfterExpanding();
             }
         }
     }
@@ -175,9 +191,11 @@ public final class InstructionSequence {
         return originalLabels.contains(labelName);
     }
 
-    /****************************** public getters and utility methods *****************************/
-    public boolean isVariableInContext(String varName) {
-        return originalContextMap.containsKey(varName);
+    private void calcMinimumArchitectureForEachExpandLevel() {
+        for (List<Instruction> instructionExpansionLevel : instructionExpansionLevels) {
+            ArchitectureType minArchNeeded = ProgramUtils.calcMinimumArchitectureLevelNeeded(instructionExpansionLevel);
+            minumumArchitectureTypeNeededByExpandLevel.add(minArchNeeded);
+        }
     }
 
     private void updateLabelsAfterExpanding() {
@@ -207,12 +225,21 @@ public final class InstructionSequence {
         labelsByExpandLevel.add(latestLabels);
     }
 
-    public List<List<Instruction>> getInstructionExpansionLevels() {
-        return instructionExpansionLevels;
+    private void calculateCreditsCostForEachExpandLevel() {
+        for (List<Instruction> instructionExpansionLevel : instructionExpansionLevels) {
+            int totalCreditsCost = ProgramUtils.calculateTotalCreditsCost(instructionExpansionLevel);
+            creditsCostByExpandLevel.add(totalCreditsCost);
+        }
     }
 
-    public List<Map<String, Integer>> getContextMapsByExpandLevel() {
-        return contextMapsByExpandLevel;
+    // endregion
+    // region -- Public getters --
+    public boolean isVariableInContext(String varName) {
+        return originalContextMap.containsKey(varName);
+    }
+
+    public int getCreditsCostAtExpandLevel(int expandLevel) {
+        return creditsCostByExpandLevel.get(expandLevel);
     }
 
     public Map<String, Integer> getContextMapCopy(int expandLevel) {
@@ -267,7 +294,11 @@ public final class InstructionSequence {
         return originalInstructions.size();
     }
 
-    private record ParsedComponents(List<Instruction> originalInstructions, Set<String> originalLabels) {
-
+    public ArchitectureType getMinimumArchitectureTypeNeededAtExpandLevel(int expandLevel) {
+        return minumumArchitectureTypeNeededByExpandLevel.get(expandLevel);
     }
+
+    private record ParsedComponents(List<Instruction> originalInstructions, Set<String> originalLabels) {
+    }
+    // endregion
 }

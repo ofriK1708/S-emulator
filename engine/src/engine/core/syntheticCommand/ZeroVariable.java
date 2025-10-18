@@ -15,8 +15,8 @@ import java.util.Map;
 
 public class ZeroVariable extends Instruction
 {
-    public static final ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_II;
-    public static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
+    private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_II;
+    private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     private static int expandLevel = -1;
 
     public ZeroVariable(String mainVarName, Map<String, String> args, String labelName)
@@ -30,6 +30,16 @@ public class ZeroVariable extends Instruction
     {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
         expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
+    }
+
+    @Override
+    public int getArchitectureCreditsCost() {
+        return ARCHITECTURE_CREDITS_COST;
+    }
+
+    @Override
+    public @NotNull ArchitectureType getArchitectureType() {
+        return ARCHITECTURE_TYPE;
     }
 
     @Override

@@ -10,8 +10,8 @@ import java.util.Map;
 
 public class JumpNotZero extends Instruction
 {
-    public static final ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_I;
-    public static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
+    private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_I;
+    private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     public static final String labelArgumentName = "JNZLabel";
     private static final int expandLevel = 0;
 
@@ -24,6 +24,16 @@ public class JumpNotZero extends Instruction
                        int derivedFromIndex)
     {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
+    }
+
+    @Override
+    public int getArchitectureCreditsCost() {
+        return ARCHITECTURE_CREDITS_COST;
+    }
+
+    @Override
+    public @NotNull ArchitectureType getArchitectureType() {
+        return ARCHITECTURE_TYPE;
     }
 
     @Override

@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 public class JumpEqualFunction extends Instruction {
-    public static final ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_IV;
-    public static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
+    private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_IV;
+    private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     private final static String labelArgumentName = "JEFunctionLabel";
     private final @NotNull FunctionManager functionManager;
     private final @NotNull Quote functionQuoteToCheck;
@@ -25,6 +25,16 @@ public class JumpEqualFunction extends Instruction {
         super(mainVarName, args, label);
         this.functionManager = functionManager;
         functionQuoteToCheck = Quote.createInitialQuote("", this.args, "", functionManager, quoteIndex);
+    }
+
+    @Override
+    public int getArchitectureCreditsCost() {
+        return ARCHITECTURE_CREDITS_COST;
+    }
+
+    @Override
+    public @NotNull ArchitectureType getArchitectureType() {
+        return ARCHITECTURE_TYPE;
     }
 
     @Override
