@@ -1,27 +1,49 @@
 package logic.manager;
 
 import logic.User;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class UserManager {
-    Map<String, User> users;
+    @NotNull
+    private final ReadWriteLock usersLock = new ReentrantReadWriteLock();
+    @NotNull
+    private final Lock writeLock = usersLock.writeLock();
+    @NotNull
+    private final Lock readLock = usersLock.readLock();
+    @NotNull
+    Map<String, User> users = new HashMap<>();
 
-
-    public synchronized void addUser(String username) {
-        User user = new User(username);
-        users.put(username, user);
+    public void addUser(String username) {
+        writeLock.lock();
+        try {
+            User user = new User(username, 0, 0, 0, 0, 0);
+            users.put(username, user);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
-    public synchronized void addUser(User user) {
-        users.put(user.name(), user);
+    public User getUser(String userName) {
+        readLock.lock();
+        try {
+            return users.get(userName);
+        } finally {
+            readLock.unlock();
+        }
     }
 
-    public synchronized User getUser(String userName) {
-        return users.get(userName);
-    }
-
-    public synchronized boolean isUserExists(String userName) {
-        return users.containsKey(userName);
+    public boolean isUserExists(String userName) {
+        readLock.lock();
+        try {
+            return users.containsKey(userName);
+        } finally {
+            readLock.unlock();
+        }
     }
 }

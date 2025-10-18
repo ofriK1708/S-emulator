@@ -18,6 +18,8 @@ public class ServletConstants {
     public static final String ALL_EXECUTION_STATISTICS = "allExecutionStatistics";
     public static final String LAST_EXECUTION_STATISTICS = "lastExecutionStatistics";
     public static final String LAST_EXECUTION_CYCLES = "lastExecutionCycles";
+    public static final String USER_MANAGER_ATTRIBUTE_NAME = "userManager";
+    public static final String USERNAME = "username";
     public static final String DEBUG_ACTION_PARAM = "debugAction";
     public static final String DEBUG_ACTION_STEP_OVER = "stepOver";
     public static final String DEBUG_ACTION_STEP_BACK = "stepBack";

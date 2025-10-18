@@ -7,6 +7,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import logic.manager.ProgramManager;
+import logic.manager.UserManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
@@ -18,6 +19,7 @@ import static utils.ServletConstants.*;
 
 public class ServletUtils {
     private static final Object programManagerLock = new Object();
+    private static final Object userManagerLock = new Object();
 
     public static ProgramManager getProgramManager(ServletContext servletContext) {
         synchronized (programManagerLock) {
@@ -26,6 +28,15 @@ public class ServletUtils {
             }
         }
         return (ProgramManager) servletContext.getAttribute("programManager");
+    }
+
+    public static UserManager getUserManager(ServletContext servletContext) {
+        synchronized (userManagerLock) {
+            if (servletContext.getAttribute(USER_MANAGER_ATTRIBUTE_NAME) == null) {
+                servletContext.setAttribute(USER_MANAGER_ATTRIBUTE_NAME, new UserManager());
+            }
+        }
+        return (UserManager) servletContext.getAttribute(USER_MANAGER_ATTRIBUTE_NAME);
     }
 
     /**
