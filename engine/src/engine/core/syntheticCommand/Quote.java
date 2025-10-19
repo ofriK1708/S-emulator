@@ -15,11 +15,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class Quote extends Instruction {
+    // region Fields
     public final static @NotNull String functionNameArgumentName = "functionName";
+    private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_IV;
     private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     public final static @NotNull String functionArgumentsArgumentName = "functionArguments";
-    // region Fields
-    private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_IV;
     private final @NotNull String enclosingFunctionName;
     private int quoteIndex = -1;
     private boolean isFinishedInitialization = false;
@@ -82,9 +82,9 @@ public class Quote extends Instruction {
      * @param quoteIndex      the index of the quote in the program
      * @return the created Quote instance
      */
-    public static Quote createInitialQuote(@NotNull String mainVarName, @NotNull Map<String, String> args,
-                                           @NotNull String label, @NotNull FunctionManager functionManager,
-                                           int quoteIndex, String enclosingFunctionName) {
+    public static @NotNull Quote createInitialQuote(@NotNull String mainVarName, @NotNull Map<String, String> args,
+                                                    @NotNull String label, @NotNull FunctionManager functionManager,
+                                                    int quoteIndex, @NotNull String enclosingFunctionName) {
         try {
             return new Quote(mainVarName, args, label, functionManager, quoteIndex, enclosingFunctionName,
                     functionManager.isInitialised());
@@ -107,9 +107,9 @@ public class Quote extends Instruction {
      * @return the created Quote instance
      * @throws FunctionNotFound if the function to run is not found
      */
-    public static Quote createSubFunctionQuote(@NotNull String mainVarName, @NotNull Map<String, String> args,
-                                               @NotNull String label, @NotNull FunctionManager functionManager,
-                                               int quoteIndex, String enclosingFunctionName) throws FunctionNotFound {
+    public static @NotNull Quote createSubFunctionQuote(@NotNull String mainVarName, @NotNull Map<String, String> args,
+                                                        @NotNull String label, @NotNull FunctionManager functionManager,
+                                                        int quoteIndex, @NotNull String enclosingFunctionName) throws FunctionNotFound {
         return new Quote(mainVarName, args, label, functionManager, quoteIndex, enclosingFunctionName, true);
     }
     // endregion

@@ -33,8 +33,8 @@ public class ProgramDebugger {
 
     }
 
-    public static ProgramDebugger create(@NotNull InstructionSequence instructionSequence,
-                                         int expandLevel) {
+    public static @NotNull ProgramDebugger create(@NotNull InstructionSequence instructionSequence,
+                                                  int expandLevel) {
         Map<String, Integer> currentDebugContext = instructionSequence.getContextMapCopy(expandLevel);
         List<Instruction> currentDebugInstructions = instructionSequence.getInstructionsCopy(expandLevel);
         return new ProgramDebugger(

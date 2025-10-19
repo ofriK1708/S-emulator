@@ -46,7 +46,7 @@ public abstract class Instruction implements Command {
     public static @NotNull Instruction createInstruction(@NotNull SInstruction sInstruction,
                                                          @NotNull FunctionManager functionManager,
                                                          int instructionIndex,
-                                                         String enclosingFunctionName) {
+                                                         @NotNull String enclosingFunctionName) {
 
         Map<String, String> args = Optional.ofNullable(sInstruction.getSInstructionArguments())
                 .map(SInstructionArguments::getSInstructionArgument)

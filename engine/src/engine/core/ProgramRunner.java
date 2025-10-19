@@ -14,8 +14,8 @@ import java.util.Map;
  * and maintaining the execution context. doesn't affect's the original instructions or context.
  */
 public class ProgramRunner {
-    private final Map<String, Integer> executedContextMap;
-    private final List<Instruction> executedInstructions;
+    private final @NotNull Map<String, Integer> executedContextMap;
+    private final @NotNull List<Instruction> executedInstructions;
     private final int initialUserCredits;
     private int runningUserCredits;
 
@@ -28,9 +28,9 @@ public class ProgramRunner {
     }
 
 
-    public static ProgramRunner createFrom(@NotNull List<Instruction> executedInstructions,
-                                           @NotNull Map<String, Integer> executedContextMap,
-                                           int userCredits) {
+    public static @NotNull ProgramRunner createFrom(@NotNull List<Instruction> executedInstructions,
+                                                    @NotNull Map<String, Integer> executedContextMap,
+                                                    int userCredits) {
         return new ProgramRunner(
                 executedInstructions,
                 executedContextMap,
@@ -38,8 +38,8 @@ public class ProgramRunner {
     }
 
     @Contract(pure = true)
-    public ExecutionResultValuesDTO run(int expandLevel,
-                                  @NotNull Map<String, Integer> arguments) {
+    public @NotNull ExecutionResultValuesDTO run(int expandLevel,
+                                                 @NotNull Map<String, Integer> arguments) {
         int cyclesCounter = 0;
         executedContextMap.putAll(arguments);
         while (executedContextMap.get(Instruction.ProgramCounterName) < executedInstructions.size()) {

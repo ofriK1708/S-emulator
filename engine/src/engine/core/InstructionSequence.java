@@ -66,7 +66,8 @@ public final class InstructionSequence {
      * @param functionManager The manager containing all available functions for resolution.
      * @return A new, immutable InstructionSequence.
      */
-    public static InstructionSequence createFrom(@NotNull SProgram sProgram, @NotNull FunctionManager functionManager)
+    public static @NotNull InstructionSequence createFrom(@NotNull SProgram sProgram,
+                                                          @NotNull FunctionManager functionManager)
             throws LabelNotExist {
         ParsedComponents components = parseRawInstructions(sProgram.getSInstructions().getSInstruction(),
                 functionManager, sProgram.getName());
@@ -75,7 +76,8 @@ public final class InstructionSequence {
                 sProgram.getName());
     }
 
-    public static InstructionSequence createFrom(@NotNull SFunction sFunction, @NotNull FunctionManager functionManager)
+    public static @NotNull InstructionSequence createFrom(@NotNull SFunction sFunction,
+                                                          @NotNull FunctionManager functionManager)
             throws LabelNotExist {
         ParsedComponents components = parseRawInstructions(sFunction.getSInstructions().getSInstruction(),
                 functionManager, sFunction.getUserString());
@@ -236,26 +238,26 @@ public final class InstructionSequence {
         return originalContextMap.containsKey(varName);
     }
 
-    public Map<String, Integer> getContextMapCopy(int expandLevel) {
+    public @NotNull Map<String, Integer> getContextMapCopy(int expandLevel) {
         return new HashMap<>(contextMapsByExpandLevel.get(expandLevel));
     }
 
-    public Set<String> getSortedArgumentsNames() {
+    public @NotNull Set<String> getSortedArgumentsNames() {
         return ProgramUtils.extractSortedArguments(originalContextMap).keySet();
     }
 
-    public List<Instruction> getInstructionsCopy(int expandLevel) {
+    public @NotNull List<Instruction> getInstructionsCopy(int expandLevel) {
         if (expandLevel < 0 || expandLevel >= instructionExpansionLevels.size()) {
             throw new IllegalArgumentException("Invalid expand level: " + expandLevel);
         }
         return new ArrayList<>(instructionExpansionLevels.get(expandLevel));
     }
 
-    public List<Instruction> getBasicInstructionsCopy() {
+    public @NotNull List<Instruction> getBasicInstructionsCopy() {
         return getInstructionsCopy(0);
     }
 
-    public Set<String> getLabels(int expandLevel) {
+    public @NotNull Set<String> getLabels(int expandLevel) {
         return ProgramUtils.extractLabels(labelsByExpandLevel, expandLevel);
     }
 

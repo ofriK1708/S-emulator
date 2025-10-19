@@ -50,10 +50,10 @@ public class FunctionManager {
      * @throws LabelNotExist        if a label referenced in an instruction does not exist
      * @throws FunctionAlreadyExist if there is a name conflict with functions or programs in the server
      */
-    public static FunctionManager createForProgram(@NotNull SProgram sProgram,
-                                                   @NotNull Map<String, Engine> allFunctionsAndProgramsInSystem,
-                                                   @NotNull Engine mainProgramEngine,
-                                                   String mainProgramName)
+    public static @NotNull FunctionManager createForProgram(@NotNull SProgram sProgram,
+                                                            @NotNull Map<String, Engine> allFunctionsAndProgramsInSystem,
+                                                            @NotNull Engine mainProgramEngine,
+                                                            @NotNull String mainProgramName)
             throws LabelNotExist, FunctionAlreadyExist {
 
         return new FunctionManager(sProgram, allFunctionsAndProgramsInSystem, mainProgramEngine,

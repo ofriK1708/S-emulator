@@ -18,9 +18,9 @@ import java.util.Set;
 public class Engine {
 
     private final String programName;
-    private final String userUploadedBy;
+    private final @NotNull String userUploadedBy;
     private final String mainProgramName;
-    private final InstructionSequence instructionSequence;
+    private final @NotNull InstructionSequence instructionSequence;
     private final @NotNull FunctionManager functionManager;
     private @Nullable SFunction originalSFunction;
     private @Nullable String funcName;
@@ -66,9 +66,9 @@ public class Engine {
      * @throws FunctionNotFound     if a function in the program is not found in the server
      * @throws FunctionAlreadyExist if a function in the program already exists in the server
      */
-    public static Engine createMainProgramEngine(@NotNull SProgram program,
-                                                 @NotNull Map<String, Engine> allFunctionAndProgramsInSystem,
-                                                 @NotNull String uploadedBy)
+    public static @NotNull Engine createMainProgramEngine(@NotNull SProgram program,
+                                                          @NotNull Map<String, Engine> allFunctionAndProgramsInSystem,
+                                                          @NotNull String uploadedBy)
             throws LabelNotExist, FunctionNotFound, FunctionAlreadyExist {
         return new Engine(program, allFunctionAndProgramsInSystem, uploadedBy);
     }
@@ -82,10 +82,10 @@ public class Engine {
      * @param functionManager the FunctionManager managing functions in the main program
      * @throws LabelNotExist if a label in the function does not exist
      */
-    public static Engine createFunctionEngine(@NotNull SFunction function,
-                                              @NotNull String mainProgramName,
-                                              @NotNull FunctionManager functionManager,
-                                              @NotNull String uploadedBy)
+    public static @NotNull Engine createFunctionEngine(@NotNull SFunction function,
+                                                       @NotNull String mainProgramName,
+                                                       @NotNull FunctionManager functionManager,
+                                                       @NotNull String uploadedBy)
             throws LabelNotExist {
         return new Engine(function, mainProgramName, functionManager, uploadedBy);
     }
@@ -110,7 +110,7 @@ public class Engine {
         return instructionSequence.isVariableInContext(varName);
     }
 
-    public ExecutionResultDTO run(int expandLevel, @NotNull Map<String, Integer> arguments, int userCredits) {
+    public @NotNull ExecutionResultDTO run(int expandLevel, @NotNull Map<String, Integer> arguments, int userCredits) {
         validateRunPossibility(expandLevel, userCredits);
         List<Instruction> executedInstructions = instructionSequence.getInstructionsCopy(expandLevel);
         Map<String, Integer> executedMap = instructionSequence.getContextMapCopy(expandLevel);
@@ -221,7 +221,7 @@ public class Engine {
         return funcName == null;
     }
 
-    public String getRepresentationName() {
+    public @Nullable String getRepresentationName() {
         return isFunction() ? funcName : programName;
     }
 

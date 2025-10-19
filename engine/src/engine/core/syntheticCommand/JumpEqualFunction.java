@@ -16,7 +16,6 @@ public class JumpEqualFunction extends Instruction {
     // region Fields
     private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_IV;
     private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
-    private final @NotNull String enclosingFunctionName;
     private final static String labelArgumentName = "JEFunctionLabel";
     private final @NotNull FunctionManager functionManager;
     private final @NotNull Quote functionQuoteToCheck;
@@ -28,7 +27,6 @@ public class JumpEqualFunction extends Instruction {
                              int quoteIndex, @NotNull String enclosingFunctionName) {
         super(mainVarName, args, label);
         this.functionManager = functionManager;
-        this.enclosingFunctionName = enclosingFunctionName;
         functionQuoteToCheck = Quote.createInitialQuote("", this.args, "", functionManager, quoteIndex,
                 enclosingFunctionName);
     }
