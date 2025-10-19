@@ -12,7 +12,8 @@ public record ExecutionResultDTO(boolean isMainProgram,
                                  Map<String, Integer> variables,
                                  int output,
                                  int expandLevel,
-                                 int cycleCount) {
+                                 int cycleCount,
+                                 int creditsCost) {
     public static ExecutionResultDTO from(ExecutionResultValuesDTO valuesDTO, boolean isMainProgram,
                                           String programName, ArchitectureType architectureType) {
         return new ExecutionResultDTO(
@@ -23,7 +24,8 @@ public record ExecutionResultDTO(boolean isMainProgram,
                 valuesDTO.variables(),
                 valuesDTO.output(),
                 valuesDTO.expandLevel(),
-                valuesDTO.cycleCount()
+                valuesDTO.cycleCount(),
+                valuesDTO.creditsCost()
         );
     }
 }

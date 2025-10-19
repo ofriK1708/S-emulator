@@ -18,31 +18,73 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 public class ProgramManager {
-    @NotNull
-    private final Map<String, Engine> programs = new HashMap<>();
-    @NotNull
-    private final Map<String, Engine> functions = new HashMap<>();
-    @NotNull
-    private final Map<String, Engine> functionsAndPrograms = new HashMap<>();
+    // region data structures
+    private final @NotNull Map<String, Engine> programs = new HashMap<>();
+    private final @NotNull Map<String, Engine> functions = new HashMap<>();
+    private final @NotNull Map<String, Engine> functionsAndPrograms = new HashMap<>();
+    // endregion
+    // region read-write locks
+    private final @NotNull ReadWriteLock programsAndFunctionsLock = new ReentrantReadWriteLock();
+    private final @NotNull Lock readLock = programsAndFunctionsLock.readLock();
+    private final @NotNull Lock writeLock = programsAndFunctionsLock.writeLock();
 
-    @NotNull
-    private final ReadWriteLock programsAndFunctionsLock = new ReentrantReadWriteLock();
-    @NotNull
-    private final Lock readLock = programsAndFunctionsLock.readLock();
-    @NotNull
-    private final Lock writeLock = programsAndFunctionsLock.writeLock();
+    /**
+     * Private constructor to prevent instantiation from outside the class.
+     */
+    private ProgramManager() {
+    }
 
-    public void addProgram(String programName, SProgram sProgram)
+    /**
+     * Provides the singleton instance of the manager.
+     *
+     * @return The single instance of ProgramManager.
+     */
+    public static ProgramManager getInstance() {
+        return ProgramManagerHolder.INSTANCE;
+    }
+
+    /**
+     * Add a new program to the system. keeps the order of insertion.
+     * crates an Engine for the program and adds its functions to the system
+     *
+     * @param programName the name of the new program, this will be the ID for the program
+     * @param sProgram    the SProgram object representing the program
+     * @throws LabelNotExist        if a label in the program does not exist
+     * @throws FunctionNotFound     if a function called in the program is not found either locally or globally
+     * @throws FunctionAlreadyExist if a function being added already exists in the system
+     */
+    public void addProgram(String programName, SProgram sProgram, String userName)
             throws LabelNotExist, FunctionNotFound, FunctionAlreadyExist {
         writeLock.lock();
         try {
-            Engine mainProgramEngine = Engine.createMainProgramEngine(sProgram, functionsAndPrograms);
+            Engine mainProgramEngine = Engine.createMainProgramEngine(sProgram, functionsAndPrograms, userName);
             mainProgramEngine.addProgramAndFunctionsToSystem(functionsAndPrograms, functions);
             programs.put(programName, mainProgramEngine);
         } finally {
             writeLock.unlock();
         }
 
+    }
+    // endregion
+    // region program and function management methods
+
+    /**
+     * Get a program engine by name.
+     * @param name the name of the program to retrieve
+     * @return the Engine object if found
+     * @throws IllegalStateException if the program is not found
+     */
+    public Engine getProgramOrFunctionEngine(String name) {
+        readLock.lock();
+        try {
+            if (functionsAndPrograms.containsKey(name)) {
+                return functionsAndPrograms.get(name);
+            } else {
+                throw new IllegalStateException("Program or function " + name + " not found!");
+            }
+        } finally {
+            readLock.unlock();
+        }
     }
 
     public Set<ProgramMetadata> getProgramsMetadata() {
@@ -60,15 +102,6 @@ public class ProgramManager {
         readLock.lock();
         try {
             return programs.keySet();
-        } finally {
-            readLock.unlock();
-        }
-    }
-
-    public Map<String, Engine> getFunctionsAndPrograms() {
-        readLock.lock();
-        try {
-            return functionsAndPrograms;
         } finally {
             readLock.unlock();
         }
@@ -103,16 +136,10 @@ public class ProgramManager {
         }
     }
 
-    public Engine getProgramOrFunctionEngine(String name) {
-        readLock.lock();
-        try {
-            if (functionsAndPrograms.containsKey(name)) {
-                return functionsAndPrograms.get(name);
-            } else {
-                throw new IllegalStateException("Program or function " + name + " not found!");
-            }
-        } finally {
-            readLock.unlock();
-        }
+    // endregion
+    // region singleton pattern
+    private static class ProgramManagerHolder {
+        private static final ProgramManager INSTANCE = new ProgramManager();
     }
+    // endregion
 }

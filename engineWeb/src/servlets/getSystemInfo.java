@@ -1,6 +1,5 @@
 package servlets;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,14 +14,19 @@ import static utils.ServletConstants.*;
 @WebServlet(name = "SystemInfo", urlPatterns = "/systemInfo")
 public class getSystemInfo extends HttpServlet {
     @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("text/html;charset=utf-8");
         resp.getWriter().println(getAllSystemInfoOptionsNames());
         resp.setStatus(HttpServletResponse.SC_OK);
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if (!ServletUtils.isUserLoggedIn(req, getServletContext())) {
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            resp.getWriter().write("Error! User is not logged in.");
+            return;
+        }
         String infoToGet = req.getParameter(INFO_PARAM);
         resp.setContentType("text/html;charset=utf-8");
         ProgramManager pm = ServletUtils.getProgramManager(getServletContext());

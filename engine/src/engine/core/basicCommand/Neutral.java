@@ -10,9 +10,13 @@ import java.util.Map;
 
 public class Neutral extends Instruction
 {
+    // region Constants
     private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_I;
     private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     private static final int expandLevel = 0;
+    // endregion
+
+    // region Constructors
     public Neutral(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
@@ -23,7 +27,9 @@ public class Neutral extends Instruction
     {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }
+    // endregion
 
+    // region Architecture
     @Override
     public int getArchitectureCreditsCost() {
         return ARCHITECTURE_CREDITS_COST;
@@ -33,19 +39,25 @@ public class Neutral extends Instruction
     public @NotNull ArchitectureType getArchitectureType() {
         return ARCHITECTURE_TYPE;
     }
+    // endregion
 
+    // region execution
     @Override
     public void execute(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException
     {
         incrementProgramCounter(contextMap);
     }
+    // endregion
 
+    // region expansion
     @Override
     public @NotNull List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
         return List.of(this);
     }
+    // endregion
 
+    // region info
     @Override
     public int getCycles()
     {
@@ -69,4 +81,5 @@ public class Neutral extends Instruction
     {
         return String.format("%s <- %s", mainVarName, mainVarName);
     }
+    // endregion
 }

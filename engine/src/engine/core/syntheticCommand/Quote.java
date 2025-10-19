@@ -10,29 +10,35 @@ import engine.utils.ArchitectureType;
 import engine.utils.CommandType;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public class Quote extends Instruction {
-    private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_IV;
+    public final static @NotNull String functionNameArgumentName = "functionName";
     private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
+    public final static @NotNull String functionArgumentsArgumentName = "functionArguments";
+    // region Fields
+    private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_IV;
+    private final @NotNull String enclosingFunctionName;
     private int quoteIndex = -1;
     private boolean isFinishedInitialization = false;
-    public final static String functionNameArgumentName = "functionName";
-    public final static String functionArgumentsArgumentName = "functionArguments";
     private final @NotNull FunctionManager functionManager;
-    private Engine functionToRun;
+    private @Nullable Engine functionToRun;
     private String allArgsString;
     private List<String> funcArgsNames;
     private final List<Quote> subfunctionCalls = new ArrayList<>();
     private int executedCycles = 0;
+    // endregion
 
+    // region Constructors
     private Quote(@NotNull String mainVarName, @NotNull Map<String, String> args,
                   @NotNull String label, @NotNull FunctionManager functionManager,
-                  int quoteIndex, boolean isFinishedInitialization) throws FunctionNotFound {
+                  int quoteIndex, @NotNull String enclosingFunctionName, boolean isFinishedInitialization) throws FunctionNotFound {
         super(mainVarName, args, label);
         this.functionManager = functionManager;
         this.quoteIndex = quoteIndex;
+        this.enclosingFunctionName = enclosingFunctionName;
         if (!isFinishedInitialization) {
             functionManager.addToUninitializedQuotes(this);
         } else {
@@ -59,17 +65,11 @@ public class Quote extends Instruction {
         this.funcArgsNames = new ArrayList<>(quote.funcArgsNames);
         this.subfunctionCalls.addAll(quote.subfunctionCalls);
         this.isFinishedInitialization = quote.isFinishedInitialization;
+        this.enclosingFunctionName = quote.enclosingFunctionName;
     }
+    // endregion
 
-    @Override
-    public int getArchitectureCreditsCost() {
-        return ARCHITECTURE_CREDITS_COST;
-    }
-
-    @Override
-    public @NotNull ArchitectureType getArchitectureType() {
-        return ARCHITECTURE_TYPE;
-    }
+    // region Factory methods
 
     /**
      * Factory method to create an initial Quote.
@@ -84,9 +84,10 @@ public class Quote extends Instruction {
      */
     public static Quote createInitialQuote(@NotNull String mainVarName, @NotNull Map<String, String> args,
                                            @NotNull String label, @NotNull FunctionManager functionManager,
-                                           int quoteIndex) {
+                                           int quoteIndex, String enclosingFunctionName) {
         try {
-            return new Quote(mainVarName, args, label, functionManager, quoteIndex, functionManager.isInitialised());
+            return new Quote(mainVarName, args, label, functionManager, quoteIndex, enclosingFunctionName,
+                    functionManager.isInitialised());
         } catch (FunctionNotFound ignored) {
             // this should not happen here, as we are not initializing yet
             throw new RuntimeException("Unexpected FunctionNotFound during initial Quote creation");
@@ -108,21 +109,20 @@ public class Quote extends Instruction {
      */
     public static Quote createSubFunctionQuote(@NotNull String mainVarName, @NotNull Map<String, String> args,
                                                @NotNull String label, @NotNull FunctionManager functionManager,
-                                               int quoteIndex) throws FunctionNotFound {
-        return new Quote(mainVarName, args, label, functionManager, quoteIndex, true);
+                                               int quoteIndex, String enclosingFunctionName) throws FunctionNotFound {
+        return new Quote(mainVarName, args, label, functionManager, quoteIndex, enclosingFunctionName, true);
     }
+    // endregion
 
-    public int getExecutedCycles() {
-        return executedCycles;
-    }
-
+    // region Initialization
     public void validateAndFinishInit() throws FunctionNotFound {
         String funcName = args.get(functionNameArgumentName);
         allArgsString = args.get(functionArgumentsArgumentName) == null ? "" : args.get(functionArgumentsArgumentName);
         functionToRun = functionManager.getFunction(funcName);
 
         if (functionToRun == null) {
-            throw new FunctionNotFound(quoteIndex, getStringRepresentation(), functionManager.getMainProgramName(),
+            throw new FunctionNotFound(quoteIndex, this.getClass().getSimpleName(),
+                    enclosingFunctionName,
                     funcName);
         }
         isFinishedInitialization = true;
@@ -139,28 +139,21 @@ public class Quote extends Instruction {
         subfunctionCalls.clear();
         for (String argName : funcArgsNames) {
             if (ProgramUtils.isFunctionCall(argName)) {
-                Quote functionCall = Instruction.createSubFunctionCall(argName, functionManager, quoteIndex);
+                Quote functionCall = Instruction.createSubFunctionCall(argName, functionManager, quoteIndex,
+                        enclosingFunctionName);
                 subfunctionCalls.add(functionCall);
             }
         }
     }
+    // endregion
 
-    private int calcSubFunctionCycles() {
-        return subfunctionCalls.stream()
-                .mapToInt(Quote::getExecutedCycles)
-                .sum();
-    }
-
+    // region Execution
     @Override
     public void execute(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException {
         if (isFinishedInitialization) {
             saveResult(contextMap, executeAndGetResult(contextMap));
             incrementProgramCounter(contextMap);
         }
-    }
-
-    public void saveResult(@NotNull Map<String, Integer> contextMap, int result) {
-        contextMap.put(mainVarName, result);
     }
 
     public int executeAndGetResult(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException {
@@ -170,6 +163,10 @@ public class Quote extends Instruction {
         ExecutionResultDTO result = functionToRun.run(functionToRunNeededArguments);
         executedCycles = result.cycleCount();
         return result.output();
+    }
+
+    public void saveResult(@NotNull Map<String, Integer> contextMap, int result) {
+        contextMap.put(mainVarName, result);
     }
 
     private @NotNull List<Integer> getArgumentsValues(@NotNull Map<String, Integer> contextMap) {
@@ -203,33 +200,9 @@ public class Quote extends Instruction {
             }
         }
     }
+    // endregion
 
-    @Override
-    public int getCycles() {
-        if (isFinishedInitialization) {
-            final int quoteOverhead = 5;
-            return quoteOverhead + executedCycles + calcSubFunctionCycles();
-        }
-        return 0; // not initialized yet
-    }
-
-    public int getFunctionCycles() {
-        if (isFinishedInitialization) {
-            return executedCycles + calcSubFunctionCycles();
-        }
-        return 0; // not initialized yet
-    }
-
-    @Override
-    public @NotNull CommandType getType() {
-        return CommandType.SYNTHETIC;
-    }
-
-    @Override
-    public int getExpandLevel() {
-        return ProgramUtils.calculateExpandedLevel(this);
-    }
-
+    // region Expansion
     @Override
     public @NotNull List<Instruction> expand(@NotNull Map<String, Integer> contextMap, int originalInstructionIndex) {
         List<Instruction> expandedInstructions = new ArrayList<>();
@@ -269,6 +242,48 @@ public class Quote extends Instruction {
                 expandedInstructions.add(new ZeroVariable(newArgName, Map.of(), "", this, originalInstructionIndex));
             }
         }
+    }
+    // endregion
+
+    // region Getters & Setters
+    @Override
+    public int getArchitectureCreditsCost() {
+        return ARCHITECTURE_CREDITS_COST;
+    }
+
+    @Override
+    public @NotNull ArchitectureType getArchitectureType() {
+        return ARCHITECTURE_TYPE;
+    }
+
+    public int getExecutedCycles() {
+        return executedCycles;
+    }
+
+    @Override
+    public int getCycles() {
+        if (isFinishedInitialization) {
+            final int quoteOverhead = 5;
+            return quoteOverhead + executedCycles + calcSubFunctionCycles();
+        }
+        return 0; // not initialized yet
+    }
+
+    public int getFunctionCycles() {
+        if (isFinishedInitialization) {
+            return executedCycles + calcSubFunctionCycles();
+        }
+        return 0; // not initialized yet
+    }
+
+    @Override
+    public @NotNull CommandType getType() {
+        return CommandType.SYNTHETIC;
+    }
+
+    @Override
+    public int getExpandLevel() {
+        return ProgramUtils.calculateExpandedLevel(this);
     }
 
     @Override
@@ -316,4 +331,13 @@ public class Quote extends Instruction {
             }
         }
     }
+    // endregion
+
+    // region Private methods
+    private int calcSubFunctionCycles() {
+        return subfunctionCalls.stream()
+                .mapToInt(Quote::getExecutedCycles)
+                .sum();
+    }
+    // endregion
 }

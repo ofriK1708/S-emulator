@@ -14,15 +14,36 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 public class UserManager {
-    @NotNull
+    // region data structures
+    private final @NotNull Map<String, User> users = new LinkedHashMap<>();
+    // endregion
+    // region read-write locks
     private final ReadWriteLock usersLock = new ReentrantReadWriteLock();
-    @NotNull
     private final Lock writeLock = usersLock.writeLock();
-    @NotNull
     private final Lock readLock = usersLock.readLock();
-    @NotNull
-    Map<String, User> users = new LinkedHashMap<>();
 
+    /**
+     * Private constructor to prevent instantiation from outside the class.
+     */
+    private UserManager() {
+    }
+
+    /**
+     * Provides the singleton instance of the manager.
+     *
+     * @return The single instance of UserManager.
+     */
+    public static UserManager getInstance() {
+        return UserManagerHolder.INSTANCE;
+    }
+
+    // endregion
+    // region singleton pattern
+    private static class UserManagerHolder {
+        private static final UserManager INSTANCE = new UserManager();
+    }
+    // endregion
+    // region user management methods
     /**
      * Add a new user to the system. keeps the order of insertion (users registration order).
      *
@@ -79,4 +100,5 @@ public class UserManager {
             readLock.unlock();
         }
     }
+    // endregion
 }

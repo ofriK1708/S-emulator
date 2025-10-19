@@ -7,6 +7,7 @@ import java.util.Map;
 public record ExecutionResultValuesDTO(int output,
                                        int expandLevel,
                                        int cycleCount,
+                                       int creditsCost,
                                        @NotNull Map<String, Integer> arguments,
                                        @NotNull Map<String, Integer> variables) {
 
@@ -15,6 +16,7 @@ public record ExecutionResultValuesDTO(int output,
                 dto.output(),
                 dto.expandLevel(),
                 dto.cycleCount(),
+                dto.creditsCost(),
                 dto.arguments(),
                 dto.variables()
         );

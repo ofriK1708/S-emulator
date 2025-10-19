@@ -16,19 +16,25 @@ import java.util.Map;
 public class ProgramRunner {
     private final Map<String, Integer> executedContextMap;
     private final List<Instruction> executedInstructions;
+    private final int initialUserCredits;
+    private int runningUserCredits;
 
     private ProgramRunner(@NotNull List<Instruction> executedInstructions,
-                          @NotNull Map<String, Integer> executedContextMap) {
+                          @NotNull Map<String, Integer> executedContextMap,
+                          int userCredits) {
         this.executedInstructions = executedInstructions;
         this.executedContextMap = executedContextMap;
+        initialUserCredits = runningUserCredits = userCredits;
     }
 
 
     public static ProgramRunner createFrom(@NotNull List<Instruction> executedInstructions,
-                                           @NotNull Map<String, Integer> executedContextMap) {
+                                           @NotNull Map<String, Integer> executedContextMap,
+                                           int userCredits) {
         return new ProgramRunner(
                 executedInstructions,
-                executedContextMap);
+                executedContextMap,
+                userCredits);
     }
 
     @Contract(pure = true)
@@ -41,15 +47,20 @@ public class ProgramRunner {
             Instruction instruction = executedInstructions.get(currentPC);
             try {
                 instruction.execute(executedContextMap);
-                cyclesCounter += instruction.getCycles();
             } catch (IllegalArgumentException e) {
                 throw new RuntimeException("Error executing instruction at PC=" + currentPC + ": " + e.getMessage(), e);
+            }
+            cyclesCounter += instruction.getCycles();
+            runningUserCredits -= instruction.getArchitectureCreditsCost();
+            if (runningUserCredits < 0) {
+                throw new RuntimeException("Insufficient user credits to continue execution at PC=" + currentPC);
             }
         }
         return new ExecutionResultValuesDTO(
                 executedContextMap.get(ProgramUtils.OUTPUT_NAME),
-                cyclesCounter,
                 expandLevel,
+                cyclesCounter,
+                initialUserCredits - runningUserCredits,
                 ProgramUtils.extractSortedArguments(executedContextMap),
                 ProgramUtils.extractSortedWorkVars(executedContextMap)
         );

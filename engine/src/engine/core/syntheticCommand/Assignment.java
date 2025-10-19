@@ -16,10 +16,14 @@ import java.util.Map;
 
 public class Assignment extends Instruction
 {
+    // region Fields
     private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_III;
     private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     public static final String sourceArgumentName = "assignedVariable";
     private static int expandLevel = -1;
+    // endregion
+
+    // region Constructors
     public Assignment(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
@@ -32,7 +36,9 @@ public class Assignment extends Instruction
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
         expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
+    // endregion
 
+    // region Architecture
     @Override
     public int getArchitectureCreditsCost() {
         return ARCHITECTURE_CREDITS_COST;
@@ -42,7 +48,9 @@ public class Assignment extends Instruction
     public @NotNull ArchitectureType getArchitectureType() {
         return ARCHITECTURE_TYPE;
     }
+    // endregion
 
+    // region Execution
     @Override
     public void execute(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException
     {
@@ -57,29 +65,9 @@ public class Assignment extends Instruction
             throw new IllegalArgumentException("No such variable: " + sourceName);
         }
     }
+    // endregion
 
-    @Override
-    public int getCycles()
-    {
-        return 4;
-    }
-
-    @Override
-    public @NotNull CommandType getType()
-    {
-        return CommandType.SYNTHETIC;
-    }
-
-    @Override
-    public int getExpandLevel()
-    {
-        if (expandLevel == -1)
-        {
-            expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
-        }
-        return expandLevel;
-    }
-
+    // region Expansion
     @Override
     public @NotNull List<Instruction> expand(@NotNull Map<String, Integer> contextMap, int originalInstructionIndex)
     {
@@ -104,6 +92,26 @@ public class Assignment extends Instruction
 
         return instructions;
     }
+    // endregion
+
+    // region Info
+    @Override
+    public int getCycles() {
+        return 4;
+    }
+
+    @Override
+    public @NotNull CommandType getType() {
+        return CommandType.SYNTHETIC;
+    }
+
+    @Override
+    public int getExpandLevel() {
+        if (expandLevel == -1) {
+            expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
+        }
+        return expandLevel;
+    }
 
     @Override
     public @NotNull String getStringRepresentation()
@@ -111,4 +119,5 @@ public class Assignment extends Instruction
         String sourceName = args.get(sourceArgumentName);
         return String.format("%s <- %s", mainVarName, sourceName);
     }
+    // endregion
 }

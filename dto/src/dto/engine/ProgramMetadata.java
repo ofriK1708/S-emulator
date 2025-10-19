@@ -7,5 +7,5 @@ public record ProgramMetadata(@NotNull String name,
                               int numOfInstructions,
                               int maxExpandLevel,
                               int numberOfExecutions,
-                              float averageCycles) {
+                              float averageCreditsCost) {
 }

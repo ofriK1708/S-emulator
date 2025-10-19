@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,8 +37,6 @@ public class HttpEngineController implements EngineController {
     private final static Type VARS_NAME_AND_VALUE_TYPE = new TypeToken<Map<String, Integer>>() {
     }.getType();
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    private final static Type STATS_LIST_TYPE = new TypeToken<List<ExecutionStatisticsDTO>>() {
-    }.getType();
     private final Set<ProgramMetadata> programsMetadata = new LinkedHashSet<>();
     private final Set<FunctionMetadata> functionsMetadata = new LinkedHashSet<>();
     String currentLoadedProgramName = null;
@@ -160,23 +157,6 @@ public class HttpEngineController implements EngineController {
     }
 
     @Override
-    public int getLastExecutionNumberOfCycles() {
-        validateProgramLoaded();
-        try (Response response = Requests.getProgramInfoSync(Endpoints.GET_PROGRAM_INFO,
-                LAST_EXECUTION_CYCLES, currentLoadedProgramName)) {
-            if (response.isSuccessful()) {
-                validateResponseBodyNotNull(response);
-                //noinspection DataFlowIssue
-                return Integer.parseInt(response.body().string());
-            } else {
-                throw new IOException("Failed to get last execution number of cycles: " + response.body());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
     public @NotNull ProgramDTO getProgramByExpandLevel(int expandLevel) {
         validateProgramLoaded();
         try (Response response = Requests.getProgramInfoSync(Endpoints.GET_PROGRAM_INFO,
@@ -193,22 +173,6 @@ public class HttpEngineController implements EngineController {
         }
     }
 
-    @Override
-    public ExecutionStatisticsDTO getLastExecutionStatistics() {
-        validateProgramLoaded();
-        try (Response response = Requests.getProgramInfoSync(Endpoints.GET_PROGRAM_INFO,
-                LAST_EXECUTION_STATISTICS, currentLoadedProgramName)) {
-            if (response.isSuccessful()) {
-                validateResponseBodyNotNull(response);
-                //noinspection DataFlowIssue
-                return gson.fromJson(response.body().string(), ExecutionStatisticsDTO.class);
-            } else {
-                throw new IOException("Failed to get last execution statistics: " + response.body());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Override
     public @NotNull Set<String> getAllVariablesAndLabelsNames(int expandLevel, boolean includeLabels) {
@@ -284,22 +248,6 @@ public class HttpEngineController implements EngineController {
         }
     }
 
-    @Override
-    public List<ExecutionStatisticsDTO> getAllExecutionStatistics() {
-        validateProgramLoaded();
-        try (Response response = Requests.getProgramInfoSync(Endpoints.GET_PROGRAM_INFO,
-                ALL_EXECUTION_STATISTICS, currentLoadedProgramName)) {
-            if (response.isSuccessful()) {
-                validateResponseBodyNotNull(response);
-                //noinspection DataFlowIssue
-                return gson.fromJson(response.body().string(), STATS_LIST_TYPE);
-            } else {
-                throw new IOException("Failed to get all execution statistics: " + response.body());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
     // TODO - implement the debug methods, first try to refactor the program engine to make it modular
 
     @Override

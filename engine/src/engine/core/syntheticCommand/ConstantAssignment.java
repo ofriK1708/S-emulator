@@ -13,17 +13,22 @@ import java.util.Map;
 
 public class ConstantAssignment extends Instruction
 {
+    // region Fields
     private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_II;
     private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     public final static String valueArgumentName = "constantValue";
     public static int expandLevel = -1;
+    // endregion
 
+    // region Constructors
     public ConstantAssignment(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
         expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
+    // endregion
 
+    // region Architecture
     @Override
     public int getArchitectureCreditsCost() {
         return ARCHITECTURE_CREDITS_COST;
@@ -33,7 +38,9 @@ public class ConstantAssignment extends Instruction
     public @NotNull ArchitectureType getArchitectureType() {
         return ARCHITECTURE_TYPE;
     }
+    // endregion
 
+    // region Execution
     @Override
     public void execute(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException
     {
@@ -47,7 +54,27 @@ public class ConstantAssignment extends Instruction
             throw new IllegalArgumentException("Invalid value for constant assignment: " + args.get(valueArgumentName));
         }
     }
+    // endregion
 
+    // region Expansion
+    @Override
+    public @NotNull List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex) {
+
+        List<Instruction> instructions = new ArrayList<>();
+        instructions.add(new ZeroVariable(mainVarName, null, label, this, originalInstructionIndex));
+        try {
+            int constantValue = Integer.parseInt(args.get(valueArgumentName));
+            for (int i = 0; i < constantValue; i++) {
+                instructions.add(new Increase(mainVarName, null, null, this, originalInstructionIndex));
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid value for constant assignment: " + args.get(valueArgumentName));
+        }
+        return instructions;
+    }
+    // endregion
+
+    // region Info
     @Override
     public int getCycles() {
         return 2;
@@ -69,26 +96,6 @@ public class ConstantAssignment extends Instruction
     }
 
     @Override
-    public @NotNull List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
-    {
-
-        List<Instruction> instructions = new ArrayList<>();
-        instructions.add(new ZeroVariable(mainVarName, null, label, this, originalInstructionIndex));
-        try
-        {
-            int constantValue = Integer.parseInt(args.get(valueArgumentName));
-            for (int i = 0; i < constantValue; i++)
-            {
-                instructions.add(new Increase(mainVarName, null, null, this, originalInstructionIndex));
-            }
-        } catch (NumberFormatException e)
-        {
-            throw new IllegalArgumentException("Invalid value for constant assignment: " + args.get(valueArgumentName));
-        }
-        return instructions;
-    }
-
-    @Override
     public @NotNull String getStringRepresentation()
     {
         int constantValue = 0;
@@ -100,4 +107,5 @@ public class ConstantAssignment extends Instruction
         }
         return String.format("%s <- %d", mainVarName, constantValue);
     }
+    // endregion
 }

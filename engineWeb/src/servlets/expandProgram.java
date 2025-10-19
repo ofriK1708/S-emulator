@@ -3,7 +3,6 @@ package servlets;
 import com.google.gson.Gson;
 import dto.engine.ProgramDTO;
 import engine.core.Engine;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,7 +15,12 @@ import java.io.IOException;
 @WebServlet(name = "expandProgram", urlPatterns = "/expandProgram")
 public class expandProgram extends HttpServlet {
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if (!ServletUtils.isUserLoggedIn(req, getServletContext())) {
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            resp.getWriter().write("Error! User is not logged in.");
+            return;
+        }
         Gson gson = new Gson();
         resp.setContentType("application/json;charset=UTF-8");
         ServletUtils.expandParams expandParams;

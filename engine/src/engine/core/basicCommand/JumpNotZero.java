@@ -10,11 +10,14 @@ import java.util.Map;
 
 public class JumpNotZero extends Instruction
 {
+    // region Constants
     private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_I;
     private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     public static final String labelArgumentName = "JNZLabel";
     private static final int expandLevel = 0;
+    // endregion
 
+    // region Constructors
     public JumpNotZero(String mainVarName, Map<String, String> args, String labelArgumentName)
     {
         super(mainVarName, args, labelArgumentName);
@@ -25,7 +28,9 @@ public class JumpNotZero extends Instruction
     {
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
     }
+    // endregion
 
+    // region Architecture
     @Override
     public int getArchitectureCreditsCost() {
         return ARCHITECTURE_CREDITS_COST;
@@ -35,7 +40,9 @@ public class JumpNotZero extends Instruction
     public @NotNull ArchitectureType getArchitectureType() {
         return ARCHITECTURE_TYPE;
     }
+    // endregion
 
+    // region execution
     @Override
     public void execute(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException
     {
@@ -56,14 +63,17 @@ public class JumpNotZero extends Instruction
             throw new IllegalArgumentException("No such label : " + labelName);
         }
     }
+    // endregion
 
-
+    // region Expansion
     @Override
     public @NotNull List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex)
     {
         return List.of(this);
     }
+    // endregion
 
+    // region info
     @Override
     public int getCycles()
     {
@@ -87,5 +97,6 @@ public class JumpNotZero extends Instruction
     {
         return String.format("if %s != 0 GOTO %s", mainVarName, args.get(labelArgumentName));
     }
+    // endregion
 }
 

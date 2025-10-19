@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import logic.User;
+import logic.manager.ExecutionHistoryManager;
 import logic.manager.ProgramManager;
 import logic.manager.UserManager;
 import org.jetbrains.annotations.NotNull;
@@ -23,11 +24,12 @@ import static utils.ServletConstants.*;
 public class ServletUtils {
     private static final Object programManagerLock = new Object();
     private static final Object userManagerLock = new Object();
+    private static final Object executionHistoryManagerLock = new Object();
 
     public static @NotNull ProgramManager getProgramManager(ServletContext servletContext) {
         synchronized (programManagerLock) {
             if (servletContext.getAttribute(PROGRAM_MANAGER_ATTRIBUTE_NAME) == null) {
-                servletContext.setAttribute(PROGRAM_MANAGER_ATTRIBUTE_NAME, new ProgramManager());
+                servletContext.setAttribute(PROGRAM_MANAGER_ATTRIBUTE_NAME, ProgramManager.getInstance());
             }
         }
         return (ProgramManager) servletContext.getAttribute("programManager");
@@ -36,16 +38,44 @@ public class ServletUtils {
     public static @NotNull UserManager getUserManager(ServletContext servletContext) {
         synchronized (userManagerLock) {
             if (servletContext.getAttribute(USER_MANAGER_ATTRIBUTE_NAME) == null) {
-                servletContext.setAttribute(USER_MANAGER_ATTRIBUTE_NAME, new UserManager());
+                servletContext.setAttribute(USER_MANAGER_ATTRIBUTE_NAME, UserManager.getInstance());
             }
         }
         return (UserManager) servletContext.getAttribute(USER_MANAGER_ATTRIBUTE_NAME);
     }
 
-    public static @Nullable User getUsername(HttpServletRequest request, ServletContext servletContext) {
+    public static @NotNull ExecutionHistoryManager getExecutionHistoryManager(ServletContext servletContext) {
+        synchronized (executionHistoryManagerLock) {
+            if (servletContext.getAttribute(EXECUTION_HISTORY_MANAGER_ATTRIBUTE_NAME) == null) {
+                servletContext.setAttribute(EXECUTION_HISTORY_MANAGER_ATTRIBUTE_NAME,
+                        ExecutionHistoryManager.getInstance());
+            }
+        }
+        return (ExecutionHistoryManager) servletContext.getAttribute(EXECUTION_HISTORY_MANAGER_ATTRIBUTE_NAME);
+    }
+
+    /**
+     * Retrieves the User object associated with the current session.
+     * Returns null if no user is logged in.
+     * does not create a new session if one does not exist.
+     */
+    public static @Nullable User getUser(HttpServletRequest request, ServletContext servletContext) {
         HttpSession session = request.getSession(false);
         String username = session != null ? session.getAttribute(USERNAME).toString() : null;
         return getUserManager(servletContext).getUser(username);
+    }
+
+    public static boolean isUserLoggedIn(HttpServletRequest request, ServletContext servletContext) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return false;
+        }
+        String username = session.getAttribute(USERNAME) != null ? session.getAttribute(USERNAME).toString() : null;
+        if (username == null) {
+            return false;
+        }
+        User user = getUserManager(servletContext).getUser(username);
+        return user != null;
     }
 
     /**

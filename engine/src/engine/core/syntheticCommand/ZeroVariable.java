@@ -15,10 +15,13 @@ import java.util.Map;
 
 public class ZeroVariable extends Instruction
 {
+    // region Fields
     private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_II;
     private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     private static int expandLevel = -1;
+    // endregion
 
+    // region Constructors
     public ZeroVariable(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
@@ -31,7 +34,9 @@ public class ZeroVariable extends Instruction
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
         expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
+    // endregion
 
+    // region Architecture
     @Override
     public int getArchitectureCreditsCost() {
         return ARCHITECTURE_CREDITS_COST;
@@ -41,26 +46,18 @@ public class ZeroVariable extends Instruction
     public @NotNull ArchitectureType getArchitectureType() {
         return ARCHITECTURE_TYPE;
     }
+    // endregion
 
+    // region Execution
     @Override
     public void execute(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException
     {
         contextMap.put(mainVarName, 0);
         incrementProgramCounter(contextMap);
     }
+    // endregion
 
-    @Override
-    public int getCycles()
-    {
-        return 1;
-    }
-
-    @Override
-    public @NotNull CommandType getType()
-    {
-        return CommandType.SYNTHETIC;
-    }
-
+    // region Expansion
     @Override
     public @NotNull List<Instruction> expand(@NotNull Map<String, Integer> contextMap, int originalInstructionIndex)
     {
@@ -73,6 +70,18 @@ public class ZeroVariable extends Instruction
         expanded.add(new JumpNotZero(mainVarName,
                 Map.of(JumpNotZero.labelArgumentName, freeLabelName), null, this, originalInstructionIndex));
         return expanded;
+    }
+    // endregion
+
+    // region Info
+    @Override
+    public int getCycles() {
+        return 1;
+    }
+
+    @Override
+    public @NotNull CommandType getType() {
+        return CommandType.SYNTHETIC;
     }
 
     @Override
@@ -90,4 +99,5 @@ public class ZeroVariable extends Instruction
     {
         return String.format("%s <- 0", mainVarName);
     }
+    // endregion
 }

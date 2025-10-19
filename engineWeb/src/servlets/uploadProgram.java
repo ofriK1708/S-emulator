@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import jakarta.xml.bind.JAXBException;
+import logic.User;
 import logic.file.xml.XMLHandler;
 import logic.manager.ProgramManager;
 import org.jetbrains.annotations.Nullable;
@@ -27,6 +28,12 @@ public class uploadProgram extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        User user = ServletUtils.getUser(req, getServletContext());
+        if (user == null) {
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            resp.getWriter().write("Error! User is not logged in.");
+            return;
+        }
         SProgram sProgram = getSProgramFromRequest(req, resp);
         Gson json = new Gson();
         if (sProgram != null) {
@@ -43,7 +50,13 @@ public class uploadProgram extends HttpServlet {
                 } else {
                     try {
                         // Validate sProgram by trying to create an engine - check for label not exists, etc.
-                        programManager.addProgram(programName, sProgram);
+                        programManager.addProgram(programName, sProgram, user.getName());
+                        resp.setStatus(HttpServletResponse.SC_OK);
+                        resp.setContentType("application/json");
+                        LoadProgramResultDTO resultDTO = new LoadProgramResultDTO(
+                                programManager.getProgramsMetadata(), programManager.getFunctionsMetadata());
+                        resp.getWriter().println(json.toJson(resultDTO));
+                        System.out.println("Program " + programName + " uploaded successfully.");
 
                     } catch (Exception e) {
                         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -52,12 +65,6 @@ public class uploadProgram extends HttpServlet {
                     }
                 }
             }
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.setContentType("application/json");
-            LoadProgramResultDTO resultDTO = new LoadProgramResultDTO(
-                    programManager.getProgramsMetadata(), programManager.getFunctionsMetadata());
-            resp.getWriter().println(json.toJson(resultDTO));
-            System.out.println("Program " + programName + " uploaded successfully.");
         }
     }
 

@@ -23,7 +23,7 @@ import static engine.utils.ProgramUtils.extractAllVariableAndLabelNamesUnsorted;
  * </p>
  */
 public final class InstructionSequence {
-    // region -- Fields --
+    // region Fields
     private final Map<String, Integer> originalContextMap = new HashMap<>();
     private final @NotNull List<Instruction> originalInstructions;
     private final @NotNull Set<String> originalLabels;
@@ -31,8 +31,10 @@ public final class InstructionSequence {
     private final List<Map<String, Integer>> contextMapsByExpandLevel = new ArrayList<>();
     private final List<Set<String>> labelsByExpandLevel = new ArrayList<>();
     private int maxExpandLevel = -1;
-    private final List<Integer> creditsCostByExpandLevel = new ArrayList<>();
-    private final List<ArchitectureType> minumumArchitectureTypeNeededByExpandLevel = new ArrayList<>();
+    private final List<ArchitectureType> minimumArchitectureTypeNeededByExpandLevel = new ArrayList<>();
+    // endregion
+
+    // region Constructors and Initialization
 
     /**
      * Private constructor to enforce immutability and controlled creation.
@@ -41,14 +43,13 @@ public final class InstructionSequence {
      * @param originalLabels       The set of labels defined in the original instructions.
      * @throws LabelNotExist if a label referenced in the instructions does not exist.
      */
-    private InstructionSequence(@NotNull List<Instruction> originalInstructions, @NotNull Set<String> originalLabels)
+    private InstructionSequence(@NotNull List<Instruction> originalInstructions, @NotNull Set<String> originalLabels,
+                                @NotNull String functionName)
             throws LabelNotExist {
         this.originalInstructions = List.copyOf(originalInstructions);
         this.originalLabels = originalLabels;
         continueInitialization();
     }
-    // endregion
-    // region -- Constructors and Initialization --
 
     private void continueInitialization() throws LabelNotExist {
         instructionExpansionLevels.add(originalInstructions);
@@ -68,32 +69,37 @@ public final class InstructionSequence {
     public static InstructionSequence createFrom(@NotNull SProgram sProgram, @NotNull FunctionManager functionManager)
             throws LabelNotExist {
         ParsedComponents components = parseRawInstructions(sProgram.getSInstructions().getSInstruction(),
-                functionManager);
+                functionManager, sProgram.getName());
 
-        return new InstructionSequence(components.originalInstructions(), components.originalLabels());
+        return new InstructionSequence(components.originalInstructions(), components.originalLabels(),
+                sProgram.getName());
     }
 
     public static InstructionSequence createFrom(@NotNull SFunction sFunction, @NotNull FunctionManager functionManager)
             throws LabelNotExist {
         ParsedComponents components = parseRawInstructions(sFunction.getSInstructions().getSInstruction(),
-                functionManager);
+                functionManager, sFunction.getUserString());
 
-        return new InstructionSequence(components.originalInstructions(), components.originalLabels());
+        return new InstructionSequence(components.originalInstructions(), components.originalLabels(),
+                sFunction.getUserString());
     }
 
     private static @NotNull ParsedComponents parseRawInstructions(@NotNull List<SInstruction> rawInstructions,
-                                                                  @NotNull FunctionManager functionManager) {
-        List<Instruction> originalInstructions = buildInstructions(rawInstructions, functionManager);
+                                                                  @NotNull FunctionManager functionManager,
+                                                                  @NotNull String enclosingFunctionName) {
+        List<Instruction> originalInstructions = buildInstructions(rawInstructions, functionManager,
+                enclosingFunctionName);
         Set<String> originalLabels = buildLabels(rawInstructions);
         return new ParsedComponents(originalInstructions, originalLabels);
     }
 
     private static @NotNull List<Instruction> buildInstructions(@NotNull List<SInstruction> rawInstructions,
-                                                                @NotNull FunctionManager functionManager) {
+                                                                @NotNull FunctionManager functionManager,
+                                                                @NotNull String enclosingFunctionName) {
         List<Instruction> instructions = new ArrayList<>();
         for (int i = 0; i < rawInstructions.size(); i++) {
             SInstruction sInstruction = rawInstructions.get(i);
-            instructions.add(Instruction.createInstruction(sInstruction, functionManager, i));
+            instructions.add(Instruction.createInstruction(sInstruction, functionManager, i, enclosingFunctionName));
         }
         return instructions;
     }
@@ -111,7 +117,6 @@ public final class InstructionSequence {
     public void finalizeInitialization() {
         expandToMax();
         calcMinimumArchitectureForEachExpandLevel();
-        calculateCreditsCostForEachExpandLevel();
     }
 
     /**
@@ -164,8 +169,8 @@ public final class InstructionSequence {
         fillUnusedLabels();
     }
     // endregion
-    // region -- Private helpers --
 
+    // region Private helpers
     private void expandToMax() {
         if (maxExpandLevel == -1) {
             maxExpandLevel = ProgramUtils.getMaxExpandLevel(originalInstructions);
@@ -194,7 +199,7 @@ public final class InstructionSequence {
     private void calcMinimumArchitectureForEachExpandLevel() {
         for (List<Instruction> instructionExpansionLevel : instructionExpansionLevels) {
             ArchitectureType minArchNeeded = ProgramUtils.calcMinimumArchitectureLevelNeeded(instructionExpansionLevel);
-            minumumArchitectureTypeNeededByExpandLevel.add(minArchNeeded);
+            minimumArchitectureTypeNeededByExpandLevel.add(minArchNeeded);
         }
     }
 
@@ -224,22 +229,11 @@ public final class InstructionSequence {
 
         labelsByExpandLevel.add(latestLabels);
     }
-
-    private void calculateCreditsCostForEachExpandLevel() {
-        for (List<Instruction> instructionExpansionLevel : instructionExpansionLevels) {
-            int totalCreditsCost = ProgramUtils.calculateTotalCreditsCost(instructionExpansionLevel);
-            creditsCostByExpandLevel.add(totalCreditsCost);
-        }
-    }
-
     // endregion
-    // region -- Public getters --
+
+    // region Public getters
     public boolean isVariableInContext(String varName) {
         return originalContextMap.containsKey(varName);
-    }
-
-    public int getCreditsCostAtExpandLevel(int expandLevel) {
-        return creditsCostByExpandLevel.get(expandLevel);
     }
 
     public Map<String, Integer> getContextMapCopy(int expandLevel) {
@@ -295,9 +289,11 @@ public final class InstructionSequence {
     }
 
     public ArchitectureType getMinimumArchitectureTypeNeededAtExpandLevel(int expandLevel) {
-        return minumumArchitectureTypeNeededByExpandLevel.get(expandLevel);
+        return minimumArchitectureTypeNeededByExpandLevel.get(expandLevel);
     }
+    // endregion
 
+    // region Inner Classes
     private record ParsedComponents(List<Instruction> originalInstructions, Set<String> originalLabels) {
     }
     // endregion

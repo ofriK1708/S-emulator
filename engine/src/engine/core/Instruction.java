@@ -14,17 +14,13 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public abstract class Instruction implements Command, Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
+public abstract class Instruction implements Command {
     protected String mainVarName;
     protected final Map<String, String> args;
     protected @NotNull String label;
@@ -49,7 +45,8 @@ public abstract class Instruction implements Command, Serializable {
 
     public static @NotNull Instruction createInstruction(@NotNull SInstruction sInstruction,
                                                          @NotNull FunctionManager functionManager,
-                                                         int instructionIndex) {
+                                                         int instructionIndex,
+                                                         String enclosingFunctionName) {
 
         Map<String, String> args = Optional.ofNullable(sInstruction.getSInstructionArguments())
                 .map(SInstructionArguments::getSInstructionArgument)
@@ -75,9 +72,11 @@ public abstract class Instruction implements Command, Serializable {
             case "JUMP_ZERO" -> new JumpZero(mainVarName, args, labelName);
             case "JUMP_EQUAL_CONSTANT" -> new JumpEqualConstant(mainVarName, args, labelName);
             case "JUMP_EQUAL_VARIABLE" -> new JumpEqualVariable(mainVarName, args, labelName);
-            case "QUOTE" -> Quote.createInitialQuote(mainVarName, args, labelName, functionManager, instructionIndex);
+            case "QUOTE" -> Quote.createInitialQuote(mainVarName, args, labelName, functionManager, instructionIndex,
+                    enclosingFunctionName);
             case "JUMP_EQUAL_FUNCTION" ->
-                    new JumpEqualFunction(mainVarName, args, labelName, functionManager, instructionIndex);
+                    new JumpEqualFunction(mainVarName, args, labelName, functionManager, instructionIndex,
+                            enclosingFunctionName);
             default -> throw new IllegalArgumentException("Unknown instruction type: " + sInstruction.getName());
         };
     }
@@ -92,7 +91,8 @@ public abstract class Instruction implements Command, Serializable {
 
     protected static @NotNull Quote createSubFunctionCall(@NotNull String argName,
                                                           @NotNull FunctionManager functionManager,
-                                                          int instructionIndex) throws FunctionNotFound {
+                                                          int instructionIndex,
+                                                          @NotNull String enclosingFunctionName) throws FunctionNotFound {
         String functionCallContent = ProgramUtils.extractFunctionContent(argName);
         List<String> parts = ProgramUtils.splitArgs(functionCallContent);
         String functionName = parts.getFirst().trim();
@@ -100,7 +100,8 @@ public abstract class Instruction implements Command, Serializable {
         Map<String, String> quoteArgs = new HashMap<>();
         quoteArgs.put(Quote.functionNameArgumentName, functionName);
         quoteArgs.put(Quote.functionArgumentsArgumentName, functionArgs);
-        return Quote.createSubFunctionQuote("", quoteArgs, "", functionManager, instructionIndex);
+        return Quote.createSubFunctionQuote("", quoteArgs, "", functionManager, instructionIndex,
+                enclosingFunctionName);
     }
 
     public String getMainVarName() {
@@ -132,13 +133,19 @@ public abstract class Instruction implements Command, Serializable {
         Instruction tempDerivedFrom = this.derivedFrom;
         int tempDerivedFromIndex = this.derivedFromIndex;
         while (tempDerivedFrom != null) {
-            derivedInstructions.add(tempDerivedFrom.simpleToDTO(tempDerivedFromIndex));
+            derivedInstructions.add(tempDerivedFrom.toSimpleDTO(tempDerivedFromIndex));
             tempDerivedFromIndex = tempDerivedFrom.derivedFromIndex;
             tempDerivedFrom = tempDerivedFrom.derivedFrom;
         }
         return derivedInstructions;
     }
 
+    /**
+     * Creates a DTO representation of the instruction including derived from info.
+     *
+     * @param idx The index of the instruction.
+     * @return A new InstructionDTO instance.
+     */
     public @NotNull InstructionDTO toDTO(int idx) {
         return new InstructionDTO(
                 idx,
@@ -150,8 +157,14 @@ public abstract class Instruction implements Command, Serializable {
         );
     }
 
+    /**
+     * Creates a simple DTO representation of the instruction without derived from info.
+     *
+     * @param index The index of the instruction.
+     * @return A new InstructionDTO instance.
+     */
     @Contract("_ -> new")
-    private @NotNull InstructionDTO simpleToDTO(int index) {
+    public @NotNull InstructionDTO toSimpleDTO(int index) {
         return new InstructionDTO(
                 index,
                 getType(),

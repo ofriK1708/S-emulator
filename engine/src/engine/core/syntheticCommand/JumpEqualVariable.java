@@ -15,18 +15,28 @@ import java.util.Map;
 
 public class JumpEqualVariable extends Instruction
 {
+    // region Fields
     private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_III;
     private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     public static final String labelArgumentName = "JEVariableLabel";
     public static final String variableArgumentName = "variableName";
     private static int expandLevel;
+    // endregion
 
+    // region Constructors
     public JumpEqualVariable(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
         expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
 
+    protected JumpEqualVariable(String mainVarName, Map<String, String> args, @Nullable String label,
+                                @NotNull Instruction derivedFrom, int derivedFromIndex) {
+        super(mainVarName, args, label, derivedFrom, derivedFromIndex);
+    }
+    // endregion
+
+    // region Architecture
     @Override
     public int getArchitectureCreditsCost() {
         return ARCHITECTURE_CREDITS_COST;
@@ -36,11 +46,9 @@ public class JumpEqualVariable extends Instruction
     public @NotNull ArchitectureType getArchitectureType() {
         return ARCHITECTURE_TYPE;
     }
+    // endregion
 
-    protected JumpEqualVariable(String mainVarName, Map<String, String> args, @Nullable String label, @NotNull Instruction derivedFrom, int derivedFromIndex) {
-        super(mainVarName, args, label, derivedFrom, derivedFromIndex);
-    }
-
+    // region Execution
     @Override
     public void execute(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException
     {
@@ -70,19 +78,9 @@ public class JumpEqualVariable extends Instruction
             throw new IllegalArgumentException("Invalid constant value: " + args.get(variableArgumentName));
         }
     }
+    // endregion
 
-    @Override
-    public int getCycles()
-    {
-        return 2;
-    }
-
-    @Override
-    public @NotNull CommandType getType()
-    {
-        return CommandType.SYNTHETIC;
-    }
-
+    // region Expansion
     @Override
     public @NotNull List<Instruction> expand(@NotNull Map<String, Integer> contextMap, int originalInstructionIndex)
     {
@@ -114,6 +112,18 @@ public class JumpEqualVariable extends Instruction
 
 
     }
+    // endregion
+
+    // region Info
+    @Override
+    public int getCycles() {
+        return 2;
+    }
+
+    @Override
+    public @NotNull CommandType getType() {
+        return CommandType.SYNTHETIC;
+    }
 
     @Override
     public int getExpandLevel()
@@ -132,4 +142,5 @@ public class JumpEqualVariable extends Instruction
         String checkConstant = args.get(variableArgumentName);
         return String.format("IF %s == %s GOTO %s", mainVarName, checkConstant, labelName);
     }
+    // endregion
 }

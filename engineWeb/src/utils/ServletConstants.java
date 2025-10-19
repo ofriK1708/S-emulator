@@ -15,11 +15,9 @@ public class ServletConstants {
     public static final String ARGUMENTS = "arguments";
     public static final String PROGRAM_RESULT = "programResult";
     public static final String WORK_VARS = "workVars";
-    public static final String ALL_EXECUTION_STATISTICS = "allExecutionStatistics";
-    public static final String LAST_EXECUTION_STATISTICS = "lastExecutionStatistics";
-    public static final String LAST_EXECUTION_CYCLES = "lastExecutionCycles";
     public static final String USER_MANAGER_ATTRIBUTE_NAME = "userManager";
     public static final String USERNAME = "username";
+    public static final String EXECUTION_HISTORY_MANAGER_ATTRIBUTE_NAME = "executionHistoryManager";
     public static final String DEBUG_ACTION_PARAM = "debugAction";
     public static final String DEBUG_ACTION_STEP_OVER = "stepOver";
     public static final String DEBUG_ACTION_STEP_BACK = "stepBack";
@@ -39,10 +37,7 @@ public class ServletConstants {
                 ALL_VARIABLES_AND_LABELS + ", " +
                 ARGUMENTS + ", " +
                 PROGRAM_RESULT + ", " +
-                WORK_VARS + ", " +
-                ALL_EXECUTION_STATISTICS + ", " +
-                LAST_EXECUTION_STATISTICS + ", " +
-                LAST_EXECUTION_CYCLES + "]";
+                WORK_VARS;
     }
 
 

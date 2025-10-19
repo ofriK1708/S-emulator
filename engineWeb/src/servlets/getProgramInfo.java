@@ -11,7 +11,6 @@ import logic.manager.ProgramManager;
 import utils.ServletUtils;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,6 +27,11 @@ public class getProgramInfo extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        if (!ServletUtils.isUserLoggedIn(req, getServletContext())) {
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            resp.getWriter().write("Error! User is not logged in.");
+            return;
+        }
         int expandLevel = -1;
         Gson gson = new Gson();
         String programName = req.getParameter(PROGRAM_NAME_PARAM);
@@ -74,26 +78,6 @@ public class getProgramInfo extends HttpServlet {
                 Map<String, Integer> workVars = currentEngine.getSortedWorkVars(expandLevel);
                 String jsonWorkVars = gson.toJson(workVars);
                 resp.getWriter().println(jsonWorkVars);
-                resp.setStatus(HttpServletResponse.SC_OK);
-                break;
-            case ALL_EXECUTION_STATISTICS:
-                List<ExecutionStatisticsDTO> allStats = currentEngine.getAllExecutionStatistics();
-                String jsonStats = gson.toJson(allStats);
-                resp.getWriter().println(jsonStats);
-                resp.setStatus(HttpServletResponse.SC_OK);
-                break;
-            case LAST_EXECUTION_STATISTICS:
-                List<ExecutionStatisticsDTO> allStatsList = currentEngine.getAllExecutionStatistics();
-                if (allStatsList.isEmpty()) {
-                    resp.getWriter().println("No execution statistics available, try running the program first");
-                } else {
-                    String jsonLastStats = gson.toJson(allStatsList.getLast());
-                    resp.getWriter().println(jsonLastStats);
-                }
-                resp.setStatus(HttpServletResponse.SC_OK);
-                break;
-            case LAST_EXECUTION_CYCLES:
-                resp.getWriter().println(gson.toJson(currentEngine.getLastExecutionCycles()));
                 resp.setStatus(HttpServletResponse.SC_OK);
                 break;
             default:

@@ -26,14 +26,14 @@ public class FunctionManager {
                             @NotNull Map<String, Engine> allFunctionsAndProgramsInSystem,
                             @NotNull Engine mainProgramEngine,
                             @NotNull String mainProgramName)
-            throws FunctionNotFound, FunctionAlreadyExist, LabelNotExist {
+            throws FunctionAlreadyExist, LabelNotExist {
 
         this.functionsInCurrentProgram = buildFunctions(sMainProgram, mainProgramName,
-                mainProgramEngine, allFunctionsAndProgramsInSystem);
+                mainProgramEngine);
         this.allFunctionsAndProgramsInSystem = allFunctionsAndProgramsInSystem;
         this.mainProgramName = mainProgramName;
         this.mainProgramEngine = mainProgramEngine;
-        checkForNameConflicts(allFunctionsAndProgramsInSystem, mainProgramName);
+        checkForNameConflicts(allFunctionsAndProgramsInSystem);
 
     }
 
@@ -48,14 +48,13 @@ public class FunctionManager {
      * @param mainProgramName                 the name of the main program
      * @return a FunctionManager instance for the given SProgram
      * @throws LabelNotExist        if a label referenced in an instruction does not exist
-     * @throws FunctionNotFound     if an unknown function - not known in server or current program is called
      * @throws FunctionAlreadyExist if there is a name conflict with functions or programs in the server
      */
     public static FunctionManager createForProgram(@NotNull SProgram sProgram,
                                                    @NotNull Map<String, Engine> allFunctionsAndProgramsInSystem,
                                                    @NotNull Engine mainProgramEngine,
                                                    String mainProgramName)
-            throws LabelNotExist, FunctionNotFound, FunctionAlreadyExist {
+            throws LabelNotExist, FunctionAlreadyExist {
 
         return new FunctionManager(sProgram, allFunctionsAndProgramsInSystem, mainProgramEngine,
                 mainProgramName);
@@ -65,6 +64,9 @@ public class FunctionManager {
     public void finishInitialization() throws FunctionNotFound {
         finishInitQuotes();
         initialised = true;
+        for (Engine functionEngine : functionsInCurrentProgram.values()) {
+            functionEngine.finishInitialization();
+        }
     }
 
     public boolean isInitialised() {
@@ -79,20 +81,18 @@ public class FunctionManager {
      * @param mainProgramEngine the ProgramEngine of the main program
      * @return a map of function names to their corresponding ProgramEngine instances
      * @throws LabelNotExist    if a label referenced in a function does not exist
-     * @throws FunctionNotFound if a function is not found during the building process
      */
 
     private @NotNull Map<String, Engine> buildFunctions(@NotNull SProgram program,
                                                         @NotNull String mainProgramName,
-                                                        @NotNull Engine mainProgramEngine,
-                                                        @NotNull Map<String, Engine>
-                                                                allFunctionsAndProgramsInSystem)
-            throws LabelNotExist, FunctionNotFound {
+                                                        @NotNull Engine mainProgramEngine)
+            throws LabelNotExist {
         Map<String, Engine> functionMap = new HashMap<>();
         List<SFunction> sFunctions = program.getSFunctions().getSFunction();
+        String userUploadedBy = mainProgramEngine.getUserUploadedBy();
 
         for (SFunction sFunc : sFunctions) {
-            Engine engine = Engine.createFunctionEngine(sFunc, mainProgramName, this);
+            Engine engine = Engine.createFunctionEngine(sFunc, mainProgramName, this, userUploadedBy);
             functionMap.put(engine.getProgramName(), engine);
         }
 
@@ -115,15 +115,14 @@ public class FunctionManager {
         uninitializedQuotes.clear();
     }
 
-    public void checkForNameConflicts(@NotNull Map<String, Engine> allFunctionAndProgramsInSystem,
-                                      @NotNull String functionName)
+    public void checkForNameConflicts(@NotNull Map<String, Engine> allFunctionAndProgramsInSystem)
             throws FunctionAlreadyExist {
 
         for (String functionNameInSystem : allFunctionAndProgramsInSystem.keySet()) {
             // Prevent having functions with the same name as the main program and vice versa
             if (functionsInCurrentProgram.containsKey(functionNameInSystem) ||
                     functionNameInSystem.equals(mainProgramName)) {
-                throw new FunctionAlreadyExist(mainProgramName, functionName);
+                throw new FunctionAlreadyExist(mainProgramName, functionNameInSystem);
             }
         }
     }

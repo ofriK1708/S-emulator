@@ -10,7 +10,7 @@ public class User {
     final String name;
     private int mainProgramsUploaded = 0;
     private int subFunctionsContributed = 0;
-    private int currentCredits = 0;
+    private int currentCredits = Integer.MIN_VALUE; // TODO - change this later to 0, only for testing
     private int usedCredits = 0;
     private int totalRuns = 0;
     private @Nullable ProgramDebugger debugger = null;
@@ -19,11 +19,19 @@ public class User {
         this.name = name;
     }
 
+    public @NotNull String getName() {
+        return name;
+    }
+
     public void setDebugger(@NotNull ProgramDebugger debugger) {
         if (this.debugger != null) {
             throw new IllegalStateException("Debugger is already set for user: " + name);
         }
         this.debugger = debugger;
+    }
+
+    public int getCurrentCredits() {
+        return currentCredits;
     }
 
     public void addProgramsAndFunctions(int mainProgramsUploaded, int subFunctionsContributed) {

@@ -18,18 +18,21 @@ import java.util.Set;
 public class Engine {
 
     private final String programName;
+    private final String userUploadedBy;
     private final String mainProgramName;
     private final InstructionSequence instructionSequence;
     private final @NotNull FunctionManager functionManager;
     private @Nullable SFunction originalSFunction;
     private @Nullable String funcName;
-    private float averageCycles = 0;
+    private float averageCreditsCost = 0;
     private int numberOfExecutions = 0;
 
     private Engine(@NotNull SProgram program,
-                   @NotNull Map<String, Engine> allFunctionAndProgramsInSystem)
+                   @NotNull Map<String, Engine> allFunctionAndProgramsInSystem,
+                   @NotNull String uploadedBy)
             throws LabelNotExist, FunctionNotFound, FunctionAlreadyExist {
         this.programName = this.mainProgramName = program.getName();
+        this.userUploadedBy = uploadedBy;
         // only for main program
         functionManager = FunctionManager.createForProgram(program, allFunctionAndProgramsInSystem,
                 this, mainProgramName);
@@ -40,15 +43,17 @@ public class Engine {
 
     private Engine(@NotNull SFunction function,
                    @NotNull String mainProgramName,
-                   @NotNull FunctionManager functionManager) throws LabelNotExist {
+                   @NotNull FunctionManager functionManager,
+                   @NotNull String uploadedBy) throws LabelNotExist {
         this.programName = function.getName();
+        this.userUploadedBy = uploadedBy;
         this.mainProgramName = mainProgramName;
         funcName = function.getUserString();
-
-        instructionSequence = InstructionSequence.createFrom(function, functionManager);
-        this.functionManager = functionManager;
-
         originalSFunction = function;
+        this.functionManager = functionManager;
+        instructionSequence = InstructionSequence.createFrom(function, functionManager);
+
+
     }
 
     /**
@@ -62,9 +67,10 @@ public class Engine {
      * @throws FunctionAlreadyExist if a function in the program already exists in the server
      */
     public static Engine createMainProgramEngine(@NotNull SProgram program,
-                                                 @NotNull Map<String, Engine> allFunctionAndProgramsInSystem)
+                                                 @NotNull Map<String, Engine> allFunctionAndProgramsInSystem,
+                                                 @NotNull String uploadedBy)
             throws LabelNotExist, FunctionNotFound, FunctionAlreadyExist {
-        return new Engine(program, allFunctionAndProgramsInSystem);
+        return new Engine(program, allFunctionAndProgramsInSystem, uploadedBy);
     }
 
     /**
@@ -78,9 +84,14 @@ public class Engine {
      */
     public static Engine createFunctionEngine(@NotNull SFunction function,
                                               @NotNull String mainProgramName,
-                                              @NotNull FunctionManager functionManager)
+                                              @NotNull FunctionManager functionManager,
+                                              @NotNull String uploadedBy)
             throws LabelNotExist {
-        return new Engine(function, mainProgramName, functionManager);
+        return new Engine(function, mainProgramName, functionManager, uploadedBy);
+    }
+
+    public void finishInitialization() {
+        instructionSequence.finalizeInitialization();
     }
 
     public String getProgramName() {
@@ -99,12 +110,13 @@ public class Engine {
         return instructionSequence.isVariableInContext(varName);
     }
 
-    public ExecutionResultDTO run(int expandLevel, @NotNull Map<String, Integer> arguments) {
+    public ExecutionResultDTO run(int expandLevel, @NotNull Map<String, Integer> arguments, int userCredits) {
+        validateRunPossibility(expandLevel, userCredits);
         List<Instruction> executedInstructions = instructionSequence.getInstructionsCopy(expandLevel);
         Map<String, Integer> executedMap = instructionSequence.getContextMapCopy(expandLevel);
-        ProgramRunner runner = ProgramRunner.createFrom(executedInstructions, executedMap);
+        ProgramRunner runner = ProgramRunner.createFrom(executedInstructions, executedMap, userCredits);
         ExecutionResultValuesDTO valuesResult = runner.run(expandLevel, arguments);
-        averageCycles = calcAverageCycles(valuesResult.cycleCount());
+        averageCreditsCost = calcAverageCredits(valuesResult.creditsCost());
         numberOfExecutions++;
 
         return ExecutionResultDTO.from(
@@ -112,12 +124,24 @@ public class Engine {
                 instructionSequence.getMinimumArchitectureTypeNeededAtExpandLevel(expandLevel));
     }
 
-    public ExecutionResultDTO run(@NotNull Map<String, Integer> arguments) {
-        return run(0, arguments);
+    private void validateRunPossibility(int expandLevel, int userCredits) {
+        if (expandLevel < 0 || expandLevel > instructionSequence.getMaxExpandLevel()) {
+            throw new IllegalArgumentException("Invalid expand level: " + expandLevel);
+        }
     }
 
-    private float calcAverageCycles(int newCycles) {
-        return (averageCycles * numberOfExecutions + newCycles) / numberOfExecutions + 1;
+    /**
+     * this run happen internally, without user credits limitation and at expand level 0
+     *
+     * @param arguments a map of argument names to their integer values
+     * @return an ExecutionResultDTO containing the results of the execution
+     */
+    public ExecutionResultDTO run(@NotNull Map<String, Integer> arguments) {
+        return run(0, arguments, Integer.MAX_VALUE);
+    }
+
+    private float calcAverageCredits(int latestRunCreditsCost) {
+        return (averageCreditsCost * numberOfExecutions + latestRunCreditsCost) / numberOfExecutions + 1;
     }
 
     public @NotNull ProgramDebugger startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments) {
@@ -201,14 +225,11 @@ public class Engine {
         return isFunction() ? funcName : programName;
     }
 
-
-    // TODO - implement user management and replace userFiller
     public @NotNull ProgramMetadata programToMetadata() {
         if (!isFunction()) {
-            String userFiller = "remove_me"; // Placeholder until user management is implemented
-            return new ProgramMetadata(programName, userFiller,
+            return new ProgramMetadata(programName, userUploadedBy,
                     instructionSequence.getOriginalInstructionCount(), instructionSequence.getMaxExpandLevel(),
-                    numberOfExecutions, averageCycles);
+                    numberOfExecutions, averageCreditsCost);
         } else {
             throw new IllegalStateException("Cannot get metadata for a function from a program");
         }
@@ -216,12 +237,15 @@ public class Engine {
 
     public @NotNull FunctionMetadata functionToMetadata() {
         if (isFunction()) {
-            String userFiller = "remove_me"; // Placeholder until user management is implemented
-            return new FunctionMetadata(programName, mainProgramName, userFiller,
+            return new FunctionMetadata(programName, mainProgramName, userUploadedBy,
                     instructionSequence.getOriginalInstructionCount(), instructionSequence.getMaxExpandLevel());
         } else {
             throw new IllegalStateException("Cannot get metadata for a program from a function");
         }
+    }
+
+    public String getUserUploadedBy() {
+        return userUploadedBy;
     }
 
     public int getMaxExpandLevel() {

@@ -14,11 +14,14 @@ import java.util.Map;
 
 public class GOTOLabel extends Instruction
 {
+    // region Fields
     private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_II;
     private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     public static final String labelArgumentName = "gotoLabel";
     private static int expandLevel = -1;
+    // endregion
 
+    // region Constructors
     public GOTOLabel(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
@@ -31,7 +34,9 @@ public class GOTOLabel extends Instruction
         super(mainVarName, args, label, derivedFrom, derivedFromIndex);
         expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
+    // endregion
 
+    // region Architecture
     @Override
     public int getArchitectureCreditsCost() {
         return ARCHITECTURE_CREDITS_COST;
@@ -41,7 +46,9 @@ public class GOTOLabel extends Instruction
     public @NotNull ArchitectureType getArchitectureType() {
         return ARCHITECTURE_TYPE;
     }
+    // endregion
 
+    // region Execution
     @Override
     public void execute(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException
     {
@@ -55,7 +62,24 @@ public class GOTOLabel extends Instruction
             throw new IllegalArgumentException("No such label : " + labelName);
         }
     }
+    // endregion
 
+    // region Expansion
+    @Override
+    public @NotNull List<Instruction> expand(@NotNull Map<String, Integer> contextMap, int originalInstructionIndex) {
+
+        List<Instruction> instructions = new ArrayList<>();
+        String workVarName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
+        String originalLabel = args.get(labelArgumentName);
+        instructions.add(new Increase(workVarName, null, label, this, originalInstructionIndex));
+        instructions.add(new JumpNotZero(workVarName,
+                Map.of(JumpNotZero.labelArgumentName, originalLabel),
+                null, this, originalInstructionIndex));
+        return instructions;
+    }
+    // endregion
+
+    // region Info
     @Override
     public int getCycles()
     {
@@ -79,23 +103,10 @@ public class GOTOLabel extends Instruction
     }
 
     @Override
-    public @NotNull List<Instruction> expand(@NotNull Map<String, Integer> contextMap, int originalInstructionIndex)
-    {
-
-        List<Instruction> instructions = new ArrayList<>();
-        String workVarName = ProgramUtils.getNextFreeWorkVariableName(contextMap);
-        String originalLabel = args.get(labelArgumentName);
-        instructions.add(new Increase(workVarName, null, label, this, originalInstructionIndex));
-        instructions.add(new JumpNotZero(workVarName,
-                Map.of(JumpNotZero.labelArgumentName, originalLabel),
-                null, this, originalInstructionIndex));
-        return instructions;
-    }
-
-    @Override
     public @NotNull String getStringRepresentation()
     {
         String labelName = args.get(labelArgumentName);
         return String.format("GOTO %s", labelName);
     }
+    // endregion
 }

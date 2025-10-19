@@ -15,28 +15,35 @@ import java.util.Map;
 
 public class JumpEqualConstant extends Instruction
 {
+    // region Fields
     private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_III;
     private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
     public final String labelArgumentName = "JEConstantLabel";
     public final String constantArgumentName = "constantValue";
     private static int expandLevel = -1;
+    // endregion
 
+    // region Constructors
     public JumpEqualConstant(String mainVarName, Map<String, String> args, String labelName)
     {
         super(mainVarName, args, labelName);
         expandLevel = ProgramUtils.calculateExpandedLevel(this, expandLevel);
     }
+    // endregion
 
+    // region Architecture
     @Override
     public int getArchitectureCreditsCost() {
-        return 0;
+        return ARCHITECTURE_CREDITS_COST;
     }
 
     @Override
     public @NotNull ArchitectureType getArchitectureType() {
-        return null;
+        return ARCHITECTURE_TYPE;
     }
+    // endregion
 
+    // region Execution
     @Override
     public void execute(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException
     {
@@ -64,19 +71,9 @@ public class JumpEqualConstant extends Instruction
             throw new IllegalArgumentException("Invalid constant value: " + args.get(constantArgumentName));
         }
     }
+    // endregion
 
-    @Override
-    public int getCycles()
-    {
-        return 2;
-    }
-
-    @Override
-    public @NotNull CommandType getType()
-    {
-        return CommandType.SYNTHETIC;
-    }
-
+    // region Expansion
     @Override
     public @NotNull List<Instruction> expand(@NotNull Map<String, Integer> contextMap, int originalInstructionIndex)
     {
@@ -107,6 +104,18 @@ public class JumpEqualConstant extends Instruction
         }
         return instructions;
     }
+    // endregion
+
+    // region Info
+    @Override
+    public int getCycles() {
+        return 2;
+    }
+
+    @Override
+    public @NotNull CommandType getType() {
+        return CommandType.SYNTHETIC;
+    }
 
     @Override
     public int getExpandLevel()
@@ -131,5 +140,5 @@ public class JumpEqualConstant extends Instruction
         }
         return String.format("IF %s == %d GOTO %s", mainVarName, checkConstant, labelName);
     }
-
+    // endregion
 }
