@@ -17,8 +17,6 @@ public interface Command extends Serializable {
 
     @NotNull List<Instruction> expand(Map<String, Integer> contextMap, int originalInstructionIndex);
 
-    int getArchitectureCreditsCost();
-
     @NotNull ArchitectureType getArchitectureType();
 
     @NotNull String getStringRepresentation();

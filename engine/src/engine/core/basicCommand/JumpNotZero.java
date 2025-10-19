@@ -12,7 +12,7 @@ public class JumpNotZero extends Instruction
 {
     // region Constants
     private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_I;
-    private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
+
     public static final String labelArgumentName = "JNZLabel";
     private static final int expandLevel = 0;
     // endregion
@@ -31,10 +31,6 @@ public class JumpNotZero extends Instruction
     // endregion
 
     // region Architecture
-    @Override
-    public int getArchitectureCreditsCost() {
-        return ARCHITECTURE_CREDITS_COST;
-    }
 
     @Override
     public @NotNull ArchitectureType getArchitectureType() {

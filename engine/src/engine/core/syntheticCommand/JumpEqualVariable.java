@@ -17,7 +17,7 @@ public class JumpEqualVariable extends Instruction
 {
     // region Fields
     private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_III;
-    private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
+
     public static final String labelArgumentName = "JEVariableLabel";
     public static final String variableArgumentName = "variableName";
     private static int expandLevel;
@@ -37,10 +37,6 @@ public class JumpEqualVariable extends Instruction
     // endregion
 
     // region Architecture
-    @Override
-    public int getArchitectureCreditsCost() {
-        return ARCHITECTURE_CREDITS_COST;
-    }
 
     @Override
     public @NotNull ArchitectureType getArchitectureType() {

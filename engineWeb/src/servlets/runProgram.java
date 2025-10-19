@@ -30,7 +30,7 @@ public class runProgram extends HttpServlet {
         resp.setContentType("application/json");
         ServletUtils.runAndDebugParams runAndDebugParams;
         try {
-            runAndDebugParams = ServletUtils.getAndValidateRunAndDebugParams(req, resp);
+            runAndDebugParams = ServletUtils.getAndValidateRunAndDebugParams(req);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write("Error! " + e.getMessage());
@@ -41,7 +41,8 @@ public class runProgram extends HttpServlet {
         Engine currentEngine = runAndDebugParams.pm().getProgramOrFunctionEngine(programName);
         Map<String, Integer> args = runAndDebugParams.arguments();
         try {
-            ExecutionResultDTO executionResultDTO = currentEngine.run(expandLevel, args, user.getCurrentCredits());
+            ExecutionResultDTO executionResultDTO = currentEngine.run(
+                    expandLevel, args, user.getCurrentCredits(), runAndDebugParams.architectureType());
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.getWriter().write(gson.toJson(executionResultDTO));
             executionHistoryManager.addExecutionResult(

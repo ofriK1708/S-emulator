@@ -103,5 +103,19 @@
             </S-Instructions>
         </S-Function>
 
+        <S-Function name="Bigger_Equal_Than" user-string="&gt;=">
+            <S-Instructions>
+
+                <S-Instruction type="synthetic" name="QUOTE">
+                    <S-Variable>y</S-Variable>
+                    <S-Instruction-Arguments>
+                        <S-Instruction-Argument name="functionName" value="NOT"/>
+                        <S-Instruction-Argument name="functionArguments" value="(Smaller_Than,x1,x2)"/>
+                    </S-Instruction-Arguments>
+                </S-Instruction>
+
+            </S-Instructions>
+        </S-Function>
+
     </S-Functions>
 </S-Program>

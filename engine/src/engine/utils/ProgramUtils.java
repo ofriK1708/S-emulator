@@ -27,12 +27,6 @@ public class ProgramUtils {
         }
     };
 
-    public static int calculateTotalCreditsCost(@NotNull List<Instruction> instructions) {
-        return instructions.stream()
-                .mapToInt(Command::getArchitectureCreditsCost)
-                .sum();
-    }
-
     public static @NotNull ArchitectureType calcMinimumArchitectureLevelNeeded(@NotNull List<Instruction> instructions) {
         Optional<ArchitectureType> minimumArchNeeded = instructions.stream()
                 .map(Command::getArchitectureType)

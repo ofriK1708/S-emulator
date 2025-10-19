@@ -16,7 +16,7 @@ import java.io.IOException;
 public class expandProgram extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (!ServletUtils.isUserLoggedIn(req, getServletContext())) {
+        if (ServletUtils.isUserNotAuthenticated(req, getServletContext())) {
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.getWriter().write("Error! User is not logged in.");
             return;
@@ -25,7 +25,7 @@ public class expandProgram extends HttpServlet {
         resp.setContentType("application/json;charset=UTF-8");
         ServletUtils.expandParams expandParams;
         try {
-            expandParams = ServletUtils.getAndValidateExpandParams(req, resp);
+            expandParams = ServletUtils.getAndValidateExpandParams(req);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write("Error! " + e.getMessage());

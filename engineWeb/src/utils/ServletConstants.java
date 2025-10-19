@@ -16,6 +16,7 @@ public class ServletConstants {
     public static final String PROGRAM_RESULT = "programResult";
     public static final String WORK_VARS = "workVars";
     public static final String USER_MANAGER_ATTRIBUTE_NAME = "userManager";
+    public static final String ARCHITECTURE_TYPE_PARAM = "architectureType";
     public static final String USERNAME = "username";
     public static final String EXECUTION_HISTORY_MANAGER_ATTRIBUTE_NAME = "executionHistoryManager";
     public static final String DEBUG_ACTION_PARAM = "debugAction";
@@ -33,11 +34,13 @@ public class ServletConstants {
 
     public static String getAllProgramInfoOptionsNames() {
         return "[" +
+                BASIC_PROGRAM + ", " +
+                PROGRAM_BY_EXPAND_LEVEL + ", " +
                 MAX_EXPAND_LEVEL + ", " +
                 ALL_VARIABLES_AND_LABELS + ", " +
                 ARGUMENTS + ", " +
                 PROGRAM_RESULT + ", " +
-                WORK_VARS;
+                WORK_VARS + "]";
     }
 
 

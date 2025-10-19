@@ -16,7 +16,7 @@ public class GOTOLabel extends Instruction
 {
     // region Fields
     private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_II;
-    private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
+
     public static final String labelArgumentName = "gotoLabel";
     private static int expandLevel = -1;
     // endregion
@@ -37,10 +37,6 @@ public class GOTOLabel extends Instruction
     // endregion
 
     // region Architecture
-    @Override
-    public int getArchitectureCreditsCost() {
-        return ARCHITECTURE_CREDITS_COST;
-    }
 
     @Override
     public @NotNull ArchitectureType getArchitectureType() {

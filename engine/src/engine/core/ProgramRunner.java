@@ -50,11 +50,12 @@ public class ProgramRunner {
             } catch (IllegalArgumentException e) {
                 throw new RuntimeException("Error executing instruction at PC=" + currentPC + ": " + e.getMessage(), e);
             }
-            cyclesCounter += instruction.getCycles();
-            runningUserCredits -= instruction.getArchitectureCreditsCost();
-            if (runningUserCredits < 0) {
+            int creditCost = instruction.getCycles();
+            cyclesCounter += creditCost; // here 1 cycle = 1 credit
+            if (runningUserCredits < creditCost) {
                 throw new RuntimeException("Insufficient user credits to continue execution at PC=" + currentPC);
             }
+            runningUserCredits -= creditCost;
         }
         return new ExecutionResultValuesDTO(
                 executedContextMap.get(ProgramUtils.OUTPUT_NAME),

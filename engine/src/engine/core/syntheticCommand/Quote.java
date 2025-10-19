@@ -18,7 +18,7 @@ public class Quote extends Instruction {
     // region Fields
     public final static @NotNull String functionNameArgumentName = "functionName";
     private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_IV;
-    private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
+
     public final static @NotNull String functionArgumentsArgumentName = "functionArguments";
     private final @NotNull String enclosingFunctionName;
     private int quoteIndex = -1;
@@ -246,10 +246,6 @@ public class Quote extends Instruction {
     // endregion
 
     // region Getters & Setters
-    @Override
-    public int getArchitectureCreditsCost() {
-        return ARCHITECTURE_CREDITS_COST;
-    }
 
     @Override
     public @NotNull ArchitectureType getArchitectureType() {

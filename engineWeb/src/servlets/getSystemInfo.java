@@ -22,7 +22,7 @@ public class getSystemInfo extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (!ServletUtils.isUserLoggedIn(req, getServletContext())) {
+        if (ServletUtils.isUserNotAuthenticated(req, getServletContext())) {
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.getWriter().write("Error! User is not logged in.");
             return;

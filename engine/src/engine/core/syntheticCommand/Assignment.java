@@ -18,7 +18,7 @@ public class Assignment extends Instruction
 {
     // region Fields
     private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_III;
-    private static final int ARCHITECTURE_CREDITS_COST = ARCHITECTURE_TYPE.getCreditsCost();
+
     public static final String sourceArgumentName = "assignedVariable";
     private static int expandLevel = -1;
     // endregion
@@ -39,10 +39,6 @@ public class Assignment extends Instruction
     // endregion
 
     // region Architecture
-    @Override
-    public int getArchitectureCreditsCost() {
-        return ARCHITECTURE_CREDITS_COST;
-    }
 
     @Override
     public @NotNull ArchitectureType getArchitectureType() {

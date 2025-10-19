@@ -137,6 +137,15 @@ public class ProgramManager {
         }
     }
 
+    public boolean isFunctionOrProgramExists(String name) {
+        readLock.lock();
+        try {
+            return functionsAndPrograms.containsKey(name);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
     // endregion
     // region singleton pattern
     private static class ProgramManagerHolder {

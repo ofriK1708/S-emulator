@@ -27,17 +27,17 @@ public class getProgramInfo extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (!ServletUtils.isUserLoggedIn(req, getServletContext())) {
+        if (ServletUtils.isUserNotAuthenticated(req, getServletContext())) {
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.getWriter().write("Error! User is not logged in.");
             return;
         }
-        int expandLevel = -1;
+        int expandLevel = 0;
         Gson gson = new Gson();
         String programName = req.getParameter(PROGRAM_NAME_PARAM);
         String infoToGet = req.getParameter(INFO_PARAM);
         ProgramManager pm = ServletUtils.getProgramManager(req.getServletContext());
-        if (programName == null || programName.isEmpty() || !pm.isProgramExists(programName)) {
+        if (programName == null || programName.isEmpty()) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "programName parameter is missing or invalid");
             return;
         }

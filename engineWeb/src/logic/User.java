@@ -10,7 +10,7 @@ public class User {
     final String name;
     private int mainProgramsUploaded = 0;
     private int subFunctionsContributed = 0;
-    private int currentCredits = Integer.MIN_VALUE; // TODO - change this later to 0, only for testing
+    private int currentCredits = Integer.MAX_VALUE; // TODO - change this later to 0, only for testing
     private int usedCredits = 0;
     private int totalRuns = 0;
     private @Nullable ProgramDebugger debugger = null;

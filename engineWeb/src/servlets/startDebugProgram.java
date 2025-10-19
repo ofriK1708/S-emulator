@@ -19,7 +19,7 @@ public class startDebugProgram extends HttpServlet {
         ServletUtils.runAndDebugParams runAndDebugParams;
         try {
             runAndDebugParams =
-                    ServletUtils.getAndValidateRunAndDebugParams(req, resp);
+                    ServletUtils.getAndValidateRunAndDebugParams(req);
         } catch (Exception e) {
             return;
         }

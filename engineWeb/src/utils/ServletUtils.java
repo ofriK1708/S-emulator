@@ -3,9 +3,9 @@ package utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import engine.utils.ArchitectureType;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import logic.User;
 import logic.manager.ExecutionHistoryManager;
@@ -65,24 +65,24 @@ public class ServletUtils {
         return getUserManager(servletContext).getUser(username);
     }
 
-    public static boolean isUserLoggedIn(HttpServletRequest request, ServletContext servletContext) {
+    public static boolean isUserNotAuthenticated(HttpServletRequest request, ServletContext servletContext) {
         HttpSession session = request.getSession(false);
         if (session == null) {
-            return false;
+            return true;
         }
         String username = session.getAttribute(USERNAME) != null ? session.getAttribute(USERNAME).toString() : null;
         if (username == null) {
-            return false;
+            return true;
         }
         User user = getUserManager(servletContext).getUser(username);
-        return user != null;
+        return user == null;
     }
 
     /**
      * Extracts and validates 'programName' and 'expandLevel' from the request parameters.
      * Throws IllegalArgumentException with a user-friendly message if validation fails.
      */
-    public static @NotNull expandParams getAndValidateExpandParams(HttpServletRequest req, HttpServletResponse resp)
+    public static @NotNull expandParams getAndValidateExpandParams(HttpServletRequest req)
             throws IllegalArgumentException {
         String programName = req.getParameter(PROGRAM_NAME_PARAM);
         int expandLevel;
@@ -93,11 +93,11 @@ public class ServletUtils {
         }
 
         ProgramManager pm = ServletUtils.getProgramManager(req.getServletContext());
-        if (programName == null || programName.isEmpty() || !pm.isProgramExists(programName)) {
+        if (programName == null || programName.isEmpty()) {
             throw new IllegalArgumentException("The 'programName' parameter is missing.");
         }
 
-        if (!pm.isProgramExists(programName)) {
+        if (!pm.isFunctionOrProgramExists(programName)) {
             throw new IllegalArgumentException("A program with the name '" + programName + "' does not exist.");
         }
         return new expandParams(programName, expandLevel, pm);
@@ -108,17 +108,28 @@ public class ServletUtils {
      * and the 'arguments' map from the JSON request body.
      * Throws IllegalArgumentException with a user-friendly message if validation fails.
      */
-    public static @NotNull runAndDebugParams getAndValidateRunAndDebugParams(HttpServletRequest req,
-                                                                             HttpServletResponse resp)
+    public static @NotNull runAndDebugParams getAndValidateRunAndDebugParams(HttpServletRequest req)
             throws Exception { // Can still throw IOException
         Gson gson = new Gson();
         Type argumentsMapType = new TypeToken<Map<String, Integer>>() {
         }.getType();
 
-        // 1. Get query parameters first. This method now throws specific exceptions.
-        expandParams expParams = getAndValidateExpandParams(req, resp);
+        // 1. Get program name, expand level and program manager.
+        expandParams expParams = getAndValidateExpandParams(req);
 
-        // 2. Get arguments from the request body.
+        // 2. get architecture type
+        String architectureTypeStr = req.getParameter(ARCHITECTURE_TYPE_PARAM);
+        if (architectureTypeStr == null || architectureTypeStr.isEmpty()) {
+            throw new IllegalArgumentException("The 'architectureType' parameter is missing." +
+                    "the supported types are: " + ArchitectureType.getSupportedArchitectures());
+        }
+        if (!ArchitectureType.isValidArchitectureType(architectureTypeStr)) {
+            throw new IllegalArgumentException("The 'architectureType' parameter is invalid." +
+                    "the supported types are: " + ArchitectureType.getSupportedArchitectures());
+        }
+        ArchitectureType architectureType = ArchitectureType.fromString(architectureTypeStr);
+
+        // 3. Get arguments from the request body.
         Map<String, Integer> arguments;
         try (BufferedReader reader = req.getReader()) {
             arguments = gson.fromJson(reader, argumentsMapType);
@@ -131,13 +142,16 @@ public class ServletUtils {
         }
 
 
-        return new runAndDebugParams(expParams.programName, expParams.expandLevel, expParams.pm, arguments);
+        return new runAndDebugParams(expParams.programName, expParams.expandLevel, expParams.pm, arguments,
+                architectureType);
     }
 
     public record expandParams(@NotNull String programName, int expandLevel, @NotNull ProgramManager pm) {
     }
 
-    public record runAndDebugParams(@NotNull String programName, int expandLevel, @NotNull ProgramManager pm,
-                                    @NotNull Map<String, Integer> arguments) {
+    public record runAndDebugParams(@NotNull String programName, int expandLevel,
+                                    @NotNull ProgramManager pm,
+                                    @NotNull Map<String, Integer> arguments,
+                                    @NotNull ArchitectureType architectureType) {
     }
 }

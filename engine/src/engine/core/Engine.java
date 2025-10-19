@@ -6,6 +6,7 @@ import engine.exception.FunctionNotFound;
 import engine.exception.LabelNotExist;
 import engine.generated_2.SFunction;
 import engine.generated_2.SProgram;
+import engine.utils.ArchitectureType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -110,8 +111,9 @@ public class Engine {
         return instructionSequence.isVariableInContext(varName);
     }
 
-    public @NotNull ExecutionResultDTO run(int expandLevel, @NotNull Map<String, Integer> arguments, int userCredits) {
-        validateRunPossibility(expandLevel, userCredits);
+    public @NotNull ExecutionResultDTO run(int expandLevel, @NotNull Map<String, Integer> arguments, int userCredits,
+                                           @NotNull ArchitectureType architectureType) {
+        userCredits -= validateRunPossibilityAndGetArchCost(expandLevel, architectureType);
         List<Instruction> executedInstructions = instructionSequence.getInstructionsCopy(expandLevel);
         Map<String, Integer> executedMap = instructionSequence.getContextMapCopy(expandLevel);
         ProgramRunner runner = ProgramRunner.createFrom(executedInstructions, executedMap, userCredits);
@@ -124,10 +126,17 @@ public class Engine {
                 instructionSequence.getMinimumArchitectureTypeNeededAtExpandLevel(expandLevel));
     }
 
-    private void validateRunPossibility(int expandLevel, int userCredits) {
+    private int validateRunPossibilityAndGetArchCost(int expandLevel, @NotNull ArchitectureType architectureType) {
         if (expandLevel < 0 || expandLevel > instructionSequence.getMaxExpandLevel()) {
             throw new IllegalArgumentException("Invalid expand level: " + expandLevel);
         }
+        ArchitectureType requiredArchitecture = instructionSequence.
+                getMinimumArchitectureTypeNeededAtExpandLevel(expandLevel);
+        if (architectureType.compareTo(requiredArchitecture) < 0) {
+            throw new IllegalArgumentException("Insufficient architecture type. Required: "
+                    + requiredArchitecture.getSymbol() + ", Provided: " + architectureType.getSymbol());
+        }
+        return architectureType.getCreditsCost();
     }
 
     /**
@@ -137,7 +146,7 @@ public class Engine {
      * @return an ExecutionResultDTO containing the results of the execution
      */
     public ExecutionResultDTO run(@NotNull Map<String, Integer> arguments) {
-        return run(0, arguments, Integer.MAX_VALUE);
+        return run(0, arguments, Integer.MAX_VALUE, ArchitectureType.INNER_RUN_ARCHITECTURE);
     }
 
     private float calcAverageCredits(int latestRunCreditsCost) {
