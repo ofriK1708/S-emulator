@@ -9,7 +9,10 @@ import java.util.Objects;
 //import static utils.ServletConstants.*;
 
 public class Requests {
-    private final static OkHttpClient HTTP_CLIENT = new OkHttpClient.Builder().build();
+    private final static SimpleCookieManager cookieManager = new SimpleCookieManager();
+    private final static OkHttpClient HTTP_CLIENT = new OkHttpClient.Builder()
+            .cookieJar(cookieManager)
+            .build();
     private static final String INFO_PARAM = "info";
     private static final String PROGRAM_NAME_PARAM = "programName";
     private static final String EXPAND_LEVEL_PARAM = "expandLevel";

@@ -18,15 +18,19 @@ public class ExecutionHistoryManager {
     private final @NotNull Map<String, List<ExecutionResultStatisticsDTO>> userToExecutionHistory = new HashMap<>();
     private final @NotNull Map<String, List<ExecutionResultStatisticsDTO>> programToExecutionHistory = new HashMap<>();
     // endregion
+
     // region read-write locks
     private final @NotNull ReadWriteLock executionHistoryLock = new ReentrantReadWriteLock();
     private final @NotNull Lock readLock = executionHistoryLock.readLock();
     private final @NotNull Lock writeLock = executionHistoryLock.writeLock();
+    // endregion
 
-    /**
-     * Private constructor to prevent instantiation from outside the class.
-     */
+    // region singleton pattern
     private ExecutionHistoryManager() {
+    }
+
+    private static class ExecutionHistoryManagerHolder {
+        private static final ExecutionHistoryManager INSTANCE = new ExecutionHistoryManager();
     }
 
     /**
@@ -37,9 +41,10 @@ public class ExecutionHistoryManager {
     public static ExecutionHistoryManager getInstance() {
         return ExecutionHistoryManagerHolder.INSTANCE;
     }
-
     // endregion
+
     // region execution history management methods
+
     public void addExecutionResult(String username, String programName,
                                    ExecutionResultStatisticsDTO executionResultStatisticsDTO) {
         writeLock.lock();
@@ -89,12 +94,6 @@ public class ExecutionHistoryManager {
         } finally {
             readLock.unlock();
         }
-    }
-
-    // endregion
-    // region singleton pattern
-    private static class ExecutionHistoryManagerHolder {
-        private static final ExecutionHistoryManager INSTANCE = new ExecutionHistoryManager();
     }
     // endregion
 

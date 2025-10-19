@@ -55,14 +55,15 @@ public class ProgramManager {
      */
     public void addProgram(String programName, SProgram sProgram, String userName)
             throws LabelNotExist, FunctionNotFound, FunctionAlreadyExist {
+        Engine mainProgramEngine = Engine.createMainProgramEngine(sProgram, functionsAndPrograms, userName);
+        mainProgramEngine.addProgramAndFunctionsToSystem(functionsAndPrograms, functions);
         writeLock.lock();
         try {
-            Engine mainProgramEngine = Engine.createMainProgramEngine(sProgram, functionsAndPrograms, userName);
-            mainProgramEngine.addProgramAndFunctionsToSystem(functionsAndPrograms, functions);
             programs.put(programName, mainProgramEngine);
         } finally {
             writeLock.unlock();
         }
+
 
     }
     // endregion
