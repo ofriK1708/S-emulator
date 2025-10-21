@@ -8,7 +8,6 @@ import engine.generated_2.SProgram;
 import engine.utils.ArchitectureType;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,9 +25,6 @@ import static engine.utils.ProgramUtils.extractAllVariables;
  */
 final class InstructionSequence {
     // region Fields
-    private final @Nullable SProgram sProgram;
-    private final @Nullable SFunction sFunction;
-    private final @NotNull FunctionManager functionManager;
     private final Map<String, Integer> originalContextMap = new HashMap<>();
     private final @NotNull List<Instruction> originalInstructions;
     private final @NotNull Set<String> originalLabels;
@@ -49,16 +45,10 @@ final class InstructionSequence {
      * @throws LabelNotExist if a label referenced in the instructions does not exist.
      */
     private InstructionSequence(@NotNull List<Instruction> originalInstructions,
-                                @NotNull Set<String> originalLabels,
-                                @NotNull FunctionManager functionManager,
-                                @Nullable SProgram sProgram,
-                                @Nullable SFunction sFunction)
+                                @NotNull Set<String> originalLabels)
             throws LabelNotExist {
         this.originalInstructions = List.copyOf(originalInstructions);
         this.originalLabels = originalLabels;
-        this.functionManager = functionManager;
-        this.sProgram = sProgram;
-        this.sFunction = sFunction;
         continueInitialization();
     }
 
@@ -83,8 +73,7 @@ final class InstructionSequence {
         ParsedComponents components = parseRawInstructions(sProgram.getSInstructions().getSInstruction(),
                 functionManager, sProgram.getName());
 
-        return new InstructionSequence(components.originalInstructions(), components.originalLabels(), functionManager
-                , sProgram, null);
+        return new InstructionSequence(components.originalInstructions(), components.originalLabels());
     }
 
     public static @NotNull InstructionSequence createFrom(@NotNull SFunction sFunction,
@@ -93,8 +82,7 @@ final class InstructionSequence {
         ParsedComponents components = parseRawInstructions(sFunction.getSInstructions().getSInstruction(),
                 functionManager, sFunction.getUserString());
 
-        return new InstructionSequence(components.originalInstructions(), components.originalLabels(), functionManager,
-                null, sFunction);
+        return new InstructionSequence(components.originalInstructions(), components.originalLabels());
     }
 
     private static @NotNull ParsedComponents parseRawInstructions(@NotNull List<SInstruction> rawInstructions,
@@ -265,26 +253,6 @@ final class InstructionSequence {
         return new ArrayList<>(instructionExpansionLevels.get(expandLevel));
     }
 
-    private @NotNull List<Instruction> getInstructionsDeepCopy(int expandLevel) {
-        if (expandLevel < 0 || expandLevel >= instructionExpansionLevels.size()) {
-            throw new IllegalArgumentException("Invalid expand level: " + expandLevel);
-        }
-        try {
-            if (sProgram != null) {
-                InstructionSequence temp = InstructionSequence.createFrom(sProgram, functionManager);
-                temp.finalizeInitialization();
-                return temp.getInstructionsCopy(expandLevel);
-            }
-            if (sFunction != null) {
-                InstructionSequence temp = InstructionSequence.createFrom(sFunction, functionManager);
-                temp.finalizeInitialization();
-                return temp.getInstructionsCopy(expandLevel);
-            }
-        } catch (Exception ignored) {
-        }
-        return new ArrayList<>(instructionExpansionLevels.get(expandLevel));
-    }
-
     public @NotNull List<Instruction> getBasicInstructionsCopy() {
         return getInstructionsCopy(0);
     }
@@ -313,7 +281,7 @@ final class InstructionSequence {
 
     public @NotNull ProgramExecutable getProgramExecutableAtExpandLevel(int expandLevel) {
         return new ProgramExecutable(
-                getInstructionsDeepCopy(expandLevel),
+                getInstructionsCopy(expandLevel),
                 getContextMapCopy(expandLevel)
         );
     }

@@ -7,6 +7,7 @@ import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +48,7 @@ public class ProgramRunner {
             int currentPC = executedContextMap.get(PC_NAME);
             Instruction instruction = executedInstructions.get(currentPC);
             try {
-                int instructionCreditsCost = instruction.getCycles();
+                int instructionCreditsCost = calcCreditCost(instruction, executedContextMap);
                 if (runningUserCredits < instructionCreditsCost) {
                     throw new InsufficientCredits("Insufficient credits to execute instruction" +
                             instruction.getStringRepresentation() + " at PC=" + currentPC, runningUserCredits,
@@ -74,4 +75,11 @@ public class ProgramRunner {
     public ExecutionResultValuesDTO run(@NotNull Map<String, Integer> arguments) {
         return run(0, arguments);
     }
+
+    private int calcCreditCost(Instruction instruction, Map<String, Integer> contextMap) {
+        Map<String, Integer> tempContext = new HashMap<>(contextMap);
+        instruction.execute(tempContext); // preform a dry run to calc dynamic instructions cost
+        return instruction.getCycles();
+    }
 }
+
