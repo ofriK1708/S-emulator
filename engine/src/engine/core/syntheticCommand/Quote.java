@@ -268,7 +268,7 @@ public class Quote extends Instruction {
 
     public int getFunctionCycles() {
         if (isFinishedInitialization) {
-            return executedCycles + calcSubFunctionCycles();
+            return executedCycles;
         }
         return 0; // not initialized yet
     }
@@ -333,7 +333,7 @@ public class Quote extends Instruction {
     // region Private methods
     private int calcSubFunctionCycles() {
         return subfunctionCalls.stream()
-                .mapToInt(Quote::getCycles)
+                .mapToInt(Quote::getExecutedCycles)
                 .sum();
     }
     // endregion
