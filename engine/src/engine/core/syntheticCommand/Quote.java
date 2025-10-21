@@ -162,7 +162,7 @@ public class Quote extends Instruction {
         Map<String, Integer> functionToRunNeededArguments = functionToRun.getSortedArgumentsMap();
         prepareArguments(functionToRunNeededArguments, arguments);
         FullExecutionResultDTO result = functionToRun.run(functionToRunNeededArguments);
-        executedCycles = result.cycleCount() + calcSubFunctionCycles();
+        executedCycles = result.cycleCount();
         return result.output();
     }
 
@@ -261,7 +261,7 @@ public class Quote extends Instruction {
     public int getCycles() {
         if (isFinishedInitialization) {
             final int quoteOverhead = 5;
-            return quoteOverhead + executedCycles;
+            return quoteOverhead + executedCycles + calcSubFunctionCycles();
         }
         return 0; // not initialized yet
     }
