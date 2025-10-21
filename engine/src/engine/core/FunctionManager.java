@@ -14,6 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Manages functions defined within a program.
+ * Responsible for building function engines, checking for name conflicts,
+ * and initializing quotes that reference functions.
+ */
 public class FunctionManager {
     private final @NotNull Engine mainProgramEngine;
     private final @NotNull String mainProgramName;
@@ -134,10 +139,6 @@ public class FunctionManager {
         functionsInSystem.putAll(functionsInCurrentProgram);
     }
 
-    public @NotNull String getMainProgramName() {
-        return mainProgramName;
-    }
-
     /**
      * Get a function by its name. First checks in current program's functions,
      * then in the server-wide functions.
@@ -149,5 +150,9 @@ public class FunctionManager {
     public @Nullable Engine getFunction(@NotNull String programName) {
         return functionsInCurrentProgram.getOrDefault(programName,
                 allFunctionsAndProgramsInSystem.get(programName));
+    }
+
+    public int getFunctionCount() {
+        return functionsInCurrentProgram.size();
     }
 }

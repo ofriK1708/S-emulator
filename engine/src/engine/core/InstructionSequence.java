@@ -8,22 +8,27 @@ import engine.generated_2.SProgram;
 import engine.utils.ArchitectureType;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static engine.utils.ProgramUtils.EXIT_LABEL_NAME;
-import static engine.utils.ProgramUtils.extractAllVariableAndLabelNamesUnsorted;
+import static engine.utils.ProgramUtils.extractAllVariables;
 
 /**
- * Represents the final, read-only sequence of executable instructions for a program or function.
+ * A {@code package-private} class that represents the final, read-only sequence of executable instructions for a
+ * program or function.
  * <p>
  * This class is immutable. It's created once from an {@link SProgram} and an existing
- * set of functions. During creation, it crated all the instructions from all the expand levels.
+ * set of functions. During creation, it created all the instructions from all the expand levels.
  * </p>
  */
-public final class InstructionSequence {
+final class InstructionSequence {
     // region Fields
+    private final @Nullable SProgram sProgram;
+    private final @Nullable SFunction sFunction;
+    private final @NotNull FunctionManager functionManager;
     private final Map<String, Integer> originalContextMap = new HashMap<>();
     private final @NotNull List<Instruction> originalInstructions;
     private final @NotNull Set<String> originalLabels;
@@ -43,11 +48,17 @@ public final class InstructionSequence {
      * @param originalLabels       The set of labels defined in the original instructions.
      * @throws LabelNotExist if a label referenced in the instructions does not exist.
      */
-    private InstructionSequence(@NotNull List<Instruction> originalInstructions, @NotNull Set<String> originalLabels,
-                                @NotNull String functionName)
+    private InstructionSequence(@NotNull List<Instruction> originalInstructions,
+                                @NotNull Set<String> originalLabels,
+                                @NotNull FunctionManager functionManager,
+                                @Nullable SProgram sProgram,
+                                @Nullable SFunction sFunction)
             throws LabelNotExist {
         this.originalInstructions = List.copyOf(originalInstructions);
         this.originalLabels = originalLabels;
+        this.functionManager = functionManager;
+        this.sProgram = sProgram;
+        this.sFunction = sFunction;
         continueInitialization();
     }
 
@@ -72,8 +83,8 @@ public final class InstructionSequence {
         ParsedComponents components = parseRawInstructions(sProgram.getSInstructions().getSInstruction(),
                 functionManager, sProgram.getName());
 
-        return new InstructionSequence(components.originalInstructions(), components.originalLabels(),
-                sProgram.getName());
+        return new InstructionSequence(components.originalInstructions(), components.originalLabels(), functionManager
+                , sProgram, null);
     }
 
     public static @NotNull InstructionSequence createFrom(@NotNull SFunction sFunction,
@@ -82,8 +93,8 @@ public final class InstructionSequence {
         ParsedComponents components = parseRawInstructions(sFunction.getSInstructions().getSInstruction(),
                 functionManager, sFunction.getUserString());
 
-        return new InstructionSequence(components.originalInstructions(), components.originalLabels(),
-                sFunction.getUserString());
+        return new InstructionSequence(components.originalInstructions(), components.originalLabels(), functionManager,
+                null, sFunction);
     }
 
     private static @NotNull ParsedComponents parseRawInstructions(@NotNull List<SInstruction> rawInstructions,
@@ -194,6 +205,7 @@ public final class InstructionSequence {
         }
     }
 
+
     private boolean validateLabel(String labelName) {
         return originalLabels.contains(labelName);
     }
@@ -253,6 +265,26 @@ public final class InstructionSequence {
         return new ArrayList<>(instructionExpansionLevels.get(expandLevel));
     }
 
+    private @NotNull List<Instruction> getInstructionsDeepCopy(int expandLevel) {
+        if (expandLevel < 0 || expandLevel >= instructionExpansionLevels.size()) {
+            throw new IllegalArgumentException("Invalid expand level: " + expandLevel);
+        }
+        try {
+            if (sProgram != null) {
+                InstructionSequence temp = InstructionSequence.createFrom(sProgram, functionManager);
+                temp.finalizeInitialization();
+                return temp.getInstructionsCopy(expandLevel);
+            }
+            if (sFunction != null) {
+                InstructionSequence temp = InstructionSequence.createFrom(sFunction, functionManager);
+                temp.finalizeInitialization();
+                return temp.getInstructionsCopy(expandLevel);
+            }
+        } catch (Exception ignored) {
+        }
+        return new ArrayList<>(instructionExpansionLevels.get(expandLevel));
+    }
+
     public @NotNull List<Instruction> getBasicInstructionsCopy() {
         return getInstructionsCopy(0);
     }
@@ -265,7 +297,7 @@ public final class InstructionSequence {
         if (expandLevel < 0 || expandLevel >= labelsByExpandLevel.size()) {
             throw new IllegalArgumentException("Expand level out of bounds");
         }
-        return extractAllVariableAndLabelNamesUnsorted(contextMapsByExpandLevel.get(expandLevel), includeLabels);
+        return extractAllVariables(contextMapsByExpandLevel.get(expandLevel), includeLabels);
     }
 
     public @NotNull Map<String, Integer> getSortedArgumentsMap(int expandLevel) {
@@ -277,6 +309,13 @@ public final class InstructionSequence {
             throw new IllegalArgumentException("Expand level out of bounds");
         }
         return ProgramUtils.extractSortedWorkVars(contextMapsByExpandLevel.get(expandLevel));
+    }
+
+    public @NotNull ProgramExecutable getProgramExecutableAtExpandLevel(int expandLevel) {
+        return new ProgramExecutable(
+                getInstructionsDeepCopy(expandLevel),
+                getContextMapCopy(expandLevel)
+        );
     }
 
     public int getMaxExpandLevel() {
@@ -293,6 +332,7 @@ public final class InstructionSequence {
     public ArchitectureType getMinimumArchitectureTypeNeededAtExpandLevel(int expandLevel) {
         return minimumArchitectureTypeNeededByExpandLevel.get(expandLevel);
     }
+
     // endregion
 
     // region Inner Classes

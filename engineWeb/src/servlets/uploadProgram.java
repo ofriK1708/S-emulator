@@ -50,7 +50,7 @@ public class uploadProgram extends HttpServlet {
                 } else {
                     try {
                         // Validate sProgram by trying to create an engine - check for label not exists, etc.
-                        programManager.addProgram(programName, sProgram, user.getName());
+                        programManager.addProgram(programName, sProgram, user);
                         resp.setStatus(HttpServletResponse.SC_OK);
                         resp.setContentType("application/json");
                         LoadProgramResultDTO resultDTO = new LoadProgramResultDTO(

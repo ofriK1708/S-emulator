@@ -7,6 +7,7 @@ import engine.exception.FunctionAlreadyExist;
 import engine.exception.FunctionNotFound;
 import engine.exception.LabelNotExist;
 import engine.generated_2.SProgram;
+import logic.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -53,10 +54,12 @@ public class ProgramManager {
      * @throws FunctionNotFound     if a function called in the program is not found either locally or globally
      * @throws FunctionAlreadyExist if a function being added already exists in the system
      */
-    public void addProgram(String programName, SProgram sProgram, String userName)
+    public void addProgram(String programName, SProgram sProgram, User user)
             throws LabelNotExist, FunctionNotFound, FunctionAlreadyExist {
-        Engine mainProgramEngine = Engine.createMainProgramEngine(sProgram, functionsAndPrograms, userName);
+        Engine mainProgramEngine = Engine.createMainProgramEngine(sProgram, functionsAndPrograms, user.getName());
         mainProgramEngine.addProgramAndFunctionsToSystem(functionsAndPrograms, functions);
+        user.incrementMainProgramsUploaded();
+        user.addFunctionsCount(mainProgramEngine.getFunctionsCount());
         writeLock.lock();
         try {
             programs.put(programName, mainProgramEngine);

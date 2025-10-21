@@ -20,11 +20,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static engine.utils.ProgramUtils.PC_NAME;
+
 public abstract class Instruction implements Command {
     protected String mainVarName;
     protected final Map<String, String> args;
     protected @NotNull String label;
-    protected final static String ProgramCounterName = "PC";
     protected @Nullable Instruction derivedFrom = null;
     protected int derivedFromIndex;
 
@@ -125,7 +126,7 @@ public abstract class Instruction implements Command {
     }
 
     protected void incrementProgramCounter(@NotNull Map<String, Integer> contextMap) {
-        contextMap.put(ProgramCounterName, contextMap.get(ProgramCounterName) + 1);
+        contextMap.put(PC_NAME, contextMap.get(PC_NAME) + 1);
     }
 
     private @NotNull List<InstructionDTO> getDerivedInstructions() {
@@ -193,7 +194,7 @@ public abstract class Instruction implements Command {
         String endLabel = ProgramUtils.getNextFreeLabelName(mainContextMap);
         allReplacements.put(ProgramUtils.EXIT_LABEL_NAME, endLabel);
 
-        // now we can go and replace all the old variables with new ones, after we made sure they won't mix
+        // now we can go and replace all the old workVariables with new ones, after we made sure they won't mix
         //noinspection DataFlowIssue
         for (Instruction instruction : functionInstructions) {
             // first we set the derived from info
@@ -282,7 +283,7 @@ public abstract class Instruction implements Command {
     ) {
 
         for (Map.Entry<String, String> argsEntry : instruction.getArgs().entrySet()) {
-            // special case for quote in argument, we need to extract all the variables from the arguments and
+            // special case for quote in argument, we need to extract all the workVariables from the arguments and
             // replace them all
             if (argsEntry.getKey().equals(Quote.functionArgumentsArgumentName)) {
                 Quote currentInstructionAsQuote = (Quote) instruction;

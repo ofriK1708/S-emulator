@@ -1,6 +1,6 @@
 package engine.core.syntheticCommand;
 
-import dto.engine.ExecutionResultDTO;
+import dto.engine.FullExecutionResultDTO;
 import engine.core.Engine;
 import engine.core.FunctionManager;
 import engine.core.Instruction;
@@ -157,10 +157,11 @@ public class Quote extends Instruction {
     }
 
     public int executeAndGetResult(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException {
+        executedCycles = 0;
         List<Integer> arguments = getArgumentsValues(contextMap);
         Map<String, Integer> functionToRunNeededArguments = functionToRun.getSortedArgumentsMap();
         prepareArguments(functionToRunNeededArguments, arguments);
-        ExecutionResultDTO result = functionToRun.run(functionToRunNeededArguments);
+        FullExecutionResultDTO result = functionToRun.run(functionToRunNeededArguments);
         executedCycles = result.cycleCount();
         return result.output();
     }
@@ -332,7 +333,7 @@ public class Quote extends Instruction {
     // region Private methods
     private int calcSubFunctionCycles() {
         return subfunctionCalls.stream()
-                .mapToInt(Quote::getExecutedCycles)
+                .mapToInt(Quote::getCycles)
                 .sum();
     }
     // endregion

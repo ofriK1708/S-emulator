@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Map;
 
+import static engine.utils.ProgramUtils.PC_NAME;
+
 public class JumpNotZero extends Instruction
 {
     // region Constants
@@ -49,7 +51,7 @@ public class JumpNotZero extends Instruction
             int labelLineNumber = contextMap.get(labelName);
             if (value != 0)
             {
-                contextMap.put(ProgramCounterName, labelLineNumber);
+                contextMap.put(PC_NAME, labelLineNumber);
             } else
             {
                 incrementProgramCounter(contextMap);

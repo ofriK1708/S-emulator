@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static engine.utils.ProgramUtils.PC_NAME;
+
 public class JumpEqualFunction extends Instruction {
     // region Fields
     private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_IV;
@@ -50,7 +52,7 @@ public class JumpEqualFunction extends Instruction {
             if (mainVarValue != functionQuoteToCheck.executeAndGetResult(contextMap)) {
                 incrementProgramCounter(contextMap);
             } else {
-                contextMap.put(ProgramCounterName, labelLineNumber);
+                contextMap.put(PC_NAME, labelLineNumber);
             }
         } else {
             throw new IllegalArgumentException("No such label : " + labelName);

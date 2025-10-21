@@ -111,7 +111,7 @@ public class HttpEngineController implements EngineController {
     public ProgramDTO getBasicProgram() throws IOException {
         validateProgramLoaded();
         try (Response response = Requests.getProgramInfoSync(Endpoints.GET_PROGRAM_INFO,
-                BASIC_PROGRAM, currentLoadedProgramName)) {
+                BASIC_PROGRAM_INFO, currentLoadedProgramName)) {
             if (response.isSuccessful()) {
                 validateResponseBodyNotNull(response);
                 //noinspection DataFlowIssue
@@ -126,7 +126,7 @@ public class HttpEngineController implements EngineController {
     public int getMaxExpandLevel() {
         validateProgramLoaded();
         try (Response response = Requests.getProgramInfoSync(
-                Endpoints.GET_PROGRAM_INFO, MAX_EXPAND_LEVEL, currentLoadedProgramName)) {
+                Endpoints.GET_PROGRAM_INFO, MAX_EXPAND_LEVEL_INFO, currentLoadedProgramName)) {
             if (response.isSuccessful()) {
                 validateResponseBodyNotNull(response);
                 //noinspection DataFlowIssue
@@ -160,7 +160,7 @@ public class HttpEngineController implements EngineController {
     public @NotNull ProgramDTO getProgramByExpandLevel(int expandLevel) {
         validateProgramLoaded();
         try (Response response = Requests.getProgramInfoSync(Endpoints.GET_PROGRAM_INFO,
-                PROGRAM_BY_EXPAND_LEVEL, currentLoadedProgramName, expandLevel)) {
+                PROGRAM_BY_EXPAND_LEVEL_INFO, currentLoadedProgramName, expandLevel)) {
             if (response.isSuccessful()) {
                 validateResponseBodyNotNull(response);
                 //noinspection DataFlowIssue
@@ -178,13 +178,13 @@ public class HttpEngineController implements EngineController {
     public @NotNull Set<String> getAllVariablesAndLabelsNames(int expandLevel, boolean includeLabels) {
         validateProgramLoaded();
         try (Response response = Requests.getProgramInfoSync(Endpoints.GET_PROGRAM_INFO,
-                ALL_VARIABLES_AND_LABELS, currentLoadedProgramName, expandLevel)) {
+                ALL_VARIABLES_AND_LABELS_INFO, currentLoadedProgramName, expandLevel)) {
             if (response.isSuccessful()) {
                 validateResponseBodyNotNull(response);
                 //noinspection DataFlowIssue
                 return gson.fromJson(response.body().string(), ALL_VARS_NAMES_SET_TYPE);
             } else {
-                throw new IOException("Failed to get all variables and labels names: " + response.body());
+                throw new IOException("Failed to get all workVariables and labels names: " + response.body());
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -195,7 +195,7 @@ public class HttpEngineController implements EngineController {
     public @NotNull Map<String, Integer> getSortedArguments(int expandLevel) {
         validateProgramLoaded();
         try (Response response = Requests.getProgramInfoSync(Endpoints.GET_PROGRAM_INFO,
-                ARGUMENTS, currentLoadedProgramName, expandLevel)) {
+                ARGUMENTS_INFO, currentLoadedProgramName, expandLevel)) {
             if (response.isSuccessful()) {
                 validateResponseBodyNotNull(response);
                 //noinspection DataFlowIssue
@@ -218,7 +218,7 @@ public class HttpEngineController implements EngineController {
     public @NotNull Integer getProgramResult(int expandLevel) {
         validateProgramLoaded();
         try (Response response = Requests.getProgramInfoSync(Endpoints.GET_PROGRAM_INFO,
-                PROGRAM_RESULT, currentLoadedProgramName, expandLevel)) {
+                PROGRAM_RESULT_INFO, currentLoadedProgramName, expandLevel)) {
             if (response.isSuccessful()) {
                 validateResponseBodyNotNull(response);
                 //noinspection DataFlowIssue
@@ -235,7 +235,7 @@ public class HttpEngineController implements EngineController {
     public @NotNull Map<String, Integer> getWorkVars(int expandLevel) {
         validateProgramLoaded();
         try (Response response = Requests.getProgramInfoSync(Endpoints.GET_PROGRAM_INFO,
-                WORK_VARS, currentLoadedProgramName, expandLevel)) {
+                WORK_VARS_INFO, currentLoadedProgramName, expandLevel)) {
             if (response.isSuccessful()) {
                 validateResponseBodyNotNull(response);
                 //noinspection DataFlowIssue

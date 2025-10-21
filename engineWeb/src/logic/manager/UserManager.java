@@ -1,13 +1,11 @@
 package logic.manager;
 
+import dto.engine.ExecutionResultStatisticsDTO;
 import dto.server.UserDTO;
 import logic.User;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -23,6 +21,23 @@ public class UserManager {
     private final Lock readLock = usersLock.readLock();
 
     /**
+     * Get all users in the system.
+     * return an order set based on insertion order (the order in which users were registered)
+     *
+     * @return a set of all user DTOs
+     */
+    public @NotNull Set<UserDTO> getAllUsersDTO() {
+        readLock.lock();
+        try {
+            return users.values().stream()
+                    .map(User::getUserDTO)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    /**
      * Private constructor to prevent instantiation from outside the class.
      */
     private UserManager() {
@@ -35,12 +50,6 @@ public class UserManager {
      */
     public static UserManager getInstance() {
         return UserManagerHolder.INSTANCE;
-    }
-
-    // endregion
-    // region singleton pattern
-    private static class UserManagerHolder {
-        private static final UserManager INSTANCE = new UserManager();
     }
     // endregion
     // region user management methods
@@ -84,21 +93,25 @@ public class UserManager {
         }
     }
 
-    /**
-     * Get all users in the system.
-     * return an order set based on insertion order (the order in which users were registered)
-     *
-     * @return a set of all user DTOs
-     */
-    public @NotNull Set<UserDTO> getAllUsers() {
+    public @NotNull List<ExecutionResultStatisticsDTO> getUserStatisticsDTO(String username) {
         readLock.lock();
         try {
-            return users.values().stream()
-                    .map(User::getUserDTO)
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            User user = users.get(username);
+            ExecutionHistoryManager ehm = ExecutionHistoryManager.getInstance();
+            if (user != null) {
+                return ehm.getUserExecutionHistory(username);
+            } else {
+                throw new IllegalArgumentException("User not found: " + username);
+            }
         } finally {
             readLock.unlock();
         }
+    }
+
+    // endregion
+    // region singleton pattern
+    private static class UserManagerHolder {
+        private static final UserManager INSTANCE = new UserManager();
     }
     // endregion
 }

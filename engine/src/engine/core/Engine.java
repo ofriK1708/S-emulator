@@ -1,9 +1,7 @@
 package engine.core;
 
 import dto.engine.*;
-import engine.exception.FunctionAlreadyExist;
-import engine.exception.FunctionNotFound;
-import engine.exception.LabelNotExist;
+import engine.exception.*;
 import engine.generated_2.SFunction;
 import engine.generated_2.SProgram;
 import engine.utils.ArchitectureType;
@@ -16,6 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * The Engine class represents a program engine that can execute SPrograms and SFunctions.
+ * It manages the instruction sequence, function management, and execution of the program or function.
+ * <p>
+ * It provides methods to run the program/function, start debugging sessions, and retrieve program metadata.
+ * </p>
+ */
 public class Engine {
 
     private final String programName;
@@ -106,37 +111,52 @@ public class Engine {
                 functionsInSystem);
     }
 
+    public int getFunctionsCount() {
+        return functionManager.getFunctionCount();
+    }
+
 
     public boolean isVariableInContext(String varName) {
         return instructionSequence.isVariableInContext(varName);
     }
 
-    public @NotNull ExecutionResultDTO run(int expandLevel, @NotNull Map<String, Integer> arguments, int userCredits,
-                                           @NotNull ArchitectureType architectureType) {
-        userCredits -= validateRunPossibilityAndGetArchCost(expandLevel, architectureType);
-        List<Instruction> executedInstructions = instructionSequence.getInstructionsCopy(expandLevel);
-        Map<String, Integer> executedMap = instructionSequence.getContextMapCopy(expandLevel);
-        ProgramRunner runner = ProgramRunner.createFrom(executedInstructions, executedMap, userCredits);
+    public @NotNull FullExecutionResultDTO run(int expandLevel, @NotNull Map<String, Integer> arguments,
+                                               int userCredits,
+                                               @NotNull ArchitectureType architectureType)
+            throws ExpandLevelOutOfBounds, IllegalArchitectureType, InsufficientCredits {
+        validateRunPossibility(expandLevel, userCredits, architectureType);
+        ProgramExecutable executable = instructionSequence.getProgramExecutableAtExpandLevel(expandLevel);
+        ProgramRunner runner = ProgramRunner.createFrom(executable, userCredits);
         ExecutionResultValuesDTO valuesResult = runner.run(expandLevel, arguments);
         averageCreditsCost = calcAverageCredits(valuesResult.creditsCost());
         numberOfExecutions++;
 
-        return ExecutionResultDTO.from(
+        return FullExecutionResultDTO.from(
                 valuesResult, isMainProgram(), getRepresentationName(),
-                instructionSequence.getMinimumArchitectureTypeNeededAtExpandLevel(expandLevel));
+                architectureType);
     }
 
-    private int validateRunPossibilityAndGetArchCost(int expandLevel, @NotNull ArchitectureType architectureType) {
+    private void validateRunPossibility(int expandLevel, int userCredits,
+                                        @NotNull ArchitectureType architectureType)
+            throws ExpandLevelOutOfBounds, IllegalArchitectureType, InsufficientCredits {
         if (expandLevel < 0 || expandLevel > instructionSequence.getMaxExpandLevel()) {
-            throw new IllegalArgumentException("Invalid expand level: " + expandLevel);
+            throw new ExpandLevelOutOfBounds("Expanding level out of bounds: ", expandLevel, 0,
+                    instructionSequence.getMaxExpandLevel());
         }
+
         ArchitectureType requiredArchitecture = instructionSequence.
                 getMinimumArchitectureTypeNeededAtExpandLevel(expandLevel);
         if (architectureType.compareTo(requiredArchitecture) < 0) {
-            throw new IllegalArgumentException("Insufficient architecture type. Required: "
-                    + requiredArchitecture.getSymbol() + ", Provided: " + architectureType.getSymbol());
+            throw new IllegalArchitectureType("Architecture type not sufficient for execution",
+                    requiredArchitecture, architectureType);
         }
-        return architectureType.getCreditsCost();
+
+        int requiredCredits = requiredArchitecture.getCreditsCost();
+        if (userCredits < requiredCredits) {
+            throw new InsufficientCredits("Not enough credits to run the program/function at the given architecture " +
+                    "type (" + architectureType + ")",
+                    requiredCredits, userCredits);
+        }
     }
 
     /**
@@ -145,7 +165,7 @@ public class Engine {
      * @param arguments a map of argument names to their integer values
      * @return an ExecutionResultDTO containing the results of the execution
      */
-    public ExecutionResultDTO run(@NotNull Map<String, Integer> arguments) {
+    public FullExecutionResultDTO run(@NotNull Map<String, Integer> arguments) {
         return run(0, arguments, Integer.MAX_VALUE, ArchitectureType.INNER_RUN_ARCHITECTURE);
     }
 
@@ -153,12 +173,16 @@ public class Engine {
         return (averageCreditsCost * numberOfExecutions + latestRunCreditsCost) / numberOfExecutions + 1;
     }
 
-    public @NotNull ProgramDebugger startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments) {
-        ProgramDebugger debugger = ProgramDebugger.create(
-                instructionSequence,
-                expandLevel);
-        debugger.startDebugSession(expandLevel, arguments);
-        return debugger;
+    public @NotNull ProgramDebugger startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments,
+                                                      int userCredits, @NotNull ArchitectureType architectureType)
+            throws ExpandLevelOutOfBounds, IllegalArchitectureType, InsufficientCredits {
+        validateRunPossibility(expandLevel, userCredits, architectureType);
+        userCredits -= architectureType.getCreditsCost();
+        ProgramExecutable executable = instructionSequence.getProgramExecutableAtExpandLevel(expandLevel);
+        ProgramDebugger debugger = ProgramDebugger.builder(executable, userCredits, expandLevel)
+                .metadata(isMainProgram(), getRepresentationName(), architectureType)
+                .build();
+        return debugger.start(arguments);
     }
 
     public @NotNull ProgramDTO getProgramByExpandLevelDTO(int expandLevel) {
@@ -230,7 +254,9 @@ public class Engine {
         return funcName == null;
     }
 
-    public @Nullable String getRepresentationName() {
+
+    public @NotNull String getRepresentationName() {
+        //noinspection DataFlowIssue
         return isFunction() ? funcName : programName;
     }
 
@@ -253,7 +279,7 @@ public class Engine {
         }
     }
 
-    public String getUserUploadedBy() {
+    public @NotNull String getUserUploadedBy() {
         return userUploadedBy;
     }
 

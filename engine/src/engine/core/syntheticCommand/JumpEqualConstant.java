@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static engine.utils.ProgramUtils.PC_NAME;
+
 public class JumpEqualConstant extends Instruction
 {
     // region Fields
@@ -56,7 +58,7 @@ public class JumpEqualConstant extends Instruction
                     incrementProgramCounter(contextMap);
                 } else
                 {
-                    contextMap.put(ProgramCounterName, labelLineNumber); // if we are equal, we go to the label line number
+                    contextMap.put(PC_NAME, labelLineNumber); // if we are equal, we go to the label line number
                 }
             } else
             {

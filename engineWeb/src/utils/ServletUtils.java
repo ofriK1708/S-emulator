@@ -2,10 +2,10 @@ package utils;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 import engine.utils.ArchitectureType;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import logic.User;
 import logic.manager.ExecutionHistoryManager;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
-import java.lang.reflect.Type;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
@@ -61,44 +61,61 @@ public class ServletUtils {
      */
     public static @Nullable User getUser(HttpServletRequest request, ServletContext servletContext) {
         HttpSession session = request.getSession(false);
-        String username = session != null ? session.getAttribute(USERNAME).toString() : null;
+        String username = session != null ? session.getAttribute(USERNAME_PARAM).toString() : null;
         return getUserManager(servletContext).getUser(username);
     }
 
-    public static boolean isUserNotAuthenticated(HttpServletRequest request, ServletContext servletContext) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return true;
-        }
-        String username = session.getAttribute(USERNAME) != null ? session.getAttribute(USERNAME).toString() : null;
-        if (username == null) {
-            return true;
-        }
-        User user = getUserManager(servletContext).getUser(username);
-        return user == null;
-    }
-
     /**
-     * Extracts and validates 'programName' and 'expandLevel' from the request parameters.
-     * Throws IllegalArgumentException with a user-friendly message if validation fails.
+     * Checks if the user is authenticated. If not, sends a 401 Unauthorized response.
+     * Returns true if the user is authenticated, false otherwise.
+     *
+     * @param request        The HTTP request
+     * @param response       The HTTP response
+     * @param servletContext The servlet context
+     * @return true if the user is authenticated, false otherwise
+     * @throws IOException if an I/O error occurs while sending the error response
      */
-    public static @NotNull expandParams getAndValidateExpandParams(HttpServletRequest req)
-            throws IllegalArgumentException {
+    public static boolean checkAndHandleUnauthorized(HttpServletRequest request, HttpServletResponse response,
+                                                     ServletContext servletContext) throws IOException {
+        if (getUser(request, servletContext) == null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error! User is not logged in.");
+            return false;
+        }
+        return true;
+    }
+    /**
+     * Extracts and validates 'programName' and 'expandLevel' parameters from the request.
+     * @param req: The HTTP request
+     * @param resp: The HTTP response
+     * @return An expandParams object containing the validated parameters, or null if an error response has been sent.
+     *
+     * @throws IllegalArgumentException with a user-friendly message if validation fails.
+     */
+    public static @Nullable expandParams getAndValidateExpandParams(HttpServletRequest req, HttpServletResponse resp)
+            throws IllegalArgumentException, IOException {
         String programName = req.getParameter(PROGRAM_NAME_PARAM);
+        String expandLevelStr = req.getParameter(EXPAND_LEVEL_PARAM);
         int expandLevel;
         try {
-            expandLevel = Integer.parseInt(req.getParameter(EXPAND_LEVEL_PARAM));
+            expandLevel = Integer.parseInt(expandLevelStr);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("The 'expandLevel' parameter is missing or is not a valid number.");
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    "The " + EXPAND_LEVEL_PARAM + " ( " + expandLevelStr + " ) parameter is missing or " +
+                            "is not a valid number.");
+            return null;
         }
 
         ProgramManager pm = ServletUtils.getProgramManager(req.getServletContext());
         if (programName == null || programName.isEmpty()) {
-            throw new IllegalArgumentException("The 'programName' parameter is missing.");
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    "The " + PROGRAM_NAME_PARAM + " parameter is missing or invalid.");
+            return null;
         }
 
         if (!pm.isFunctionOrProgramExists(programName)) {
-            throw new IllegalArgumentException("A program with the name '" + programName + "' does not exist.");
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    "The program/function with name '" + programName + "' does not exist.");
+            return null;
         }
         return new expandParams(programName, expandLevel, pm);
     }
@@ -106,33 +123,42 @@ public class ServletUtils {
     /**
      * Extracts run/debug parameters. It gets 'programName' and 'expandLevel' from query parameters
      * and the 'arguments' map from the JSON request body.
-     * Throws IllegalArgumentException with a user-friendly message if validation fails.
+     * @param req: The HTTP request
+     * @param resp: The HTTP response
+     * @return A runAndDebugParams object containing the validated parameters,
+     * or null if an error response has been sent.
+     * @throws IllegalArgumentException with a user-friendly message if validation fails.
      */
-    public static @NotNull runAndDebugParams getAndValidateRunAndDebugParams(HttpServletRequest req)
-            throws Exception { // Can still throw IOException
+    public static @Nullable runAndDebugParams getAndValidateRunAndDebugParams(HttpServletRequest req,
+                                                                              HttpServletResponse resp) throws IOException {
         Gson gson = new Gson();
-        Type argumentsMapType = new TypeToken<Map<String, Integer>>() {
-        }.getType();
 
         // 1. Get program name, expand level and program manager.
-        expandParams expParams = getAndValidateExpandParams(req);
+        expandParams expParams = getAndValidateExpandParams(req, resp);
+        if (expParams == null) {
+            return null;
+        }
 
         // 2. get architecture type
         String architectureTypeStr = req.getParameter(ARCHITECTURE_TYPE_PARAM);
         if (architectureTypeStr == null || architectureTypeStr.isEmpty()) {
-            throw new IllegalArgumentException("The 'architectureType' parameter is missing." +
-                    "the supported types are: " + ArchitectureType.getSupportedArchitectures());
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    "The " + ARCHITECTURE_TYPE_PARAM + " parameter is missing." +
+                            "the supported types are: " + ArchitectureType.getSupportedArchitectures());
+            return null;
         }
         if (!ArchitectureType.isValidArchitectureType(architectureTypeStr)) {
-            throw new IllegalArgumentException("The 'architectureType' parameter is invalid." +
-                    "the supported types are: " + ArchitectureType.getSupportedArchitectures());
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    "The " + ARCHITECTURE_TYPE_PARAM + " parameter is missing." +
+                            "the supported types are: " + ArchitectureType.getSupportedArchitectures());
+            return null;
         }
         ArchitectureType architectureType = ArchitectureType.fromString(architectureTypeStr);
 
         // 3. Get arguments from the request body.
         Map<String, Integer> arguments;
         try (BufferedReader reader = req.getReader()) {
-            arguments = gson.fromJson(reader, argumentsMapType);
+            arguments = gson.fromJson(reader, ARGUMENTS_MAP_TYPE);
             // Handle the case of an empty or null JSON body gracefully.
             if (arguments == null) {
                 arguments = Collections.emptyMap();

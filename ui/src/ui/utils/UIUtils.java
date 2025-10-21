@@ -155,10 +155,10 @@ public class UIUtils {
     }
 
     /**
-     * Gets all variables from the engine controller as a map.
+     * Gets all workVariables from the engine controller as a map.
      *
      * @param localEngineController The engine controller instance
-     * @param expandLevel The expansion level to get variables from
+     * @param expandLevel The expansion level to get workVariables from
      * @return Map of all variable names to their current values
      */
     public static @NotNull Map<String, Integer> getAllVariablesMap(
@@ -167,7 +167,7 @@ public class UIUtils {
 
         Map<String, Integer> allVariables = new LinkedHashMap<>();
 
-        // Add work variables (z1, z2, etc.)
+        // Add work workVariables (z1, z2, etc.)
         allVariables.putAll(localEngineController.getWorkVars(expandLevel));
 
         // Add arguments (x1, x2, etc.)
@@ -182,10 +182,10 @@ public class UIUtils {
     }
 
     /**
-     * Converts all variables from engine controller to VariableDTO list for UI display.
+     * Converts all workVariables from engine controller to VariableDTO list for UI display.
      *
      * @param localEngineController The engine controller instance
-     * @param expandLevel The expansion level to get variables from
+     * @param expandLevel The expansion level to get workVariables from
      * @return List of VariableDTO objects sorted by name
      */
     public static @NotNull List<VariableDTO> getAllVariablesDTOSorted(
@@ -195,7 +195,7 @@ public class UIUtils {
         Map<String, Integer> allVariables = getAllVariablesMap(localEngineController, expandLevel);
         Map<String, Integer> sortedVars = sortVariableMapByName(allVariables);
 
-        // Sort variables by name for consistent display
+        // Sort workVariables by name for consistent display
 
         return getSortedVariableDTOS(sortedVars);
     }

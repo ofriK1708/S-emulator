@@ -14,7 +14,7 @@ import ui.utils.AnimatedTableRow;
 import ui.utils.UIUtils;
 
 /**
- * Displays variables in a table format with change highlighting for debug mode.
+ * Displays workVariables in a table format with change highlighting for debug mode.
  */
 public class VariablesTableController {
     @FXML
@@ -36,7 +36,7 @@ public class VariablesTableController {
     }
 
     /**
-     * Sets up the row factory to highlight changed variables in debug mode
+     * Sets up the row factory to highlight changed workVariables in debug mode
      */
 
     public void initAllVarsTable(@NotNull ListProperty<VariableDTO> variables,

@@ -16,34 +16,27 @@ import java.io.IOException;
 public class expandProgram extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (ServletUtils.isUserNotAuthenticated(req, getServletContext())) {
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            resp.getWriter().write("Error! User is not logged in.");
-            return;
-        }
-        Gson gson = new Gson();
-        resp.setContentType("application/json;charset=UTF-8");
-        ServletUtils.expandParams expandParams;
-        try {
-            expandParams = ServletUtils.getAndValidateExpandParams(req);
-        } catch (Exception e) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("Error! " + e.getMessage());
-            return;
-        }
+        if (ServletUtils.checkAndHandleUnauthorized(req, resp, getServletContext())) {
+            Gson gson = new Gson();
+            resp.setContentType("application/json;charset=UTF-8");
+            ServletUtils.expandParams expandParams;
+            expandParams = ServletUtils.getAndValidateExpandParams(req, resp);
+            if (expandParams == null) {
+                return;
+            }
+            String programName = expandParams.programName();
+            int expandLevel = expandParams.expandLevel();
+            ProgramManager pm = expandParams.pm();
+            Engine currentEngine = pm.getProgramOrFunctionEngine(programName);
+            if (expandLevel < 0 || expandLevel > currentEngine.getMaxExpandLevel()) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().write("Error! expand level must be between 0 to " + currentEngine.getMaxExpandLevel());
+                return;
+            }
 
-        String programName = expandParams.programName();
-        int expandLevel = expandParams.expandLevel();
-        ProgramManager pm = expandParams.pm();
-        Engine currentEngine = pm.getProgramOrFunctionEngine(programName);
-        if (expandLevel < 0 || expandLevel > currentEngine.getMaxExpandLevel()) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("Error! expand level must be between 0 to " + currentEngine.getMaxExpandLevel());
-            return;
+            ProgramDTO programDTO = currentEngine.getProgramByExpandLevelDTO(expandLevel);
+            String json = gson.toJson(programDTO);
+            resp.getWriter().write(json);
         }
-
-        ProgramDTO programDTO = currentEngine.getProgramByExpandLevelDTO(expandLevel);
-        String json = gson.toJson(programDTO);
-        resp.getWriter().write(json);
     }
 }

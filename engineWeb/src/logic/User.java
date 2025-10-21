@@ -30,13 +30,24 @@ public class User {
         this.debugger = debugger;
     }
 
+    public void clearDebugger() {
+        this.debugger = null;
+    }
+
+    public @Nullable ProgramDebugger getDebugger() {
+        return debugger;
+    }
+
     public int getCurrentCredits() {
         return currentCredits;
     }
 
-    public void addProgramsAndFunctions(int mainProgramsUploaded, int subFunctionsContributed) {
-        this.mainProgramsUploaded += mainProgramsUploaded;
+    public void addFunctionsCount(int subFunctionsContributed) {
         this.subFunctionsContributed += subFunctionsContributed;
+    }
+
+    public void incrementMainProgramsUploaded() {
+        this.mainProgramsUploaded++;
     }
 
     public void addCredits(int currentCredits) {
@@ -46,6 +57,16 @@ public class User {
     public void chargeCredits(int chargedCredits) {
         this.currentCredits -= chargedCredits;
         this.usedCredits += chargedCredits;
+    }
+
+    /**
+     * Set the remaining credits of the user after an insufficient credits exception.
+     *
+     * @param remainingCredits the remaining credits to set
+     */
+    public void setRemainingCredits(int remainingCredits) {
+        this.usedCredits = this.usedCredits + (this.currentCredits - remainingCredits);
+        this.currentCredits = remainingCredits;
     }
 
     public void increaseTotalRuns() {

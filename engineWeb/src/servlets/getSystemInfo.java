@@ -22,31 +22,34 @@ public class getSystemInfo extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (ServletUtils.isUserNotAuthenticated(req, getServletContext())) {
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            resp.getWriter().write("Error! User is not logged in.");
-            return;
-        }
-        String infoToGet = req.getParameter(INFO_PARAM);
-        resp.setContentType("text/html;charset=utf-8");
-        ProgramManager pm = ServletUtils.getProgramManager(getServletContext());
-        switch (infoToGet) {
-            case PROGRAMS_NAMES_INFO:
-                resp.getWriter().println(pm.getProgramNames());
-                resp.setStatus(HttpServletResponse.SC_OK);
-                break;
-            case FUNCTIONS_NAMES_INFO:
-                resp.getWriter().println(pm.getFunctionNames());
-                resp.setStatus(HttpServletResponse.SC_OK);
-                break;
-            case ALL_NAMES_INFO:
-                resp.getWriter().println("Programs: " + pm.getProgramNames() + "\nFunctions: " +
-                        pm.getFunctionNames());
-                resp.setStatus(HttpServletResponse.SC_OK);
-                break;
-            default:
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "item parameter is missing or invalid");
-                break;
+        if (ServletUtils.checkAndHandleUnauthorized(req, resp, getServletContext())) {
+            String infoToGet = req.getParameter(INFO_PARAM);
+            if (infoToGet == null) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                        "item parameter is missing or invalid, available options are: " +
+                                getAllSystemInfoOptionsNames() + ".");
+                return;
+            }
+            resp.setContentType("text/html;charset=utf-8");
+            ProgramManager pm = ServletUtils.getProgramManager(getServletContext());
+            switch (infoToGet) {
+                case PROGRAMS_NAMES_INFO:
+                    resp.getWriter().println(pm.getProgramNames());
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    break;
+                case FUNCTIONS_NAMES_INFO:
+                    resp.getWriter().println(pm.getFunctionNames());
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    break;
+                case ALL_NAMES_INFO:
+                    resp.getWriter().println("Programs: " + pm.getProgramNames() + "\nFunctions: " +
+                            pm.getFunctionNames());
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    break;
+                default:
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "item parameter is missing or invalid");
+                    break;
+            }
         }
     }
 }

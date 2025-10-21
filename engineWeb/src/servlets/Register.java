@@ -12,13 +12,13 @@ import utils.ServletUtils;
 
 import java.io.IOException;
 
-import static utils.ServletConstants.USERNAME;
+import static utils.ServletConstants.USERNAME_PARAM;
 
 @WebServlet(name = "register", urlPatterns = {"/register"})
 public class Register extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String username = req.getParameter(USERNAME);
+        String username = req.getParameter(USERNAME_PARAM);
         if (username == null || username.isEmpty()) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write("Username is required.");
@@ -37,7 +37,7 @@ public class Register extends HttpServlet {
                 resp.setStatus(HttpServletResponse.SC_OK);
                 resp.setContentType("application/json");
                 resp.getWriter().write(gson.toJson(userDTO));
-                req.getSession().setAttribute(USERNAME, username);
+                req.getSession().setAttribute(USERNAME_PARAM, username);
             }
         }
     }

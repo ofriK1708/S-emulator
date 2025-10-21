@@ -275,10 +275,10 @@ public class LocalEngineController implements EngineController {
             // Note: This creates a temporary execution that doesn't interfere with current state
             engine.run(expandLevel, arguments, false);
 
-            // Get both work variables and arguments from the final state
+            // Get both work workVariables and arguments from the final state
             Map<String, Integer> finalStates = new java.util.HashMap<>();
 
-            // Add work variables (z1, z2, etc.)
+            // Add work workVariables (z1, z2, etc.)
             finalStates.putAll(engine.getSortedWorkVars(expandLevel));
 
             // Add arguments (x1, x2, etc.) - these might have changed during execution

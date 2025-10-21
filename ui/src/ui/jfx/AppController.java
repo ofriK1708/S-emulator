@@ -98,7 +98,7 @@ public class AppController {
     @FXML
     private DebuggerController debugControlsController;
 
-    // Arguments and variables
+    // Arguments and workVariables
     private final ListProperty<VariableDTO> allVariablesDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
     private final ListProperty<VariableDTO> previousVariablesDTO =
@@ -451,7 +451,8 @@ public class AppController {
         // If no arguments are needed, mark as loaded and return
         if (programArguments.isEmpty()) {
             argumentsLoaded.set(true);
-            showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() + "\nNo variables required" +
+            showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() + "\nNo workVariables " +
+                    "required" +
                     ".");
             return;
         }
@@ -665,7 +666,7 @@ public class AppController {
                     System.out.println("Variable changed: " + name + " from " + previousValue + " to " + value);
                 }
             } else if (isFirstDebugStep) {
-                // On the first step, consider non-zero and non-argument variables as changed
+                // On the first step, consider non-zero and non-argument workVariables as changed
                 hasChanged = value != 0 && !ProgramUtils.isArgument(name);
             }
 

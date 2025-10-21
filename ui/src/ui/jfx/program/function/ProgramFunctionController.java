@@ -117,7 +117,7 @@ public class ProgramFunctionController {
 
 
     /**
-     * Updates the dropdown menu with available execution variables
+     * Updates the dropdown menu with available execution workVariables
      *
      * @param variables List of VariableDTO objects from ExecutionVariableController
      */
@@ -125,7 +125,7 @@ public class ProgramFunctionController {
         highlightSelectionButton.getItems().clear();
 
         if (variables == null || variables.isEmpty()) {
-            MenuItem noVariablesItem = new MenuItem("No variables available");
+            MenuItem noVariablesItem = new MenuItem("No workVariables available");
             noVariablesItem.setDisable(true);
             highlightSelectionButton.getItems().add(noVariablesItem);
             return;

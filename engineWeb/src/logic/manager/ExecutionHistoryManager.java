@@ -72,7 +72,7 @@ public class ExecutionHistoryManager {
         }
     }
 
-    public @NotNull List<ExecutionResultStatisticsDTO> getUserToExecutionHistory(String username) {
+    public @NotNull List<ExecutionResultStatisticsDTO> getUserExecutionHistory(String username) {
         readLock.lock();
         try {
             if (!userToExecutionHistory.containsKey(username)) {
@@ -84,7 +84,7 @@ public class ExecutionHistoryManager {
         }
     }
 
-    public @NotNull List<ExecutionResultStatisticsDTO> getProgramToExecutionHistory(String programName) {
+    public @NotNull List<ExecutionResultStatisticsDTO> getProgramExecutionHistory(String programName) {
         readLock.lock();
         try {
             if (!programToExecutionHistory.containsKey(programName)) {

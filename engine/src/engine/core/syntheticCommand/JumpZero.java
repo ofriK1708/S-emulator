@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static engine.utils.ProgramUtils.PC_NAME;
+
 public class JumpZero extends Instruction
 {
     // region Fields
@@ -57,7 +59,7 @@ public class JumpZero extends Instruction
                 incrementProgramCounter(contextMap);
             } else
             {
-                contextMap.put(ProgramCounterName, labelLineNumber);
+                contextMap.put(PC_NAME, labelLineNumber);
             }
         } else
         {

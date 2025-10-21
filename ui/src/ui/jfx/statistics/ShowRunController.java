@@ -75,7 +75,7 @@ public class ShowRunController {
         // Populate the arguments section
         updateArgumentsDisplay(executionStats.arguments());
 
-        // Populate the variables table with final states
+        // Populate the workVariables table with final states
         updateVariablesTable(variableStates);
 
         System.out.println("ShowRunController initialized with execution #" +
@@ -117,7 +117,7 @@ public class ShowRunController {
     }
 
     /**
-     * Populate the variables table with final variable states.
+     * Populate the workVariables table with final variable states.
      * Converts the Map<String, Integer> to VariableDTO objects for table display.
      *
      * @param variableStates Map of variable names to their final values
@@ -130,18 +130,18 @@ public class ShowRunController {
             VariableDTO variableDTO = new VariableDTO(
                     new SimpleStringProperty(entry.getKey()),
                     new SimpleIntegerProperty(entry.getValue()),
-                    // No change detection needed for this view - all variables shown as unchanged
+                    // No change detection needed for this view - all workVariables shown as unchanged
                     new javafx.beans.property.SimpleBooleanProperty(false)
             );
             variablesList.add(variableDTO);
         }
 
-        // Sort variables by name for consistent display
+        // Sort workVariables by name for consistent display
         variablesList.sort((v1, v2) -> v1.name().get().compareToIgnoreCase(v2.name().get()));
 
         variablesTable.setItems(variablesList);
 
-        System.out.println("Variables table populated with " + variablesList.size() + " variables");
+        System.out.println("Variables table populated with " + variablesList.size() + " workVariables");
     }
 
     /**

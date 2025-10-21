@@ -89,10 +89,19 @@ public class ProgramUtils {
         return maxLevel;
     }
 
+    /**
+     * Extracts all variable names from the given context map.
+     * can include labels based on the includeLabels parameter.
+     * returns a set of variable names (work workVariables, arguments, output) only.
+     * not sorted in any particular order.
+     *
+     * @param contextMap    the context map containing variable names and their values
+     * @param includeLabels whether to include labels in the result
+     * @return a set of variable names
+     */
     @Contract(pure = true)
-    public static @NotNull Set<String> extractAllVariableAndLabelNamesUnsorted(@NotNull Map<String, Integer>
-                                                                                       contextMap,
-                                                                               boolean includeLabels) {
+    public static @NotNull Set<String> extractAllVariables(@NotNull Map<String, Integer> contextMap,
+                                                           boolean includeLabels) {
         Map<String, Integer> newContextMap = new HashMap<>(contextMap);
         newContextMap.remove(EXIT_LABEL_NAME);
         newContextMap.remove(PC_NAME);
@@ -102,11 +111,42 @@ public class ProgramUtils {
         return new HashSet<>(newContextMap.keySet());
     }
 
+    /**
+     * Extracts and sorts all workVariables (output, arguments, work workVariables) from the given context map.
+     * The output variable is placed first, followed by arguments and then work workVariables.
+     *
+     * @param contextMap the context map containing variable names and their values
+     * @return a sorted map ({@code LinkedHashMap<String,Integer>}) of variable names to their values
+     */
+    @Contract(pure = true)
+    public static @NotNull Map<String, Integer> extractSortedVariables(@NotNull Map<String, Integer> contextMap) {
+        Map<String, Integer> sortedContextMap = new LinkedHashMap<>();
+        Map<String, Integer> workVars = extractSortedWorkVars(contextMap);
+        Map<String, Integer> arguments = extractSortedArguments(contextMap);
+        int outputValue = contextMap.getOrDefault(OUTPUT_NAME, 0);
+        sortedContextMap.put(OUTPUT_NAME, outputValue);
+        sortedContextMap.putAll(arguments);
+        sortedContextMap.putAll(workVars);
+        return sortedContextMap;
+    }
+
+    /**
+     * Extracts and sorts work workVariables (z1, z2, etc.) from the given context map.
+     *
+     * @param contextMap the context map containing variable names and their values
+     * @return a sorted map of work variable names to their values ordered by their numeric suffix
+     */
     @Contract(pure = true)
     public static @NotNull Map<String, Integer> extractSortedWorkVars(@NotNull Map<String, Integer> contextMap) {
         return getVariableIntegerMap(contextMap, WORK_VAR_PREFIX);
     }
 
+    /**
+     * Extracts and sorts arguments (x1, x2, etc.) from the given context map.
+     *
+     * @param contextMap the context map containing variable names and their values
+     * @return a sorted map of argument names to their values ordered by their numeric suffix
+     */
     @Contract(pure = true)
     public static @NotNull Map<String, Integer> extractSortedArguments(@NotNull Map<String, Integer> contextMap) {
         return getVariableIntegerMap(contextMap, ARG_PREFIX);

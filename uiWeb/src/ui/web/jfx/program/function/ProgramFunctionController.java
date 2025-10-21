@@ -103,13 +103,13 @@ public class ProgramFunctionController {
     }
 
     /**
-     * Updates the dropdown menu with available execution variables
+     * Updates the dropdown menu with available execution workVariables
      */
     public void updateVariableDropdown(@Nullable List<String> variables) {
         highlightSelectionButton.getItems().clear();
 
         if (variables == null || variables.isEmpty()) {
-            MenuItem noVariablesItem = new MenuItem("No variables available");
+            MenuItem noVariablesItem = new MenuItem("No workVariables available");
             noVariablesItem.setDisable(true);
             highlightSelectionButton.getItems().add(noVariablesItem);
             return;

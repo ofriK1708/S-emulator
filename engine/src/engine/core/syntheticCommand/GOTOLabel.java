@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static engine.utils.ProgramUtils.PC_NAME;
+
 public class GOTOLabel extends Instruction
 {
     // region Fields
@@ -52,7 +54,7 @@ public class GOTOLabel extends Instruction
         if (contextMap.containsKey(labelName))
         {
             int labelLineNumber = contextMap.get(labelName);
-            contextMap.put(ProgramCounterName, labelLineNumber);
+            contextMap.put(PC_NAME, labelLineNumber);
         } else
         {
             throw new IllegalArgumentException("No such label : " + labelName);

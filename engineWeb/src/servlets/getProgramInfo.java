@@ -11,8 +11,6 @@ import logic.manager.ProgramManager;
 import utils.ServletUtils;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
 
 import static utils.ServletConstants.*;
 
@@ -22,69 +20,53 @@ public class getProgramInfo extends HttpServlet {
     protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("text/html;charset=utf-8");
         resp.getWriter().println(getAllProgramInfoOptionsNames());
-        resp.setStatus(HttpServletResponse.SC_OK);
+
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (ServletUtils.isUserNotAuthenticated(req, getServletContext())) {
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            resp.getWriter().write("Error! User is not logged in.");
-            return;
-        }
-        int expandLevel = 0;
-        Gson gson = new Gson();
-        String programName = req.getParameter(PROGRAM_NAME_PARAM);
-        String infoToGet = req.getParameter(INFO_PARAM);
-        ProgramManager pm = ServletUtils.getProgramManager(req.getServletContext());
-        if (programName == null || programName.isEmpty()) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "programName parameter is missing or invalid");
-            return;
-        }
-        Engine currentEngine = pm.getProgramOrFunctionEngine(programName);
-        resp.setContentType("application/json;charset=UTF-8");
-        if (isExpandLevelRequired(infoToGet)) {
-            try {
-                expandLevel = getAndValidateExpandLevel(req, resp, currentEngine);
-            } catch (RuntimeException ignored) {
+        if (ServletUtils.checkAndHandleUnauthorized(req, resp, getServletContext())) {
+            int expandLevel = 0;
+            Gson gson = new Gson();
+            String programName = req.getParameter(PROGRAM_NAME_PARAM);
+            ProgramManager pm = ServletUtils.getProgramManager(req.getServletContext());
+            if (programName == null || programName.isEmpty()) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "programName parameter is missing or invalid");
                 return;
             }
-        }
-        System.out.println("current program: " + currentEngine.getProgramName() + ", info requested: " + infoToGet);
-        switch (infoToGet) {
-            case BASIC_PROGRAM:
-                resp.getWriter().println(gson.toJson(currentEngine.getBasicProgramDTO()));
-                break;
-            case PROGRAM_BY_EXPAND_LEVEL:
-                resp.getWriter().println(gson.toJson(currentEngine.getProgramByExpandLevelDTO(expandLevel)));
-                break;
-            case MAX_EXPAND_LEVEL:
-                resp.getWriter().println(gson.toJson(currentEngine.getMaxExpandLevel()));
-                resp.setStatus(HttpServletResponse.SC_OK);
-                break;
-            case ALL_VARIABLES_AND_LABELS:
-                Set<String> allVarsAndLabels = currentEngine.getAllVariablesNames(expandLevel, true);
-                String json = gson.toJson(allVarsAndLabels);
-                resp.getWriter().println(json);
-                resp.setStatus(HttpServletResponse.SC_OK);
-                break;
-            case ARGUMENTS:
-                Map<String, Integer> sortedArguments = currentEngine.getSortedArgumentsMap(expandLevel);
-                String jsonArgs = gson.toJson(sortedArguments);
-                resp.getWriter().println(jsonArgs);
-                resp.setStatus(HttpServletResponse.SC_OK);
-                break;
-            case WORK_VARS:
-                Map<String, Integer> workVars = currentEngine.getSortedWorkVars(expandLevel);
-                String jsonWorkVars = gson.toJson(workVars);
-                resp.getWriter().println(jsonWorkVars);
-                resp.setStatus(HttpServletResponse.SC_OK);
-                break;
-            default:
+            String infoToGet = req.getParameter(INFO_PARAM);
+            if (infoToGet == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                        "info parameter is missing or invalid, if you want to see all available options," +
+                        "Info parameter is missing or invalid, available options are: " +
+                                getAllProgramInfoOptionsNames() + ".");
+                return;
+            }
+            Engine currentEngine = pm.getProgramOrFunctionEngine(programName);
+            resp.setContentType("application/json;charset=UTF-8");
+            if (isExpandLevelRequired(infoToGet)) {
+                expandLevel = getAndValidateExpandLevel(req, resp, currentEngine);
+            }
+            resp.setStatus(HttpServletResponse.SC_OK);
+            System.out.println("current program: " + currentEngine.getProgramName() + ", info requested: " + infoToGet);
+
+            switch (infoToGet) {
+                case BASIC_PROGRAM_INFO -> resp.getWriter().println(gson.toJson(currentEngine.
+                        getBasicProgramDTO()));
+                case PROGRAM_BY_EXPAND_LEVEL_INFO -> resp.getWriter().println(gson.toJson(currentEngine.
+                        getProgramByExpandLevelDTO(expandLevel)));
+                case PROGRAMS_STATISTICS_INFO ->
+                        resp.getWriter().println(gson.toJson(ServletUtils.getExecutionHistoryManager(getServletContext())
+                                .getProgramExecutionHistory(programName)));
+                case MAX_EXPAND_LEVEL_INFO -> resp.getWriter().println(gson.toJson(currentEngine.
+                        getMaxExpandLevel()));
+                case ALL_VARIABLES_AND_LABELS_INFO -> resp.getWriter().println(gson.toJson(currentEngine.
+                        getAllVariablesNames(expandLevel, true)));
+                case ARGUMENTS_INFO -> resp.getWriter().println(currentEngine.getSortedArgumentsMap(expandLevel));
+                case WORK_VARS_INFO -> resp.getWriter().println(currentEngine.getSortedWorkVars(expandLevel));
+                default -> resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                        "Info parameter is missing or invalid, if you want to see all available options," +
                                 "please send an OPTIONS request to this URL");
-                break;
+            }
         }
     }
 
@@ -111,9 +93,9 @@ public class getProgramInfo extends HttpServlet {
     }
 
     private boolean isExpandLevelRequired(String infoToGet) {
-        return infoToGet.equals(ALL_VARIABLES_AND_LABELS) ||
-                infoToGet.equals(ARGUMENTS) ||
-                infoToGet.equals(PROGRAM_RESULT) ||
-                infoToGet.equals(WORK_VARS); // add other cases if needed
+        return infoToGet.equals(ALL_VARIABLES_AND_LABELS_INFO) ||
+                infoToGet.equals(ARGUMENTS_INFO) ||
+                infoToGet.equals(PROGRAM_RESULT_INFO) ||
+                infoToGet.equals(WORK_VARS_INFO); // add other cases if needed
     }
 }

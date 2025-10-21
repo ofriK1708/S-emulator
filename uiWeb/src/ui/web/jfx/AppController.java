@@ -465,7 +465,7 @@ public class AppController {
         if (programArguments.isEmpty()) {
             argumentsLoaded.set(true);
             showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() +
-                    "\nNo variables required.");
+                    "\nNo workVariables required.");
             return;
         }
 
