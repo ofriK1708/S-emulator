@@ -4,9 +4,9 @@ package system.controller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import dto.engine.FunctionMetadata;
+import dto.engine.FunctionMetadataDTO;
 import dto.engine.ProgramDTO;
-import dto.engine.ProgramMetadata;
+import dto.engine.ProgramMetadataDTO;
 import dto.server.LoadProgramResultDTO;
 import jakarta.xml.bind.JAXBException;
 import okhttp3.Call;
@@ -37,8 +37,8 @@ public class HttpEngineController implements EngineController {
     private final static Type VARS_NAME_AND_VALUE_TYPE = new TypeToken<Map<String, Integer>>() {
     }.getType();
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    private final Set<ProgramMetadata> programsMetadata = new LinkedHashSet<>();
-    private final Set<FunctionMetadata> functionsMetadata = new LinkedHashSet<>();
+    private final Set<ProgramMetadataDTO> programsMetadata = new LinkedHashSet<>();
+    private final Set<FunctionMetadataDTO> functionsMetadata = new LinkedHashSet<>();
     String currentLoadedProgramName = null;
     int loadedProgramMaxExpandLevel = -1;
 
@@ -54,11 +54,11 @@ public class HttpEngineController implements EngineController {
         }
     }
 
-    public Set<ProgramMetadata> getProgramsMetadata() {
+    public Set<ProgramMetadataDTO> getProgramsMetadata() {
         return programsMetadata;
     }
 
-    public Set<FunctionMetadata> getFunctionsMetadata() {
+    public Set<FunctionMetadataDTO> getFunctionsMetadata() {
         return functionsMetadata;
     }
 

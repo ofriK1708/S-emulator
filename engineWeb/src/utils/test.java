@@ -1,6 +1,6 @@
 package utils;
 
-import dto.engine.FullExecutionResultDTO;
+import dto.engine.ExecutionResultInfoDTO;
 import engine.core.Engine;
 import engine.exception.FunctionAlreadyExist;
 import engine.exception.FunctionNotFound;
@@ -23,15 +23,15 @@ public class test {
             XMLHandler xmlHandler = new XMLHandler();
             SProgram sProgram = xmlHandler.unmarshallFile(inputStream);
             Engine engine = Engine.createMainProgramEngine(sProgram, Map.of(), "testUser");
-            FullExecutionResultDTO resultDTO = engine.run(0, Map.of("x1", 4, "x2", 2),
+            ExecutionResultInfoDTO resultDTO = engine.start(0, Map.of("x1", 4, "x2", 2),
                     Integer.MAX_VALUE, ArchitectureType.ARCHITECTURE_IV);
             int cycles = resultDTO.cycleCount();
             System.out.println("Program executed in " + cycles + " cycles.");
-            resultDTO = engine.run(0, Map.of("x1", 4, "x2", 2),
+            resultDTO = engine.start(0, Map.of("x1", 4, "x2", 2),
                     Integer.MAX_VALUE, ArchitectureType.ARCHITECTURE_IV);
             cycles = resultDTO.cycleCount();
             System.out.println("Program executed in " + cycles + " cycles.");
-            resultDTO = engine.run(0, Map.of("x1", 4, "x2", 2),
+            resultDTO = engine.start(0, Map.of("x1", 4, "x2", 2),
                     Integer.MAX_VALUE, ArchitectureType.ARCHITECTURE_IV);
             cycles = resultDTO.cycleCount();
             System.out.println("Program executed in " + cycles + " cycles.");

@@ -1,6 +1,8 @@
 package engine.core;
 
-import dto.engine.*;
+import dto.engine.FunctionMetadataDTO;
+import dto.engine.ProgramDTO;
+import dto.engine.ProgramMetadataDTO;
 import engine.exception.*;
 import engine.generated_2.SFunction;
 import engine.generated_2.SProgram;
@@ -120,20 +122,24 @@ public class Engine {
         return instructionSequence.isVariableInContext(varName);
     }
 
-    public @NotNull FullExecutionResultDTO run(int expandLevel, @NotNull Map<String, Integer> arguments,
-                                               int userCredits,
-                                               @NotNull ArchitectureType architectureType)
+    public void start(int expandLevel, @NotNull Map<String, Integer> arguments,
+                      int userCredits,
+                      @NotNull ArchitectureType architectureType)
             throws ExpandLevelOutOfBounds, IllegalArchitectureType, InsufficientCredits {
         validateRunPossibility(expandLevel, userCredits, architectureType);
-        ProgramExecutable executable = instructionSequence.getProgramExecutableAtExpandLevel(expandLevel);
-        ProgramRunner runner = ProgramRunner.createFrom(executable, userCredits);
-        ExecutionResultValuesDTO valuesResult = runner.run(expandLevel, arguments);
-        averageCreditsCost = calcAverageCredits(valuesResult.creditsCost());
-        numberOfExecutions++;
 
-        return FullExecutionResultDTO.from(
-                valuesResult, isMainProgram(), getRepresentationName(),
-                architectureType);
+        ProgramExecutable executable = instructionSequence.getProgramExecutableAtExpandLevel(expandLevel);
+
+        ExecutionMetadata executionMetadata = ExecutionMetadata.builder()
+                .isMainProgram(isMainProgram())
+                .programName(getRepresentationName())
+                .architectureType(architectureType)
+                .build();
+
+        ProgramRunner runner = ProgramRunner.createMainRunner(executable, executionMetadata, arguments, userCredits);
+        runner.start();
+        averageCreditsCost = calcAverageCredits(runner.getEndOfRunCyclesCount());
+        numberOfExecutions++;
     }
 
     private void validateRunPossibility(int expandLevel, int userCredits,
@@ -165,8 +171,11 @@ public class Engine {
      * @param arguments a map of argument names to their integer values
      * @return an ExecutionResultDTO containing the results of the execution
      */
-    public FullExecutionResultDTO run(@NotNull Map<String, Integer> arguments) {
-        return run(0, arguments, Integer.MAX_VALUE, ArchitectureType.INNER_RUN_ARCHITECTURE);
+    public InnerRunResult startInnerRun(@NotNull Map<String, Integer> arguments) {
+        ProgramExecutable executable = instructionSequence.getProgramExecutableAtExpandLevel(0);
+
+        ProgramRunner runner = ProgramRunner.createInnerRunner(executable, arguments);
+        return runner.innerRun();
     }
 
     private float calcAverageCredits(int latestRunCreditsCost) {
@@ -176,12 +185,21 @@ public class Engine {
     public @NotNull ProgramDebugger startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments,
                                                       int userCredits, @NotNull ArchitectureType architectureType)
             throws ExpandLevelOutOfBounds, IllegalArchitectureType, InsufficientCredits {
+
         validateRunPossibility(expandLevel, userCredits, architectureType);
+
         userCredits -= architectureType.getCreditsCost();
+
         ProgramExecutable executable = instructionSequence.getProgramExecutableAtExpandLevel(expandLevel);
+
         ProgramDebugger debugger = ProgramDebugger.builder(executable, userCredits, expandLevel)
-                .metadata(isMainProgram(), getRepresentationName(), architectureType)
+                .executionMetadata(ExecutionMetadata.builder()
+                        .isMainProgram(isMainProgram())
+                        .programName(getRepresentationName())
+                        .architectureType(architectureType)
+                        .build())
                 .build();
+
         return debugger.start(arguments);
     }
 
@@ -260,9 +278,9 @@ public class Engine {
         return isFunction() ? funcName : programName;
     }
 
-    public @NotNull ProgramMetadata programToMetadata() {
+    public @NotNull ProgramMetadataDTO programToMetadata() {
         if (!isFunction()) {
-            return new ProgramMetadata(programName, userUploadedBy,
+            return new ProgramMetadataDTO(programName, userUploadedBy,
                     instructionSequence.getOriginalInstructionCount(), instructionSequence.getMaxExpandLevel(),
                     numberOfExecutions, averageCreditsCost);
         } else {
@@ -270,9 +288,9 @@ public class Engine {
         }
     }
 
-    public @NotNull FunctionMetadata functionToMetadata() {
+    public @NotNull FunctionMetadataDTO functionToMetadata() {
         if (isFunction()) {
-            return new FunctionMetadata(programName, mainProgramName, userUploadedBy,
+            return new FunctionMetadataDTO(programName, mainProgramName, userUploadedBy,
                     instructionSequence.getOriginalInstructionCount(), instructionSequence.getMaxExpandLevel());
         } else {
             throw new IllegalStateException("Cannot get metadata for a program from a function");

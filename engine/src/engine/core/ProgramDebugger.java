@@ -1,7 +1,7 @@
 package engine.core;
 
 import dto.engine.DebugStateChangeResultDTO;
-import dto.engine.FullExecutionResultDTO;
+import dto.engine.ExecutionResultInfoDTO;
 import engine.exception.InsufficientCredits;
 import engine.utils.ArchitectureType;
 import engine.utils.ProgramUtils;
@@ -66,6 +66,25 @@ public class ProgramDebugger {
     }
 
     /**
+     * Constructs an ExecutionResultDTO representing the current debug state.
+     * used when debug is finished or stopped.
+     *
+     * @return ExecutionResultDTO with current debug information.
+     */
+    public ExecutionResultInfoDTO getDebugFinishedExecutionResult() {
+        return new ExecutionResultInfoDTO(
+                isMainProgram,
+                programName,
+                architectureType,
+                debugArguments,
+                ProgramUtils.extractSortedVariables(currentDebugContext),
+                currentDebugContext.get(OUTPUT_NAME),
+                expandLevel,
+                initialUserCredits - runningUserCredits,
+                initialUserCredits - runningUserCredits
+        );
+    }
+    /**
      * Starts a debug session by initializing the context with provided arguments.
      *
      * @param arguments Map of argument names to their integer values.
@@ -86,6 +105,7 @@ public class ProgramDebugger {
         currentDebugPC = currentDebugContext.get(PC_NAME);
         return this;
     }
+
     // endregion
 
     // region debug actions
@@ -173,62 +193,6 @@ public class ProgramDebugger {
     }
 
     /**
-     * Constructs an ExecutionResultDTO representing the current debug state.
-     * used when debug is finished or stopped.
-     *
-     * @return ExecutionResultDTO with current debug information.
-     */
-    public FullExecutionResultDTO getDebugFinishedExecutionResult() {
-        return new FullExecutionResultDTO(
-                isMainProgram,
-                programName,
-                architectureType,
-                debugArguments,
-                ProgramUtils.extractSortedVariables(currentDebugContext),
-                currentDebugContext.get(OUTPUT_NAME),
-                expandLevel,
-                initialUserCredits - runningUserCredits,
-                initialUserCredits - runningUserCredits
-        );
-    }
-    // endregion
-
-    // region public getters
-
-    public @NotNull String getProgramName() {
-        return programName;
-    }
-
-    // region private helpers
-    private void executeStep() {
-        Instruction instruction = currentDebugInstructions.get(currentDebugPC);
-
-        try {
-            int creditCost = instruction.getCycles();
-            if (runningUserCredits < creditCost) {
-                throw new InsufficientCredits("Insufficient credits to execute instruction" +
-                        instruction.getStringRepresentation() + " at PC=" + currentDebugPC, runningUserCredits,
-                        creditCost);
-            }
-            runningUserCredits -= creditCost;
-            instruction.execute(currentDebugContext);
-            currentDebugPC = currentDebugContext.get(PC_NAME);
-            // Save state
-            debugStateHistory.add(new HashMap<>(currentDebugContext));
-            debugCyclesHistory.add(creditCost); // cycles = credit cost for this instruction;
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error executing debug instruction at PC=" +
-                    currentDebugPC + ": " + e.getMessage(), e);
-        }
-    }
-    // endregion
-
-    private boolean isDebugFinished() {
-        return debugMode && currentDebugPC >= currentDebugInstructions.size();
-    }
-
-    /**
      * Builder for ProgramDebugger.
      * Allows setting required and optional parameters.
      *
@@ -271,23 +235,56 @@ public class ProgramDebugger {
         /**
          * Sets all metadata fields at once.
          *
-         * @param isMainProgram    Whether it's the main program
-         * @param programName      Name of the program
-         * @param architectureType Architecture type
+         * @param executionMetadata The ExecutionMetadata instance
          * @return Builder instance for chaining
          */
-        public Builder metadata(boolean isMainProgram,
-                                @NotNull String programName,
-                                @NotNull ArchitectureType architectureType) {
-            this.isMainProgram = isMainProgram;
-            this.programName = programName;
-            this.architectureType = architectureType;
+        public Builder executionMetadata(ExecutionMetadata executionMetadata) {
+            this.isMainProgram = executionMetadata.isMainProgram();
+            this.programName = executionMetadata.programName();
+            this.architectureType = executionMetadata.architectureType();
             return this;
         }
 
         public ProgramDebugger build() {
             return new ProgramDebugger(this);
         }
+    }
+
+    // endregion
+
+    // region public getters
+
+    public @NotNull String getProgramName() {
+        return programName;
+    }
+    // region private helpers
+    private void executeStep() {
+        Instruction instruction = currentDebugInstructions.get(currentDebugPC);
+
+        try {
+            int creditCost = instruction.getCycles();
+            if (runningUserCredits < creditCost) {
+                throw new InsufficientCredits("Insufficient credits to execute instruction" +
+                        instruction.getStringRepresentation() + " at PC=" + currentDebugPC, runningUserCredits,
+                        creditCost);
+            }
+            runningUserCredits -= creditCost;
+            instruction.execute(currentDebugContext);
+            currentDebugPC = currentDebugContext.get(PC_NAME);
+            // Save state
+            debugStateHistory.add(new HashMap<>(currentDebugContext));
+            debugCyclesHistory.add(creditCost); // cycles = credit cost for this instruction;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error executing debug instruction at PC=" +
+                    currentDebugPC + ": " + e.getMessage(), e);
+        }
+    }
+
+    // endregion
+
+    private boolean isDebugFinished() {
+        return debugMode && currentDebugPC >= currentDebugInstructions.size();
     }
 
     // endregion

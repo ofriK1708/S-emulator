@@ -1,7 +1,7 @@
 package logic.manager;
 
-import dto.engine.FunctionMetadata;
-import dto.engine.ProgramMetadata;
+import dto.engine.FunctionMetadataDTO;
+import dto.engine.ProgramMetadataDTO;
 import engine.core.Engine;
 import engine.exception.FunctionAlreadyExist;
 import engine.exception.FunctionNotFound;
@@ -91,7 +91,7 @@ public class ProgramManager {
         }
     }
 
-    public Set<ProgramMetadata> getProgramsMetadata() {
+    public Set<ProgramMetadataDTO> getProgramsMetadata() {
         readLock.lock();
         try {
             return programs.values().stream()
@@ -111,7 +111,7 @@ public class ProgramManager {
         }
     }
 
-    public Set<FunctionMetadata> getFunctionsMetadata() {
+    public Set<FunctionMetadataDTO> getFunctionsMetadata() {
         readLock.lock();
         try {
             return functions.values().stream()

@@ -112,7 +112,7 @@ public class ProgramUtils {
     }
 
     /**
-     * Extracts and sorts all workVariables (output, arguments, work workVariables) from the given context map.
+     * Extracts and sorts all variables (output, arguments, work workVariables) from the given context map.
      * The output variable is placed first, followed by arguments and then work workVariables.
      *
      * @param contextMap the context map containing variable names and their values

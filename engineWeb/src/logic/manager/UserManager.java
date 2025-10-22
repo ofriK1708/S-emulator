@@ -1,7 +1,7 @@
 package logic.manager;
 
-import dto.engine.ExecutionResultStatisticsDTO;
 import dto.server.UserDTO;
+import engine.core.ExecutionStatistics;
 import logic.User;
 import org.jetbrains.annotations.NotNull;
 
@@ -93,7 +93,7 @@ public class UserManager {
         }
     }
 
-    public @NotNull List<ExecutionResultStatisticsDTO> getUserStatisticsDTO(String username) {
+    public @NotNull List<ExecutionStatistics> getUserStatisticsDTO(String username) {
         readLock.lock();
         try {
             User user = users.get(username);

@@ -1,9 +1,9 @@
 package servlets;
 
 import com.google.gson.Gson;
-import dto.engine.ExecutionResultStatisticsDTO;
-import dto.engine.FullExecutionResultDTO;
+import dto.engine.ExecutionResultInfoDTO;
 import engine.core.Engine;
+import engine.core.ExecutionStatistics;
 import engine.exception.InsufficientCredits;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -38,16 +38,16 @@ public class runProgram extends HttpServlet {
         int expandLevel = runAndDebugParams.expandLevel();
         Map<String, Integer> args = runAndDebugParams.arguments();
         try {
-            FullExecutionResultDTO fullExecutionResultDTO = currentEngine.run(
+            ExecutionResultInfoDTO executionResultInfoDTO = currentEngine.start(
                     0, args, user.getCurrentCredits(), runAndDebugParams.architectureType());
             System.out.println("Current thread :" + Thread.currentThread().getName() +
-                    " cycles took " + fullExecutionResultDTO.cycleCount() + " to execute program " + programName);
+                    " cycles took " + executionResultInfoDTO.cycleCount() + " to execute program " + programName);
             user.increaseTotalRuns();
-            user.chargeCredits(fullExecutionResultDTO.creditsCost());
+            user.chargeCredits(executionResultInfoDTO.creditsCost());
             resp.setStatus(HttpServletResponse.SC_OK);
-            resp.getWriter().write(gson.toJson(fullExecutionResultDTO));
+            resp.getWriter().write(gson.toJson(executionResultInfoDTO));
             executionHistoryManager.addExecutionResult(
-                    user.getName(), programName, ExecutionResultStatisticsDTO.of(fullExecutionResultDTO));
+                    user.getName(), programName, ExecutionStatistics.of(executionResultInfoDTO));
         } catch (InsufficientCredits insufficientCredits) {
             user.setRemainingCredits(insufficientCredits.getCreditsLeft());
             writeErrorMessage(resp, insufficientCredits, runAndDebugParams, expandLevel);

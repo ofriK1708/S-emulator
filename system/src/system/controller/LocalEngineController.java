@@ -81,7 +81,7 @@ public class LocalEngineController implements EngineController {
         if (expandLevel < 0 || expandLevel > maxExpandLevel) {
             throw new IllegalArgumentException("Expand level must be between 0 and " + maxExpandLevel);
         }
-        engine.run(expandLevel, arguments, true);
+        engine.startInnerRun(expandLevel, arguments, true);
     }
 
 
@@ -273,7 +273,7 @@ public class LocalEngineController implements EngineController {
 
             // Temporarily execute the program to get final states
             // Note: This creates a temporary execution that doesn't interfere with current state
-            engine.run(expandLevel, arguments, false);
+            engine.startInnerRun(expandLevel, arguments, false);
 
             // Get both work workVariables and arguments from the final state
             Map<String, Integer> finalStates = new java.util.HashMap<>();

@@ -2,8 +2,8 @@ package servlets;
 
 import com.google.gson.Gson;
 import dto.engine.DebugStateChangeResultDTO;
-import dto.engine.ExecutionResultStatisticsDTO;
-import dto.engine.FullExecutionResultDTO;
+import dto.engine.ExecutionResultInfoDTO;
+import engine.core.ExecutionStatistics;
 import engine.core.ProgramDebugger;
 import engine.exception.InsufficientCredits;
 import jakarta.servlet.ServletException;
@@ -94,11 +94,11 @@ public class debugAction extends HttpServlet {
         if (stateChange.isFinished()) {
             ExecutionHistoryManager executionHistoryManager = ServletUtils.
                     getExecutionHistoryManager(getServletContext());
-            FullExecutionResultDTO fullExecutionResult = debugger.getDebugFinishedExecutionResult();
+            ExecutionResultInfoDTO fullExecutionResult = debugger.getDebugFinishedExecutionResult();
             executionHistoryManager.addExecutionResult(
                     user.getName(),
                     debugger.getProgramName(),
-                    ExecutionResultStatisticsDTO.of(fullExecutionResult));
+                    ExecutionStatistics.of(fullExecutionResult));
             user.clearDebugger();
             user.chargeCredits(fullExecutionResult.creditsCost());
         }

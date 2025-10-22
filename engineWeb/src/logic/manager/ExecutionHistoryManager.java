@@ -1,6 +1,6 @@
 package logic.manager;
 
-import dto.engine.ExecutionResultStatisticsDTO;
+import engine.core.ExecutionStatistics;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -14,9 +14,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class ExecutionHistoryManager {
 
     // region data structures
-    private final @NotNull List<ExecutionResultStatisticsDTO> executionResultDTOList = new ArrayList<>();
-    private final @NotNull Map<String, List<ExecutionResultStatisticsDTO>> userToExecutionHistory = new HashMap<>();
-    private final @NotNull Map<String, List<ExecutionResultStatisticsDTO>> programToExecutionHistory = new HashMap<>();
+    private final @NotNull List<ExecutionStatistics> executionResultDTOList = new ArrayList<>();
+    private final @NotNull Map<String, List<ExecutionStatistics>> userToExecutionHistory = new HashMap<>();
+    private final @NotNull Map<String, List<ExecutionStatistics>> programToExecutionHistory = new HashMap<>();
     // endregion
 
     // region read-write locks
@@ -46,24 +46,24 @@ public class ExecutionHistoryManager {
     // region execution history management methods
 
     public void addExecutionResult(String username, String programName,
-                                   ExecutionResultStatisticsDTO executionResultStatisticsDTO) {
+                                   ExecutionStatistics executionStatistics) {
         writeLock.lock();
         try {
-            executionResultDTOList.add(executionResultStatisticsDTO);
+            executionResultDTOList.add(executionStatistics);
 
             userToExecutionHistory
                     .computeIfAbsent(username, k -> new ArrayList<>())
-                    .add(executionResultStatisticsDTO);
+                    .add(executionStatistics);
 
             programToExecutionHistory
                     .computeIfAbsent(programName, k -> new ArrayList<>())
-                    .add(executionResultStatisticsDTO);
+                    .add(executionStatistics);
         } finally {
             writeLock.unlock();
         }
     }
 
-    public @NotNull List<ExecutionResultStatisticsDTO> getExecutionResultDTOList() {
+    public @NotNull List<ExecutionStatistics> getExecutionResultDTOList() {
         readLock.lock();
         try {
             return executionResultDTOList;
@@ -72,7 +72,7 @@ public class ExecutionHistoryManager {
         }
     }
 
-    public @NotNull List<ExecutionResultStatisticsDTO> getUserExecutionHistory(String username) {
+    public @NotNull List<ExecutionStatistics> getUserExecutionHistory(String username) {
         readLock.lock();
         try {
             if (!userToExecutionHistory.containsKey(username)) {
@@ -84,7 +84,7 @@ public class ExecutionHistoryManager {
         }
     }
 
-    public @NotNull List<ExecutionResultStatisticsDTO> getProgramExecutionHistory(String programName) {
+    public @NotNull List<ExecutionStatistics> getProgramExecutionHistory(String programName) {
         readLock.lock();
         try {
             if (!programToExecutionHistory.containsKey(programName)) {
