@@ -23,14 +23,11 @@ import static engine.utils.ProgramUtils.PC_NAME;
  * Supports starting, stepping, resuming, and stopping debug sessions.
  * </p>
  */
-public class ProgramDebugger {
+public class ProgramDebugger extends ProgramExecutor {
     // region Final fields set via Builder
     private final boolean isMainProgram;
     private final @NotNull String programName;
     private final @NotNull ArchitectureType architectureType;
-    private final @NotNull List<Instruction> currentDebugInstructions;
-    private final @NotNull Map<String, Integer> currentDebugContext;
-    private final int initialUserCredits;
     private final int expandLevel;
     // endregion
 
@@ -39,7 +36,6 @@ public class ProgramDebugger {
     private final @NotNull List<Integer> debugCyclesHistory = new ArrayList<>();
     private @NotNull Map<String, Integer> debugArguments = new HashMap<>();
     private boolean debugMode = false;
-    private int currentDebugPC = 0;
     private int runningUserCredits;
     // endregion
 
@@ -51,10 +47,8 @@ public class ProgramDebugger {
      * @param builder The Builder instance
      */
     private ProgramDebugger(Builder builder) {
-        this.currentDebugInstructions = builder.instructions;
-        this.currentDebugContext = builder.contextMap;
+        super(builder.instructions, builder.contextMap, builder.userCredits);
         this.expandLevel = builder.expandLevel;
-        this.initialUserCredits = this.runningUserCredits = builder.userCredits;
         this.isMainProgram = builder.isMainProgram;
         this.programName = builder.programName;
         this.architectureType = builder.architectureType;
@@ -112,12 +106,11 @@ public class ProgramDebugger {
         if (debugMode) {
             throw new IllegalStateException("Debug session already started");
         }
-        currentDebugContext.putAll(arguments);
+        executedContextMap.putAll(arguments);
         debugArguments = new HashMap<>(arguments);
         // Save initial state with zero cycles
-        debugStateHistory.add(new HashMap<>(currentDebugContext));
+        debugStateHistory.add(new HashMap<>(executedContextMap));
         debugMode = true;
-        currentDebugPC = currentDebugContext.get(PC_NAME);
         return this;
     }
 
@@ -133,7 +126,7 @@ public class ProgramDebugger {
         executeStep();
         // Prepare result DTO
         return new DebugStateChangeResultDTO(
-                ProgramUtils.extractSortedVariables(currentDebugContext),
+                ProgramUtils.extractSortedVariables(executedContextMap),
                 isDebugFinished()
         );
     }
@@ -143,14 +136,14 @@ public class ProgramDebugger {
             throw new IllegalStateException("Debug session not started");
         }
 
-        if (currentDebugPC == 0) {
+        if (executedContextMap.get(PC_NAME) == 0) {
             // Can't go back further than the first instruction
             throw new IllegalStateException("Already at the beginning of the program");
         }
         // make sure we have enough credits to step back
         int lastCycleCreditCost = debugCyclesHistory.getLast();
         int lastPcValue = debugStateHistory.getLast().get(PC_NAME);
-        String lastInstructionStr = currentDebugInstructions.get(lastPcValue).getStringRepresentation();
+        String lastInstructionStr = executedInstructions.get(lastPcValue).getStringRepresentation();
         if (runningUserCredits < lastCycleCreditCost) {
             throw new InsufficientCredits("Not enough credits to step backward and execute instruction "
                     + lastInstructionStr + " at pc=" + lastPcValue,
@@ -165,14 +158,11 @@ public class ProgramDebugger {
         debugStateHistory.removeLast();
 
         // Restore previous state
-        currentDebugContext.putAll(debugStateHistory.getLast());
-        currentDebugPC = currentDebugContext.get(PC_NAME);
-
-        String instructionStr = currentDebugInstructions.get(currentDebugPC).getStringRepresentation();
+        executedContextMap.putAll(debugStateHistory.getLast());
 
         // Prepare result DTO
         return new DebugStateChangeResultDTO(
-                ProgramUtils.extractSortedVariables(currentDebugContext),
+                ProgramUtils.extractSortedVariables(executedContextMap),
                 false // stepping back can never finish the program
         );
     }
@@ -185,13 +175,13 @@ public class ProgramDebugger {
         // Reset breakpoint statuses at start of resume
 
         // Execute remaining instructions, stopping at breakpoints
-        while (currentDebugPC < currentDebugInstructions.size()) {
+        while (executedContextMap.get(PC_NAME) < executedInstructions.size()) {
             executeStep();
         }
 
         // Prepare result DTO
         return new DebugStateChangeResultDTO(
-                ProgramUtils.extractSortedVariables(currentDebugContext),
+                ProgramUtils.extractSortedVariables(executedContextMap),
                 true // resume always finishes the program
         );
     }
@@ -202,9 +192,51 @@ public class ProgramDebugger {
         }
         // prepare result DTO
         return new DebugStateChangeResultDTO(
-                ProgramUtils.extractSortedVariables(currentDebugContext),
+                ProgramUtils.extractSortedVariables(executedContextMap),
                 true // stopping the debug session marks it as finished
         );
+    }
+
+    /**
+     * Constructs an ExecutionResultDTO representing the current debug state.
+     * used when debug is finished or stopped.
+     *
+     * @return ExecutionResultDTO with current debug information.
+     */
+    public FullExecutionResultDTO getDebugFinishedExecutionResult() {
+        return new FullExecutionResultDTO(
+                isMainProgram,
+                programName,
+                architectureType,
+                debugArguments,
+                ProgramUtils.extractSortedVariables(executedContextMap),
+                executedContextMap.get(OUTPUT_NAME),
+                expandLevel,
+                initialUserCredits - runningUserCredits,
+                initialUserCredits - runningUserCredits
+        );
+    }
+    // endregion
+
+    // region public getters
+
+    public @NotNull String getProgramName() {
+        return programName;
+    }
+
+    // region private helpers
+    private void executeStep() {
+        int creditCost = executeInstruction();
+        // Save state
+        debugStateHistory.add(new HashMap<>(executedContextMap));
+        debugCyclesHistory.add(creditCost); // cycles = credit cost for this instruction;
+
+    }
+
+    // endregion
+
+    private boolean isDebugFinished() {
+        return debugMode && executedContextMap.get(PC_NAME) >= executedInstructions.size();
     }
 
     /**

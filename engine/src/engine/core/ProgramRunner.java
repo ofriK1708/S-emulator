@@ -1,6 +1,7 @@
 package engine.core;
 
 
+import dto.engine.ExecutionResultValuesDTO;
 import dto.engine.ExecutionResultInfoDTO;
 import engine.exception.InsufficientCredits;
 import engine.utils.ArchitectureType;
@@ -19,28 +20,14 @@ import static engine.utils.ProgramUtils.PC_NAME;
  * Class responsible for running a program represented by a list of instructions
  * and maintaining the execution context. doesn't affect's the original instructions or context.
  */
-public class ProgramRunner {
-    private final @NotNull Map<String, Integer> executedContextMap;
-    private final @NotNull List<Instruction> executedInstructions;
-    private final @Nullable ExecutionResultInfoDTO executionResultInfo;
-    private final @NotNull Map<String, Integer> arguments;
-    private boolean isFinished = false;
-    private final int initialUserCredits;
-    private int runningUserCredits;
-    private int cyclesCount = 0;
+public class ProgramRunner extends ProgramExecutor {
 
     private ProgramRunner(@NotNull List<Instruction> executedInstructions,
                           @NotNull Map<String, Integer> executedContextMap,
                           @Nullable ExecutionResultInfoDTO executionResultInfo,
                           @NotNull Map<String, Integer> arguments,
                           int userCredits) {
-        this.executedInstructions = executedInstructions;
-        this.executionResultInfo = executionResultInfo;
-        this.executedContextMap = executedContextMap;
-        this.arguments = arguments;
-        initialUserCredits = runningUserCredits = userCredits;
-        executedContextMap.putAll(arguments);
-
+        super(executedInstructions, executedContextMap, userCredits);
     }
 
     static @NotNull ProgramRunner createInnerRunner(@NotNull ProgramExecutable executable,
@@ -77,6 +64,7 @@ public class ProgramRunner {
     @Contract(pure = true)
     private void run(boolean isMainRun) {
         while (executedContextMap.get(PC_NAME) < executedInstructions.size()) {
+            executeInstruction();
             int currentPC = executedContextMap.get(PC_NAME);
             Instruction instruction = executedInstructions.get(currentPC);
             try {
