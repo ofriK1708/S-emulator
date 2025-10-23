@@ -43,27 +43,33 @@ import java.util.Map;
 
 import static ui.web.utils.UIUtils.*;
 
-public class AppController {
+public class ExecutionController {
 
     private final Map<String, Integer> previousDebugVariables = new HashMap<>();
+
     private final ListProperty<VariableDTO> allVariablesDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
+
     private final ListProperty<VariableDTO> previousVariablesDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
+
     private final ListProperty<VariableDTO> argumentsDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
+
     private final BooleanProperty argumentsLoaded = new SimpleBooleanProperty(false);
 
     private final ListProperty<InstructionDTO> programInstructions =
             new SimpleListProperty<>(FXCollections.observableArrayList());
+
     private final ListProperty<InstructionDTO> derivedInstructions =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final ListProperty<ExecutionStatisticsDTO> executionStatistics =
-            new SimpleListProperty<>(FXCollections.observableArrayList());
+
     private final ListProperty<String> programVariablesNamesAndLabels =
             new SimpleListProperty<>(FXCollections.observableArrayList());
+
     private final MapProperty<String, String> allSubFunction =
             new SimpleMapProperty<>(FXCollections.observableHashMap());
+
     private final StringProperty mainProgramName = new SimpleStringProperty("");
     private final StringProperty currentLoadedProgramName = new SimpleStringProperty("");
     private final @NotNull EngineController engineController;
@@ -137,7 +143,7 @@ public class AppController {
     private boolean isFirstDebugStep = true;
     private boolean isInDebugResume = false;
 
-    public AppController() {
+    public ExecutionController() {
         this.engineController = new LocalEngineController();
         UIUtils.setAppControllerInstance(this);
     }
@@ -275,29 +281,6 @@ public class AppController {
             System.err.println("Return to Dashboard callback not set");
         }
     }
-    // Continuation of AppController.java
-
-    private @NotNull Map<String, Integer> getFinalVariableStates(@NotNull ExecutionStatisticsDTO executionStats) {
-        try {
-            int expandLevel = executionStats.expandLevel();
-            Map<String, Integer> arguments = executionStats.arguments();
-
-            System.out.println("Retrieving final variable states for execution #" +
-                    executionStats.executionNumber() + " (expand level: " + expandLevel + ")");
-
-            Map<String, Integer> finalStates = engineController.getFinalVariableStates(expandLevel, arguments);
-
-            System.out.println("Retrieved " + finalStates.size() + " final variable states for execution #" +
-                    executionStats.executionNumber());
-
-            return finalStates;
-
-        } catch (Exception e) {
-            System.err.println("Error retrieving final variable states: " + e.getMessage());
-            showError("Error retrieving execution details: " + e.getMessage());
-            return new HashMap<>();
-        }
-    }
 
     public void handleRerunRequest(int expandLevel, @NotNull Map<String, Integer> previousArguments) {
         if (!programLoaded.get()) {
@@ -348,7 +331,7 @@ public class AppController {
 
         if (inDebugSession) {
             try {
-                engineController.stopDebugSession();
+                engineController.debugStop();
             } catch (Exception e) {
                 System.err.println("Warning: Error stopping debug session during rerun reset: " + e.getMessage());
             }
@@ -428,8 +411,6 @@ public class AppController {
         programArguments.clear();
         programInstructions.setAll(loadedProgram.instructions());
         derivedInstructions.clear();
-        executionStatistics.setAll(engineController.getAllExecutionStatistics());
-        programRanAtLeastOnce.set(!executionStatistics.isEmpty());
         instructionsTableController.clearHighlighting();
         derivedInstructionsTableController.clearHighlighting();
         allVariablesDTO.clear();
@@ -521,8 +502,6 @@ public class AppController {
 
             engineController.runLoadedProgram(expandLevel, programArguments);
             allVariablesDTO.setAll(UIUtils.getAllVariablesDTOSorted((LocalEngineController) engineController, expandLevel));
-            executionStatistics.add(engineController.getLastExecutionStatistics());
-
             ProgramDTO executedProgram = engineController.getProgramByExpandLevel(expandLevel);
             programInstructions.setAll(executedProgram.instructions());
             derivedInstructions.clear();
@@ -594,7 +573,6 @@ public class AppController {
         programArguments.clear();
 
         engineController.clearLoadedProgram();
-        executionStatistics.clear();
         programInstructions.clear();
         derivedInstructions.clear();
         allVariablesDTO.clear();
@@ -629,7 +607,7 @@ public class AppController {
     // DEBUG METHODS
     public void stopDebugSession() {
         try {
-            engineController.stopDebugSession();
+            engineController.debugStop();
 
             if (engineController.isDebugFinished()) {
                 showInfo("Debug session stopped. Execution was completed.");
@@ -729,7 +707,7 @@ public class AppController {
                         currentExpandLevel.get()));
             }
 
-            engineController.debugStep();
+            engineController.debugStepOver();
 
             int currentPC = engineController.getCurrentDebugPC();
             currentCycles.set(engineController.getCurrentDebugCycles());

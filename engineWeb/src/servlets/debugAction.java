@@ -6,6 +6,7 @@ import dto.engine.ExecutionResultStatisticsDTO;
 import dto.engine.FullExecutionResultDTO;
 import engine.core.ProgramDebugger;
 import engine.exception.InsufficientCredits;
+import engine.utils.DebugAction;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -18,7 +19,8 @@ import utils.ServletUtils;
 
 import java.io.IOException;
 
-import static utils.ServletConstants.*;
+import static utils.ServletConstants.DEBUG_ACTION_PARAM;
+import static utils.ServletConstants.getAllDebugActionsOptions;
 
 @WebServlet(name = "debugAction", urlPatterns = "/debugger/action")
 public class debugAction extends HttpServlet {
@@ -38,37 +40,46 @@ public class debugAction extends HttpServlet {
             return;
         }
         // Get the debug action parameter and perform the corresponding action
-        String debugAction = req.getParameter(DEBUG_ACTION_PARAM);
+        String debugActionStr = req.getParameter(DEBUG_ACTION_PARAM);
+        if (debugActionStr == null) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    "Debug action parameter is missing. Available actions: " + getAllDebugActionsOptions());
+            return;
+        }
+        DebugAction debugAction = DebugAction.fromString(debugActionStr);
+        if (debugAction == null) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    "Unknown debug action: " + debugActionStr + ". Available actions: " + getAllDebugActionsOptions());
+            return;
+        }
+
         DebugStateChangeResultDTO stateChange;
         try {
             switch (debugAction) {
-                case DEBUG_ACTION_STEP_OVER -> {
+                case STEP_OVER -> {
                     stateChange = debugger.stepOver();
                     checkIfDebugEnded(stateChange, debugger, user);
                     writeDebugStateChangeResult(resp, stateChange);
                 }
-                case DEBUG_ACTION_STEP_BACK -> {
+                case STEP_BACK -> {
                     stateChange = debugger.stepBack();
                     checkIfDebugEnded(stateChange, debugger, user);
                     writeDebugStateChangeResult(resp, stateChange);
                 }
-                case DEBUG_ACTION_RESUME -> {
+                case RESUME -> {
                     stateChange = debugger.resume();
                     checkIfDebugEnded(stateChange, debugger, user);
                     writeDebugStateChangeResult(resp, stateChange);
                 }
-                case DEBUG_ACTION_STOP -> {
+                case STOP -> {
                     stateChange = debugger.stop();
                     checkIfDebugEnded(stateChange, debugger, user);
                     writeDebugStateChangeResult(resp, stateChange);
                 }
-                default -> {
-                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                    resp.getWriter().println("Unknown debug action: " + debugAction);
-                }
             }
         } catch (InsufficientCredits insufficientCredits) {
             user.setRemainingCredits(insufficientCredits.getCreditsLeft());
+            user.clearDebugger();
             sendErrorMessage(resp, insufficientCredits);
         } catch (Exception e) {
             sendErrorMessage(resp, e);

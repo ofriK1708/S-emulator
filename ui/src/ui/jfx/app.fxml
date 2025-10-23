@@ -11,14 +11,14 @@
         <BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity"
                     minWidth="-Infinity" styleClass="app-main-border">
 
-            <!-- TOP: file bar + program/function selector row -->
+            <!-- TOP: file bar + programDTO/function selector row -->
             <top>
                 <VBox spacing="8.0">
                     <padding>
                         <Insets bottom="8" left="12" right="12" top="8"/>
                     </padding>
                     <fx:include fx:id="fileHandler" source="fileHandler/fileHandler.fxml"/>
-                    <fx:include fx:id="programFunction" source="program/function/programFunction.fxml"/>
+                    <fx:include fx:id="programFunction" source="programDTO/function/programFunction.fxml"/>
                 </VBox>
             </top>
 

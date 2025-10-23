@@ -7,7 +7,7 @@
 <?import java.lang.*?>
 <HBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" alignment="CENTER_LEFT" spacing="8" styleClass="buttons-HBox"
       stylesheets="@ProgramFunction.css" xmlns="http://javafx.com/javafx/24.0.1"
-      fx:controller="ui.web.jfx.program.function.ProgramFunctionController">
+      fx:controller="ui.web.jfx.programDTO.function.ProgramFunctionController">
 
     <padding>
         <Insets bottom="6" left="8" right="8" top="6"/>

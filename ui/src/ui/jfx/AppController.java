@@ -292,7 +292,7 @@ public class AppController {
 
         if (inDebugSession) {
             try {
-                localEngineController.stopDebugSession();
+                localEngineController.debugStop();
             } catch (Exception e) {
                 System.err.println("Warning: Error stopping debug session during rerun reset: " + e.getMessage());
             }
@@ -632,7 +632,7 @@ public class AppController {
     // DEBUG METHODS
     public void stopDebugSession() {
         try {
-            localEngineController.stopDebugSession();
+            localEngineController.debugStop();
 
             if (localEngineController.isDebugFinished()) {
                 showInfo("Debug session stopped. Execution was completed.");
@@ -738,7 +738,7 @@ public class AppController {
             }
 
             // Execute one instruction
-            localEngineController.debugStep();
+            localEngineController.debugStepOver();
 
             int currentPC = localEngineController.getCurrentDebugPC();
             currentCycles.set(localEngineController.getCurrentDebugCycles());
@@ -786,7 +786,7 @@ public class AppController {
 
         try {
             previousDebugVariables.putAll(UIUtils.getAllVariablesMap(localEngineController, currentExpandLevel.get()));
-            localEngineController.debugStepBackward();
+            localEngineController.debugStepBack();
             int currentPC = localEngineController.getCurrentDebugPC();
             currentCycles.set(localEngineController.getCurrentDebugCycles());
 

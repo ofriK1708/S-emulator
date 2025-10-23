@@ -15,7 +15,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
 import system.controller.LocalEngineController;
-import ui.web.jfx.AppController;
+import ui.web.jfx.ExecutionController;
 
 import java.util.*;
 
@@ -25,15 +25,15 @@ public class UIUtils {
             Comparator.comparingInt(str -> Integer.parseInt(str.substring(1)));
     public static boolean showInfoAndSuccess = false;
     // Reference to AppController for re-run functionality
-    private static AppController appControllerInstance = null;
+    private static ExecutionController executionControllerInstance = null;
 
     // for later use if needed
     public static void setShowInfoAndSuccess(boolean showInfoAndSuccess) {
         UIUtils.showInfoAndSuccess = showInfoAndSuccess;
     }
 
-    public static void setAppControllerInstance(AppController appController) {
-        appControllerInstance = appController;
+    public static void setAppControllerInstance(ExecutionController executionController) {
+        executionControllerInstance = executionController;
         System.out.println("AppController instance set for UIUtils re-run functionality");
     }
 
@@ -225,12 +225,12 @@ public class UIUtils {
     }
 
     public static void executeRerunFromShowDialog(int expandLevel, Map<String, Integer> arguments) {
-        if (appControllerInstance == null) {
+        if (executionControllerInstance == null) {
             throw new IllegalStateException("AppController instance not set in UIUtils");
         }
 
         // This should trigger the complete rerun process
-        appControllerInstance.handleRerunRequest(expandLevel, arguments);
+        executionControllerInstance.handleRerunRequest(expandLevel, arguments);
     }
 
     public static void checkIfShouldAnimate(@NotNull TableRow<?> row, boolean isAnimationsOn) {

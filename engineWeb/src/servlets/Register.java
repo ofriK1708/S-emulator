@@ -1,7 +1,5 @@
 package servlets;
 
-import com.google.gson.Gson;
-import dto.server.UserDTO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,7 +12,7 @@ import java.io.IOException;
 
 import static utils.ServletConstants.USERNAME_PARAM;
 
-@WebServlet(name = "register", urlPatterns = {"/register"})
+@WebServlet(name = "registerUser", urlPatterns = "/users/register")
 public class Register extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -26,17 +24,16 @@ public class Register extends HttpServlet {
         }
         username = username.trim();
         UserManager userManager = ServletUtils.getUserManager(getServletContext());
-        Gson gson = new Gson();
         synchronized (this) {
             if (userManager.isUserExists(username)) {
                 resp.setStatus(HttpServletResponse.SC_CONFLICT);
                 resp.getWriter().write("User with the username '" + username + "' already exists. " +
                         "Please choose a different username.");
             } else {
-                UserDTO userDTO = userManager.addUser(username);
+                userManager.addUser(username);
                 resp.setStatus(HttpServletResponse.SC_OK);
-                resp.setContentType("application/json");
-                resp.getWriter().write(gson.toJson(userDTO));
+                resp.setContentType("text/plain");
+                resp.getWriter().println("user " + username + " has been successfully registered.");
                 req.getSession().setAttribute(USERNAME_PARAM, username);
             }
         }

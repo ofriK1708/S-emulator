@@ -8,7 +8,7 @@
             fitToWidth="true"
             stylesheets="@styles/style.css"
             xmlns="http://javafx.com/javafx/24.0.1"
-            fx:controller="ui.web.jfx.AppController">
+            fx:controller="ui.web.jfx.ExecutionController">
     <content>
         <BorderPane maxHeight="1.7976931348623157E308"
                     maxWidth="1.7976931348623157E308"
@@ -28,7 +28,7 @@
 
                     <!-- Program/Function Selector -->
                     <fx:include fx:id="programFunction"
-                                source="program/function/programFunction.fxml"/>
+                                source="programDTO/function/programFunction.fxml"/>
                 </VBox>
             </top>
 
@@ -173,7 +173,7 @@
                                         <content>
                                             <VBox alignment="CENTER" spacing="8.0">
                                                 <!-- Statistics content would go here -->
-                                                <Label text="Execution history will appear here after running the program"
+                                                <Label text="Execution history will appear here after running the programDTO"
                                                        styleClass="placeholder-text"/>
                                             </VBox>
                                         </content>

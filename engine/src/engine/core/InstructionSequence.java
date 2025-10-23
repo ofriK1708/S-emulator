@@ -7,6 +7,7 @@ import engine.generated_2.SInstruction;
 import engine.generated_2.SProgram;
 import engine.utils.ArchitectureType;
 import engine.utils.ProgramUtils;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -279,6 +280,7 @@ final class InstructionSequence {
         return ProgramUtils.extractSortedWorkVars(contextMapsByExpandLevel.get(expandLevel));
     }
 
+    @Contract(pure = true)
     public @NotNull ProgramExecutable getProgramExecutableAtExpandLevel(int expandLevel) {
         return new ProgramExecutable(
                 getInstructionsCopy(expandLevel),

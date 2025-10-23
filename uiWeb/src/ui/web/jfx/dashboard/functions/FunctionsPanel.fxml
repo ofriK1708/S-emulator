@@ -43,7 +43,7 @@
             </columns>
 
             <placeholder>
-                <Label text="No functions available.\nLoad a program file to view functions."
+                <Label text="No functions available.\nLoad a programDTO file to view functions."
                        styleClass="placeholder-text"/>
             </placeholder>
 
