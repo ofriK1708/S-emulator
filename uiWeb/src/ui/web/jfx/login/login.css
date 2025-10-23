@@ -1,0 +1,89 @@
+/* login.css - Modern login screen style inspired by VariableInputDialog.css */
+
+.root {
+    -fx-background-color: linear-gradient(to bottom right, #e0f7fa, #b2ebf2);
+    -fx-background-radius: 12px;
+    -fx-padding: 40px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 12, 0, 0, 3);
+}
+
+/* Title Label */
+.title-label,
+.instruction-label {
+    -fx-font-size: 24px;
+    -fx-text-fill: #1976d2;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 10 0;
+    -fx-background-color: transparent;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+}
+
+/* Regular Label */
+.label {
+    -fx-font-size: 15px;
+    -fx-text-fill: #222;
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+}
+
+/* Text Field */
+.text-field {
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #25a5a0;
+    -fx-border-width: 2px;
+    -fx-padding: 12px 16px;
+    -fx-font-size: 15px;
+    -fx-effect: dropshadow(gaussian, rgba(37, 165, 160, 0.10), 3, 0, 0, 2);
+    -fx-transition: border-color 0.2s;
+}
+
+.text-field:focused {
+    -fx-border-color: #2196f3;
+    -fx-background-color: #e3f2fd;
+    -fx-effect: dropshadow(gaussian, rgba(33, 150, 243, 0.20), 4, 0, 0, 2);
+}
+
+.text-field:hover {
+    -fx-border-color: #2bb8b2;
+}
+
+/* Button */
+.button {
+    -fx-background-radius: 20px;
+    -fx-background-color: linear-gradient(to bottom, #25a5a0, #1e8883);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+    -fx-padding: 12px 32px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.18), 3, 0, 0, 2);
+    -fx-border-width: 0;
+}
+
+.button:hover {
+    -fx-background-color: linear-gradient(to bottom, #2bb8b2, #21968f);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 4, 0, 0, 3);
+}
+
+.button:pressed {
+    -fx-background-color: #1a7a76;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 2, 0, 0, 1);
+}
+
+.button:disabled {
+    -fx-background-color: linear-gradient(to bottom, #89c6c3, #7ab8b5);
+    -fx-opacity: 0.7;
+    -fx-effect: none;
+    -fx-cursor: default;
+}
+
+/* Error State */
+.error-field {
+    -fx-border-color: #d32f2f !important;
+    -fx-border-width: 2px !important;
+    -fx-background-color: #ffebee;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(211, 47, 47, 0.15), 3, 0, 0, 2);
+}

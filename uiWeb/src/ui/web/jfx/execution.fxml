@@ -86,7 +86,7 @@
                                     <TitledPane fx:id="runControlsTitledPane"
                                                 alignment="CENTER"
                                                 text="Run Controls"
-                                                VBox.vgrow="NEVER">
+                                                VBox.vgrow="ALWAYS">
                                         <content>
                                             <VBox alignment="CENTER"
                                                   minWidth="-Infinity"
@@ -101,19 +101,18 @@
                                     <TitledPane fx:id="debugControlsTitledPane"
                                                 alignment="CENTER"
                                                 minWidth="-Infinity"
-                                                text="Debug Controls"
-                                                VBox.vgrow="NEVER">
+                                                text="Debug Controls">
                                         <content>
-                                            <VBox alignment="CENTER"
+                                            <HBox alignment="CENTER"
                                                   minWidth="-Infinity"
                                                   spacing="8.0">
                                                 <fx:include fx:id="debugControls"
                                                             source="debugger/Debugger.fxml"/>
-                                            </VBox>
+                                            </HBox>
                                         </content>
                                     </TitledPane>
 
-                                    <!-- Variables & Cycles Section - REDESIGNED -->
+                                    <!-- Variables & Cycles Section -->
                                     <TitledPane fx:id="variablesTitledPane"
                                                 alignment="CENTER"
                                                 maxHeight="1.7976931348623157E308"
@@ -123,45 +122,60 @@
                                                 text="Arguments / Variables / Cycles"
                                                 VBox.vgrow="ALWAYS">
                                         <content>
-                                            <VBox spacing="10.0">
-                                                <!-- Top Row: Arguments and All Variables side by side -->
-                                                <HBox spacing="10.0" VBox.vgrow="ALWAYS">
-                                                    <!-- Arguments Table (LEFT) -->
+                                            <GridPane alignment="CENTER"
+                                                      hgap="20.0"
+                                                      maxHeight="1.7976931348623157E308"
+                                                      maxWidth="1.7976931348623157E308">
+                                                <columnConstraints>
+                                                    <ColumnConstraints hgrow="ALWAYS"
+                                                                       maxWidth="1.7976931348623157E308"
+                                                                       minWidth="10.0"/>
+                                                    <ColumnConstraints hgrow="ALWAYS"
+                                                                       maxWidth="1.7976931348623157E308"
+                                                                       minWidth="10.0"/>
+                                                </columnConstraints>
+                                                <rowConstraints>
+                                                    <RowConstraints maxHeight="228.0"
+                                                                    minHeight="10.0"
+                                                                    vgrow="ALWAYS"/>
+                                                    <RowConstraints maxHeight="278.0"
+                                                                    minHeight="0.0"
+                                                                    vgrow="ALWAYS"/>
+                                                    <RowConstraints maxHeight="10.0"
+                                                                    minHeight="0.0"
+                                                                    vgrow="NEVER"/>
+                                                    <RowConstraints maxHeight="60.0"
+                                                                    minHeight="0.0"
+                                                                    vgrow="ALWAYS"/>
+                                                </rowConstraints>
+                                                <children>
+                                                    <!-- Arguments Table -->
                                                     <fx:include fx:id="argumentsTable"
                                                                 source="variables/variablesTable.fxml"
-                                                                HBox.hgrow="SOMETIMES"/>
+                                                                GridPane.halignment="CENTER"
+                                                                GridPane.hgrow="ALWAYS"
+                                                                GridPane.rowSpan="2"
+                                                                GridPane.valignment="CENTER"
+                                                                GridPane.vgrow="ALWAYS"/>
 
-                                                    <!-- All Variables Table (RIGHT - larger) -->
+                                                    <!-- All Variables Table -->
                                                     <fx:include fx:id="allVarsTable"
                                                                 source="variables/variablesTable.fxml"
-                                                                HBox.hgrow="ALWAYS"/>
-                                                </HBox>
+                                                                GridPane.columnIndex="1"
+                                                                GridPane.hgrow="ALWAYS"
+                                                                GridPane.rowSpan="4"
+                                                                GridPane.vgrow="ALWAYS"/>
 
-                                                <!-- Bottom Row: Cycles and Back Button side by side -->
-                                                <HBox spacing="10.0" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
-                                                    <!-- Cycles Display (LEFT - compact) -->
-                                                    <VBox styleClass="cycles-container"
-                                                          prefWidth="150"
-                                                          minWidth="150"
-                                                          maxWidth="150"
-                                                          HBox.hgrow="NEVER">
-                                                        <fx:include fx:id="cycles"
-                                                                    source="cycles/cycles.fxml"/>
-                                                    </VBox>
-
-                                                    <!-- Spacer -->
-                                                    <Region HBox.hgrow="ALWAYS"/>
-
-                                                    <!-- Back to Dashboard Button (RIGHT) -->
-                                                    <Button fx:id="backToDashboardButton"
-                                                            text="← Back to Dashboard"
-                                                            onAction="#handleBackToDashboard"
-                                                            styleClass="back-button"
-                                                            prefWidth="200"
-                                                            prefHeight="40"
-                                                            HBox.hgrow="NEVER"/>
-                                                </HBox>
-                                            </VBox>
+                                                    <!-- Cycles Display -->
+                                                    <fx:include fx:id="cycles"
+                                                                source="cycles/cycles.fxml"
+                                                                GridPane.halignment="CENTER"
+                                                                GridPane.hgrow="ALWAYS"
+                                                                GridPane.rowIndex="3"
+                                                                GridPane.valignment="CENTER"
+                                                                GridPane.vgrow="ALWAYS"/>
+                                                </children>
+                                            </GridPane>
                                         </content>
                                     </TitledPane>
 
@@ -169,7 +183,7 @@
                                     <TitledPane fx:id="statisticsTitledPane"
                                                 alignment="CENTER"
                                                 text="Execution Statistics"
-                                                VBox.vgrow="NEVER">
+                                                VBox.vgrow="ALWAYS">
                                         <content>
                                             <VBox alignment="CENTER" spacing="8.0">
                                                 <!-- Statistics content would go here -->

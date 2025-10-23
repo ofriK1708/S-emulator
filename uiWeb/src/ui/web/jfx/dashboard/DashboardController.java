@@ -24,7 +24,6 @@ import java.net.URL;
 /**
  * Main controller for the Dashboard screen.
  * Coordinates all sub-panels and manages navigation to execution screen.
- * CRITICAL: Navigation to Execution ONLY happens via execute buttons.
  */
 public class DashboardController {
 
