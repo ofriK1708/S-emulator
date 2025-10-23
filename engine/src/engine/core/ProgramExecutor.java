@@ -24,10 +24,19 @@ public class ProgramExecutor {
         initialUserCredits = runningUserCredits = userCredits;
     }
 
-    protected int executeInstruction() {
+    protected ProgramExecutor(@NotNull List<Instruction> executedInstructions,
+                              @NotNull Map<String, Integer> executedContextMap,
+                              @NotNull Map<String, Integer> arguments,
+                              int userCredits) {
+        this.executedInstructions = executedInstructions;
+        this.executedContextMap = executedContextMap;
+        initialUserCredits = runningUserCredits = userCredits;
+        executedContextMap.putAll(arguments);
+    }
+
+    protected int executeInstruction(Instruction instruction) {
         try {
             int currentPC = executedContextMap.get(PC_NAME);
-            Instruction instruction = executedInstructions.get(currentPC);
             int creditCost = calcCreditCost(instruction, executedContextMap);
             if (runningUserCredits < creditCost) {
                 throw new InsufficientCredits("Insufficient credits to execute instruction" +
@@ -43,6 +52,12 @@ public class ProgramExecutor {
             throw new RuntimeException("Error executing instruction at PC=" +
                     executedContextMap.get(PC_NAME) + ": " + e.getMessage(), e);
         }
+    }
+
+    protected int executeInstruction() {
+        int currentPC = executedContextMap.get(PC_NAME);
+        Instruction instruction = executedInstructions.get(currentPC);
+        return executeInstruction(instruction);
     }
 
     private int calcCreditCost(@NotNull Instruction instruction, @NotNull Map<String, Integer> contextMap) {

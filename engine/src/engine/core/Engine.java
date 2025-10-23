@@ -127,6 +127,7 @@ public class Engine {
                       int userCredits,
                       @NotNull ArchitectureType architectureType)
             throws ExpandLevelOutOfBounds, IllegalArchitectureType, InsufficientCredits {
+
         validateRunPossibility(expandLevel, userCredits, architectureType);
 
         ProgramExecutable executable = instructionSequence.getProgramExecutableAtExpandLevel(expandLevel);
@@ -135,6 +136,7 @@ public class Engine {
                 .isMainProgram(isMainProgram())
                 .programName(getRepresentationName())
                 .architectureType(architectureType)
+                .expandLevel(expandLevel)
                 .build();
 
         ProgramRunner runner = ProgramRunner.createMainRunner(executable, executionMetadata, arguments, userCredits);
@@ -193,7 +195,7 @@ public class Engine {
 
         ProgramExecutable executable = instructionSequence.getProgramExecutableAtExpandLevel(expandLevel);
 
-        ProgramDebugger debugger = ProgramDebugger.builder(executable, userCredits, expandLevel)
+        ProgramDebugger debugger = ProgramDebugger.builder(executable, userCredits)
                 .executionMetadata(ExecutionMetadata.builder()
                         .isMainProgram(isMainProgram())
                         .programName(getRepresentationName())

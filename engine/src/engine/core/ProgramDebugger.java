@@ -3,7 +3,6 @@ package engine.core;
 import dto.engine.DebugStateChangeResultDTO;
 import dto.engine.ExecutionResultInfoDTO;
 import engine.exception.InsufficientCredits;
-import engine.utils.ArchitectureType;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,10 +24,7 @@ import static engine.utils.ProgramUtils.PC_NAME;
  */
 public class ProgramDebugger extends ProgramExecutor {
     // region Final fields set via Builder
-    private final boolean isMainProgram;
-    private final @NotNull String programName;
-    private final @NotNull ArchitectureType architectureType;
-    private final int expandLevel;
+    private final @NotNull ExecutionMetadata executionMetadata;
     // endregion
 
     // region State-related fields
@@ -36,7 +32,6 @@ public class ProgramDebugger extends ProgramExecutor {
     private final @NotNull List<Integer> debugCyclesHistory = new ArrayList<>();
     private @NotNull Map<String, Integer> debugArguments = new HashMap<>();
     private boolean debugMode = false;
-    private int runningUserCredits;
     // endregion
 
     // region class ctor and builder
@@ -48,15 +43,12 @@ public class ProgramDebugger extends ProgramExecutor {
      */
     private ProgramDebugger(Builder builder) {
         super(builder.instructions, builder.contextMap, builder.userCredits);
-        this.expandLevel = builder.expandLevel;
-        this.isMainProgram = builder.isMainProgram;
-        this.programName = builder.programName;
-        this.architectureType = builder.architectureType;
+        this.executionMetadata = builder.executionMetadata;
     }
 
     // Static factory method to get a new builder instance
-    static Builder builder(@NotNull ProgramExecutable executable, int userCredits, int expandLevel) {
-        return new Builder(executable, userCredits, expandLevel);
+    static Builder builder(@NotNull ProgramExecutable executable, int userCredits) {
+        return new Builder(executable, userCredits);
     }
 
     /**
@@ -67,33 +59,19 @@ public class ProgramDebugger extends ProgramExecutor {
      */
     public ExecutionResultInfoDTO getDebugFinishedExecutionResult() {
         return new ExecutionResultInfoDTO(
-                ExecutionMetadata.builder()
-                        .isMainProgram(isMainProgram)
-                        .programName(programName)
-                        .architectureType(architectureType)
-                        .expandLevel(expandLevel)
-                        .build(),
+                executionMetadata,
                 new ExecutionResultValues(
-                        currentDebugContext.get(OUTPUT_NAME),
+                        executedContextMap.get(OUTPUT_NAME),
                         debugArguments,
-                        ProgramUtils.extractSortedWorkVars(currentDebugContext)
+                        ProgramUtils.extractSortedWorkVars(executedContextMap)
                 ),
                 ExecutionStatistics.builder()
-                        .cycleCount(debugCyclesHistory.stream().mapToInt(Integer::intValue).sum())
+                        .cycleCount(initialUserCredits - runningUserCredits) // credit = cycles
                         .creditCost(initialUserCredits - runningUserCredits)
-                        .build(
-                        )
-//                isMainProgram,
-//                programName,
-//                architectureType,
-//                debugArguments,
-//                ProgramUtils.extractSortedVariables(currentDebugContext),
-//                currentDebugContext.get(OUTPUT_NAME),
-//                expandLevel,
-//                initialUserCredits - runningUserCredits,
-//                initialUserCredits - runningUserCredits
+                        .build()
         );
     }
+
     /**
      * Starts a debug session by initializing the context with provided arguments.
      *
@@ -142,8 +120,11 @@ public class ProgramDebugger extends ProgramExecutor {
         }
         // make sure we have enough credits to step back
         int lastCycleCreditCost = debugCyclesHistory.getLast();
+
         int lastPcValue = debugStateHistory.getLast().get(PC_NAME);
+
         String lastInstructionStr = executedInstructions.get(lastPcValue).getStringRepresentation();
+
         if (runningUserCredits < lastCycleCreditCost) {
             throw new InsufficientCredits("Not enough credits to step backward and execute instruction "
                     + lastInstructionStr + " at pc=" + lastPcValue,
@@ -197,32 +178,33 @@ public class ProgramDebugger extends ProgramExecutor {
         );
     }
 
-    /**
-     * Constructs an ExecutionResultDTO representing the current debug state.
-     * used when debug is finished or stopped.
-     *
-     * @return ExecutionResultDTO with current debug information.
-     */
-    public FullExecutionResultDTO getDebugFinishedExecutionResult() {
-        return new FullExecutionResultDTO(
-                isMainProgram,
-                programName,
-                architectureType,
-                debugArguments,
-                ProgramUtils.extractSortedVariables(executedContextMap),
-                executedContextMap.get(OUTPUT_NAME),
-                expandLevel,
-                initialUserCredits - runningUserCredits,
-                initialUserCredits - runningUserCredits
-        );
-    }
+//    /**
+//     * Constructs an ExecutionResultDTO representing the current debug state.
+//     * used when debug is finished or stopped.
+//     *
+//     * @return ExecutionResultDTO with current debug information.
+//     */
+//    public FullExecutionResultDTO getDebugFinishedExecutionResult() {
+//        return new FullExecutionResultDTO(
+//                isMainProgram,
+//                programName,
+//                architectureType,
+//                debugArguments,
+//                ProgramUtils.extractSortedVariables(executedContextMap),
+//                executedContextMap.get(OUTPUT_NAME),
+//                expandLevel,
+//                initialUserCredits - runningUserCredits,
+//                initialUserCredits - runningUserCredits
+//        );
+//    }
     // endregion
 
     // region public getters
 
     public @NotNull String getProgramName() {
-        return programName;
+        return executionMetadata.programName();
     }
+    // endregion
 
     // region private helpers
     private void executeStep() {
@@ -233,12 +215,12 @@ public class ProgramDebugger extends ProgramExecutor {
 
     }
 
-    // endregion
-
     private boolean isDebugFinished() {
         return debugMode && executedContextMap.get(PC_NAME) >= executedInstructions.size();
     }
+    // endregion
 
+    // region Builder class
     /**
      * Builder for ProgramDebugger.
      * Allows setting required and optional parameters.
@@ -250,33 +232,12 @@ public class ProgramDebugger extends ProgramExecutor {
         private final List<Instruction> instructions;
         private final Map<String, Integer> contextMap;
         private final int userCredits;
-        private final int expandLevel;
+        private ExecutionMetadata executionMetadata;
 
-        // Optional parameters with default values
-        private boolean isMainProgram = false;
-        private String programName = " ";
-        private ArchitectureType architectureType = ArchitectureType.ARCHITECTURE_I; // the default architecture
-
-        private Builder(@NotNull ProgramExecutable executable, int userCredits, int expandLevel) {
+        private Builder(@NotNull ProgramExecutable executable, int userCredits) {
             this.instructions = executable.instructions();
             this.contextMap = executable.contextMap();
             this.userCredits = userCredits;
-            this.expandLevel = expandLevel;
-        }
-
-        public Builder mainProgram(boolean isMainProgram) {
-            this.isMainProgram = isMainProgram;
-            return this;
-        }
-
-        public Builder programName(@NotNull String programName) {
-            this.programName = programName;
-            return this;
-        }
-
-        public Builder setArchitectureType(@NotNull ArchitectureType architectureType) {
-            this.architectureType = architectureType;
-            return this;
         }
 
         /**
@@ -286,9 +247,7 @@ public class ProgramDebugger extends ProgramExecutor {
          * @return Builder instance for chaining
          */
         public Builder executionMetadata(ExecutionMetadata executionMetadata) {
-            this.isMainProgram = executionMetadata.isMainProgram();
-            this.programName = executionMetadata.programName();
-            this.architectureType = executionMetadata.architectureType();
+            this.executionMetadata = executionMetadata;
             return this;
         }
 
@@ -296,43 +255,5 @@ public class ProgramDebugger extends ProgramExecutor {
             return new ProgramDebugger(this);
         }
     }
-
-    // endregion
-
-    // region public getters
-
-    public @NotNull String getProgramName() {
-        return programName;
-    }
-    // region private helpers
-    private void executeStep() {
-        Instruction instruction = currentDebugInstructions.get(currentDebugPC);
-
-        try {
-            int creditCost = instruction.getCycles();
-            if (runningUserCredits < creditCost) {
-                throw new InsufficientCredits("Insufficient credits to execute instruction" +
-                        instruction.getStringRepresentation() + " at PC=" + currentDebugPC, runningUserCredits,
-                        creditCost);
-            }
-            runningUserCredits -= creditCost;
-            instruction.execute(currentDebugContext);
-            currentDebugPC = currentDebugContext.get(PC_NAME);
-            // Save state
-            debugStateHistory.add(new HashMap<>(currentDebugContext));
-            debugCyclesHistory.add(creditCost); // cycles = credit cost for this instruction;
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error executing debug instruction at PC=" +
-                    currentDebugPC + ": " + e.getMessage(), e);
-        }
-    }
-
-    // endregion
-
-    private boolean isDebugFinished() {
-        return debugMode && currentDebugPC >= currentDebugInstructions.size();
-    }
-
     // endregion
 }

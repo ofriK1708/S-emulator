@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class ExecutionResultValues {
     int output = 0;
-    @NotNull Map<String, Integer> arguments = new HashMap<>();
+    @NotNull Map<String, Integer> arguments;
     @NotNull Map<String, Integer> workVariables = new HashMap<>();
 
     public ExecutionResultValues(@NotNull Map<String, Integer> arguments) {
