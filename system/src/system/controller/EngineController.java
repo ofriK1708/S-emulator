@@ -1,6 +1,9 @@
 package system.controller;
 
-import dto.engine.ProgramDTO;
+import dto.engine.FunctionMetadata;
+import dto.engine.ProgramMetadata;
+import dto.server.SystemResponse;
+import dto.server.UserDTO;
 import engine.exception.FunctionNotFound;
 import engine.exception.LabelNotExist;
 import jakarta.xml.bind.JAXBException;
@@ -10,49 +13,41 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public interface EngineController {
     void LoadProgramFromFile(@NotNull Path xmlFilePath) throws LabelNotExist, JAXBException, IOException,
             FunctionNotFound;
 
-    void loadProgram(String programName);
+    void loadProgram(String programName, @NotNull Consumer<SystemResponse> onResponse) throws IOException;
 
-    ProgramDTO getBasicProgram() throws IOException;
+    Set<ProgramMetadata> getProgramsMetadata() throws IOException;
 
-    int getMaxExpandLevel();
-
-    void runLoadedProgram(int expandLevel, @NotNull Map<String, Integer> arguments);
-
-    @NotNull ProgramDTO getProgramByExpandLevel(int expandLevel);
-
-    @NotNull Set<String> getAllVariablesAndLabelsNames(int expandLevel, boolean includeLabels);
-
-    @NotNull Map<String, Integer> getSortedArguments(int expandLevel);
-
-    @NotNull Map<String, Integer> getSortedArguments();
-
-    // @NotNull Map<String, String> getFunctionsSet(); not sure if needed
-    @NotNull Integer getProgramResult(int expandLevel);
-
-    @NotNull Map<String, Integer> getWorkVars(int expandLevel);
-
-    void startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments);
-
-    void debugStep();
-
-    void debugStepBackward();
-
-    void debugResume();
-
-    void stopDebugSession();
-
-    int getCurrentDebugPC();
-
-    boolean isDebugFinished();
-
-    @NotNull Map<String, Integer> getFinalVariableStates(int expandLevel, @NotNull Map<String, Integer> arguments);
-
-    int getCurrentDebugCycles();
+    Set<FunctionMetadata> getFunctionsMetadata() throws IOException;
 
     void clearLoadedProgram();
+
+    void getBasicProgram(@NotNull Consumer<SystemResponse> onResponse) throws IOException;
+
+    void getProgramByExpandLevel(int expandLevel, @NotNull Consumer<SystemResponse> onResponse) throws IOException;
+
+    void runLoadedProgram(int expandLevel, @NotNull Map<String, Integer> arguments,
+                          @NotNull Consumer<SystemResponse> onResponse) throws IOException;
+
+    void startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments,
+                           @NotNull Consumer<SystemResponse> onResponse) throws IOException;
+
+    void debugStepOver(@NotNull Consumer<SystemResponse> onResponse) throws IOException;
+
+    void debugStepBack(@NotNull Consumer<SystemResponse> onResponse) throws IOException;
+
+    void debugResume(@NotNull Consumer<SystemResponse> onResponse) throws IOException;
+
+    void debugStop(@NotNull Consumer<SystemResponse> onResponse) throws IOException;
+
+    void getUserStatistics(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse) throws IOException;
+
+    Set<UserDTO> getAllUsersDTO() throws IOException;
+
+    void registerUser(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse) throws IOException;
 }

@@ -1,11 +1,15 @@
 package utils;
 
 import com.google.gson.reflect.TypeToken;
+import dto.engine.ExecutionResultStatisticsDTO;
+import dto.engine.FunctionMetadata;
+import dto.engine.ProgramMetadata;
 import dto.server.UserDTO;
+import engine.utils.DebugAction;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,6 +32,8 @@ public class ServletConstants {
     // region info queries options names
     public static final String PROGRAMS_NAMES_INFO = "programs_names";
     public static final String FUNCTIONS_NAMES_INFO = "functions_names";
+    public static final String PROGRAMS_METADATA_INFO = "programs_metadata";
+    public static final String FUNCTIONS_METADATA_INFO = "functions_metadata";
     public static final String ALL_NAMES_INFO = "all_names";
     public static final String USER_STATISTICS_INFO = "user_statistics";
     public static final String PROGRAMS_STATISTICS_INFO = "programs_statistics";
@@ -42,17 +48,29 @@ public class ServletConstants {
     // endregion
 
     // region Debug Actions Names
-    public static final String DEBUG_ACTION_STEP_OVER = "step_over";
-    public static final String DEBUG_ACTION_STEP_BACK = "step_back";
-    public static final String DEBUG_ACTION_RESUME = "resume";
-    public static final String DEBUG_ACTION_STOP = "pause";
+    public static final String DEBUG_ACTION_STEP_OVER = DebugAction.STEP_OVER.toString();
+    public static final String DEBUG_ACTION_STEP_BACK = DebugAction.STEP_BACK.toString();
+    public static final String DEBUG_ACTION_RESUME = DebugAction.RESUME.toString();
+    public static final String DEBUG_ACTION_STOP = DebugAction.STOP.toString();
     // endregion
 
     // region classes Types (for Gson deserialization)
-    public static final Type ARGUMENTS_MAP_TYPE = new TypeToken<Map<String, Integer>>() {
-    }.getType();
-    public static final Type USER_DTO_SET_TYPE = new TypeToken<Set<UserDTO>>() {
-    }.getType();
+    public static final TypeToken<Map<String, Integer>> ARGUMENTS_MAP_TYPE_TOKEN = new TypeToken<>() {
+    };
+
+    public static final TypeToken<Set<UserDTO>> USER_DTO_SET_TYPE_TOKEN = new TypeToken<>() {
+    };
+
+    public static final TypeToken<Set<ProgramMetadata>> PROGRAMS_METADATA_SET_TYPE_TOKEN = new TypeToken<>() {
+    };
+
+    public static final TypeToken<Set<FunctionMetadata>> FUNCTIONS_METADATA_SET_TYPE_TOKEN =
+            new TypeToken<Set<FunctionMetadata>>() {
+            };
+
+    public static final TypeToken<List<ExecutionResultStatisticsDTO>> EXECUTION_RESULT_STATISTICS_DTO_LIST_TYPE_TOKEN =
+            new TypeToken<List<ExecutionResultStatisticsDTO>>() {
+            };
     // endregion
 
     // region helper methods for all options names
@@ -78,9 +96,7 @@ public class ServletConstants {
 
     @Contract(pure = true)
     public static @NotNull String getAllUsersOptionsNames() {
-        return "[" +
-                ALL_USERS_INFO + ", " +
-                USER_STATISTICS_INFO + "]";
+        return "[" + ALL_USERS_INFO + "]";
     }
 
     @Contract(pure = true)

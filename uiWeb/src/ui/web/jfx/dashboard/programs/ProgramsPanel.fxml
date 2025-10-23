@@ -46,7 +46,7 @@
             </columns>
 
             <placeholder>
-                <Label text="No programs available.\nLoad a program file to get started."
+                <Label text="No programs available.\nLoad a programDTO file to get started."
                        styleClass="placeholder-text"/>
             </placeholder>
 

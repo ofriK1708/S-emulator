@@ -1,43 +1,53 @@
 package system.http.utils;
 
 import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-//import static utils.ServletConstants.*;
+import static utils.ServletConstants.DEBUG_ACTION_PARAM;
+import static utils.ServletConstants.USERNAME_PARAM;
 
 public class Requests {
     private final static SimpleCookieManager cookieManager = new SimpleCookieManager();
     private final static OkHttpClient HTTP_CLIENT = new OkHttpClient.Builder()
             .cookieJar(cookieManager)
             .build();
+
     private static final String INFO_PARAM = "info";
     private static final String PROGRAM_NAME_PARAM = "programName";
     private static final String EXPAND_LEVEL_PARAM = "expandLevel";
 
-    public static void getRunAsync(String serverEndpoint, Callback callback) {
-        Request request = new Request.Builder()
-                .url(serverEndpoint)
-                .build();
-
-        Call call = HTTP_CLIENT.newCall(request);
-
-        call.enqueue(callback);
+    // TODO - remove this before submission
+    static {
+        Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
     }
 
-    public static void uploadFileAsync(String serverEndpoint, String jsonBody, Callback callback) {
-        Request request = new Request.Builder()
-                .url(serverEndpoint)
-                .post(RequestBody.create(jsonBody, MediaType.parse("application/json")))
-                .build();
-
-        Call call = HTTP_CLIENT.newCall(request);
-
-        call.enqueue(callback);
+    /**
+     * Safely parses a URL string and returns a HttpUrl.Builder
+     *
+     * @param url The URL string to parse
+     * @return A builder for the parsed URL
+     * @throws IllegalArgumentException if the URL is invalid or cannot be parsed
+     */
+    private static @NotNull HttpUrl.Builder safeUrlBuilder(@NotNull String url) {
+        HttpUrl httpUrl = HttpUrl.parse(url);
+        if (httpUrl == null) {
+            throw new IllegalArgumentException("Invalid URL: " + url);
+        }
+        return httpUrl.newBuilder();
     }
 
+    /**
+     * Uploads an XML file to the specified server endpoint <strong>asynchronously</strong>.
+     *
+     * @param serverEndpoint The server endpoint URL to which the file will be uploaded.
+     * @param xmlFile        The XML file to be uploaded.
+     * @param callback       The callback to handle the response or failure.
+     */
     public static void uploadFileAsync(String serverEndpoint, File xmlFile, Callback callback) {
         RequestBody fileBody = RequestBody.create(xmlFile, MediaType.parse("application/xml"));
         MultipartBody requestBody = new MultipartBody.Builder()
@@ -55,50 +65,338 @@ public class Requests {
         call.enqueue(callback);
     }
 
-    public static Response getProgramInfoSync(String serverEndpoint, String info, String programName, int expandLevel)
+    /**
+     * Retrieves system information <strong>asynchronously</strong> from the specified server endpoint.
+     *
+     * @param serverEndpoint The server endpoint URL from which to retrieve the information.
+     * @param info           The specific information to retrieve.
+     * @param callback       The callback to handle the response or failure.
+     */
+    public static void getSystemInfoAsync(String serverEndpoint, String info, Callback callback) {
+        Call call = getSystemInfoCall(serverEndpoint, info);
+
+        call.enqueue(callback);
+    }
+
+    /**
+     * Retrieves system information <strong>synchronously</strong> from the specified server endpoint.
+     *
+     * @param serverEndpoint The server endpoint URL from which to retrieve the information.
+     * @param info           The specific information to retrieve.
+     * @return The response from the server.
+     */
+    public static @NotNull Response getSystemInfo(@NotNull String serverEndpoint, @NotNull String info) {
+        Call call = getSystemInfoCall(serverEndpoint, info);
+        try {
+            return call.execute();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Constructs a Call object to retrieve system information.
+     *
+     * @param serverEndpoint The server endpoint URL.
+     * @param info           The specific information to retrieve.
+     * @return The Call object for the request.
+     */
+    private static @NotNull Call getSystemInfoCall(String serverEndpoint, String info) {
+        HttpUrl url = safeUrlBuilder(serverEndpoint)
+                .addQueryParameter(INFO_PARAM, info)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        return HTTP_CLIENT.newCall(request);
+    }
+
+    /**
+     * Retrieves program information <strong>asynchronously</strong> from the specified server endpoint.
+     *
+     * @param serverEndpoint The server endpoint URL from which to retrieve the information.
+     * @param info           The specific information to retrieve.
+     * @param programName    The name of the program.
+     * @param expandLevel    The level of detail to expand in the response.
+     * @param callback       The callback to handle the response or failure.
+     */
+    public static void getProgramInfoAsync(@NotNull String serverEndpoint,
+                                           @NotNull String info,
+                                           @NotNull String programName,
+                                           int expandLevel,
+                                           @NotNull Callback callback) {
+
+        Call call = getProgramInfoCall(serverEndpoint, info, programName, expandLevel);
+        call.enqueue(callback);
+    }
+
+    /**
+     * Retrieves program information <strong>asynchronously</strong> from the specified server endpoint.
+     *
+     * @param serverEndpoint The server endpoint URL from which to retrieve the information.
+     * @param info           The specific information to retrieve.
+     * @param programName    The name of the program.
+     * @param callback       The callback to handle the response or failure.
+     */
+    public static void getProgramInfoAsync(@NotNull String serverEndpoint,
+                                           @NotNull String info,
+                                           @NotNull String programName,
+                                           @NotNull Callback callback) {
+        getProgramInfoAsync(serverEndpoint, info, programName, 0, callback);
+    }
+
+    /**
+     * Retrieves program information <strong>synchronously</strong> from the specified server endpoint.
+     *
+     * @param serverEndpoint The server endpoint URL from which to retrieve the information.
+     * @param info           The specific information to retrieve.
+     * @param programName    The name of the program.
+     * @param expandLevel    The level of detail to expand in the response.
+     * @return The response from the server.
+     */
+    public static @NotNull Response getProgramInfo(@NotNull String serverEndpoint,
+                                                   @NotNull String info,
+                                                   @NotNull String programName,
+                                                   int expandLevel)
             throws IOException {
-        HttpUrl url = Objects.requireNonNull(HttpUrl.parse(serverEndpoint)).newBuilder()
+
+        Call call = getProgramInfoCall(serverEndpoint, info, programName, expandLevel);
+        return call.execute();
+    }
+
+    /**
+     * Retrieves program information <strong>synchronously</strong> from the specified server endpoint.
+     *
+     * @param serverEndpoint The server endpoint URL from which to retrieve the information.
+     * @param info           The specific information to retrieve.
+     * @param programName    The name of the program.
+     * @return The response from the server.
+     */
+    public static @NotNull Response getProgramInfo(@NotNull String serverEndpoint,
+                                                   @NotNull String info,
+                                                   @NotNull String programName)
+            throws IOException {
+        return getProgramInfo(serverEndpoint, info, programName, 0);
+    }
+
+    /**
+     * Constructs a Call object to retrieve program information.
+     *
+     * @param serverEndpoint The server endpoint URL.
+     * @param info           The specific information to retrieve.
+     * @param programName    The name of the program.
+     * @param expandLevel    The level of detail to expand in the response.
+     * @return The Call object for the request.
+     */
+    private static @NotNull Call getProgramInfoCall(@NotNull String serverEndpoint,
+                                                    @NotNull String info,
+                                                    @NotNull String programName,
+                                                    int expandLevel) {
+        HttpUrl url = safeUrlBuilder(serverEndpoint)
                 .addQueryParameter(INFO_PARAM, info)
                 .addQueryParameter(PROGRAM_NAME_PARAM, programName)
                 .addQueryParameter(EXPAND_LEVEL_PARAM, String.valueOf(expandLevel))
                 .build();
+
         System.out.println("about to send request to: " + url);
         Request request = new Request.Builder()
-                .url(serverEndpoint)
+                .url(url)
                 .build();
 
-        Call call = HTTP_CLIENT.newCall(request);
-
-        return call.execute();
+        return HTTP_CLIENT.newCall(request);
     }
 
-    /* Overloaded method without expandLevel parameter */
-    public static Response getProgramInfoSync(String serverEndpoint, String info, String programName) throws IOException {
-        return getProgramInfoSync(serverEndpoint, info, programName, -1);
+    /**
+     * Sends a POST request to run a program <strong>asynchronously</strong>.
+     *
+     * @param serverEndpoint           The server endpoint URL.
+     * @param currentLoadedProgramName The name of the currently loaded program.
+     * @param jsonArguments            The JSON string containing the arguments for the program.
+     * @param callback                 The callback to handle the response or failure.
+     * @param expandLevel              The level of detail to expand in the response.
+     */
+    public static void postRunProgramAsync(@NotNull String serverEndpoint,
+                                           @NotNull String currentLoadedProgramName,
+                                           int expandLevel,
+                                           @NotNull String jsonArguments,
+                                           @NotNull Callback callback) {
+        postRunOrDebugProgramAsync(serverEndpoint, currentLoadedProgramName, jsonArguments, callback, expandLevel);
     }
 
-    public static Response postRunProgramSync(String serverEndpoint, String currentLoadedProgramName, int expandLevel,
-                                              String jsonArguments) throws IOException {
-        HttpUrl url = Objects.requireNonNull(HttpUrl.parse(serverEndpoint)).newBuilder()
+    /**
+     * Sends a POST request to debug a program <strong>asynchronously</strong>.
+     *
+     * @param serverEndpoint The server endpoint URL.
+     * @param programName    The name of the program to debug.
+     * @param jsonArguments  The JSON string containing the arguments for the program.
+     * @param callback       The callback to handle the response or failure.
+     * @param expandLevel    The level of detail to expand in the response.
+     */
+    public static void postStartDebugAsync(@NotNull String serverEndpoint,
+                                           @NotNull String programName,
+                                           @NotNull String jsonArguments,
+                                           int expandLevel,
+                                           @NotNull Callback callback
+    ) {
+        postRunOrDebugProgramAsync(serverEndpoint, programName, jsonArguments, callback, expandLevel);
+    }
+
+    /**
+     * Sends a POST request to run or debug a program <strong>asynchronously</strong>.
+     *
+     * @param serverEndpoint           The server endpoint URL.
+     * @param currentLoadedProgramName The name of the currently loaded program.
+     * @param jsonArguments            The JSON string containing the arguments for the program.
+     * @param callback                 The callback to handle the response or failure.
+     * @param expandLevel              The level of detail to expand in the response.
+     */
+    private static void postRunOrDebugProgramAsync(@NotNull String serverEndpoint,
+                                                   @NotNull String currentLoadedProgramName,
+                                                   @NotNull String jsonArguments,
+                                                   @NotNull Callback callback,
+                                                   int expandLevel) {
+        Call call = buildRunOrDebugProgramCall(serverEndpoint, currentLoadedProgramName, jsonArguments, expandLevel);
+
+        call.enqueue(callback);
+    }
+
+    /**
+     * Constructs a Call object to run or debug a program.
+     *
+     * @param serverEndpoint           The server endpoint URL.
+     * @param currentLoadedProgramName The name of the currently loaded program.
+     * @param jsonArguments            The JSON string containing the arguments for the program.
+     * @param expandLevel              The level of detail to expand in the response.
+     * @return The Call object for the request.
+     */
+    private static @NotNull Call buildRunOrDebugProgramCall(@NotNull String serverEndpoint,
+                                                            @NotNull String currentLoadedProgramName,
+                                                            @NotNull String jsonArguments, int expandLevel) {
+        HttpUrl url = safeUrlBuilder(serverEndpoint)
                 .addQueryParameter(PROGRAM_NAME_PARAM, currentLoadedProgramName)
                 .addQueryParameter(EXPAND_LEVEL_PARAM, String.valueOf(expandLevel))
                 .build();
 
         System.out.println("about to send request to: " + url);
 
+        Request request = getPostJsonRequest(jsonArguments, url);
+
+        return HTTP_CLIENT.newCall(request);
+    }
+
+    /**
+     * Constructs a POST request with JSON body.
+     *
+     * @param jsonArguments The JSON string to be sent in the request body.
+     * @param url           The URL to which the request will be sent.
+     * @return The constructed Request object.
+     */
+    private static @NotNull Request getPostJsonRequest(@NotNull String jsonArguments, HttpUrl url) {
         RequestBody body = RequestBody.create(jsonArguments, MediaType.parse("application/json"));
-        Request request = new Request.Builder()
+        return new Request.Builder()
                 .url(url)
                 .post(body)
                 .build();
+    }
+
+    /**
+     * Sends a POST request to perform a debug action <strong>asynchronously</strong>.
+     *
+     * @param serverEndpoint The server endpoint URL.
+     * @param debugAction    The debug action to perform.
+     * @param callback       The callback to handle the response or failure.
+     */
+    public static void postDebugActionAsync(@NotNull String serverEndpoint,
+                                            @NotNull String debugAction,
+                                            @NotNull Callback callback) {
+        HttpUrl url = safeUrlBuilder(serverEndpoint)
+                .addQueryParameter(DEBUG_ACTION_PARAM, debugAction)
+                .build();
+
+        Request request = getPostNoBody(url);
 
         Call call = HTTP_CLIENT.newCall(request);
+        call.enqueue(callback);
+    }
 
+    /**
+     * Retrieves user statistics <strong>asynchronously</strong> from the specified server endpoint.
+     *
+     * @param serverEndpoint The server endpoint URL from which to retrieve the statistics.
+     * @param username       The username for which to retrieve statistics.
+     * @param callback       The callback to handle the response or failure.
+     */
+    public static void getUserStatisticsAsync(@NotNull String serverEndpoint,
+                                              @NotNull String username,
+                                              @NotNull Callback callback) {
+        HttpUrl url = safeUrlBuilder(serverEndpoint)
+                .addQueryParameter(USERNAME_PARAM, username)
+                .build();
+
+        System.out.println("about to send request to: " + url);
+
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        Call call = HTTP_CLIENT.newCall(request);
+        call.enqueue(callback);
+    }
+
+    /**
+     * Retrieves all users DTO <strong>synchronously</strong> from the specified server endpoint.
+     *
+     * @param serverEndpoint The server endpoint URL from which to retrieve the users DTO.
+     * @return The response from the server.
+     */
+    public static @NotNull Response getAllUsersDTO(@NotNull String serverEndpoint) throws IOException {
+        HttpUrl url = safeUrlBuilder(serverEndpoint)
+                .build();
+
+        System.out.println("about to send request to: " + url);
+
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        Call call = HTTP_CLIENT.newCall(request);
         return call.execute();
     }
 
-    public static Response postDebugProgramSync(String serverEndpoint, String currentLoadedProgramName, int expandLevel,
-                                                String jsonArguments) throws IOException {
-        return postRunProgramSync(serverEndpoint, currentLoadedProgramName, expandLevel, jsonArguments);
+    /**
+     * Sends a POST request to register a new user <strong>synchronously</strong>.
+     *
+     * @param serverEndpoint The server endpoint URL.
+     * @param username       The username of the new user to register.
+     * @return The response from the server.
+     */
+    public static @NotNull Response postRegisterUser(@NotNull String serverEndpoint,
+                                                     @NotNull String username) throws IOException {
+        HttpUrl url = safeUrlBuilder(serverEndpoint)
+                .addQueryParameter(USERNAME_PARAM, username)
+                .build();
+
+        Request request = getPostNoBody(url);
+
+        Call call = HTTP_CLIENT.newCall(request);
+        return call.execute();
     }
+
+    /**
+     * Constructs a POST request without a body.
+     *
+     * @param url The URL to which the request will be sent.
+     * @return The constructed Request object.
+     */
+    private static @NotNull Request getPostNoBody(HttpUrl url) {
+        System.out.println("about to send request to: " + url);
+
+        return new Request.Builder()
+                .url(url)
+                .post(RequestBody.create(new byte[0], null))
+                .build();
+    }
+
 }

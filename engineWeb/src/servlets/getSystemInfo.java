@@ -1,10 +1,12 @@
 package servlets;
 
+import com.google.gson.Gson;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import logic.manager.ProgramManager;
+import logic.manager.UserManager;
 import utils.ServletUtils;
 
 import java.io.IOException;
@@ -33,22 +35,34 @@ public class getSystemInfo extends HttpServlet {
             resp.setContentType("text/html;charset=utf-8");
             ProgramManager pm = ServletUtils.getProgramManager(getServletContext());
             switch (infoToGet) {
-                case PROGRAMS_NAMES_INFO:
+                case PROGRAMS_METADATA_INFO -> {
+                    resp.getWriter().println(pm.getProgramsMetadata());
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                }
+                case FUNCTIONS_METADATA_INFO -> {
+                    resp.getWriter().println(pm.getFunctionsMetadata());
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                }
+                case PROGRAMS_NAMES_INFO -> {
                     resp.getWriter().println(pm.getProgramNames());
                     resp.setStatus(HttpServletResponse.SC_OK);
-                    break;
-                case FUNCTIONS_NAMES_INFO:
+                }
+                case FUNCTIONS_NAMES_INFO -> {
                     resp.getWriter().println(pm.getFunctionNames());
                     resp.setStatus(HttpServletResponse.SC_OK);
-                    break;
-                case ALL_NAMES_INFO:
+                }
+                case ALL_NAMES_INFO -> {
                     resp.getWriter().println("Programs: " + pm.getProgramNames() + "\nFunctions: " +
                             pm.getFunctionNames());
                     resp.setStatus(HttpServletResponse.SC_OK);
-                    break;
-                default:
-                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "item parameter is missing or invalid");
-                    break;
+                }
+                case ALL_USERS_INFO -> {
+                    Gson gson = new Gson();
+                    UserManager userManager = ServletUtils.getUserManager(getServletContext());
+                    resp.setContentType("application/json");
+                    resp.getWriter().println(gson.toJson(userManager.getAllUsersDTO()));
+                }
+                default -> resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "item parameter is missing or invalid");
             }
         }
     }

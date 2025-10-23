@@ -158,7 +158,7 @@ public class ServletUtils {
         // 3. Get arguments from the request body.
         Map<String, Integer> arguments;
         try (BufferedReader reader = req.getReader()) {
-            arguments = gson.fromJson(reader, ARGUMENTS_MAP_TYPE);
+            arguments = gson.fromJson(reader, ARGUMENTS_MAP_TYPE_TOKEN);
             // Handle the case of an empty or null JSON body gracefully.
             if (arguments == null) {
                 arguments = Collections.emptyMap();

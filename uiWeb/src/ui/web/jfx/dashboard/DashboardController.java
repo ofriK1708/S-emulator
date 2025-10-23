@@ -11,7 +11,7 @@ import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import system.controller.EngineController;
 import system.controller.LocalEngineController;
-import ui.web.jfx.AppController;
+import ui.web.jfx.ExecutionController;
 import ui.web.jfx.dashboard.functions.FunctionsPanelController;
 import ui.web.jfx.dashboard.header.DashboardHeaderController;
 import ui.web.jfx.dashboard.history.HistoryPanelController;
@@ -61,7 +61,7 @@ public class DashboardController {
     private Stage primaryStage;
     private Scene dashboardScene;
     private Scene executionScene;
-    private AppController appController;
+    private ExecutionController executionController;
 
     // Engine controller for Dashboard data preview
     private final EngineController engineController;
@@ -181,18 +181,18 @@ public class DashboardController {
             System.out.println("Dashboard: Executing program '" + programName + "'");
 
             // Load Execution scene if not already loaded
-            if (executionScene == null || appController == null) {
+            if (executionScene == null || executionController == null) {
                 loadExecutionScene();
             }
 
             // Configure execution screen with user info BEFORE loading file
-            appController.setUserName(selectedUser.get() != null ? selectedUser.get() : "Guest User");
-            appController.setScreenTitle("S-Emulator - Execution: " + programName);
-            appController.setAvailableCredits(availableCredits.get());
+            executionController.setUserName(selectedUser.get() != null ? selectedUser.get() : "Guest User");
+            executionController.setScreenTitle("S-Emulator - Execution: " + programName);
+            executionController.setAvailableCredits(availableCredits.get());
 
             // Load the file in AppController's engine (with callback to navigate after load)
             File programFile = new File(currentFilePath.get());
-            appController.loadProgramFromFileExternal(programFile, () -> {
+            executionController.loadProgramFromFileExternal(programFile, () -> {
                 // After file is loaded in AppController's engine, navigate
                 transitionToExecutionScreen();
                 System.out.println("Dashboard: Navigated to Execution screen for program: " + programName);
@@ -218,21 +218,21 @@ public class DashboardController {
             System.out.println("Dashboard: Executing function '" + functionName + "'");
 
             // Load Execution scene if not already loaded
-            if (executionScene == null || appController == null) {
+            if (executionScene == null || executionController == null) {
                 loadExecutionScene();
             }
 
             // Configure execution screen with user info BEFORE loading file
-            appController.setUserName(selectedUser.get() != null ? selectedUser.get() : "Guest User");
-            appController.setScreenTitle("S-Emulator - Execution: " + functionName);
-            appController.setAvailableCredits(availableCredits.get());
+            executionController.setUserName(selectedUser.get() != null ? selectedUser.get() : "Guest User");
+            executionController.setScreenTitle("S-Emulator - Execution: " + functionName);
+            executionController.setAvailableCredits(availableCredits.get());
 
             // Load the file in AppController's engine (with callback to navigate after load)
             File programFile = new File(currentFilePath.get());
-            appController.loadProgramFromFileExternal(programFile, () -> {
+            executionController.loadProgramFromFileExternal(programFile, () -> {
                 // After file is loaded, switch to the function
                 try {
-                    appController.switchLoadedProgram(functionName);
+                    executionController.switchLoadedProgram(functionName);
                 } catch (Exception e) {
                     System.err.println("Dashboard: Error switching to function: " + e.getMessage());
                 }
@@ -263,11 +263,11 @@ public class DashboardController {
         executionScene = new Scene(executionRoot, 1400, 800);
 
         // Get AppController and configure it
-        appController = executionLoader.getController();
-        appController.setScene(executionScene);
+        executionController = executionLoader.getController();
+        executionController.setScene(executionScene);
 
         // Set up return-to-dashboard callback
-        appController.setReturnToDashboardCallback(this::transitionToDashboardScreen);
+        executionController.setReturnToDashboardCallback(this::transitionToDashboardScreen);
 
         System.out.println("Dashboard: Execution scene loaded successfully");
     }

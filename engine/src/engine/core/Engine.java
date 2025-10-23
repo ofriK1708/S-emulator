@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 /**
  * The Engine class represents a program engine that can execute SPrograms and SFunctions.
@@ -207,9 +208,9 @@ public class Engine {
         List<Instruction> instructionsAtLevel = instructionSequence.getInstructionsCopy(expandLevel);
         return new ProgramDTO(
                 programName,
-                instructionSequence.getSortedArgumentsNames(),
-                instructionSequence.getLabels(expandLevel),
-                java.util.stream.IntStream.range(0, instructionsAtLevel.size())
+                getSortedArgumentsMap(),
+                instructionSequence.getMaxExpandLevel(),
+                IntStream.range(0, instructionsAtLevel.size())
                         .mapToObj(i -> instructionsAtLevel.get(i).toDTO(i))
                         .toList()
         );
@@ -229,7 +230,7 @@ public class Engine {
     }
 
     /**
-     * Get sorted arguments at a specific expansion level.
+     * Get arguments (x1,x2,...)  sorted by their numeric suffix at a specific expansion level.
      * Used in debugging a program, because arguments can change during execution.
      *
      * @param expandLevel the expansion level to get the arguments from
@@ -239,6 +240,12 @@ public class Engine {
         return instructionSequence.getSortedArgumentsMap(expandLevel);
     }
 
+    /**
+     * Get arguments (x1,x2,...)  sorted by their numeric suffix at expansion level 0.
+     * Used to get arguments before running the program.
+     *
+     * @return a map of argument names to their values at expansion level 0
+     */
     public @NotNull Map<String, Integer> getSortedArgumentsMap() {
         return getSortedArgumentsMap(0);
     }

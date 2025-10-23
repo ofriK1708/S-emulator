@@ -18,6 +18,11 @@ public class startDebugProgram extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (ServletUtils.checkAndHandleUnauthorized(req, resp, getServletContext())) {
             User user = ServletUtils.getUser(req, getServletContext());
+            if (user == null) {
+                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                resp.getWriter().write("Error! User is not logged in.");
+                return;
+            }
             ServletUtils.runAndDebugParams rdp;
             rdp = ServletUtils.getAndValidateRunAndDebugParams(req, resp);
             if (rdp == null) {

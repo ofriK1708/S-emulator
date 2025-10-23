@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -42,27 +43,33 @@ import java.util.Map;
 
 import static ui.web.utils.UIUtils.*;
 
-public class AppController {
+public class ExecutionController {
 
     private final Map<String, Integer> previousDebugVariables = new HashMap<>();
+
     private final ListProperty<VariableDTO> allVariablesDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
+
     private final ListProperty<VariableDTO> previousVariablesDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
+
     private final ListProperty<VariableDTO> argumentsDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
+
     private final BooleanProperty argumentsLoaded = new SimpleBooleanProperty(false);
 
     private final ListProperty<InstructionDTO> programInstructions =
             new SimpleListProperty<>(FXCollections.observableArrayList());
+
     private final ListProperty<InstructionDTO> derivedInstructions =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final ListProperty<ExecutionStatisticsDTO> executionStatistics =
-            new SimpleListProperty<>(FXCollections.observableArrayList());
+
     private final ListProperty<String> programVariablesNamesAndLabels =
             new SimpleListProperty<>(FXCollections.observableArrayList());
+
     private final MapProperty<String, String> allSubFunction =
             new SimpleMapProperty<>(FXCollections.observableHashMap());
+
     private final StringProperty mainProgramName = new SimpleStringProperty("");
     private final StringProperty currentLoadedProgramName = new SimpleStringProperty("");
     private final @NotNull EngineController engineController;
@@ -126,7 +133,8 @@ public class AppController {
     private VariablesTableController allVarsTableController;
     @FXML
     private DebuggerController debugControlsController;
-
+    @FXML
+    private Button backToDashboardButton;
     private @Nullable ProgramDTO loadedProgram = null;
     private Runnable returnToDashboardCallback = null;
     private boolean inDebugSession = false;
@@ -135,7 +143,7 @@ public class AppController {
     private boolean isFirstDebugStep = true;
     private boolean isInDebugResume = false;
 
-    public AppController() {
+    public ExecutionController() {
         this.engineController = new LocalEngineController();
         UIUtils.setAppControllerInstance(this);
     }
@@ -159,11 +167,17 @@ public class AppController {
             argumentsTableController.initArgsTable(argumentsDTO, isAnimationsOn);
             allVarsTableController.initAllVarsTable(allVariablesDTO, isAnimationsOn);
 
-            debugControlsController.initComponent(
-                    this::debugStep,
-                    this::debugResume,
-                    this::stopDebugSession
-            );
+            // Set back button callback in DebuggerController
+            if (debugControlsController != null) {
+                System.out.println("Back to Dashboard callback registered with DebuggerController");
+                debugControlsController.initComponent(
+                        this::debugStep,
+                        this::debugResume,
+                        this::stopDebugSession
+                );
+
+            }
+
             initializeExecutionHeader();
 
             System.out.println("AppController initialized with cleaned architecture");
@@ -178,8 +192,7 @@ public class AppController {
             executionHeaderController.initComponent(
                     currentUserName,
                     screenTitle,
-                    availableCredits,
-                    this::handleBackToDashboard
+                    availableCredits
             );
             System.out.println("Execution header initialized with back button");
         } else {
@@ -244,23 +257,6 @@ public class AppController {
         loadProgramFromFileExternal(file, null);
     }
 
-    @FXML
-    public void handleBackToDashboard() {
-        if (returnToDashboardCallback != null) {
-            if (inDebugSession) {
-                try {
-                    stopDebugSession();
-                } catch (Exception e) {
-                    System.err.println("Error stopping debug session: " + e.getMessage());
-                }
-            }
-            returnToDashboardCallback.run();
-            System.out.println("Returning to Dashboard...");
-        } else {
-            System.err.println("Return to Dashboard callback not set");
-            UIUtils.showError("Navigation to Dashboard is not configured");
-        }
-    }
 
     public void setScreenTitle(String title) {
         screenTitle.set(title);
@@ -283,29 +279,6 @@ public class AppController {
             System.out.println("Returning to Dashboard...");
         } else {
             System.err.println("Return to Dashboard callback not set");
-        }
-    }
-    // Continuation of AppController.java
-
-    private @NotNull Map<String, Integer> getFinalVariableStates(@NotNull ExecutionStatisticsDTO executionStats) {
-        try {
-            int expandLevel = executionStats.expandLevel();
-            Map<String, Integer> arguments = executionStats.arguments();
-
-            System.out.println("Retrieving final variable states for execution #" +
-                    executionStats.executionNumber() + " (expand level: " + expandLevel + ")");
-
-            Map<String, Integer> finalStates = engineController.getFinalVariableStates(expandLevel, arguments);
-
-            System.out.println("Retrieved " + finalStates.size() + " final variable states for execution #" +
-                    executionStats.executionNumber());
-
-            return finalStates;
-
-        } catch (Exception e) {
-            System.err.println("Error retrieving final variable states: " + e.getMessage());
-            showError("Error retrieving execution details: " + e.getMessage());
-            return new HashMap<>();
         }
     }
 
@@ -358,7 +331,7 @@ public class AppController {
 
         if (inDebugSession) {
             try {
-                engineController.stopDebugSession();
+                engineController.debugStop();
             } catch (Exception e) {
                 System.err.println("Warning: Error stopping debug session during rerun reset: " + e.getMessage());
             }
@@ -438,8 +411,6 @@ public class AppController {
         programArguments.clear();
         programInstructions.setAll(loadedProgram.instructions());
         derivedInstructions.clear();
-        executionStatistics.setAll(engineController.getAllExecutionStatistics());
-        programRanAtLeastOnce.set(!executionStatistics.isEmpty());
         instructionsTableController.clearHighlighting();
         derivedInstructionsTableController.clearHighlighting();
         allVariablesDTO.clear();
@@ -531,8 +502,6 @@ public class AppController {
 
             engineController.runLoadedProgram(expandLevel, programArguments);
             allVariablesDTO.setAll(UIUtils.getAllVariablesDTOSorted((LocalEngineController) engineController, expandLevel));
-            executionStatistics.add(engineController.getLastExecutionStatistics());
-
             ProgramDTO executedProgram = engineController.getProgramByExpandLevel(expandLevel);
             programInstructions.setAll(executedProgram.instructions());
             derivedInstructions.clear();
@@ -604,7 +573,6 @@ public class AppController {
         programArguments.clear();
 
         engineController.clearLoadedProgram();
-        executionStatistics.clear();
         programInstructions.clear();
         derivedInstructions.clear();
         allVariablesDTO.clear();
@@ -639,7 +607,7 @@ public class AppController {
     // DEBUG METHODS
     public void stopDebugSession() {
         try {
-            engineController.stopDebugSession();
+            engineController.debugStop();
 
             if (engineController.isDebugFinished()) {
                 showInfo("Debug session stopped. Execution was completed.");
@@ -739,7 +707,7 @@ public class AppController {
                         currentExpandLevel.get()));
             }
 
-            engineController.debugStep();
+            engineController.debugStepOver();
 
             int currentPC = engineController.getCurrentDebugPC();
             currentCycles.set(engineController.getCurrentDebugCycles());
@@ -842,4 +810,23 @@ public class AppController {
     public void setScene(Scene scene) {
         this.scene = scene;
     }
+
+    @FXML
+    private void handleBackToDashboard() {
+        if (returnToDashboardCallback != null) {
+            if (inDebugSession) {
+                try {
+                    stopDebugSession();
+                } catch (Exception e) {
+                    System.err.println("Error stopping debug session: " + e.getMessage());
+                }
+            }
+            returnToDashboardCallback.run();
+            System.out.println("Returning to Dashboard from execution screen...");
+        } else {
+            System.err.println("Return to Dashboard callback not set");
+            UIUtils.showError("Navigation to Dashboard is not configured");
+        }
+    }
+
 }

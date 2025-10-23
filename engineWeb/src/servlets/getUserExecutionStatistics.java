@@ -12,33 +12,18 @@ import utils.ServletUtils;
 
 import java.io.IOException;
 
-import static utils.ServletConstants.*;
+import static utils.ServletConstants.USERNAME_PARAM;
 
-@WebServlet(name = "getUserInfoServlet", urlPatterns = "/users/info")
-public class getUserInfo extends HttpServlet {
+@WebServlet(name = "getUserStatistics", urlPatterns = "/user/ExecutionStatistics")
+public class getUserExecutionStatistics extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Gson gson = new Gson();
         String username = req.getParameter(USERNAME_PARAM);
         UserManager userManager = ServletUtils.getUserManager(getServletContext());
         if (userManager.isUserExists(username)) {
-            String infoToGet = req.getParameter(INFO_PARAM);
-            if (infoToGet == null) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "missing info parameter, available options are: " +
-                        ServletConstants.getAllUsersOptionsNames() + ".");
-                return;
-            }
             resp.setContentType("application/json");
-            switch (infoToGet) {
-                case ALL_USERS_INFO -> resp.getWriter().println(gson.toJson(userManager.getAllUsersDTO()));
-                case USER_STATISTICS_INFO ->
-                        resp.getWriter().println(gson.toJson(userManager.getUserStatisticsDTO(username)));
-                default -> {
-                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    resp.getWriter().println("unrecognised info parameter, available options are: " +
-                            ServletConstants.getAllUsersOptionsNames() + ".");
-                }
-            }
+            resp.getWriter().println(gson.toJson(userManager.getUserStatisticsDTO(username)));
         }
     }
 

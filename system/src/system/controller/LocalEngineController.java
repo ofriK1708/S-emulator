@@ -186,7 +186,7 @@ public class LocalEngineController implements EngineController {
         inDebugSession = true;
     }
 
-    public void debugStep() {
+    public void debugStepOver() {
         if (engine == null || !inDebugSession) {
             throw new IllegalStateException("Debug session not active");
         }
@@ -196,7 +196,7 @@ public class LocalEngineController implements EngineController {
         }
     }
 
-    public void debugStepBackward() {
+    public void debugStepBack() {
         if (engine == null || !inDebugSession) {
             throw new IllegalStateException("Debug session not active");
         }
@@ -214,7 +214,7 @@ public class LocalEngineController implements EngineController {
         }
     }
 
-    public void stopDebugSession() {
+    public void debugStop() {
         if (engine != null && inDebugSession) {
             engine.stopDebugSession();
             inDebugSession = false;

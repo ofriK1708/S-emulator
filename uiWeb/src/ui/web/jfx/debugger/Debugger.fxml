@@ -8,6 +8,7 @@
       xmlns="http://javafx.com/javafx/24.0.1" fx:controller="ui.web.jfx.debugger.DebuggerController">
 
     <children>
+        <!-- Debug Controls Grid -->
         <GridPane hgap="20" vgap="15">
 
             <!-- Row 1 -->
