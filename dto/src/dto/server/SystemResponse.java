@@ -13,77 +13,98 @@ import java.util.Set;
 /**
  * A response object representing the result of a system operation.
  * This class contains the following fields:
- * <ul>
- *     <li>{@code isSuccess}: Indicates whether the operation was successful. (This field is mandatory).</li>
- *     <li>{@code message}: A message providing details about the operation's result
- *     (e.g., isSuccess message or error details).</li>
- *     <li>{@code programDTO}: The programDTO data associated with the response, if applicable. Can be null.</li>
- *     <li>{@code debugStateChangeResultDTO}: The debug state change result data associated with the response,
- *     if applicable. Can be null.</li>
- * </ul>
+ *
+ * @param isSuccess                 Indicates whether the operation was successful.
+ * @param message                   A message providing additional information about the operation result.
+ * @param programDTO                An optional ProgramDTO object representing the programDTO (Instruction, name, etc.).
+ *                                  can be null if not needed.
+ * @param debugStateChangeResultDTO An optional DebugStateChangeResultDTO object representing the debug state change
+ *                                  result.
+ *                                  can be null if not needed.
+ * @param allUsersDTO               An optional set of UserDTO objects representing all users in the system.
+ *                                  can be null if not needed.
+ * @param userStatisticsDTOList     An optional list of ExecutionResultStatisticsDTO objects representing user
+ *                                  execution statistics.
+ *                                  can be null if not needed.
  */
-public class SystemResponse {
+public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullable ProgramDTO programDTO,
+                             @Nullable DebugStateChangeResultDTO debugStateChangeResultDTO,
+                             @Nullable Set<UserDTO> allUsersDTO,
+                             @Nullable List<ExecutionResultStatisticsDTO> userStatisticsDTOList) {
     /**
      * Indicates whether the operation was successful.
      *
+     * @return true if the operation was successful, false otherwise
      */
-    private final boolean isSuccess;
-
-    /**
-     * A message providing additional information about the operation result.
-     *
-     */
-    private final @NotNull String message;
-
-    /**
-     * An optional ProgramDTO object representing the programDTO (Instruction, name, etc.).
-     * can be null if not needed.
-     *
-     */
-    private final @Nullable ProgramDTO programDTO;
-
-    /**
-     * An optional DebugStateChangeResultDTO object representing the debug state change result.
-     * can be null if not needed.
-     *
-     * @see DebugStateChangeResultDTO
-     */
-    private final @Nullable DebugStateChangeResultDTO debugStateChangeResultDTO;
-
-    /**
-     * An optional set of UserDTO objects representing all users in the system.
-     * can be null if not needed.
-     *
-     * @see UserDTO
-     */
-    private final @Nullable Set<UserDTO> allUsersDTO;
-
-    /**
-     * An optional list of ExecutionResultStatisticsDTO objects representing user execution statistics.
-     * can be null if not needed.
-     *
-     * @see ExecutionResultStatisticsDTO
-     */
-    private final @Nullable List<ExecutionResultStatisticsDTO> userStatisticsDTOList;
-
-    private SystemResponse(Boolean isSuccess,
-                           @Nullable String message,
-                           @Nullable ProgramDTO programDTO,
-                           @Nullable DebugStateChangeResultDTO debugStateChangeResultDTO,
-                           @Nullable Set<UserDTO> allUsersDTO,
-                           @Nullable List<ExecutionResultStatisticsDTO> userStatisticsDTOList) {
-        if (isSuccess == null) {
-            throw new IllegalArgumentException("Success field must be provided and cannot be null.");
-        }
-        this.isSuccess = isSuccess;
-        this.message = message != null ? message : "";
-        this.programDTO = programDTO;
-        this.debugStateChangeResultDTO = debugStateChangeResultDTO;
-        this.allUsersDTO = allUsersDTO;
-        this.userStatisticsDTOList = userStatisticsDTOList;
-
+    public boolean isSuccessful() {
+        return isSuccess;
     }
 
+    /**
+     * Returns the message providing additional information about the operation result.
+     *
+     * @return the message string
+     */
+    @Override
+    public @NotNull String message() {
+        return message;
+    }
+
+    /**
+     * Returns the ProgramDTO object associated with the response.
+     *
+     * @return the ProgramDTO object
+     * @throws IllegalStateException if the ProgramDTO is not available in this response
+     */
+    @Override
+    public @NotNull ProgramDTO programDTO() {
+        if (programDTO == null) {
+            throw new IllegalStateException("ProgramDTO is not available in this response.");
+        }
+        return programDTO;
+    }
+
+    /**
+     * Returns the DebugStateChangeResultDTO object associated with the response.
+     *
+     * @return the DebugStateChangeResultDTO object
+     * @throws IllegalStateException if the DebugStateChangeResultDTO is not available in this response
+     */
+    @Override
+    public @NotNull DebugStateChangeResultDTO debugStateChangeResultDTO() {
+        if (debugStateChangeResultDTO == null) {
+            throw new IllegalStateException("DebugStateChangeResultDTO is not available in this response.");
+        }
+        return debugStateChangeResultDTO;
+    }
+
+    /**
+     * Returns the set of UserDTO objects representing all users in the system.
+     *
+     * @return the set of UserDTO objects
+     * @throws IllegalStateException if the AllUsersDTO is not available in this response
+     */
+    @Override
+    public @NotNull Set<UserDTO> allUsersDTO() {
+        if (allUsersDTO == null) {
+            throw new IllegalStateException("AllUsersDTO is not available in this response.");
+        }
+        return allUsersDTO;
+    }
+
+    /**
+     * Returns the list of ExecutionResultStatisticsDTO objects representing user execution statistics.
+     *
+     * @return the list of ExecutionResultStatisticsDTO objects
+     * @throws IllegalStateException if the UserStatisticsDTOList is not available in this response
+     */
+    @Override
+    public @NotNull List<ExecutionResultStatisticsDTO> userStatisticsDTOList() {
+        if (userStatisticsDTOList == null) {
+            throw new IllegalStateException("UserStatisticsDTOList is not available in this response.");
+        }
+        return userStatisticsDTOList;
+    }
 
     @Contract(value = " -> new", pure = true)
     public static @NotNull Builder builder() {
@@ -97,7 +118,7 @@ public class SystemResponse {
      */
     public static class Builder {
         private @Nullable Boolean isSuccess;
-        private @Nullable String message;
+        private @NotNull String message = "";
         private @Nullable ProgramDTO programDTO;
         private @Nullable DebugStateChangeResultDTO debugStateChangeResultDTO;
         private @Nullable Set<UserDTO> allUsersDTO;
@@ -185,6 +206,9 @@ public class SystemResponse {
          * @return the constructed SystemResponse
          */
         public SystemResponse build() {
+            if (isSuccess == null) {
+                throw new IllegalStateException("isSuccess must be set");
+            }
             return new SystemResponse(isSuccess, message, programDTO, debugStateChangeResultDTO,
                     allUsersDTO, userStatisticsDTOList);
         }
