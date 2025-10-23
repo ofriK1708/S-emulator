@@ -73,15 +73,31 @@ public class ProgramDebugger {
      */
     public ExecutionResultInfoDTO getDebugFinishedExecutionResult() {
         return new ExecutionResultInfoDTO(
-                isMainProgram,
-                programName,
-                architectureType,
-                debugArguments,
-                ProgramUtils.extractSortedVariables(currentDebugContext),
-                currentDebugContext.get(OUTPUT_NAME),
-                expandLevel,
-                initialUserCredits - runningUserCredits,
-                initialUserCredits - runningUserCredits
+                ExecutionMetadata.builder()
+                        .isMainProgram(isMainProgram)
+                        .programName(programName)
+                        .architectureType(architectureType)
+                        .expandLevel(expandLevel)
+                        .build(),
+                new ExecutionResultValues(
+                        currentDebugContext.get(OUTPUT_NAME),
+                        debugArguments,
+                        ProgramUtils.extractSortedWorkVars(currentDebugContext)
+                ),
+                ExecutionStatistics.builder()
+                        .cycleCount(debugCyclesHistory.stream().mapToInt(Integer::intValue).sum())
+                        .creditCost(initialUserCredits - runningUserCredits)
+                        .build(
+                        )
+//                isMainProgram,
+//                programName,
+//                architectureType,
+//                debugArguments,
+//                ProgramUtils.extractSortedVariables(currentDebugContext),
+//                currentDebugContext.get(OUTPUT_NAME),
+//                expandLevel,
+//                initialUserCredits - runningUserCredits,
+//                initialUserCredits - runningUserCredits
         );
     }
     /**
@@ -100,7 +116,6 @@ public class ProgramDebugger {
         debugArguments = new HashMap<>(arguments);
         // Save initial state with zero cycles
         debugStateHistory.add(new HashMap<>(currentDebugContext));
-        debugCyclesHistory.add(0);
         debugMode = true;
         currentDebugPC = currentDebugContext.get(PC_NAME);
         return this;

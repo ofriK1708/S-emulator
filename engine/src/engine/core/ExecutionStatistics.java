@@ -11,6 +11,18 @@ public class ExecutionStatistics {
     int numberOfInstructionsExecuted = 0;
     Map<ArchitectureType, Integer> instructionsPerArchitecture = new HashMap<>();
 
+    public ExecutionStatistics() {
+
+    }
+
+    public ExecutionStatistics(int creditCost, int cycleCount, int numberOfInstructionsExecuted,
+                               Map<ArchitectureType, Integer> instructionsPerArchitecture) {
+        this.creditCost = creditCost;
+        this.cycleCount = cycleCount;
+        this.numberOfInstructionsExecuted = numberOfInstructionsExecuted;
+        this.instructionsPerArchitecture = instructionsPerArchitecture;
+    }
+
     public int getCreditCost() {
         return creditCost;
     }
@@ -42,5 +54,41 @@ public class ExecutionStatistics {
     void incrementInstructionsForArchitecture(ArchitectureType architectureType) {
         this.instructionsPerArchitecture.put(architectureType,
                 this.instructionsPerArchitecture.getOrDefault(architectureType, 0) + 1);
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        int numberOfInstructionsExecuted = 0;
+        Map<ArchitectureType, Integer> instructionsPerArchitecture = new HashMap<>();
+        private int creditCost;
+        private int cycleCount;
+
+        public Builder creditCost(int creditCost) {
+            this.creditCost = creditCost;
+            return this;
+        }
+
+        public Builder cycleCount(int cycleCount) {
+            this.cycleCount = cycleCount;
+            return this;
+        }
+
+        public Builder numberOfInstructionsExecuted(int numberOfInstructionsExecuted) {
+            this.numberOfInstructionsExecuted = numberOfInstructionsExecuted;
+            return this;
+        }
+
+        public Builder instructionsPerArchitecture(Map<ArchitectureType, Integer> instructionsPerArchitecture) {
+            this.instructionsPerArchitecture = instructionsPerArchitecture;
+            return this;
+        }
+
+        public ExecutionStatistics build() {
+            return new ExecutionStatistics(creditCost, cycleCount, numberOfInstructionsExecuted,
+                    instructionsPerArchitecture);
+        }
     }
 }

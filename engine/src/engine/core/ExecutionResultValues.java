@@ -14,6 +14,14 @@ public class ExecutionResultValues {
         this.arguments = arguments;
     }
 
+    public ExecutionResultValues(int output,
+                                 @NotNull Map<String, Integer> arguments,
+                                 @NotNull Map<String, Integer> workVariables) {
+        this.output = output;
+        this.arguments = arguments;
+        this.workVariables = workVariables;
+    }
+
     public int getOutput() {
         return output;
     }

@@ -1,7 +1,7 @@
 package system.controller;
 
-import dto.engine.FunctionMetadata;
-import dto.engine.ProgramMetadata;
+import dto.engine.FunctionMetadataDTO;
+import dto.engine.ProgramMetadataDTO;
 import dto.server.SystemResponse;
 import dto.server.UserDTO;
 import engine.exception.FunctionNotFound;
@@ -21,9 +21,9 @@ public interface EngineController {
 
     void loadProgram(String programName, @NotNull Consumer<SystemResponse> onResponse) throws IOException;
 
-    Set<ProgramMetadata> getProgramsMetadata() throws IOException;
+    Set<ProgramMetadataDTO> getProgramsMetadata() throws IOException;
 
-    Set<FunctionMetadata> getFunctionsMetadata() throws IOException;
+    Set<FunctionMetadataDTO> getFunctionsMetadata() throws IOException;
 
     void clearLoadedProgram();
 

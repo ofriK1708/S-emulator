@@ -1,8 +1,8 @@
 package dto.server;
 
 import dto.engine.DebugStateChangeResultDTO;
-import dto.engine.ExecutionResultStatisticsDTO;
 import dto.engine.ProgramDTO;
+import engine.core.ExecutionStatistics;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,7 +30,7 @@ import java.util.Set;
 public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullable ProgramDTO programDTO,
                              @Nullable DebugStateChangeResultDTO debugStateChangeResultDTO,
                              @Nullable Set<UserDTO> allUsersDTO,
-                             @Nullable List<ExecutionResultStatisticsDTO> userStatisticsDTOList) {
+                             @Nullable List<ExecutionStatistics> userStatisticsDTOList) {
     /**
      * Indicates whether the operation was successful.
      *
@@ -99,7 +99,7 @@ public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullab
      * @throws IllegalStateException if the UserStatisticsDTOList is not available in this response
      */
     @Override
-    public @NotNull List<ExecutionResultStatisticsDTO> userStatisticsDTOList() {
+    public @NotNull List<ExecutionStatistics> userStatisticsDTOList() {
         if (userStatisticsDTOList == null) {
             throw new IllegalStateException("UserStatisticsDTOList is not available in this response.");
         }
@@ -122,7 +122,7 @@ public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullab
         private @Nullable ProgramDTO programDTO;
         private @Nullable DebugStateChangeResultDTO debugStateChangeResultDTO;
         private @Nullable Set<UserDTO> allUsersDTO;
-        private @Nullable List<ExecutionResultStatisticsDTO> userStatisticsDTOList;
+        private @Nullable List<ExecutionStatistics> userStatisticsDTOList;
 
         /**
          * Sets the {@link SystemResponse#isSuccess} for the SystemResponse.
@@ -192,10 +192,10 @@ public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullab
          *
          * @param userStatisticsDTOList the list of ExecutionResultStatisticsDTO to set
          * @return the Builder instance
-         * @see ExecutionResultStatisticsDTO
+         * @see ExecutionStatistics
          * @see SystemResponse
          */
-        public Builder userStatisticsDTOList(@NotNull List<ExecutionResultStatisticsDTO> userStatisticsDTOList) {
+        public Builder userStatisticsDTOList(@NotNull List<ExecutionStatistics> userStatisticsDTOList) {
             this.userStatisticsDTOList = userStatisticsDTOList;
             return this;
         }

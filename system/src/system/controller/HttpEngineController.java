@@ -3,13 +3,13 @@ package system.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import dto.engine.ExecutionResultStatisticsDTO;
 import dto.engine.FunctionMetadataDTO;
 import dto.engine.ProgramDTO;
 import dto.engine.ProgramMetadataDTO;
 import dto.server.LoadProgramResultDTO;
 import dto.server.SystemResponse;
 import dto.server.UserDTO;
+import engine.core.ExecutionStatistics;
 import engine.utils.DebugAction;
 import jakarta.xml.bind.JAXBException;
 import okhttp3.Call;
@@ -130,7 +130,7 @@ public class HttpEngineController implements EngineController {
      * @return A set of ProgramMetadata objects representing the programs metadata.
      */
     @Override
-    public Set<ProgramMetadata> getProgramsMetadata() throws IOException {
+    public Set<ProgramMetadataDTO> getProgramsMetadata() throws IOException {
         try (Response response = Requests
                 .getSystemInfo(Endpoints.GET_SYSTEM_INFO, PROGRAMS_METADATA_INFO)) {
 
@@ -154,7 +154,7 @@ public class HttpEngineController implements EngineController {
      * @throws IOException If an I/O error occurs.
      */
     @Override
-    public Set<FunctionMetadata> getFunctionsMetadata() throws IOException {
+    public Set<FunctionMetadataDTO> getFunctionsMetadata() throws IOException {
         try (Response response = Requests
                 .getSystemInfo(Endpoints.GET_SYSTEM_INFO, FUNCTIONS_METADATA_INFO)) {
 
@@ -214,7 +214,7 @@ public class HttpEngineController implements EngineController {
                     if (response.isSuccessful()) {
                         String jsonString = getAndValidateBodyString(responseBody);
 
-                        List<ExecutionResultStatisticsDTO> statisticsDTOList = gson.fromJson(jsonString,
+                        List<ExecutionStatistics> statisticsDTOList = gson.fromJson(jsonString,
                                 EXECUTION_RESULT_STATISTICS_DTO_LIST_TYPE_TOKEN);
 
                         SystemResponse systemResponse = SystemResponse.builder()
@@ -347,7 +347,8 @@ public class HttpEngineController implements EngineController {
     }
 
     /**
-     * Runs the loaded program with the given arguments and expand level <strong>asynchronously</strong>.
+     * send a request to run the loaded program with the given arguments and expand
+     * doesn't wait for the program to finish
      *
      * @param expandLevel The expand level for the program execution.
      * @param arguments   A map of argument names to their integer values.
@@ -373,13 +374,11 @@ public class HttpEngineController implements EngineController {
                     public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                         try (ResponseBody responseBody = response.body()) {
                             if (response.isSuccessful()) {
-                                String jsonString = getAndValidateBodyString(responseBody);
-
-                                ProgramDTO programDTO = gson.fromJson(jsonString, ProgramDTO.class);
+                                String successesMessage = getAndValidateBodyString(responseBody);
 
                                 SystemResponse systemResponse = SystemResponse.builder()
                                         .isSuccess(true)
-                                        .programDTO(programDTO)
+                                        .message(successesMessage)
                                         .build();
 
                                 onResponse.accept(systemResponse);

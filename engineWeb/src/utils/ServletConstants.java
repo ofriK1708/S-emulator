@@ -1,10 +1,10 @@
 package utils;
 
 import com.google.gson.reflect.TypeToken;
-import dto.engine.ExecutionResultStatisticsDTO;
-import dto.engine.FunctionMetadata;
-import dto.engine.ProgramMetadata;
+import dto.engine.FunctionMetadataDTO;
+import dto.engine.ProgramMetadataDTO;
 import dto.server.UserDTO;
+import engine.core.ExecutionStatistics;
 import engine.utils.DebugAction;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -61,15 +61,15 @@ public class ServletConstants {
     public static final TypeToken<Set<UserDTO>> USER_DTO_SET_TYPE_TOKEN = new TypeToken<>() {
     };
 
-    public static final TypeToken<Set<ProgramMetadata>> PROGRAMS_METADATA_SET_TYPE_TOKEN = new TypeToken<>() {
+    public static final TypeToken<Set<ProgramMetadataDTO>> PROGRAMS_METADATA_SET_TYPE_TOKEN = new TypeToken<>() {
     };
 
-    public static final TypeToken<Set<FunctionMetadata>> FUNCTIONS_METADATA_SET_TYPE_TOKEN =
-            new TypeToken<Set<FunctionMetadata>>() {
+    public static final TypeToken<Set<FunctionMetadataDTO>> FUNCTIONS_METADATA_SET_TYPE_TOKEN =
+            new TypeToken<Set<FunctionMetadataDTO>>() {
             };
 
-    public static final TypeToken<List<ExecutionResultStatisticsDTO>> EXECUTION_RESULT_STATISTICS_DTO_LIST_TYPE_TOKEN =
-            new TypeToken<List<ExecutionResultStatisticsDTO>>() {
+    public static final TypeToken<List<ExecutionStatistics>> EXECUTION_RESULT_STATISTICS_DTO_LIST_TYPE_TOKEN =
+            new TypeToken<>() {
             };
     // endregion
 

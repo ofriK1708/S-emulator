@@ -12,6 +12,9 @@ import org.jetbrains.annotations.NotNull;
  * @param executionMetadata     metadata about the execution such as program name, architecture type, etc.
  * @param executionResultValues the result values obtained from the execution. (output, arguments, work variables).
  * @param executionStatistics   statistics related to the execution such as cycle count and credits cost.
+ * @see ExecutionMetadata
+ * @see ExecutionResultValues
+ * @see ExecutionStatistics
  */
 public record ExecutionResultInfoDTO(@NotNull ExecutionMetadata executionMetadata,
                                      @NotNull ExecutionResultValues executionResultValues,
