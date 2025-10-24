@@ -35,26 +35,30 @@ public class DashboardHeaderController {
     /**
      * Initialize the header with callbacks and bindings
      *
+     * @param loggedInUserName Property for displaying logged-in username
      * @param currentFilePath  Property for displaying current file path
      * @param availableCredits Property for available credits display
      * @param onLoadFile       Callback to handle file loading (receives File)
      * @param onChargeCredits  Callback to handle credit charging (receives amount)
      */
     public void initComponent(
+            @NotNull StringProperty loggedInUserName,
             @NotNull StringProperty currentFilePath,
             @NotNull IntegerProperty availableCredits,
             @NotNull Consumer<File> onLoadFile,
             @NotNull Consumer<Integer> onChargeCredits) {
 
         this.onLoadFile = onLoadFile;
-        this.onChargeCredits = () -> onChargeCredits.accept(50); // Default charge amount
+        this.onChargeCredits = () -> onChargeCredits.accept(50);
 
-        // Bind file path and credits fields to properties
+        // Bind username, file path, and credits fields to properties
+        userNameLabel.textProperty().bind(loggedInUserName);
         filePathField.textProperty().bind(currentFilePath);
         creditsField.textProperty().bind(availableCredits.asString());
 
-        System.out.println("DashboardHeaderController initialized");
+        System.out.println("DashboardHeaderController initialized with username binding");
     }
+
 
     @FXML
     private void handleLoadFile() {

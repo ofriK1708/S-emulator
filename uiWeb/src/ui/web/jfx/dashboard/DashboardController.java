@@ -34,6 +34,7 @@ public class DashboardController {
     private final BooleanProperty userSelected = new SimpleBooleanProperty(false);
     private final BooleanProperty fileLoaded = new SimpleBooleanProperty(false);
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
+    private final StringProperty loggedInUserName = new SimpleStringProperty("Guest User");
 
     @FXML
     private HBox headerSection;
@@ -106,6 +107,7 @@ public class DashboardController {
     private void initializeSubControllers() {
         // Header: file loading and credits
         headerSectionController.initComponent(
+                loggedInUserName,
                 currentFilePath,
                 availableCredits,
                 this::handleFileLoadFromDashboard,
@@ -185,7 +187,7 @@ public class DashboardController {
             }
 
             // Configure execution screen with user info BEFORE loading file
-            executionController.setUserName(selectedUser.get() != null ? selectedUser.get() : "Guest User");
+            executionController.setUserName(loggedInUserName.get());
             executionController.setScreenTitle("S-Emulator - Execution: " + programName);
             executionController.setAvailableCredits(availableCredits.get());
 
@@ -222,7 +224,7 @@ public class DashboardController {
             }
 
             // Configure execution screen with user info BEFORE loading file
-            executionController.setUserName(selectedUser.get() != null ? selectedUser.get() : "Guest User");
+            executionController.setUserName(loggedInUserName.get());
             executionController.setScreenTitle("S-Emulator - Execution: " + functionName);
             executionController.setAvailableCredits(availableCredits.get());
 
@@ -335,6 +337,26 @@ public class DashboardController {
         // TODO: Integrate with history management server
         System.out.println("Dashboard: Loading history for user '" + username + "'");
         historyPanelController.refreshHistory();
+    }
+
+    /**
+     * Set the logged-in username.
+     * MUST be called before setupNavigation().
+     *
+     * @param username The logged-in username
+     */
+    public void setLoggedInUser(@NotNull String username) {
+        this.loggedInUserName.set(username);
+        System.out.println("Dashboard: Logged in user set to - " + username);
+    }
+
+    /**
+     * Get the logged-in username property.
+     *
+     * @return StringProperty for the logged-in username
+     */
+    public StringProperty loggedInUserNameProperty() {
+        return loggedInUserName;
     }
 
     /**

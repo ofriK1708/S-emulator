@@ -20,7 +20,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import system.controller.EngineController;
 import system.controller.LocalEngineController;
 import ui.web.jfx.VariableInputDialog.VariableInputDialogController;
 import ui.web.jfx.cycles.CyclesController;
@@ -49,30 +48,31 @@ public class ExecutionController {
 
     private final ListProperty<VariableDTO> allVariablesDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-
     private final ListProperty<VariableDTO> previousVariablesDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-
     private final ListProperty<VariableDTO> argumentsDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-
     private final BooleanProperty argumentsLoaded = new SimpleBooleanProperty(false);
 
     private final ListProperty<InstructionDTO> programInstructions =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-
     private final ListProperty<InstructionDTO> derivedInstructions =
             new SimpleListProperty<>(FXCollections.observableArrayList());
 
     private final ListProperty<String> programVariablesNamesAndLabels =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-
     private final MapProperty<String, String> allSubFunction =
             new SimpleMapProperty<>(FXCollections.observableHashMap());
 
+    private final ListProperty<ExecutionResultStatisticsDTO> executionStatistics =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+
     private final StringProperty mainProgramName = new SimpleStringProperty("");
     private final StringProperty currentLoadedProgramName = new SimpleStringProperty("");
-    private final @NotNull EngineController engineController;
+
+    // Use LocalEngineController so we can call the synchronous methods used throughout this controller
+    private final @NotNull LocalEngineController engineController;
+
     private final Map<String, Integer> programArguments = new HashMap<>();
     private final BooleanProperty isAnimationsOn = new SimpleBooleanProperty(true);
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
@@ -135,6 +135,7 @@ public class ExecutionController {
     private DebuggerController debugControlsController;
     @FXML
     private Button backToDashboardButton;
+
     private @Nullable ProgramDTO loadedProgram = null;
     private Runnable returnToDashboardCallback = null;
     private boolean inDebugSession = false;
@@ -256,7 +257,6 @@ public class ExecutionController {
     public void loadProgramFromFile(@NotNull File file) {
         loadProgramFromFileExternal(file, null);
     }
-
 
     public void setScreenTitle(String title) {
         screenTitle.set(title);
@@ -399,10 +399,9 @@ public class ExecutionController {
     }
 
     private void setStageForLoadedProgram(String functionName) {
-       // loadedProgram = engineController.set(functionName);
 
         currentLoadedProgramName.set(loadedProgram.ProgramName());
-        maxExpandLevel.set(engineController.getMaxExpandLevel());
+        maxExpandLevel.set(maxExpandLevel.get() + 1);
         currentExpandLevel.set(0);
         programLoaded.set(true);
         argumentsLoaded.set(false);
@@ -501,7 +500,7 @@ public class ExecutionController {
             programRunning.set(true);
 
             engineController.runLoadedProgram(expandLevel, programArguments);
-            allVariablesDTO.setAll(UIUtils.getAllVariablesDTOSorted((LocalEngineController) engineController, expandLevel));
+            allVariablesDTO.setAll(UIUtils.getAllVariablesDTOSorted(engineController, expandLevel));
             ProgramDTO executedProgram = engineController.getProgramByExpandLevel(expandLevel);
             programInstructions.setAll(executedProgram.instructions());
             derivedInstructions.clear();
@@ -558,9 +557,6 @@ public class ExecutionController {
             showError("Error expanding program: " + e.getMessage());
         }
     }
-    // Debug Methods - Continuation of AppController.java
-
-// Debug Methods - Continuation of AppController.java
 
     public void clearLoadedProgram() {
         programLoaded.set(false);
@@ -604,7 +600,6 @@ public class ExecutionController {
         }
     }
 
-    // DEBUG METHODS
     public void stopDebugSession() {
         try {
             engineController.debugStop();
@@ -703,7 +698,7 @@ public class ExecutionController {
 
         try {
             if (!isFirstDebugStep) {
-                previousDebugVariables.putAll(UIUtils.getAllVariablesMap((LocalEngineController) engineController,
+                previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController,
                         currentExpandLevel.get()));
             }
 
@@ -719,7 +714,7 @@ public class ExecutionController {
             }
 
             if (engineController.isDebugFinished()) {
-                executionStatistics.setAll(engineController.getAllExecutionStatistics());
+                executionStatistics.get().setAll();
                 handleExecutionFinished();
             } else {
                 showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + currentCycles.get());
@@ -732,7 +727,7 @@ public class ExecutionController {
     }
 
     private void updateDebugVariableState() {
-        List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted((LocalEngineController) engineController,
+        List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted(engineController,
                 currentExpandLevel.get());
         List<VariableDTO> allVarWithChangeDetection = FXCollections.observableArrayList();
         allVarNoChangeDetection.stream()
@@ -754,7 +749,7 @@ public class ExecutionController {
         }
         if (!isFirstDebugStep) {
             previousDebugVariables.clear();
-            previousDebugVariables.putAll(UIUtils.getAllVariablesMap((LocalEngineController) engineController, currentExpandLevel.get()));
+            previousDebugVariables.putAll(UIUtils.getAllVariablesMap(engineController, currentExpandLevel.get()));
         }
 
         isInDebugResume = true;
@@ -799,7 +794,7 @@ public class ExecutionController {
         programFinished.set(true);
         previousDebugVariables.clear();
         isFirstDebugStep = true;
-        executionStatistics.add(engineController.getLastExecutionStatistics());
+        //executionStatistics.get().add(engineController.getLastExecutionStatistics());
         programRanAtLeastOnce.set(true);
         debugControlsController.notifyDebugSessionEnded();
         instructionsTableController.clearAllDebugHighlighting();
