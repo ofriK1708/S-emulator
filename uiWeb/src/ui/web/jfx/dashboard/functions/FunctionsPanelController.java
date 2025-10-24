@@ -1,7 +1,9 @@
 package ui.web.jfx.dashboard.functions;
 
+import dto.engine.FunctionMetadata;
 import dto.engine.ProgramDTO;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -22,26 +24,25 @@ import java.util.function.Consumer;
  */
 public class FunctionsPanelController {
 
-    private final ObservableList<FunctionDTO> functionsList = FXCollections.observableArrayList();
+    private final ObservableList<FunctionMetadata> functionsList = FXCollections.observableArrayList();
 
     @FXML
-    private TableView<FunctionDTO> functionsTableView;
+    private TableView<FunctionMetadata> functionsTableView;
     @FXML
-    private TableColumn<FunctionDTO, String> functionNameColumn;
+    private TableColumn<FunctionMetadata, String> functionNameColumn;
     @FXML
-    private TableColumn<FunctionDTO, String> programNameColumn;
+    private TableColumn<FunctionMetadata, String> programNameColumn;
     @FXML
-    private TableColumn<FunctionDTO, String> uploadedByColumn;
+    private TableColumn<FunctionMetadata, String> uploadedByColumn;
     @FXML
-    private TableColumn<FunctionDTO, Number> instructionCountColumn;
+    private TableColumn<FunctionMetadata, Number> instructionCountColumn;
     @FXML
-    private TableColumn<FunctionDTO, Number> maxExpandLevelColumn;
+    private TableColumn<FunctionMetadata, Number> maxExpandLevelColumn;
     @FXML
     private Button executeFunctionButton;
 
     private Consumer<String> executeFunctionCallback;
     private EngineController engineController;
-    private BooleanProperty programLoadedProperty;
 
     @FXML
     public void initialize() {
@@ -56,15 +57,15 @@ public class FunctionsPanelController {
     }
 
     private void setupTableColumns() {
-        // Bind columns to FunctionDTO properties
+        // Bind columns to FunctionMetadata properties
         functionNameColumn.setCellValueFactory(cellData ->
-                cellData.getValue().functionName());
+                new ReadOnlyStringWrapper(cellData.getValue().name()));
         programNameColumn.setCellValueFactory(cellData ->
-                cellData.getValue().programName());
+                cellData.getValue().ProgramContext());
         uploadedByColumn.setCellValueFactory(cellData ->
                 cellData.getValue().uploadedBy());
         instructionCountColumn.setCellValueFactory(cellData ->
-                cellData.getValue().instructionCount());
+                cellData.getValue().numOfInstructions());
         maxExpandLevelColumn.setCellValueFactory(cellData ->
                 cellData.getValue().maxExpandLevel());
 
@@ -118,7 +119,7 @@ public class FunctionsPanelController {
 
             functionsList.clear();
 
-            // Create FunctionDTO for each function
+            // Create FunctionMetadata for each function
             for (Map.Entry<String, String> entry : functions.entrySet()) {
                 String functionKey = entry.getKey();
                 String functionDisplayName = entry.getValue();
@@ -128,7 +129,7 @@ public class FunctionsPanelController {
                     int instructionCount = getInstructionCountForFunction(functionKey);
                     int maxExpandLevel = engineController.getMaxExpandLevel();
 
-                    FunctionDTO functionDTO = new FunctionDTO(
+                    FunctionMetadata FunctionMetadata = new FunctionMetadata(
                             new SimpleStringProperty(functionDisplayName),
                             new SimpleStringProperty(mainProgramName),
                             new SimpleStringProperty("System"), // Default uploader
@@ -136,7 +137,7 @@ public class FunctionsPanelController {
                             new SimpleIntegerProperty(maxExpandLevel)
                     );
 
-                    functionsList.add(functionDTO);
+                    functionsList.add(FunctionMetadata);
                 } catch (Exception e) {
                     System.err.println("Error loading function " + functionKey + ": " + e.getMessage());
                 }
@@ -186,7 +187,7 @@ public class FunctionsPanelController {
 
     @FXML
     private void handleExecuteFunction() {
-        FunctionDTO selected = functionsTableView.getSelectionModel().getSelectedItem();
+        FunctionMetadata selected = functionsTableView.getSelectionModel().getSelectedItem();
         if (selected != null && executeFunctionCallback != null) {
             String functionName = selected.functionName().get();
             System.out.println("Execute function requested: " + functionName);
@@ -204,7 +205,7 @@ public class FunctionsPanelController {
     /**
      * Manually set functions (for external updates)
      */
-    public void setFunctions(@NotNull ObservableList<FunctionDTO> functions) {
+    public void setFunctions(@NotNull ObservableList<FunctionMetadata> functions) {
         functionsList.setAll(functions);
     }
 

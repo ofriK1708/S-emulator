@@ -21,13 +21,13 @@ import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import system.controller.EngineController;
+import system.controller.HttpEngineController;
 import system.controller.LocalEngineController;
 import ui.web.jfx.VariableInputDialog.VariableInputDialogController;
 import ui.web.jfx.cycles.CyclesController;
 import ui.web.jfx.debugger.DebuggerController;
 import ui.web.jfx.execution.header.ExecutionHeaderController;
 import ui.web.jfx.fileLoader.FileLoaderController;
-import ui.web.jfx.fileLoader.UIAdapterLoadFileTask;
 import ui.web.jfx.instruction.InstructionTableController;
 import ui.web.jfx.program.function.PaneMode;
 import ui.web.jfx.program.function.ProgramFunctionController;
@@ -144,7 +144,7 @@ public class ExecutionController {
     private boolean isInDebugResume = false;
 
     public ExecutionController() {
-        this.engineController = new LocalEngineController();
+        this.engineController = new HttpEngineController();
         UIUtils.setAppControllerInstance(this);
     }
 
@@ -216,33 +216,9 @@ public class ExecutionController {
             loadingStage.setTitle("Loading File");
             loadingStage.setScene(new Scene(root, 1000, 183));
 
-            UIAdapterLoadFileTask uiAdapter = new UIAdapterLoadFileTask(
-                    programLoaded::set,
-                    argumentsLoaded::set,
-                    programVariablesNamesAndLabels::setAll,
-                    programInstructions::setAll,
-                    derivedInstructions::clear,
-                    summaryLineController::updateCounts,
-                    maxExpandLevel::set,
-                    currentExpandLevel::set,
-                    currentCycles::set,
-                    program -> {
-                        if (program != null) {
-                            UIUtils.showSuccess("File loaded successfully: " + file.getName());
-                            loadedProgram = program;
-                            mainProgramName.set(program.ProgramName());
-                            currentLoadedProgramName.set(program.ProgramName());
-
-                            if (onSuccessCallback != null) {
-                                onSuccessCallback.run();
-                            }
-                        }
-                        loadingStage.close();
-                    }
-            );
 
             loadingStage.setOnShown(event -> fileLoaderController.initializeAndRunFileLoaderTaskThread(
-                    file.toPath(), engineController, uiAdapter));
+                    file.toPath(), engineController));
             loadingStage.show();
 
             System.out.println("AppController: External file load triggered for " + file.getName());
@@ -252,6 +228,34 @@ public class ExecutionController {
             showError("Error loading file: " + e.getMessage());
         }
     }
+
+//    public void tempPlaceHolderForUIAdpater(){
+//        UIAdapterLoadFileTask uiAdapter = new UIAdapterLoadFileTask(
+//                programLoaded::set,
+//                argumentsLoaded::set,
+//                programVariablesNamesAndLabels::setAll,
+//                programInstructions::setAll,
+//                derivedInstructions::clear,
+//                summaryLineController::updateCounts,
+//                maxExpandLevel::set,
+//                currentExpandLevel::set,
+//                currentCycles::set,
+//                program -> {
+//                    if (program != null) {
+//                        UIUtils.showSuccess("File loaded successfully: " + file.getName());
+//                        loadedProgram = program;
+//                        mainProgramName.set(program.ProgramName());
+//                        currentLoadedProgramName.set(program.ProgramName());
+//
+//                        if (onSuccessCallback != null) {
+//                            onSuccessCallback.run();
+//                        }
+//                    }
+//                    loadingStage.close();
+//                }
+//        );
+//
+//    }
 
     public void loadProgramFromFile(@NotNull File file) {
         loadProgramFromFileExternal(file, null);

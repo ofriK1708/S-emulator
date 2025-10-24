@@ -1,5 +1,6 @@
 package ui.web.jfx.dashboard;
 
+import dto.engine.ProgramMetadata;
 import javafx.beans.property.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -34,6 +35,8 @@ public class DashboardController {
     private final BooleanProperty userSelected = new SimpleBooleanProperty(false);
     private final BooleanProperty fileLoaded = new SimpleBooleanProperty(false);
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
+    private final ListProperty<ProgramMetadata> programsMetadata = new SimpleListProperty<>();
+    private final ListProperty<ProgramMetadata> functionsMetadata = new SimpleListProperty<>();
 
     @FXML
     private HBox headerSection;
@@ -113,11 +116,8 @@ public class DashboardController {
         );
 
         // Programs panel: set engine and execution callback
-        programsPanelController.setEngineController(engineController);
-        programsPanelController.initComponent(
-                programLoaded,
-                fileLoaded,
-                this::handleProgramExecution  // Navigation happens here
+        programsPanelController.initComponent(this::handleProgramExecution,
+                programsMetadata// Navigation happens here
         );
 
         // Functions panel: set engine and execution callback

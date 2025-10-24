@@ -1,10 +1,8 @@
 package ui.web.jfx.dashboard.programs;
 
-import dto.engine.ProgramDTO;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
+import dto.engine.ProgramMetadata;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -12,7 +10,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.jetbrains.annotations.NotNull;
-import system.controller.EngineController;
 
 import java.util.function.Consumer;
 
@@ -22,28 +19,26 @@ import java.util.function.Consumer;
  */
 public class ProgramsPanelController {
 
-    private final ObservableList<ProgramDashboardDTO> programsList = FXCollections.observableArrayList();
+    private final ObservableList<ProgramMetadata> programsList = FXCollections.observableArrayList();
 
     @FXML
-    private TableView<ProgramDashboardDTO> programsTableView;
+    private TableView<ProgramMetadata> programsTableView;
     @FXML
-    private TableColumn<ProgramDashboardDTO, String> programNameColumn;
+    private TableColumn<ProgramMetadata, String> programNameColumn;
     @FXML
-    private TableColumn<ProgramDashboardDTO, String> uploadedByColumn;
+    private TableColumn<ProgramMetadata, String> uploadedByColumn;
     @FXML
-    private TableColumn<ProgramDashboardDTO, Number> instructionCountColumn;
+    private TableColumn<ProgramMetadata, Number> instructionCountColumn;
     @FXML
-    private TableColumn<ProgramDashboardDTO, Number> maxExpandLevelColumn;
+    private TableColumn<ProgramMetadata, Number> maxExpandLevelColumn;
     @FXML
-    private TableColumn<ProgramDashboardDTO, Number> totalRunsColumn;
+    private TableColumn<ProgramMetadata, Number> totalRunsColumn;
     @FXML
-    private TableColumn<ProgramDashboardDTO, Number> avgCreditCostColumn;
+    private TableColumn<ProgramMetadata, Number> avgCreditCostColumn;
     @FXML
     private Button executeProgramButton;
 
     private Consumer<String> executeProgramCallback;
-    private EngineController engineController;
-    private BooleanProperty programLoadedProperty;
 
     @FXML
     public void initialize() {
@@ -58,19 +53,19 @@ public class ProgramsPanelController {
     }
 
     private void setupTableColumns() {
-        // Bind columns to ProgramDashboardDTO properties
+        // Bind columns to ProgramMetadata properties
         programNameColumn.setCellValueFactory(cellData ->
-                cellData.getValue().programName());
+                new ReadOnlyObjectWrapper<>(cellData.getValue().name()));
         uploadedByColumn.setCellValueFactory(cellData ->
-                cellData.getValue().uploadedBy());
+                new ReadOnlyObjectWrapper<>(cellData.getValue().uploadedBy()));
         instructionCountColumn.setCellValueFactory(cellData ->
-                cellData.getValue().instructionCount());
+                new ReadOnlyObjectWrapper<>(cellData.getValue().numOfInstructions()));
         maxExpandLevelColumn.setCellValueFactory(cellData ->
-                cellData.getValue().maxExpandLevel());
+                new ReadOnlyObjectWrapper<>(cellData.getValue().maxExpandLevel()));
         totalRunsColumn.setCellValueFactory(cellData ->
-                cellData.getValue().totalRuns());
+                new ReadOnlyObjectWrapper<>(cellData.getValue().numberOfExecutions()));
         avgCreditCostColumn.setCellValueFactory(cellData ->
-                cellData.getValue().avgCreditCost());
+                new ReadOnlyObjectWrapper<>(cellData.getValue().averageCreditsCost()));
 
         programsTableView.setItems(programsList);
     }
@@ -78,127 +73,29 @@ public class ProgramsPanelController {
     /**
      * Initialize component with necessary dependencies
      */
-    public void initComponent(@NotNull BooleanProperty programLoadedProperty,
-                              @NotNull BooleanProperty fileLoadedProperty,
-                              @NotNull Consumer<String> executeProgramCallback) {
-        this.programLoadedProperty = programLoadedProperty;
+    public void initComponent(@NotNull Consumer<String> executeProgramCallback,
+                              ListProperty<ProgramMetadata> availableProgramsProperty) {
+
         this.executeProgramCallback = executeProgramCallback;
 
         // Bind execute button to both program loaded and selection state
-        executeProgramButton.disableProperty().bind(
-                programLoadedProperty.not()
-                        .or(programsTableView.getSelectionModel().selectedItemProperty().isNull())
+        executeProgramButton.disableProperty().bind((
+                programsTableView.getSelectionModel().selectedItemProperty().isNull())
         );
-
-        // Listen for file load events to refresh program data
-        fileLoadedProperty.addListener((obs, oldVal, newVal) -> {
-            if (newVal) {
-                refreshProgramData();
-            }
-        });
+        // Bind the available programs property to the internal list
+        programsTableView.itemsProperty().bind(availableProgramsProperty);
     }
 
-    /**
-     * Refresh program data from engine controller
-     */
-    public void refreshProgramData() {
-        if (engineController == null) {
-            System.err.println("EngineController not set - cannot refresh program data");
-            return;
-        }
-
-        try {
-            // Get basic program from engine
-            ProgramDTO basicProgram = engineController.getBasicProgram();
-
-            if (basicProgram != null) {
-                // Get execution statistics for the program
-                int totalRuns = engineController.getAllExecutionStatistics().size();
-
-                // Calculate average credit cost from execution statistics
-                double avgCost = calculateAverageCreditCost(totalRuns);
-
-                // Create dashboard DTO
-                ProgramDashboardDTO dashboardDTO = createProgramDashboardDTO(
-                        basicProgram,
-                        totalRuns,
-                        avgCost
-                );
-
-                // Update table
-                programsList.clear();
-                programsList.add(dashboardDTO);
-
-                System.out.println("Programs panel refreshed with: " + basicProgram.ProgramName());
-            }
-        } catch (Exception e) {
-            System.err.println("Error refreshing program data: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Create ProgramDashboardDTO from ProgramDTO
-     */
-    private @NotNull ProgramDashboardDTO createProgramDashboardDTO(
-            @NotNull ProgramDTO program,
-            int totalRuns,
-            double avgCreditCost) {
-
-        return new ProgramDashboardDTO(
-                new SimpleStringProperty(program.ProgramName()),
-                new SimpleStringProperty("System"), // Default uploader
-                new SimpleIntegerProperty(program.instructions().size()),
-                new SimpleIntegerProperty(engineController.getMaxExpandLevel()),
-                new SimpleIntegerProperty(totalRuns),
-                new SimpleDoubleProperty(avgCreditCost)
-        );
-    }
-
-    /**
-     * Calculate average credit cost from execution statistics
-     */
-    private double calculateAverageCreditCost(int totalRuns) {
-        if (totalRuns == 0) {
-            return 0.0;
-        }
-
-        // Simple cost calculation: 1 credit per 1 cycles
-        // This can be adjusted based on actual business logic
-        try {
-            int totalCycles = engineController.getAllExecutionStatistics().stream()
-                    .mapToInt(ExecutionStatisticsDTO::cyclesUsed)
-                    .sum();
-            return (double) totalCycles / 1.0 / totalRuns;
-        } catch (Exception e) {
-            return 0.0;
-        }
-    }
 
     @FXML
     private void handleExecuteProgram() {
-        ProgramDashboardDTO selectedProgram = programsTableView.getSelectionModel().getSelectedItem();
+        ProgramMetadata selectedProgram = programsTableView.getSelectionModel().getSelectedItem();
         if (selectedProgram != null && executeProgramCallback != null) {
-            String programName = selectedProgram.programName().get();
+            String programName = selectedProgram.name();
             System.out.println("Execute program requested: " + programName);
             executeProgramCallback.accept(programName);
         }
     }
-
-    /**
-     * Set engine controller for data access
-     */
-    public void setEngineController(@NotNull EngineController engineController) {
-        this.engineController = engineController;
-    }
-
-    /**
-     * Manually set programs (for external updates)
-     */
-    public void setPrograms(@NotNull ObservableList<ProgramDashboardDTO> programs) {
-        programsList.setAll(programs);
-    }
-
     /**
      * Clear all programs from the table
      */

@@ -1,16 +1,13 @@
 package ui.web.jfx.fileLoader;
 
-import dto.engine.ProgramDTO;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import org.jetbrains.annotations.NotNull;
 import system.controller.EngineController;
-import ui.web.utils.UIUtils;
 
 import java.nio.file.Path;
-import java.util.function.Consumer;
 
 public class FileLoaderController {
 
@@ -25,20 +22,18 @@ public class FileLoaderController {
     @FXML
     private ProgressBar progressBar;
 
-    public void initializeAndRunFileLoaderTaskThread(@NotNull Path filePath, EngineController engineController,
-                                                     UIAdapterLoadFileTask uiAdapter) {
+    public void initializeAndRunFileLoaderTaskThread(@NotNull Path filePath, EngineController engineController) {
         fileNameLabel.setText(filePath.toString());
         percentLabel.setText("0%");
         progressBar.setProgress(0);
-        LoadFileToProgramTask loadFileToProgramTask = new LoadFileToProgramTask(
-                engineController, filePath, uiAdapter
-        );
-        bindTaskToUIComponents(loadFileToProgramTask, uiAdapter.onFinish());
-        Thread thread = new Thread(loadFileToProgramTask, "FileLoaderTaskThread");
+        UploadFileToSystemTask uploadFileToSystemTask = new UploadFileToSystemTask(
+                engineController, filePath);
+        bindTaskToUIComponents(uploadFileToSystemTask);
+        Thread thread = new Thread(uploadFileToSystemTask, "FileLoaderTaskThread");
         thread.start();
     }
 
-    private void bindTaskToUIComponents(@NotNull LoadFileToProgramTask task, @NotNull Consumer<ProgramDTO> onFinish) {
+    private void bindTaskToUIComponents(@NotNull UploadFileToSystemTask task) {
         progressBar.progressProperty().bind(task.progressProperty());
         taskMessage.textProperty().bind(task.messageProperty());
         percentLabel.textProperty().bind(Bindings.concat(
@@ -49,13 +44,13 @@ public class FileLoaderController {
                                 100)),
                 " %"));
 
-        task.setOnSucceeded(e -> onFinish.accept(task.getValue()));
-        task.setOnCancelled(e -> onFinish.accept(task.getValue()));
-        task.setOnFailed(e -> {
-            UIUtils.showError("Failed to load the file: " + task.getException().getMessage())
-            ;
-            onFinish.accept(null);
-        });
+//        task.setOnSucceeded(e -> onFinish.accept());
+//        task.setOnCancelled(e -> onFinish.accept(task.getValue()));
+//        task.setOnFailed(e -> {
+//            UIUtils.showError("Failed to load the file: " + task.getException().getMessage())
+//            ;
+//            onFinish.accept(null);
+//        });
     }
 
 }
