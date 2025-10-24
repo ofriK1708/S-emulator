@@ -2,7 +2,6 @@ package engine.core;
 
 
 import dto.engine.ExecutionResultValuesDTO;
-import engine.exception.InsufficientCredits;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -17,19 +16,12 @@ import static engine.utils.ProgramUtils.PC_NAME;
  * Class responsible for running a program represented by a list of instructions
  * and maintaining the execution context. doesn't affect's the original instructions or context.
  */
-public class ProgramRunner {
-    private final @NotNull Map<String, Integer> executedContextMap;
-    private final @NotNull List<Instruction> executedInstructions;
-    private final int initialUserCredits;
-    private int runningUserCredits;
-    private int cyclesCount = 0;
+public class ProgramRunner extends ProgramExecutor {
 
     private ProgramRunner(@NotNull List<Instruction> executedInstructions,
                           @NotNull Map<String, Integer> executedContextMap,
                           int userCredits) {
-        this.executedInstructions = executedInstructions;
-        this.executedContextMap = executedContextMap;
-        initialUserCredits = runningUserCredits = userCredits;
+        super(executedInstructions, executedContextMap, userCredits);
     }
 
     static @NotNull ProgramRunner createFrom(@NotNull ProgramExecutable executable,
@@ -45,21 +37,7 @@ public class ProgramRunner {
                                                  @NotNull Map<String, Integer> arguments) {
         executedContextMap.putAll(arguments);
         while (executedContextMap.get(PC_NAME) < executedInstructions.size()) {
-            int currentPC = executedContextMap.get(PC_NAME);
-            Instruction instruction = executedInstructions.get(currentPC);
-            try {
-                int instructionCreditsCost = calcCreditCost(instruction, executedContextMap);
-                if (runningUserCredits < instructionCreditsCost) {
-                    throw new InsufficientCredits("Insufficient credits to execute instruction" +
-                            instruction.getStringRepresentation() + " at PC=" + currentPC, runningUserCredits,
-                            instructionCreditsCost);
-                }
-                runningUserCredits -= instructionCreditsCost;
-                cyclesCount += instructionCreditsCost;
-                instruction.execute(executedContextMap);
-            } catch (IllegalArgumentException e) {
-                throw new RuntimeException("Error executing instruction at PC=" + currentPC + ": " + e.getMessage(), e);
-            }
+            executeInstruction();
         }
         return new ExecutionResultValuesDTO(
                 executedContextMap.get(ProgramUtils.OUTPUT_NAME),
