@@ -10,7 +10,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
-import ui.utils.UIUtils;
+import ui.utils.OLD_UIUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -92,7 +92,7 @@ public class VariableInputDialogController {
     }
 
     private boolean validate(@NotNull String newVal) {
-        return newVal.isEmpty() || UIUtils.isValidProgramArgument(newVal);
+        return newVal.isEmpty() || OLD_UIUtils.isValidProgramArgument(newVal);
     }
 
     private void updateFieldValidationStyle(@NotNull TextField field, boolean valid) {

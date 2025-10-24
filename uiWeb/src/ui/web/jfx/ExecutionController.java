@@ -27,12 +27,13 @@ import ui.web.jfx.VariableInputDialog.VariableInputDialogController;
 import ui.web.jfx.cycles.CyclesController;
 import ui.web.jfx.debugger.DebuggerController;
 import ui.web.jfx.execution.header.ExecutionHeaderController;
-import ui.web.jfx.fileLoader.FileLoaderController;
 import ui.web.jfx.instruction.InstructionTableController;
 import ui.web.jfx.program.function.PaneMode;
 import ui.web.jfx.program.function.ProgramFunctionController;
 import ui.web.jfx.runControls.RunControlsController;
 import ui.web.jfx.summaryLine.SummaryLineController;
+import ui.web.jfx.task.program.ProgramTaskController;
+import ui.web.jfx.task.program.load.UIAdapter;
 import ui.web.jfx.variables.VariablesTableController;
 import ui.web.utils.UIUtils;
 
@@ -205,19 +206,21 @@ public class ExecutionController {
         System.out.println("AppController: Return to Dashboard callback registered");
     }
 
-    public void loadProgramFromFileExternal(@NotNull File file, @Nullable Runnable onSuccessCallback) {
+    public void loadProgramToExecution(@NotNull File file, @Nullable Runnable onSuccessCallback) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("fileLoader/fileLoader.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("task/program/ProgramTask.fxml"));
             Parent root = loader.load();
-            FileLoaderController fileLoaderController = loader.getController();
+            ProgramTaskController programTaskController = loader.getController();
 
             Stage loadingStage = new Stage();
             loadingStage.initModality(Modality.APPLICATION_MODAL);
             loadingStage.setTitle("Loading File");
             loadingStage.setScene(new Scene(root, 1000, 183));
 
+            UIAdapter uiAdapter = buildUIAdapter(file, loadingStage);
 
-            loadingStage.setOnShown(event -> fileLoaderController.initializeAndRunFileLoaderTaskThread(
+
+            loadingStage.setOnShown(event -> programTaskController.initializeAndRunUploadTaskThread(
                     file.toPath(), engineController));
             loadingStage.show();
 
@@ -229,38 +232,28 @@ public class ExecutionController {
         }
     }
 
-//    public void tempPlaceHolderForUIAdpater(){
-//        UIAdapterLoadFileTask uiAdapter = new UIAdapterLoadFileTask(
-//                programLoaded::set,
-//                argumentsLoaded::set,
-//                programVariablesNamesAndLabels::setAll,
-//                programInstructions::setAll,
-//                derivedInstructions::clear,
-//                summaryLineController::updateCounts,
-//                maxExpandLevel::set,
-//                currentExpandLevel::set,
-//                currentCycles::set,
-//                program -> {
-//                    if (program != null) {
-//                        UIUtils.showSuccess("File loaded successfully: " + file.getName());
-//                        loadedProgram = program;
-//                        mainProgramName.set(program.ProgramName());
-//                        currentLoadedProgramName.set(program.ProgramName());
-//
-//                        if (onSuccessCallback != null) {
-//                            onSuccessCallback.run();
-//                        }
-//                    }
-//                    loadingStage.close();
-//                }
-//        );
-//
-//    }
-
-    public void loadProgramFromFile(@NotNull File file) {
-        loadProgramFromFileExternal(file, null);
+    private UIAdapter buildUIAdapter(@NotNull File file, Stage loadingStage) {
+        return UIAdapter.builder()
+                .programLoadedDelegate(programLoaded::set)
+                .argumentsEnteredDelegate(argumentsLoaded::set)
+                .variablesAndLabelsNamesDelegate(programVariablesNamesAndLabels::setAll)
+                .programInstructionsDelegate(programInstructions::setAll)
+                .clearDerivedInstructionsDelegate(derivedInstructions::clear)
+                .summaryLineDelegate(summaryLineController::updateCounts)
+                .maxExpandLevelDelegate(maxExpandLevel::set)
+                .currentExpandLevelDelegate(currentExpandLevel::set)
+                .cyclesDelegate(currentCycles::set)
+                .onFinish(program -> {
+                    if (program != null) {
+                        UIUtils.showSuccess("File loaded successfully: " + file.getName());
+                        loadedProgram = program;
+                        mainProgramName.set(program.ProgramName());
+                        currentLoadedProgramName.set(program.ProgramName());
+                    }
+                    loadingStage.close();
+                })
+                .build();
     }
-
 
     public void setScreenTitle(String title) {
         screenTitle.set(title);
@@ -403,7 +396,7 @@ public class ExecutionController {
     }
 
     private void setStageForLoadedProgram(String functionName) {
-       // loadedProgram = engineController.set(functionName);
+        // loadedProgram = engineController.set(functionName);
 
         currentLoadedProgramName.set(loadedProgram.ProgramName());
         maxExpandLevel.set(engineController.getMaxExpandLevel());
@@ -505,8 +498,9 @@ public class ExecutionController {
             programRunning.set(true);
 
             engineController.runLoadedProgram(expandLevel, programArguments);
-            allVariablesDTO.setAll(UIUtils.getAllVariablesDTOSorted((LocalEngineController) engineController, expandLevel));
-            ProgramDTO executedProgram = engineController.getProgramByExpandLevel(expandLevel);
+            allVariablesDTO.setAll(UIUtils.getAllVariablesDTOSorted((LocalEngineController) engineController,
+                    expandLevel));
+            ProgramDTO executedProgram = engineController.getProgramByExpandLevelAsync(expandLevel);
             programInstructions.setAll(executedProgram.instructions());
             derivedInstructions.clear();
             currentCycles.set(engineController.getLastExecutionNumberOfCycles());
@@ -547,7 +541,7 @@ public class ExecutionController {
             instructionsTableController.clearHighlighting();
             derivedInstructionsTableController.clearHighlighting();
             currentExpandLevel.set(expandLevel);
-            ProgramDTO program = engineController.getProgramByExpandLevel(expandLevel);
+            ProgramDTO program = engineController.getProgramByExpandLevelAsync(expandLevel);
             derivedInstructions.clear();
             programInstructions.setAll(program.instructions());
             allVariablesDTO.clear();
@@ -736,8 +730,9 @@ public class ExecutionController {
     }
 
     private void updateDebugVariableState() {
-        List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted((LocalEngineController) engineController,
-                currentExpandLevel.get());
+        List<VariableDTO> allVarNoChangeDetection =
+                UIUtils.getAllVariablesDTOSorted((LocalEngineController) engineController,
+                        currentExpandLevel.get());
         List<VariableDTO> allVarWithChangeDetection = FXCollections.observableArrayList();
         allVarNoChangeDetection.stream()
                 .map(var -> createVariableDTOWithChangeDetection(var.name().get(), var.value().get()))
@@ -758,7 +753,8 @@ public class ExecutionController {
         }
         if (!isFirstDebugStep) {
             previousDebugVariables.clear();
-            previousDebugVariables.putAll(UIUtils.getAllVariablesMap((LocalEngineController) engineController, currentExpandLevel.get()));
+            previousDebugVariables.putAll(UIUtils.getAllVariablesMap((LocalEngineController) engineController,
+                    currentExpandLevel.get()));
         }
 
         isInDebugResume = true;

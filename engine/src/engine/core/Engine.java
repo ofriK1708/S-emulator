@@ -191,6 +191,7 @@ public class Engine {
         return new ProgramDTO(
                 programName,
                 getSortedArgumentsMap(),
+                new ArrayList<>(instructionSequence.getAllVariablesNames(expandLevel, true)),
                 instructionSequence.getMaxExpandLevel(),
                 IntStream.range(0, instructionsAtLevel.size())
                         .mapToObj(i -> instructionsAtLevel.get(i).toDTO(i))

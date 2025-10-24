@@ -2,6 +2,7 @@ package logic.manager;
 
 import dto.engine.FunctionMetadata;
 import dto.engine.ProgramMetadata;
+import dto.engine.ProgramsAndFunctionsMetadata;
 import engine.core.Engine;
 import engine.exception.FunctionAlreadyExist;
 import engine.exception.FunctionNotFound;
@@ -120,6 +121,16 @@ public class ProgramManager {
         } finally {
             readLock.unlock();
         }
+    }
+
+    public ProgramsAndFunctionsMetadata getProgramsAndFunctionsMetadata() {
+        readLock.lock();
+        try {
+            return new ProgramsAndFunctionsMetadata(getProgramsMetadata(), getFunctionsMetadata());
+        } finally {
+            readLock.unlock();
+        }
+
     }
 
     public Set<String> getFunctionNames() {

@@ -11,7 +11,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import org.jetbrains.annotations.NotNull;
 import ui.utils.AnimatedTableRow;
-import ui.utils.UIUtils;
+import ui.utils.OLD_UIUtils;
 
 /**
  * Displays workVariables in a table format with change highlighting for debug mode.
@@ -89,7 +89,7 @@ public class VariablesTableController {
         if (!hasChanged) {
             return;
         }
-        UIUtils.checkIfShouldAnimate(row, isAnimationsEnabled.get());
+        OLD_UIUtils.checkIfShouldAnimate(row, isAnimationsEnabled.get());
     }
 
     private void scrollToFirstChangedVariable() {

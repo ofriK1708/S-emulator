@@ -19,7 +19,7 @@ public class getProgramInfo extends HttpServlet {
     @Override
     protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("text/html;charset=utf-8");
-        resp.getWriter().println(getAllProgramInfoOptionsNames());
+        resp.getWriter().write(getAllProgramInfoOptionsNames());
 
     }
 
@@ -50,19 +50,28 @@ public class getProgramInfo extends HttpServlet {
             System.out.println("current program: " + currentEngine.getProgramName() + ", info requested: " + infoToGet);
 
             switch (infoToGet) {
-                case BASIC_PROGRAM_INFO -> resp.getWriter().println(gson.toJson(currentEngine.
+                case BASIC_PROGRAM_INFO -> resp.getWriter().write(gson.toJson(currentEngine.
                         getBasicProgramDTO()));
-                case PROGRAM_BY_EXPAND_LEVEL_INFO -> resp.getWriter().println(gson.toJson(currentEngine.
+
+                case PROGRAM_BY_EXPAND_LEVEL_INFO -> resp.getWriter().write(gson.toJson(currentEngine.
                         getProgramByExpandLevelDTO(expandLevel)));
+
                 case PROGRAMS_STATISTICS_INFO ->
-                        resp.getWriter().println(gson.toJson(ServletUtils.getExecutionHistoryManager(getServletContext())
+                        resp.getWriter().write(gson.toJson(ServletUtils.getExecutionHistoryManager(getServletContext())
                                 .getProgramExecutionHistory(programName)));
-                case MAX_EXPAND_LEVEL_INFO -> resp.getWriter().println(gson.toJson(currentEngine.
+
+                case MAX_EXPAND_LEVEL_INFO -> resp.getWriter().write(gson.toJson(currentEngine.
                         getMaxExpandLevel()));
-                case ALL_VARIABLES_AND_LABELS_INFO -> resp.getWriter().println(gson.toJson(currentEngine.
+
+                case ALL_VARIABLES_AND_LABELS_INFO -> resp.getWriter().write(gson.toJson(currentEngine.
                         getAllVariablesNames(expandLevel, true)));
-                case ARGUMENTS_INFO -> resp.getWriter().println(currentEngine.getSortedArgumentsMap(expandLevel));
-                case WORK_VARS_INFO -> resp.getWriter().println(currentEngine.getSortedWorkVars(expandLevel));
+
+                case ARGUMENTS_INFO -> resp.getWriter().write(
+                        gson.toJson(currentEngine.getSortedArgumentsMap(expandLevel)));
+
+                case WORK_VARS_INFO -> resp.getWriter().write(gson.toJson(currentEngine.
+                        getSortedWorkVars(expandLevel)));
+
                 default -> resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
                         "Info parameter is missing or invalid, if you want to see all available options," +
                                 "please send an OPTIONS request to this URL");

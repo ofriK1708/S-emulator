@@ -34,7 +34,7 @@ import ui.jfx.runControls.RunControlsController;
 import ui.jfx.statistics.HistoryStatsController;
 import ui.jfx.summaryLine.SummaryLineController;
 import ui.jfx.variables.VariablesTableController;
-import ui.utils.UIUtils;
+import ui.utils.OLD_UIUtils;
 
 import java.io.File;
 import java.util.Collections;
@@ -42,7 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ui.utils.UIUtils.*;
+import static ui.utils.OLD_UIUtils.*;
 
 public class AppController {
 
@@ -144,7 +144,7 @@ public class AppController {
     public AppController() {
         this.localEngineController = new LocalEngineController();
         // Set this instance for UIUtils re-run functionality
-        UIUtils.setAppControllerInstance(this);
+        OLD_UIUtils.setAppControllerInstance(this);
     }
 
     @FXML
@@ -374,7 +374,7 @@ public class AppController {
                     currentCycles::set,
                     program -> {
                         if (program != null) {
-                            UIUtils.showSuccess("File loaded successfully: " + file.getName());
+                            OLD_UIUtils.showSuccess("File loaded successfully: " + file.getName());
                             loadedProgram = program;
                             mainProgramName.set(program.ProgramName());
                             currentLoadedProgramName.set(program.ProgramName());
@@ -462,7 +462,7 @@ public class AppController {
 
         // After dialog closes, update UI and mark arguments as loaded
         argumentsLoaded.set(true);
-        argumentsDTO.setAll(UIUtils.formatArgumentsToVariableDTO(programArguments));
+        argumentsDTO.setAll(OLD_UIUtils.formatArgumentsToVariableDTO(programArguments));
 
         // Show appropriate success message based on whether this is a rerun and current mode
         if (argumentsHaveNonZeroValues(programArguments)) {
@@ -525,7 +525,7 @@ public class AppController {
 
             // Execute the program using SystemController
             localEngineController.runLoadedProgram(expandLevel, programArguments);
-            allVariablesDTO.setAll(UIUtils.getAllVariablesDTOSorted(localEngineController, expandLevel));
+            allVariablesDTO.setAll(OLD_UIUtils.getAllVariablesDTOSorted(localEngineController, expandLevel));
             executionStatistics.add(localEngineController.getLastExecutionStatistics());
 
             ProgramDTO executedProgram = localEngineController.getProgramByExpandLevel(expandLevel);
@@ -733,7 +733,7 @@ public class AppController {
             instructionsTableController.clearBreakpointHitHighlight();
 
             if (!isFirstDebugStep) {
-                previousDebugVariables.putAll(UIUtils.getAllVariablesMap(localEngineController,
+                previousDebugVariables.putAll(OLD_UIUtils.getAllVariablesMap(localEngineController,
                         currentExpandLevel.get()));
             }
 
@@ -763,7 +763,7 @@ public class AppController {
     }
 
     private void updateDebugVariableState() {
-        List<VariableDTO> allVarNoChangeDetection = UIUtils.getAllVariablesDTOSorted(localEngineController,
+        List<VariableDTO> allVarNoChangeDetection = OLD_UIUtils.getAllVariablesDTOSorted(localEngineController,
                 currentExpandLevel.get());
         List<VariableDTO> allVarWithChangeDetection = FXCollections.observableArrayList();
         allVarNoChangeDetection.stream()
@@ -785,7 +785,7 @@ public class AppController {
         }
 
         try {
-            previousDebugVariables.putAll(UIUtils.getAllVariablesMap(localEngineController, currentExpandLevel.get()));
+            previousDebugVariables.putAll(OLD_UIUtils.getAllVariablesMap(localEngineController, currentExpandLevel.get()));
             localEngineController.debugStepBack();
             int currentPC = localEngineController.getCurrentDebugPC();
             currentCycles.set(localEngineController.getCurrentDebugCycles());
@@ -815,7 +815,7 @@ public class AppController {
         }
         if (!isFirstDebugStep) {
             previousDebugVariables.clear();
-            previousDebugVariables.putAll(UIUtils.getAllVariablesMap(localEngineController, currentExpandLevel.get()));
+            previousDebugVariables.putAll(OLD_UIUtils.getAllVariablesMap(localEngineController, currentExpandLevel.get()));
         }
 
         isInDebugResume = true;

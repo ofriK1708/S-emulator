@@ -1,4 +1,4 @@
-package ui.web.jfx.fileLoader;
+package ui.web.jfx.task.program.upload;
 
 import javafx.concurrent.Task;
 import system.controller.EngineController;
@@ -17,11 +17,9 @@ public class UploadFileToSystemTask extends Task<Void> {
     @Override
     protected Void call() throws Exception {
         updateMessage("Loading file...");
-        updateProgress(0, 2);
-        engineController.LoadProgramFromFile(filePath);
         updateProgress(1, 2);
-        // todo - here get all the programs and function metadata loaded
-        updateProgress(4, 4);
+        engineController.loadProgramFromFile(filePath);
+        updateProgress(2, 2);
         updateMessage("File loaded successfully");
         return null;
     }

@@ -32,35 +32,34 @@ public class getSystemInfo extends HttpServlet {
                                 getAllSystemInfoOptionsNames() + ".");
                 return;
             }
-            resp.setContentType("text/html;charset=utf-8");
+            Gson gson = new Gson();
+            resp.setContentType("application/json");
             ProgramManager pm = ServletUtils.getProgramManager(getServletContext());
             switch (infoToGet) {
                 case PROGRAMS_METADATA_INFO -> {
-                    resp.getWriter().println(pm.getProgramsMetadata());
+                    resp.getWriter().write(gson.toJson(pm.getProgramsMetadata()));
                     resp.setStatus(HttpServletResponse.SC_OK);
                 }
                 case FUNCTIONS_METADATA_INFO -> {
-                    resp.getWriter().println(pm.getFunctionsMetadata());
+                    resp.getWriter().write(gson.toJson(pm.getFunctionsMetadata()));
                     resp.setStatus(HttpServletResponse.SC_OK);
                 }
                 case PROGRAMS_NAMES_INFO -> {
-                    resp.getWriter().println(pm.getProgramNames());
+                    resp.getWriter().write(gson.toJson(pm.getProgramNames()));
                     resp.setStatus(HttpServletResponse.SC_OK);
                 }
                 case FUNCTIONS_NAMES_INFO -> {
-                    resp.getWriter().println(pm.getFunctionNames());
+                    resp.getWriter().write(gson.toJson(pm.getFunctionNames()));
                     resp.setStatus(HttpServletResponse.SC_OK);
                 }
-                case ALL_NAMES_INFO -> {
-                    resp.getWriter().println("Programs: " + pm.getProgramNames() + "\nFunctions: " +
-                            pm.getFunctionNames());
+                case PROGRAMS_AND_FUNCTIONS_METADATA -> {
+                    resp.getWriter().write(gson.toJson(pm.getProgramsAndFunctionsMetadata()));
                     resp.setStatus(HttpServletResponse.SC_OK);
                 }
                 case ALL_USERS_INFO -> {
-                    Gson gson = new Gson();
                     UserManager userManager = ServletUtils.getUserManager(getServletContext());
                     resp.setContentType("application/json");
-                    resp.getWriter().println(gson.toJson(userManager.getAllUsersDTO()));
+                    resp.getWriter().write(gson.toJson(userManager.getAllUsersDTO()));
                 }
                 default -> resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "item parameter is missing or invalid");
             }

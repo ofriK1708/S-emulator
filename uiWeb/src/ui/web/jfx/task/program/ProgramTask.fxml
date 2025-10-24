@@ -5,16 +5,16 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" spacing="20" styleClass="root"
-      stylesheets="@fileLoader.css" xmlns="http://javafx.com/javafx/24.0.1"
-      fx:controller="ui.web.jfx.fileLoader.FileLoaderController">
+      stylesheets="@ProgramTask.css" xmlns="http://javafx.com/javafx/17.0.12"
+      fx:controller="ui.web.jfx.task.program.ProgramTaskController">
     <padding>
         <Insets bottom="30.0" left="30.0" right="30.0" top="30.0"/>
     </padding>
 
     <!-- File loading label section -->
     <HBox alignment="CENTER_LEFT" spacing="8">
-        <Label styleClass="label" text="Loading file :"/>
-        <Label fx:id="fileNameLabel" styleClass="file-name-label" text="example.txt"/>
+        <Label fx:id="taskTitle" styleClass="label"/>
+        <Label fx:id="taskOn" styleClass="file-name-label" text="example.txt"/>
     </HBox>
 
     <!-- Separator line -->

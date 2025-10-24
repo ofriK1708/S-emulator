@@ -19,13 +19,13 @@ import ui.jfx.statistics.ShowRunController;
 
 import java.util.*;
 
-public class UIUtils {
+public class OLD_UIUtils {
     public static final String ArgumentResourcePath = "/ui/jfx/VariableInputDialog/VariableInputDialog.fxml";
     public static boolean showInfoAndSuccess = false;
 
     // for later use if needed
     public static void setShowInfoAndSuccess(boolean showInfoAndSuccess) {
-        UIUtils.showInfoAndSuccess = showInfoAndSuccess;
+        OLD_UIUtils.showInfoAndSuccess = showInfoAndSuccess;
     }
 
     // Reference to AppController for re-run functionality
@@ -116,7 +116,7 @@ public class UIUtils {
         try {
             // Load the FXML file for the Show Run dialog
             FXMLLoader loader = new FXMLLoader(
-                    UIUtils.class.getResource("/ui/jfx/statistics/ShowRunView.fxml")
+                    OLD_UIUtils.class.getResource("/ui/jfx/statistics/ShowRunView.fxml")
             );
             Parent root = loader.load();
 

@@ -1,8 +1,7 @@
 package ui.web.jfx.dashboard.users;
 
 import dto.server.UserDTO;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.beans.property.ListProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
@@ -19,7 +18,6 @@ import java.util.function.Consumer;
  */
 public class UsersPanelController {
 
-    private final ObservableList<UserDTO> usersList = FXCollections.observableArrayList();
     @FXML
     private TableView<UserDTO> usersTableView;
     @FXML
@@ -55,31 +53,20 @@ public class UsersPanelController {
         creditsSpentColumn.setCellValueFactory(new PropertyValueFactory<>("creditsSpent"));
         totalRunsColumn.setCellValueFactory(new PropertyValueFactory<>("totalRuns"));
 
-        usersTableView.setItems(usersList);
-    }
-
-    // Mock data method for future implementation
-    @SuppressWarnings("unused")
-    private void loadMockData() {
     }
 
     @FXML
     private void handleSelectUser() {
         UserDTO selected = usersTableView.getSelectionModel().getSelectedItem();
         if (selected != null && selectUserCallback != null) {
+            selectUserCallback.accept(selected.name());
         }
     }
 
-    public void initComponent(Consumer<String> selectUserCallback) {
+    public void initComponent(@NotNull ListProperty<UserDTO> usersList,
+                              @NotNull Consumer<String> selectUserCallback) {
         this.selectUserCallback = selectUserCallback;
-    }
-
-    public void setUsers(@NotNull ObservableList<UserDTO> users) {
-        usersList.setAll(users);
-    }
-
-    public void clearUsers() {
-        usersList.clear();
+        usersTableView.itemsProperty().bind(usersList);
     }
 
     public void clearSelection() {

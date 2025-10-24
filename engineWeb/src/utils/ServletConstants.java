@@ -34,7 +34,7 @@ public class ServletConstants {
     public static final String FUNCTIONS_NAMES_INFO = "functions_names";
     public static final String PROGRAMS_METADATA_INFO = "programs_metadata";
     public static final String FUNCTIONS_METADATA_INFO = "functions_metadata";
-    public static final String ALL_NAMES_INFO = "all_names";
+    public static final String PROGRAMS_AND_FUNCTIONS_METADATA = "programs_and_functions_metadata";
     public static final String USER_STATISTICS_INFO = "user_statistics";
     public static final String PROGRAMS_STATISTICS_INFO = "programs_statistics";
     public static final String ALL_USERS_INFO = "all_users";
@@ -79,7 +79,7 @@ public class ServletConstants {
         return "[" +
                 PROGRAMS_NAMES_INFO + ", " +
                 FUNCTIONS_NAMES_INFO + ", " +
-                ALL_NAMES_INFO + "]";
+                PROGRAMS_AND_FUNCTIONS_METADATA + "]";
     }
 
     @Contract(pure = true)

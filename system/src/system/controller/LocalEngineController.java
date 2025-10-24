@@ -1,6 +1,7 @@
 package system.controller;
 
 import dto.engine.ProgramDTO;
+import dto.server.SystemResponse;
 import engine.core.Engine;
 import engine.exception.FunctionNotFound;
 import engine.exception.LabelNotExist;
@@ -16,6 +17,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static system.utils.systemUtils.validateFile;
@@ -62,7 +64,7 @@ public class LocalEngineController implements EngineController {
     }
 
     @Override
-    public void LoadProgramFromFile(@NotNull Path xmlFilePath)
+    public void LoadProgramFromFileAsync(@NotNull Path xmlFilePath, Consumer<SystemResponse> onResponse)
             throws LabelNotExist, JAXBException, IOException, FunctionNotFound {
         if (!xmlFilePath.getFileName().toString().endsWith(".xml")) {
             throw new IllegalArgumentException("File must be an XML file");

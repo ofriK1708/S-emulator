@@ -8,7 +8,7 @@ import javafx.scene.layout.HBox;
 import org.controlsfx.control.ToggleSwitch;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ui.utils.UIUtils;
+import ui.utils.OLD_UIUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -224,7 +224,7 @@ public class ProgramFunctionController {
 
         Optional<String> result = dialog.showAndWait();
         if (result.isPresent()) {
-            if (UIUtils.isValidProgramArgument(result.get())) {
+            if (OLD_UIUtils.isValidProgramArgument(result.get())) {
                 onExpandLevelChangeCallback.accept(Integer.parseInt(result.get().trim()));
             } else {
                 showInvalidChoice(maxLevel.get());
@@ -251,6 +251,6 @@ public class ProgramFunctionController {
     }
 
     private void showInvalidChoice(int max) {
-        UIUtils.showError("Please enter a number between " + 0 + " and " + max);
+        OLD_UIUtils.showError("Please enter a number between " + 0 + " and " + max);
     }
 }

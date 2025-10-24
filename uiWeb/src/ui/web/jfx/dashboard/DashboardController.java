@@ -1,6 +1,9 @@
 package ui.web.jfx.dashboard;
 
+import dto.engine.FunctionMetadata;
 import dto.engine.ProgramMetadata;
+import dto.server.SystemResponse;
+import dto.server.UserDTO;
 import javafx.beans.property.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,6 +15,9 @@ import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import system.controller.EngineController;
 import system.controller.LocalEngineController;
+import ui.refresher.FunctionTableRefresher;
+import ui.refresher.ProgramsTableRefresher;
+import ui.refresher.UserTableRefresher;
 import ui.web.jfx.ExecutionController;
 import ui.web.jfx.dashboard.functions.FunctionsPanelController;
 import ui.web.jfx.dashboard.header.DashboardHeaderController;
@@ -21,6 +27,12 @@ import ui.web.jfx.dashboard.users.UsersPanelController;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Timer;
+import java.util.function.Consumer;
+
+import static ui.web.utils.UIUtils.showError;
+import static ui.web.utils.UIUtils.showSuccess;
+import static ui.web.utils.clientConstants.*;
 
 /**
  * Main controller for the Dashboard screen.
@@ -35,8 +47,10 @@ public class DashboardController {
     private final BooleanProperty userSelected = new SimpleBooleanProperty(false);
     private final BooleanProperty fileLoaded = new SimpleBooleanProperty(false);
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
-    private final ListProperty<ProgramMetadata> programsMetadata = new SimpleListProperty<>();
-    private final ListProperty<ProgramMetadata> functionsMetadata = new SimpleListProperty<>();
+
+    private final ListProperty<ProgramMetadata> programsMetadataListProperty = new SimpleListProperty<>();
+    private final ListProperty<FunctionMetadata> functionsMetadataListProperty = new SimpleListProperty<>();
+    private final ListProperty<UserDTO> usersMetadataListProperty = new SimpleListProperty<>();
 
     @FXML
     private HBox headerSection;
@@ -86,6 +100,8 @@ public class DashboardController {
                 historyPanelController != null) {
 
             System.out.println("DashboardController: All sub-controllers injected successfully");
+            startRefreshers();
+            System.out.println("DashboardController: Data refreshers started");
 
             // Bind user selection across panels
             selectedUser.addListener((obs, oldVal, newVal) -> {
@@ -106,6 +122,22 @@ public class DashboardController {
         }
     }
 
+    private void startRefreshers() {
+        ProgramsTableRefresher programsTableRefresher =
+                new ProgramsTableRefresher(engineController, programsMetadataListProperty);
+        FunctionTableRefresher functionTableRefresher =
+                new FunctionTableRefresher(engineController, functionsMetadataListProperty);
+        UserTableRefresher userTableRefresher =
+                new UserTableRefresher(engineController, usersMetadataListProperty);
+        Timer programsTimer = new Timer();
+        Timer functionsTimer = new Timer();
+        Timer usersTimer = new Timer();
+        programsTimer.schedule(programsTableRefresher, PROGRAMS_TABLE_REFRESH_RATE, PROGRAMS_TABLE_REFRESH_RATE);
+        functionsTimer.schedule(functionTableRefresher, FUNCTIONS_TABLE_REFRESH_RATE, FUNCTIONS_TABLE_REFRESH_RATE);
+        usersTimer.schedule(userTableRefresher, 0, USERS_TABLE_REFRESH_RATE);
+
+    }
+
     private void initializeSubControllers() {
         // Header: file loading and credits
         headerSectionController.initComponent(
@@ -117,14 +149,12 @@ public class DashboardController {
 
         // Programs panel: set engine and execution callback
         programsPanelController.initComponent(this::handleProgramExecution,
-                programsMetadata// Navigation happens here
+                programsMetadataListProperty// Navigation happens here
         );
 
         // Functions panel: set engine and execution callback
-        functionsPanelController.setEngineController(engineController);
         functionsPanelController.initComponent(
-                programLoaded,
-                fileLoaded,
+                functionsMetadataListProperty,
                 this::handleFunctionExecution  // Navigation happens here
         );
 
@@ -145,7 +175,15 @@ public class DashboardController {
             System.out.println("Dashboard: Loading file " + file.getName());
 
             // Load the file using Dashboard's engine controller for preview
-            engineController.LoadProgramFromFile(file.toPath());
+            engineController.LoadProgramFromFileAsync(file.toPath(), (Consumer<SystemResponse>)
+                    systemResponse -> {
+                        if (systemResponse.isSuccess()) {
+                            // Update programs and functions metadata lists
+                            showSuccess(systemResponse.message());
+                        } else {
+                            showError(systemResponse.message());
+                        }
+                    });
 
             // Store the file path for later use by Execution screen
             currentFilePath.set(file.getAbsolutePath());
@@ -154,9 +192,6 @@ public class DashboardController {
 
             System.out.println("Dashboard: File loaded successfully - " + file.getName());
             System.out.println("Dashboard: Staying on Dashboard - awaiting execute button press");
-
-            // Refresh panels to show loaded program data
-            refreshDashboardPanels();
 
         } catch (Exception e) {
             System.err.println("Dashboard: Error loading file - " + e.getMessage());
@@ -179,19 +214,9 @@ public class DashboardController {
         try {
             System.out.println("Dashboard: Executing program '" + programName + "'");
 
-            // Load Execution scene if not already loaded
-            if (executionScene == null || executionController == null) {
-                loadExecutionScene();
-            }
-
-            // Configure execution screen with user info BEFORE loading file
-            executionController.setUserName(selectedUser.get() != null ? selectedUser.get() : "Guest User");
-            executionController.setScreenTitle("S-Emulator - Execution: " + programName);
-            executionController.setAvailableCredits(availableCredits.get());
-
-            // Load the file in AppController's engine (with callback to navigate after load)
+            loadExecutionScene(programName);
             File programFile = new File(currentFilePath.get());
-            executionController.loadProgramFromFileExternal(programFile, () -> {
+            executionController.loadProgramToExecution(programFile, () -> {
                 // After file is loaded in AppController's engine, navigate
                 transitionToExecutionScreen();
                 System.out.println("Dashboard: Navigated to Execution screen for program: " + programName);
@@ -201,6 +226,19 @@ public class DashboardController {
             System.err.println("Dashboard: Error executing program - " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void loadExecutionScene(@NotNull String programName) throws Exception {
+        // Load Execution scene if not already loaded
+        if (executionScene == null || executionController == null) {
+            loadExecutionScene();
+        }
+
+        // Configure execution screen with user info BEFORE loading file
+        executionController.setUserName(selectedUser.get() != null ? selectedUser.get() : "Guest User");
+        executionController.setScreenTitle("S-Emulator - Execution: " + programName);
+        executionController.setAvailableCredits(availableCredits.get());
+
     }
 
     /**
@@ -217,18 +255,8 @@ public class DashboardController {
             System.out.println("Dashboard: Executing function '" + functionName + "'");
 
             // Load Execution scene if not already loaded
-            if (executionScene == null || executionController == null) {
-                loadExecutionScene();
-            }
-
-            // Configure execution screen with user info BEFORE loading file
-            executionController.setUserName(selectedUser.get() != null ? selectedUser.get() : "Guest User");
-            executionController.setScreenTitle("S-Emulator - Execution: " + functionName);
-            executionController.setAvailableCredits(availableCredits.get());
-
-            // Load the file in AppController's engine (with callback to navigate after load)
-            File programFile = new File(currentFilePath.get());
-            executionController.loadProgramFromFileExternal(programFile, () -> {
+            File programFile = loadExecutionScene(functionName);
+            executionController.loadProgramToExecution(programFile, () -> {
                 // After file is loaded, switch to the function
                 try {
                     executionController.switchLoadedProgram(functionName);
@@ -298,17 +326,6 @@ public class DashboardController {
             System.out.println("Dashboard: Switched back to Dashboard screen");
         } else {
             System.err.println("Dashboard: Cannot transition - dashboard scene not available");
-        }
-    }
-
-    /**
-     * Refresh all dashboard panels with current program data
-     */
-    private void refreshDashboardPanels() {
-        if (programLoaded.get()) {
-            programsPanelController.refreshProgramData();
-            functionsPanelController.refreshFunctionData();
-            System.out.println("Dashboard: Panels refreshed with current program data");
         }
     }
 

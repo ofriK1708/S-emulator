@@ -13,7 +13,7 @@ import javafx.scene.control.TableView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ui.utils.AnimatedTableRow;
-import ui.utils.UIUtils;
+import ui.utils.OLD_UIUtils;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -149,7 +149,7 @@ public class InstructionTableController {
                 if (!row.getStyleClass().contains("highlighted-row")) {
                     row.getStyleClass().add("highlighted-row");
                 }
-                UIUtils.checkIfShouldAnimate(row, animationsEnabledProperty.get());
+                OLD_UIUtils.checkIfShouldAnimate(row, animationsEnabledProperty.get());
             } else {
                 row.getStyleClass().removeAll("highlighted-row");
             }

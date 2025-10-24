@@ -49,6 +49,16 @@ public class Requests {
      * @param callback       The callback to handle the response or failure.
      */
     public static void uploadFileAsync(String serverEndpoint, File xmlFile, Callback callback) {
+        Call call = createPostFileUploadCall(serverEndpoint, xmlFile);
+        call.enqueue(callback);
+    }
+
+    public static @NotNull Response uploadFile(String uploadProgram, File xmlFile) throws IOException {
+        Call call = createPostFileUploadCall(uploadProgram, xmlFile);
+        return call.execute();
+    }
+
+    private static @NotNull Call createPostFileUploadCall(String uploadProgram, File xmlFile) {
         RequestBody fileBody = RequestBody.create(xmlFile, MediaType.parse("application/xml"));
         MultipartBody requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
@@ -56,13 +66,11 @@ public class Requests {
                 .build();
 
         Request request = new Request.Builder()
-                .url(serverEndpoint)
+                .url(uploadProgram)
                 .post(requestBody)
                 .build();
 
-        Call call = HTTP_CLIENT.newCall(request);
-
-        call.enqueue(callback);
+        return HTTP_CLIENT.newCall(request);
     }
 
     /**

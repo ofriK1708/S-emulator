@@ -1,6 +1,7 @@
 package system.controller;
 
 import dto.engine.FunctionMetadata;
+import dto.engine.ProgramDTO;
 import dto.engine.ProgramMetadata;
 import dto.server.SystemResponse;
 import dto.server.UserDTO;
@@ -11,25 +12,33 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 
 public interface EngineController {
-    void LoadProgramFromFile(@NotNull Path xmlFilePath) throws LabelNotExist, JAXBException, IOException,
+    void LoadProgramFromFileAsync(@NotNull Path xmlFilePath, Consumer<SystemResponse> onResponse) throws LabelNotExist, JAXBException, IOException,
             FunctionNotFound;
 
-    void loadProgram(String programName, @NotNull Consumer<SystemResponse> onResponse) throws IOException;
+    void loadProgramAsync(String programName, @NotNull Consumer<SystemResponse> onResponse) throws IOException;
 
-    Set<ProgramMetadata> getProgramsMetadata() throws IOException;
+    ProgramDTO loadProgram(String programName) throws IOException;
 
-    Set<FunctionMetadata> getFunctionsMetadata() throws IOException;
+    void loadProgramFromFile(@NotNull Path xmlFilePath) throws JAXBException, IOException;
+
+    List<ProgramMetadata> getProgramsMetadata() throws IOException;
+
+    List<FunctionMetadata> getFunctionsMetadata() throws IOException;
 
     void clearLoadedProgram();
 
-    void getBasicProgram(@NotNull Consumer<SystemResponse> onResponse) throws IOException;
+    void getBasicProgramAsync(@NotNull Consumer<SystemResponse> onResponse) throws IOException;
 
-    void getProgramByExpandLevel(int expandLevel, @NotNull Consumer<SystemResponse> onResponse) throws IOException;
+    ProgramDTO getBasicProgram();
+
+    void getProgramByExpandLevelAsync(int expandLevel, @NotNull Consumer<SystemResponse> onResponse) throws IOException;
+
+    ProgramDTO getProgramByExpandLevel(int expandLevel);
 
     void runLoadedProgram(int expandLevel, @NotNull Map<String, Integer> arguments,
                           @NotNull Consumer<SystemResponse> onResponse) throws IOException;
@@ -47,7 +56,7 @@ public interface EngineController {
 
     void getUserStatistics(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse) throws IOException;
 
-    Set<UserDTO> getAllUsersDTO() throws IOException;
+    List<UserDTO> getAllUsersDTO() throws IOException;
 
     void registerUser(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse) throws IOException;
 }

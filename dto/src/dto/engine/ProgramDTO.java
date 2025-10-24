@@ -15,6 +15,7 @@ import java.util.Map;
  */
 public record ProgramDTO(@NotNull String ProgramName,
                          @NotNull Map<String, Integer> arguments,
+                         @NotNull List<String> allVariablesIncludingLabelsNames,
                          int maxExpandLevel,
                          @NotNull List<InstructionDTO> instructions) {
 }

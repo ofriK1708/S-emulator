@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public record UIAdapterLoadFileTask(
-        Consumer<Boolean> programLoadedDelegate, Consumer<Boolean> variablesEnteredDelegate,
+        Consumer<Boolean> programLoadedDelegate, Consumer<Boolean> argumentsEntered,
         Consumer<List<String>> variablesAndLabelsNamesDelegate,
         Consumer<List<InstructionDTO>> programInstructionsDelegate, Runnable clearDerivedInstructionsDelegate,
         Consumer<List<InstructionDTO>> summaryLineDelegate, Consumer<Integer> maxExpandLevelDelegate,
@@ -18,7 +18,7 @@ public record UIAdapterLoadFileTask(
     public void variablesAndInstructionsHandler(@NotNull ProgramDTO program, List<String> allVars) {
         Platform.runLater(() -> {
             programLoadedDelegate.accept(true);
-            variablesEnteredDelegate.accept(false);
+            argumentsEntered.accept(false);
             variablesAndLabelsNamesDelegate.accept(allVars);
             programInstructionsDelegate.accept(program.instructions());
             clearDerivedInstructionsDelegate.run();

@@ -1,7 +1,6 @@
 package servlets;
 
 import com.google.gson.Gson;
-import dto.server.LoadProgramResultDTO;
 import engine.generated_2.SProgram;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -53,9 +52,7 @@ public class uploadProgram extends HttpServlet {
                         programManager.addProgram(programName, sProgram, user);
                         resp.setStatus(HttpServletResponse.SC_OK);
                         resp.setContentType("application/json");
-                        LoadProgramResultDTO resultDTO = new LoadProgramResultDTO(
-                                programManager.getProgramsMetadata(), programManager.getFunctionsMetadata());
-                        resp.getWriter().println(json.toJson(resultDTO));
+                        resp.getWriter().println("Program " + programName + " uploaded successfully.");
                         System.out.println("Program " + programName + " uploaded successfully.");
 
                     } catch (Exception e) {

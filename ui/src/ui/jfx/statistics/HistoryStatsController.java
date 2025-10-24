@@ -10,12 +10,13 @@ import javafx.scene.control.TableView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ui.utils.AnimatedTableRow;
+import ui.utils.OLD_UIUtils;
 
 import java.util.Map;
 import java.util.function.Function;
 
-import static ui.utils.UIUtils.showError;
-import static ui.utils.UIUtils.showInfo;
+import static ui.utils.OLD_UIUtils.showError;
+import static ui.utils.OLD_UIUtils.showInfo;
 
 /**
  * Controller for the History/Statistics table.
@@ -128,7 +129,7 @@ public class HistoryStatsController {
 
             // Open the Show dialog with all required data
             // Re-run functionality is handled within the Show dialog
-            ui.utils.UIUtils.openShowRunDialog(
+            OLD_UIUtils.openShowRunDialog(
                     selectedExecution,
                     finalVariableStates
             );
@@ -159,7 +160,7 @@ public class HistoryStatsController {
             Map<String, Integer> arguments = selectedExecution.arguments();
 
             // Use UIUtils to prepare the rerun (this will open the Set Run dialog)
-            ui.utils.UIUtils.executeRerunFromShowDialog(expandLevel, arguments);
+            OLD_UIUtils.executeRerunFromShowDialog(expandLevel, arguments);
 
         } catch (Exception e) {
             System.err.println("Error during rerun from history table: " + e.getMessage());

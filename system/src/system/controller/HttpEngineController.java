@@ -3,11 +3,7 @@ package system.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import dto.engine.ExecutionResultStatisticsDTO;
-import dto.engine.FunctionMetadata;
-import dto.engine.ProgramDTO;
-import dto.engine.ProgramMetadata;
-import dto.server.LoadProgramResultDTO;
+import dto.engine.*;
 import dto.server.SystemResponse;
 import dto.server.UserDTO;
 import engine.utils.DebugAction;
@@ -91,33 +87,64 @@ public class HttpEngineController implements EngineController {
      * Loads a program from an XML file to the server <strong>asynchronously</strong>.
      *
      * @param xmlFilePath The path to the XML file containing the program.
+     * @param onResponse
      */
     @Override
-    public void LoadProgramFromFile(@NotNull Path xmlFilePath) throws JAXBException, IOException {
+    public void LoadProgramFromFileAsync(@NotNull Path xmlFilePath, Consumer<SystemResponse> onResponse)
+            throws JAXBException, IOException {
+
         File xmlFile = xmlFilePath.toFile();
         Requests.uploadFileAsync(Endpoints.UPLOAD_PROGRAM, xmlFile, new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                System.out.println("Failed to upload program: " + e.getMessage());
+                SystemResponse systemResponse = SystemResponse.builder()
+                        .isSuccess(false)
+                        .message("Failed to upload program: " + e.getMessage())
+                        .build();
+                onResponse.accept(systemResponse);
             }
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 try (ResponseBody responseBody = response.body()) {
                     if (response.isSuccessful()) {
-                        Gson json = new Gson();
-                        getAndValidateBodyString(responseBody);
-                        LoadProgramResultDTO resultDTO = json.fromJson(response.body().string(),
-                                LoadProgramResultDTO.class);
-                        System.out.println("Program uploaded successfully");
-                        System.out.println("resultDTO = " + resultDTO);
-                        // TODO - update ui with the new program and function metadata
+                        String successMessage = getAndValidateBodyString(responseBody);
+                        SystemResponse systemResponse = SystemResponse.builder()
+                                .isSuccess(true)
+                                .message(successMessage)
+                                .build();
+                        onResponse.accept(systemResponse);
+
                     } else {
                         System.out.println("Failed to upload program: " + response.body());
                     }
                 }
             }
         });
+    }
+
+    /**
+     * Loads a program from an XML file to the server.
+     * this happens <strong>synchronously</strong>.
+     * <p>
+     * call this with 'pulling' threads or async tasks. <strong>NOT THE JAT!</strong>
+     * </p>
+     *
+     * @param xmlFilePath The path to the XML file containing the program.
+     * @throws JAXBException If an error occurs while processing the XML.
+     * @throws IOException   If an I/O error occurs.
+     */
+    @Override
+    public void loadProgramFromFile(@NotNull Path xmlFilePath) throws JAXBException, IOException {
+        File xmlFile = xmlFilePath.toFile();
+        try (Response response = Requests.uploadFile(Endpoints.UPLOAD_PROGRAM, xmlFile)) {
+            if (response.isSuccessful()) {
+                String successMessage = getAndValidateBodyString(response.body());
+                System.out.println("Program uploaded successfully: " + successMessage);
+            } else {
+                throw new IOException("Failed to upload program: " + response.body());
+            }
+        }
     }
 
     /**
@@ -130,13 +157,14 @@ public class HttpEngineController implements EngineController {
      * @return A set of ProgramMetadata objects representing the programs metadata.
      */
     @Override
-    public Set<ProgramMetadata> getProgramsMetadata() throws IOException {
+    public List<ProgramMetadata> getProgramsMetadata() throws IOException {
         try (Response response = Requests
                 .getSystemInfo(Endpoints.GET_SYSTEM_INFO, PROGRAMS_METADATA_INFO)) {
 
             if (response.isSuccessful()) {
                 String jsonString = getAndValidateBodyString(response.body());
-                return gson.fromJson(jsonString, PROGRAMS_METADATA_SET_TYPE_TOKEN);
+                Set<ProgramMetadata> programsLinkedSet = gson.fromJson(jsonString, PROGRAMS_METADATA_SET_TYPE_TOKEN);
+                return List.copyOf(programsLinkedSet);
             } else {
                 throw new IOException("Failed to get programs metadata: " + response.body());
             }
@@ -154,15 +182,39 @@ public class HttpEngineController implements EngineController {
      * @throws IOException If an I/O error occurs.
      */
     @Override
-    public Set<FunctionMetadata> getFunctionsMetadata() throws IOException {
+    public List<FunctionMetadata> getFunctionsMetadata() throws IOException {
         try (Response response = Requests
                 .getSystemInfo(Endpoints.GET_SYSTEM_INFO, FUNCTIONS_METADATA_INFO)) {
 
             if (response.isSuccessful()) {
                 String jsonString = getAndValidateBodyString(response.body());
-                return gson.fromJson(jsonString, FUNCTIONS_METADATA_SET_TYPE_TOKEN);
+                Set<FunctionMetadata> functionLinkedSet = gson.fromJson(jsonString, FUNCTIONS_METADATA_SET_TYPE_TOKEN);
+                return List.copyOf(functionLinkedSet);
             } else {
                 throw new IOException("Failed to get functions metadata: " + response.body());
+            }
+        }
+    }
+
+    /**
+     * Gets the programs and functions metadata from the server.
+     * this happens <strong>synchronously</strong>.
+     * <p>
+     * call this with 'pulling' threads or async tasks. <strong>NOT THE JAT!</strong>
+     * </p>
+     *
+     * @return A ProgramsAndFunctionsMetadata object representing the programs and functions metadata.
+     * @throws IOException If an I/O error occurs.
+     */
+    public ProgramsAndFunctionsMetadata getProgramsAndFunctionsMetadata() throws IOException {
+        try (Response response = Requests
+                .getSystemInfo(Endpoints.GET_SYSTEM_INFO, PROGRAMS_AND_FUNCTIONS_METADATA)) {
+
+            if (response.isSuccessful()) {
+                String jsonString = getAndValidateBodyString(response.body());
+                return gson.fromJson(jsonString, ProgramsAndFunctionsMetadata.class);
+            } else {
+                throw new IOException("Failed to get programs and functions metadata: " + response.body());
             }
         }
     }
@@ -174,16 +226,17 @@ public class HttpEngineController implements EngineController {
      * call this with 'pulling' threads or async tasks. <strong>NOT THE JAT!</strong>
      * </p>
      *
-     * @return A set of UserDTO objects representing all users.
+     * @return A List of UserDTO objects representing all users. (sorted already by registration order)
      */
     @Override
-    public Set<UserDTO> getAllUsersDTO() throws IOException {
+    public List<UserDTO> getAllUsersDTO() throws IOException {
         try (Response response = Requests
                 .getSystemInfo(Endpoints.GET_ALL_USERS, ALL_USERS_INFO)) {
 
             if (response.isSuccessful()) {
                 String jsonString = getAndValidateBodyString(response.body());
-                return gson.fromJson(jsonString, USER_DTO_SET_TYPE_TOKEN);
+                Set<UserDTO> usersLinkedSet = gson.fromJson(jsonString, USER_DTO_SET_TYPE_TOKEN);
+                return List.copyOf(usersLinkedSet);
             } else {
                 throw new IOException("Failed to get all users: " + response.body());
             }
@@ -276,9 +329,26 @@ public class HttpEngineController implements EngineController {
      * @throws IOException If an I/O error occurs.
      */
     @Override
-    public void loadProgram(@NotNull String programName, @NotNull Consumer<SystemResponse> onResponse) {
+    public void loadProgramAsync(@NotNull String programName, @NotNull Consumer<SystemResponse> onResponse) {
         this.loadedProgramName = programName;
-        getBasicProgram(onResponse);
+        getBasicProgramAsync(onResponse);
+    }
+
+    /**
+     * Loads a program by name from the server to be executed.
+     * this happens <strong>synchronously</strong>.
+     * <p>
+     * call this with 'pulling' threads or async tasks. <strong>NOT THE JAT!</strong>
+     * </p>
+     *
+     * @param programName The name of the program to load.
+     * @return A ProgramDTO object representing the loaded program.
+     * @throws IOException If an I/O error occurs.
+     */
+    @Override
+    public ProgramDTO loadProgram(String programName) throws IOException {
+        this.loadedProgramName = programName;
+        return getBasicProgram();
     }
 
     /**
@@ -295,8 +365,8 @@ public class HttpEngineController implements EngineController {
      * @param onResponse A consumer that will be called with the SystemResponse when the operation is complete.
      */
     @Override
-    public void getBasicProgram(@NotNull Consumer<SystemResponse> onResponse) {
-        getProgramByExpandLevel(0, onResponse);
+    public void getBasicProgramAsync(@NotNull Consumer<SystemResponse> onResponse) {
+        getProgramByExpandLevelAsync(0, onResponse);
     }
 
     /**
@@ -306,8 +376,8 @@ public class HttpEngineController implements EngineController {
      * @param onResponse  A consumer that will be called with the SystemResponse when the operation is complete.
      */
     @Override
-    public void getProgramByExpandLevel(int expandLevel,
-                                        @NotNull Consumer<SystemResponse> onResponse) {
+    public void getProgramByExpandLevelAsync(int expandLevel,
+                                             @NotNull Consumer<SystemResponse> onResponse) {
         String programName = getAndValidateProgramLoaded();
         Requests.getProgramInfoAsync(Endpoints.GET_PROGRAM_INFO, PROGRAM_BY_EXPAND_LEVEL_INFO, programName, expandLevel,
                 new Callback() {
@@ -344,6 +414,47 @@ public class HttpEngineController implements EngineController {
                         }
                     }
                 });
+    }
+
+    /**
+     * Gets the program information by expand level from the server.
+     * this happens <strong>synchronously</strong>.
+     * <p>
+     * call this with 'pulling' threads or async tasks. <strong>NOT THE JAT!</strong>
+     * </p>
+     *
+     * @param expandLevel The expand level for the program information.
+     * @return A ProgramDTO object representing the program information.
+     */
+    @Override
+    public ProgramDTO getProgramByExpandLevel(int expandLevel) {
+        String programName = getAndValidateProgramLoaded();
+        try (Response response = Requests
+                .getProgramInfo(Endpoints.GET_PROGRAM_INFO, PROGRAM_BY_EXPAND_LEVEL_INFO, programName, expandLevel)) {
+
+            if (response.isSuccessful()) {
+                String jsonString = getAndValidateBodyString(response.body());
+                return gson.fromJson(jsonString, ProgramDTO.class);
+            } else {
+                throw new IOException("Failed to get program by expand level: " + response.body());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Gets the basic program information from the server.
+     * this happens <strong>synchronously</strong>.
+     * <p>
+     * call this with 'pulling' threads or async tasks. <strong>NOT THE JAT!</strong>
+     * </p>
+     *
+     * @return A ProgramDTO object representing the basic program information.
+     */
+    @Override
+    public ProgramDTO getBasicProgram() {
+        return getProgramByExpandLevel(0);
     }
 
     /**
