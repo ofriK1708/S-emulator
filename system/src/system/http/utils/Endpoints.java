@@ -8,7 +8,7 @@ public class Endpoints {
     public static final String GET_PROGRAM_INFO = BASE_URL + "/programInfo";
     public static final String START_DEBUG_PROGRAM = BASE_URL + "/debugger/start";
     public static final String DEBUG_ACTION = BASE_URL + "/debugger/action";
-    public static final String GET_ALL_USERS = BASE_URL + "/users/all";
+    public static final String GET_ALL_USERS = BASE_URL + "/getAllUsersInSystem";
     public static final String GET_USER_EXECUTION_HISTORY = BASE_URL + "/user/ExecutionStatistics";
     public static final String REGISTER_USER = BASE_URL + "/users/register";
 

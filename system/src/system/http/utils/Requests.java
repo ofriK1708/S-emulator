@@ -102,6 +102,18 @@ public class Requests {
         }
     }
 
+    public static @NotNull Response getAllUsersInSystem(@NotNull String serverEndpoint) throws IOException {
+        HttpUrl url = safeUrlBuilder(serverEndpoint).build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        Call call = HTTP_CLIENT.newCall(request);
+
+        return call.execute();
+    }
+
     /**
      * Constructs a Call object to retrieve system information.
      *

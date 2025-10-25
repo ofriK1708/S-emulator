@@ -23,7 +23,7 @@ public class UserTableRefresher extends TimerTask {
     public void run() {
         try {
             users = httpEngineController.getAllUsersDTO();
-            if (!userInTheUI.get().equals(users)) {
+            if (userInTheUI.isEmpty() || !userInTheUI.get().equals(users)) {
                 Platform.runLater(() -> userInTheUI.setAll(users));
             }
         } catch (Exception e) {

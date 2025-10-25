@@ -272,7 +272,7 @@ public class HttpEngineController implements EngineController {
     @Override
     public List<UserDTO> getAllUsersDTO() throws IOException {
         try (Response response = Requests
-                .getSystemInfo(Endpoints.GET_ALL_USERS, ALL_USERS_INFO)) {
+                .getAllUsersInSystem(Endpoints.GET_ALL_USERS)) {
 
             if (response.isSuccessful()) {
                 String jsonString = getAndValidateBodyString(response.body());

@@ -7,13 +7,13 @@ package dto.server;
  * @param mainProgramsUploaded    The number of main programs uploaded by the user.
  * @param subFunctionsContributed The number of sub-functions contributed by the user.
  * @param currentCredits          The current credits available to the user.
- * @param usedCredits             The total credits used by the user.
+ * @param creditSpend             The total credits used by the user.
  * @param totalRuns               The total number of program runs executed by the user.
  */
 public record UserDTO(String name,
                       int mainProgramsUploaded,
                       int subFunctionsContributed,
                       int currentCredits,
-                      int usedCredits,
+                      int creditSpend,
                       int totalRuns) {
 }

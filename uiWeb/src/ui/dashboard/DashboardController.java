@@ -6,6 +6,7 @@ import dto.engine.ProgramMetadata;
 import dto.server.UserDTO;
 import javafx.application.Platform;
 import javafx.beans.property.*;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -49,10 +50,13 @@ public class DashboardController {
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
     private final StringProperty loggedInUserName = new SimpleStringProperty("Guest User");
 
-    private final ListProperty<ProgramMetadata> programsMetadataListProperty = new SimpleListProperty<>();
-    private final ListProperty<FunctionMetadata> functionsMetadataListProperty = new SimpleListProperty<>();
-    private final ListProperty<UserDTO> usersList = new SimpleListProperty<>();
-    private final ListProperty<ExecutionResultStatisticsDTO> userHistoryListProperty = new SimpleListProperty<>();
+    private final ListProperty<ProgramMetadata> programsMetadataListProperty =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<FunctionMetadata> functionsMetadataListProperty =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<UserDTO> usersList = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<ExecutionResultStatisticsDTO> userHistoryListProperty =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
     private final String originalUser = "";
 
     @FXML

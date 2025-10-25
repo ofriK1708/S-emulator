@@ -2,13 +2,14 @@ package ui.dashboard.users;
 
 import dto.server.UserDTO;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.ReadOnlyIntegerWrapper;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import org.jetbrains.annotations.NotNull;
 
 public class UsersPanelController {
@@ -18,9 +19,9 @@ public class UsersPanelController {
     @FXML
     private TableColumn<UserDTO, String> usernameColumn;
     @FXML
-    private TableColumn<UserDTO, Number> mainProgramsColumn;
+    private TableColumn<UserDTO, Number> mainProgramsUploadedColumn;
     @FXML
-    private TableColumn<UserDTO, Number> subFunctionsColumn;
+    private TableColumn<UserDTO, Number> subFunctionsUploadedColumn;
     @FXML
     private TableColumn<UserDTO, Number> currentCreditsColumn;
     @FXML
@@ -43,12 +44,23 @@ public class UsersPanelController {
     }
 
     private void setupTableColumns() {
-        usernameColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
-        mainProgramsColumn.setCellValueFactory(new PropertyValueFactory<>("mainProgramsUploaded"));
-        subFunctionsColumn.setCellValueFactory(new PropertyValueFactory<>("subFunctionsContributed"));
-        currentCreditsColumn.setCellValueFactory(new PropertyValueFactory<>("currentCredits"));
-        creditsSpentColumn.setCellValueFactory(new PropertyValueFactory<>("creditsSpent"));
-        totalRunsColumn.setCellValueFactory(new PropertyValueFactory<>("totalRuns"));
+        usernameColumn.setCellValueFactory(callData ->
+                new SimpleStringProperty(callData.getValue().name()));
+
+        mainProgramsUploadedColumn.setCellValueFactory(callData ->
+                new ReadOnlyIntegerWrapper(callData.getValue().mainProgramsUploaded()));
+
+        subFunctionsUploadedColumn.setCellValueFactory(callData ->
+                new ReadOnlyIntegerWrapper(callData.getValue().subFunctionsContributed()));
+
+        currentCreditsColumn.setCellValueFactory(callData ->
+                new ReadOnlyIntegerWrapper(callData.getValue().currentCredits()));
+
+        creditsSpentColumn.setCellValueFactory(callData ->
+                new ReadOnlyIntegerWrapper(callData.getValue().creditSpend()));
+
+        totalRunsColumn.setCellValueFactory(callData ->
+                new ReadOnlyIntegerWrapper(callData.getValue().totalRuns()));
 
     }
 
