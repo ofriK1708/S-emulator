@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12"
+            fx:controller="ui.execution.variables.VariablesTableController">
+    <children>
+        <TableView fx:id="variablesTable" layoutX="10.0" layoutY="5.0" styleClass="table-view"
+                   stylesheets="@variablesTable.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <columns>
+                <TableColumn fx:id="variableColumn" prefWidth="124.0" text="Variabels"/>
+                <TableColumn fx:id="valueColumn" prefWidth="124.0" text="Value"/>
+            </columns>
+            <placeholder>
+                <Label styleClass="placeholder-label" text="No variables to display"/>
+            </placeholder>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </TableView>
+    </children>
+</AnchorPane>

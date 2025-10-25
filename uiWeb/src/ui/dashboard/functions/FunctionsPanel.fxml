@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" styleClass="panel-container, functions-panel"
+            xmlns="http://javafx.com/javafx/24.0.1" fx:controller="ui.dashboard.functions.FunctionsPanelController">
+
+    <VBox spacing="10" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
+          AnchorPane.topAnchor="0">
+
+        <padding>
+            <Insets bottom="10" left="10" right="10" top="10"/>
+        </padding>
+
+        <!-- Panel Title -->
+        <Label styleClass="panel-title" text="Available Functions"/>
+
+        <!-- Functions Table -->
+        <TableView fx:id="functionsTableView" styleClass="functions-table" VBox.vgrow="ALWAYS">
+
+            <columns>
+                <TableColumn fx:id="functionNameColumn" prefWidth="150" text="Function Name"/>
+                <TableColumn fx:id="programNameColumn" prefWidth="120" text="Program Name"/>
+                <TableColumn fx:id="uploadedByColumn" prefWidth="100" text="Uploaded By"/>
+                <TableColumn fx:id="instructionCountColumn" prefWidth="140" text="Instruction Count (L0)"/>
+                <TableColumn fx:id="maxExpandLevelColumn" prefWidth="120" text="Max Expand Level"/>
+            </columns>
+
+            <placeholder>
+                <Label styleClass="placeholder-text"
+                       text="No functions available.\nLoad a programDTO file to view functions."/>
+            </placeholder>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+
+        </TableView>
+
+        <!-- Execute Function Button -->
+        <Button fx:id="executeFunctionButton" disable="true" maxWidth="Infinity" onAction="#handleExecuteFunction"
+                styleClass="panel-button, execute-button" text="Execute Function"/>
+
+    </VBox>
+
+</AnchorPane>

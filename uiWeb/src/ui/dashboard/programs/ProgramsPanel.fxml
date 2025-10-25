@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" styleClass="panel-container, programs-panel"
+            xmlns="http://javafx.com/javafx/24.0.1" fx:controller="ui.dashboard.programs.ProgramsPanelController">
+
+    <VBox spacing="10" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
+          AnchorPane.topAnchor="0">
+
+        <padding>
+            <Insets bottom="10" left="10" right="10" top="10"/>
+        </padding>
+
+        <!-- Panel Title -->
+        <Label styleClass="panel-title" text="Available Programs"/>
+
+        <!-- Programs Table -->
+        <TableView fx:id="programsTableView" styleClass="programs-table" VBox.vgrow="ALWAYS">
+
+            <columns>
+                <TableColumn fx:id="programNameColumn" prefWidth="150" text="Program Name"/>
+                <TableColumn fx:id="uploadedByColumn" prefWidth="100" text="Uploaded By"/>
+                <TableColumn fx:id="instructionCountColumn" prefWidth="140" text="Instruction Count (L0)"/>
+                <TableColumn fx:id="maxExpandLevelColumn" prefWidth="120" text="Max Expand Level"/>
+                <TableColumn fx:id="totalRunsColumn" prefWidth="90" text="Total Runs"/>
+                <TableColumn fx:id="avgCreditCostColumn" prefWidth="110" text="Avg Credit Cost"/>
+            </columns>
+
+            <placeholder>
+                <Label styleClass="placeholder-text"
+                       text="No programs available.\nLoad a programDTO file to get started."/>
+            </placeholder>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+
+        </TableView>
+
+        <!-- Execute Program Button -->
+        <Button fx:id="executeProgramButton" disable="true" maxWidth="Infinity" onAction="#handleExecuteProgram"
+                styleClass="panel-button, execute-button" text="Execute Program"/>
+
+    </VBox>
+
+</AnchorPane>
