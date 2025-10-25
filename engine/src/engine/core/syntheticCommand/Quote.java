@@ -1,10 +1,10 @@
 package engine.core.syntheticCommand;
 
-import dto.engine.FullExecutionResultDTO;
 import engine.core.Engine;
 import engine.core.FunctionManager;
 import engine.core.Instruction;
 import engine.core.basicCommand.Neutral;
+import engine.core.info.InnerRunResult;
 import engine.exception.FunctionNotFound;
 import engine.utils.ArchitectureType;
 import engine.utils.CommandType;
@@ -161,8 +161,8 @@ public class Quote extends Instruction {
         List<Integer> arguments = getArgumentsValues(contextMap);
         Map<String, Integer> functionToRunNeededArguments = functionToRun.getSortedArgumentsMap();
         prepareArguments(functionToRunNeededArguments, arguments);
-        FullExecutionResultDTO result = functionToRun.run(functionToRunNeededArguments);
-        executedCycles = result.cycleCount();
+        InnerRunResult result = functionToRun.innerRun(functionToRunNeededArguments);
+        executedCycles = result.cyclesUsed();
         return result.output();
     }
 

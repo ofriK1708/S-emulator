@@ -25,6 +25,7 @@ public class runProgram extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "You must be logged in to run a program.");
             return;
         }
+
         ExecutionHistoryManager executionHistoryManager = ServletUtils.getExecutionHistoryManager(getServletContext());
         Gson gson = new Gson();
         resp.setContentType("application/json");
@@ -33,21 +34,26 @@ public class runProgram extends HttpServlet {
         if (runAndDebugParams == null) {
             return;
         }
+
         String programName = runAndDebugParams.programName();
         Engine currentEngine = runAndDebugParams.pm().getProgramOrFunctionEngine(programName);
         int expandLevel = runAndDebugParams.expandLevel();
         Map<String, Integer> args = runAndDebugParams.arguments();
+
         try {
-            FullExecutionResultDTO fullExecutionResultDTO = currentEngine.run(
-                    0, args, user.getCurrentCredits(), runAndDebugParams.architectureType());
-            System.out.println("Current thread :" + Thread.currentThread().getName() +
-                    " cycles took " + fullExecutionResultDTO.cycleCount() + " to execute program " + programName);
+            FullExecutionResultDTO fullExecutionResultDTO = currentEngine.mainRun(
+                    expandLevel, args, user.getCurrentCredits(), runAndDebugParams.architectureType());
+
             user.increaseTotalRuns();
             user.chargeCredits(fullExecutionResultDTO.creditsCost());
+
+            executionHistoryManager.addExecutionResult(
+                    user.getName(), programName, ExecutionResultStatisticsDTO.of(fullExecutionResultDTO,
+                            user.getTotalRuns()));
+
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.getWriter().write(gson.toJson(fullExecutionResultDTO));
-            executionHistoryManager.addExecutionResult(
-                    user.getName(), programName, ExecutionResultStatisticsDTO.of(fullExecutionResultDTO));
+
         } catch (InsufficientCredits insufficientCredits) {
             user.setRemainingCredits(insufficientCredits.getCreditsLeft());
             writeErrorMessage(resp, insufficientCredits, runAndDebugParams, expandLevel);
@@ -58,7 +64,6 @@ public class runProgram extends HttpServlet {
 
     private void writeErrorMessage(HttpServletResponse resp, Exception e,
                                    ServletUtils.runAndDebugParams runAndDebugParams, int expandLevel) throws IOException {
-        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         resp.setContentType("text/plain");
         String errorMessage = String.format(
                 "Error trying to run %s at expand level %d: %s",
@@ -66,6 +71,6 @@ public class runProgram extends HttpServlet {
                 expandLevel,
                 e.getMessage()
         );
-        resp.getWriter().write(errorMessage);
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, errorMessage);
     }
 }

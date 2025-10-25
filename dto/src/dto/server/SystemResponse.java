@@ -2,6 +2,7 @@ package dto.server;
 
 import dto.engine.DebugStateChangeResultDTO;
 import dto.engine.ExecutionResultStatisticsDTO;
+import dto.engine.FullExecutionResultDTO;
 import dto.engine.ProgramDTO;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -26,11 +27,13 @@ import java.util.Set;
  * @param userStatisticsDTOList     An optional list of ExecutionResultStatisticsDTO objects representing user
  *                                  execution statistics.
  *                                  can be null if not needed.
+ * @param fullExecutionResultDTO    A FullExecutionResultDTO object representing the full execution result.
  */
 public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullable ProgramDTO programDTO,
                              @Nullable DebugStateChangeResultDTO debugStateChangeResultDTO,
                              @Nullable Set<UserDTO> allUsersDTO,
-                             @Nullable List<ExecutionResultStatisticsDTO> userStatisticsDTOList) {
+                             @Nullable List<ExecutionResultStatisticsDTO> userStatisticsDTOList,
+                             @Nullable FullExecutionResultDTO fullExecutionResultDTO) {
     /**
      * Indicates whether the operation was successful.
      *
@@ -106,6 +109,14 @@ public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullab
         return userStatisticsDTOList;
     }
 
+    @Override
+    public @NotNull FullExecutionResultDTO fullExecutionResultDTO() {
+        if (fullExecutionResultDTO == null) {
+            throw new IllegalStateException("FullExecutionResultDTO is not available in this response.");
+        }
+        return fullExecutionResultDTO;
+    }
+
     @Contract(value = " -> new", pure = true)
     public static @NotNull Builder builder() {
         return new Builder();
@@ -123,6 +134,7 @@ public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullab
         private @Nullable DebugStateChangeResultDTO debugStateChangeResultDTO;
         private @Nullable Set<UserDTO> allUsersDTO;
         private @Nullable List<ExecutionResultStatisticsDTO> userStatisticsDTOList;
+        private @Nullable FullExecutionResultDTO fullExecutionResultDTO;
 
         /**
          * Sets the {@link SystemResponse#isSuccess} for the SystemResponse.
@@ -201,6 +213,19 @@ public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullab
         }
 
         /**
+         * Sets the {@link SystemResponse#fullExecutionResultDTO} for the SystemResponse
+         *
+         * @param fullExecutionResultDTO the FullExecutionResultDTO to set
+         * @return the Builder instance
+         * @see FullExecutionResultDTO
+         * @see SystemResponse
+         */
+        public Builder fullExecutionResultDTO(@NotNull FullExecutionResultDTO fullExecutionResultDTO) {
+            this.fullExecutionResultDTO = fullExecutionResultDTO;
+            return this;
+        }
+
+        /**
          * Builds and returns the SystemResponse object.
          *
          * @return the constructed SystemResponse
@@ -210,7 +235,7 @@ public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullab
                 throw new IllegalStateException("isSuccess must be set");
             }
             return new SystemResponse(isSuccess, message, programDTO, debugStateChangeResultDTO,
-                    allUsersDTO, userStatisticsDTOList);
+                    allUsersDTO, userStatisticsDTOList, fullExecutionResultDTO);
         }
     }
 }

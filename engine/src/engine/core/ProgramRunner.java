@@ -20,38 +20,44 @@ public class ProgramRunner extends ProgramExecutor {
 
     private ProgramRunner(@NotNull List<Instruction> executedInstructions,
                           @NotNull Map<String, Integer> executedContextMap,
+                          @NotNull Map<String, Integer> arguments,
                           int userCredits) {
         super(executedInstructions, executedContextMap, userCredits);
+        executedContextMap.putAll(arguments);
     }
 
-    static @NotNull ProgramRunner createFrom(@NotNull ProgramExecutable executable,
-                                                    int userCredits) {
+    static @NotNull ProgramRunner createInnerRunner(@NotNull ProgramExecutable executable,
+                                                    @NotNull Map<String, Integer> arguments) {
         return new ProgramRunner(
                 executable.instructions(),
                 executable.contextMap(),
+                arguments,
+                Integer.MAX_VALUE);  // no credit limit for inner runs
+    }
+
+    static @NotNull ProgramRunner createMainRunner(@NotNull ProgramExecutable executable,
+                                                   @NotNull Map<String, Integer> arguments,
+                                                   int userCredits) {
+
+        return new ProgramRunner(
+                executable.instructions(),
+                executable.contextMap(),
+                arguments,
                 userCredits);
     }
 
     @Contract(pure = true)
-    public @NotNull ExecutionResultValuesDTO run(int expandLevel,
-                                                 @NotNull Map<String, Integer> arguments) {
-        executedContextMap.putAll(arguments);
+    public @NotNull ExecutionResultValuesDTO run() {
         while (executedContextMap.get(PC_NAME) < executedInstructions.size()) {
-            executeInstruction();
+            executeInstruction(executedInstructions.get(executedContextMap.get(PC_NAME)));
         }
         return new ExecutionResultValuesDTO(
                 executedContextMap.get(ProgramUtils.OUTPUT_NAME),
-                expandLevel,
                 cyclesCount,
                 initialUserCredits - runningUserCredits,
                 ProgramUtils.extractSortedArguments(executedContextMap),
                 ProgramUtils.extractSortedWorkVars(executedContextMap)
         );
-    }
-
-    @Contract(pure = true)
-    public ExecutionResultValuesDTO run(@NotNull Map<String, Integer> arguments) {
-        return run(0, arguments);
     }
 
     private int calcCreditCost(Instruction instruction, Map<String, Integer> contextMap) {

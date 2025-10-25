@@ -18,7 +18,7 @@ public class Requests {
             .build();
 
     private static final String INFO_PARAM = "info";
-    private static final String PROGRAM_NAME_PARAM = "programName";
+    private static final String PROGRAM_NAME_PARAM = "displayName";
     private static final String EXPAND_LEVEL_PARAM = "expandLevel";
 
     // TODO - remove this before submission

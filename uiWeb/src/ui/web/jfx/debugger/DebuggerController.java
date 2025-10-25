@@ -79,7 +79,7 @@ public class DebuggerController {
     }
 
     // Public methods for AppController to manage debug session state
-    public void notifyDebugSessionStarted() {
+    public void prepareForDebugSession() {
         debugSessionActive.set(true);
         atFirstStep.set(true);
         executionFinished.set(false);

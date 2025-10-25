@@ -9,6 +9,8 @@ import java.util.Map;
  * Data Transfer Object representing a program.
  *
  * @param ProgramName    the name of the program
+ * @param arguments      the map of argument names to their values
+ * @param allVariablesIncludingLabelsNames the list of all variable and label names in the program
  * @param maxExpandLevel the maximum expansion level of the program
  * @param instructions   the list of instructions in the program
  * @see InstructionDTO

@@ -1,13 +1,13 @@
 package ui.web.jfx.dashboard.history;
 
+import dto.engine.ExecutionResultStatisticsDTO;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Controller for the History Panel.
@@ -15,85 +15,60 @@ import org.jetbrains.annotations.NotNull;
  */
 public class HistoryPanelController {
 
-    private final ObservableList<HistoryRecordDTO> historyList = FXCollections.observableArrayList();
     @FXML
-    private TableView<HistoryRecordDTO> historyTableView;
+    private TableView<ExecutionResultStatisticsDTO> historyTableView;
     @FXML
-    private TableColumn<HistoryRecordDTO, Number> runIdColumn;
+    private TableColumn<ExecutionResultStatisticsDTO, Number> runNumberColumn;
     @FXML
-    private TableColumn<HistoryRecordDTO, String> executionTypeColumn;
+    private TableColumn<ExecutionResultStatisticsDTO, String> programTypeColumn;
     @FXML
-    private TableColumn<HistoryRecordDTO, String> programFunctionNameColumn;
+    private TableColumn<ExecutionResultStatisticsDTO, String> programDisplayNameColumn;
     @FXML
-    private TableColumn<HistoryRecordDTO, String> architectureTypeColumn;
+    private TableColumn<ExecutionResultStatisticsDTO, String> architectureTypeColumn;
     @FXML
-    private TableColumn<HistoryRecordDTO, Number> executionLevelColumn;
+    private TableColumn<ExecutionResultStatisticsDTO, Number> executionLevelColumn;
     @FXML
-    private TableColumn<HistoryRecordDTO, Number> finalYValueColumn;
+    private TableColumn<ExecutionResultStatisticsDTO, Number> outputColumn;
     @FXML
-    private TableColumn<HistoryRecordDTO, Number> cycleCountColumn;
+    private TableColumn<ExecutionResultStatisticsDTO, Number> cycleCountColumn;
+
     private StringProperty selectedUser;
 
     @FXML
     public void initialize() {
         setupTableColumns();
-        loadMockData();
 
         System.out.println("HistoryPanelController initialized");
     }
 
     private void setupTableColumns() {
-        runIdColumn.setCellValueFactory(new PropertyValueFactory<>("runId"));
-        executionTypeColumn.setCellValueFactory(new PropertyValueFactory<>("executionType"));
-        programFunctionNameColumn.setCellValueFactory(new PropertyValueFactory<>("programFunctionName"));
-        architectureTypeColumn.setCellValueFactory(new PropertyValueFactory<>("architectureType"));
-        executionLevelColumn.setCellValueFactory(new PropertyValueFactory<>("executionLevel"));
-        finalYValueColumn.setCellValueFactory(new PropertyValueFactory<>("finalYValue"));
-        cycleCountColumn.setCellValueFactory(new PropertyValueFactory<>("cycleCount"));
+        runNumberColumn.setCellValueFactory(callData ->
+                new SimpleIntegerProperty(callData.getValue().runNumber()));
 
-        historyTableView.setItems(historyList);
+        programTypeColumn.setCellValueFactory(cellData -> {
+            String programType = cellData.getValue().isMainProgram() ? "Main Program" : "Sub-function";
+            return new SimpleStringProperty(programType);
+        });
+
+        programDisplayNameColumn.setCellValueFactory(callData ->
+                new SimpleStringProperty(callData.getValue().displayName()));
+
+        architectureTypeColumn.setCellValueFactory(callData ->
+                new SimpleStringProperty(callData.getValue().architectureType().name()));
+
+        executionLevelColumn.setCellValueFactory(callData ->
+                new SimpleIntegerProperty(callData.getValue().expandLevel()));
+
+        outputColumn.setCellValueFactory(callData ->
+                new SimpleIntegerProperty(callData.getValue().output()));
+
+        cycleCountColumn.setCellValueFactory(callData ->
+                new SimpleIntegerProperty(callData.getValue().cycleCount()));
+
     }
 
-    private void loadMockData() {
+    public void initComponent(ListProperty<ExecutionResultStatisticsDTO> userStats) {
+        historyTableView.itemsProperty().bind(userStats);
     }
 
-    public void initComponent(StringProperty selectedUser) {
-        this.selectedUser = selectedUser;
-
-        // Listen for user changes to reload history
-        if (selectedUser != null) {
-            selectedUser.addListener((obs, oldVal, newVal) -> {
-                if (newVal != null && !newVal.isEmpty()) {
-                    loadHistoryForUser(newVal);
-                }
-            });
-        }
-    }
-
-    private void loadHistoryForUser(@NotNull String username) {
-        // This would normally fetch data from a service/repository
-        // For now, just refresh with mock data
-        System.out.println("Loading history for user: " + username);
-        refreshHistory();
-    }
-
-    public void refreshHistory() {
-        // Reload history data
-        historyList.clear();
-        loadMockData();
-        System.out.println("History refreshed");
-    }
-
-    public void clearHistory() {
-        historyList.clear();
-        System.out.println("History cleared");
-    }
-
-    public void addHistoryRecord(@NotNull HistoryRecordDTO record) {
-        historyList.add(record);
-    }
-
-    public void setHistoryRecords(@NotNull ObservableList<HistoryRecordDTO> records) {
-        historyList.setAll(records);
-    }
 }

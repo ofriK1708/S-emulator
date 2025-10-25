@@ -250,7 +250,7 @@ public class HttpEngineController implements EngineController {
      * @param onResponse A consumer that will be called with the SystemResponse when the operation is complete.
      */
     @Override
-    public void getUserStatistics(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse) {
+    public void FetchUserExecutionHistoryAsync(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse) {
         Requests.getUserStatisticsAsync(Endpoints.GET_USER_EXECUTION_HISTORY, username, new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
@@ -294,28 +294,26 @@ public class HttpEngineController implements EngineController {
      * we cant proceed without registering. so this must be sync.
      *
      * @param username   The username of the user to register.
-     * @param onResponse A consumer that will be called with the SystemResponse when the operation is complete.
+     * @return A SystemResponse indicating the success or failure of the registration.
      * @throws IOException If an I/O error occurs.
      */
     @Override
-    public void registerUser(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse) throws IOException {
+    public SystemResponse registerUser(@NotNull String username) throws IOException {
         try (Response response = Requests
                 .postRegisterUser(Endpoints.REGISTER_USER, username)) {
 
             if (response.isSuccessful()) {
                 String successMessage = getAndValidateBodyString(response.body());
 
-                SystemResponse systemResponse = SystemResponse.builder()
+                return SystemResponse.builder()
                         .isSuccess(true)
                         .message(successMessage)
                         .build();
-                onResponse.accept(systemResponse);
             } else {
-                SystemResponse systemResponse = SystemResponse.builder()
+                return SystemResponse.builder()
                         .isSuccess(false)
                         .message("Failed to register user: " + response.body())
                         .build();
-                onResponse.accept(systemResponse);
             }
         }
 
@@ -486,11 +484,12 @@ public class HttpEngineController implements EngineController {
                             if (response.isSuccessful()) {
                                 String jsonString = getAndValidateBodyString(responseBody);
 
-                                ProgramDTO programDTO = gson.fromJson(jsonString, ProgramDTO.class);
+                                FullExecutionResultDTO executionResultDTO = gson.fromJson(jsonString,
+                                        FullExecutionResultDTO.class);
 
                                 SystemResponse systemResponse = SystemResponse.builder()
                                         .isSuccess(true)
-                                        .programDTO(programDTO)
+                                        .fullExecutionResultDTO(executionResultDTO)
                                         .build();
 
                                 onResponse.accept(systemResponse);
@@ -560,7 +559,7 @@ public class HttpEngineController implements EngineController {
      * @param onResponse A consumer that will be called with the SystemResponse when the operation is complete.
      */
     @Override
-    public void debugStepOver(@NotNull Consumer<SystemResponse> onResponse) throws IOException {
+    public void debugStepOver(@NotNull Consumer<SystemResponse> onResponse) {
         validateProgramLoaded();
         Requests.postDebugActionAsync(Endpoints.DEBUG_ACTION, DebugAction.STEP_OVER.toString(),
                 new DebugActionCallback(onResponse));
@@ -573,7 +572,7 @@ public class HttpEngineController implements EngineController {
      * @param onResponse A consumer that will be called with the SystemResponse when the operation is complete.
      */
     @Override
-    public void debugStepBack(@NotNull Consumer<SystemResponse> onResponse) throws IOException {
+    public void debugStepBack(@NotNull Consumer<SystemResponse> onResponse) {
         validateProgramLoaded();
         Requests.postDebugActionAsync(Endpoints.DEBUG_ACTION, DebugAction.STEP_BACK.toString(),
                 new DebugActionCallback(onResponse));
@@ -586,7 +585,7 @@ public class HttpEngineController implements EngineController {
      * @param onResponse A consumer that will be called with the SystemResponse when the operation is complete.
      */
     @Override
-    public void debugResume(@NotNull Consumer<SystemResponse> onResponse) throws IOException {
+    public void debugResume(@NotNull Consumer<SystemResponse> onResponse) {
         validateProgramLoaded();
         Requests.postDebugActionAsync(Endpoints.DEBUG_ACTION, DebugAction.RESUME.toString(),
                 new DebugActionCallback(onResponse));
@@ -599,7 +598,7 @@ public class HttpEngineController implements EngineController {
      * @param onResponse A consumer that will be called with the SystemResponse when the operation is complete.
      */
     @Override
-    public void debugStop(@NotNull Consumer<SystemResponse> onResponse) throws IOException {
+    public void debugStop(@NotNull Consumer<SystemResponse> onResponse) {
         validateProgramLoaded();
         Requests.postDebugActionAsync(Endpoints.DEBUG_ACTION, DebugAction.STOP.toString(),
                 new DebugActionCallback(onResponse));

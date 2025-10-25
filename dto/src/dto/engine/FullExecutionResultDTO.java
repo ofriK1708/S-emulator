@@ -1,8 +1,13 @@
 package dto.engine;
 
 import engine.utils.ArchitectureType;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static engine.utils.ProgramUtils.OUTPUT_NAME;
 
 /**
  * A Data Transfer Object (DTO) that encapsulates the full execution result of a program.
@@ -26,8 +31,11 @@ public record FullExecutionResultDTO(boolean isMainProgram,
                                      int expandLevel,
                                      int cycleCount,
                                      int creditsCost) {
-    public static FullExecutionResultDTO from(ExecutionResultValuesDTO valuesDTO, boolean isMainProgram,
-                                              String programName, ArchitectureType architectureType) {
+
+    @Contract("_, _, _, _, _ -> new")
+    private static @NotNull FullExecutionResultDTO from(@NotNull ExecutionResultValuesDTO valuesDTO, int expandLevel,
+                                                        boolean isMainProgram,
+                                                        String programName, ArchitectureType architectureType) {
         return new FullExecutionResultDTO(
                 isMainProgram,
                 programName,
@@ -35,9 +43,64 @@ public record FullExecutionResultDTO(boolean isMainProgram,
                 valuesDTO.arguments(),
                 valuesDTO.workVariables(),
                 valuesDTO.output(),
-                valuesDTO.expandLevel(),
+                expandLevel,
                 valuesDTO.cycleCount(),
                 valuesDTO.creditsCost()
         );
+    }
+
+    public static @NotNull Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Combines output, arguments, and work variables into a single map sorted by variable names.
+     * the order is output first, then arguments, then work variables. <strong>(y, x1,x2,..., z1,z2,...)</strong>
+     *
+     * @return A map containing all variables with their names as keys and their integer values.
+     */
+    public Map<String, Integer> getAllVariablesSorted() {
+        Map<String, Integer> allVars = new LinkedHashMap<>();
+        allVars.put(OUTPUT_NAME, output);
+        allVars.putAll(arguments);
+        allVars.putAll(workVariables);
+        return allVars;
+    }
+
+    public static class Builder {
+        private ExecutionResultValuesDTO valuesDTO;
+        private int expandLevel;
+        private boolean isMainProgram;
+        private String programName;
+        private ArchitectureType architectureType;
+
+        public Builder valuesDTO(ExecutionResultValuesDTO valuesDTO) {
+            this.valuesDTO = valuesDTO;
+            return this;
+        }
+
+        public Builder expandLevel(int expandLevel) {
+            this.expandLevel = expandLevel;
+            return this;
+        }
+
+        public Builder isMainProgram(boolean isMainProgram) {
+            this.isMainProgram = isMainProgram;
+            return this;
+        }
+
+        public Builder programName(String programName) {
+            this.programName = programName;
+            return this;
+        }
+
+        public Builder architectureType(ArchitectureType architectureType) {
+            this.architectureType = architectureType;
+            return this;
+        }
+
+        public FullExecutionResultDTO build() {
+            return FullExecutionResultDTO.from(valuesDTO, expandLevel, isMainProgram, programName, architectureType);
+        }
     }
 }

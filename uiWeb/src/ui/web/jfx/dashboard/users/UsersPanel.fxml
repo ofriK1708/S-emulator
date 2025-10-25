@@ -3,63 +3,41 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml"
-            xmlns="http://javafx.com/javafx"
-            fx:controller="ui.web.jfx.dashboard.users.UsersPanelController"
-            styleClass="panel-container, users-panel">
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" styleClass="panel-container, users-panel"
+            xmlns="http://javafx.com/javafx/17.0.12" fx:controller="ui.web.jfx.dashboard.users.UsersPanelController">
 
-    <VBox AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
-          spacing="10">
+    <VBox spacing="10" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
+          AnchorPane.topAnchor="0">
 
         <padding>
-            <Insets top="10" right="10" bottom="10" left="10"/>
+            <Insets bottom="10" left="10" right="10" top="10"/>
         </padding>
 
         <!-- Panel Title -->
-        <Label text="Available Users" styleClass="panel-title"/>
+        <Label styleClass="panel-title" text="Available Users"/>
 
         <!-- Users Table -->
-        <TableView fx:id="usersTableView"
-                   VBox.vgrow="ALWAYS"
-                   styleClass="users-table"
-                   disable="true">
+        <TableView fx:id="usersTableView" disable="true" styleClass="users-table" VBox.vgrow="ALWAYS">
 
             <columns>
-                <TableColumn fx:id="usernameColumn"
-                             text="Username"
-                             prefWidth="100"/>
-                <TableColumn fx:id="mainProgramsColumn"
-                             text="Main Programs"
-                             prefWidth="110"/>
-                <TableColumn fx:id="subFunctionsColumn"
-                             text="Sub-Functions"
-                             prefWidth="100"/>
-                <TableColumn fx:id="currentCreditsColumn"
-                             text="Current Credits"
-                             prefWidth="110"/>
-                <TableColumn fx:id="creditsSpentColumn"
-                             text="Credits Spent"
-                             prefWidth="100"/>
-                <TableColumn fx:id="totalRunsColumn"
-                             text="Total Runs"
-                             prefWidth="90"/>
+                <TableColumn fx:id="usernameColumn" prefWidth="100" text="Username"/>
+                <TableColumn fx:id="mainProgramsColumn" prefWidth="110" text="Main Programs"/>
+                <TableColumn fx:id="subFunctionsColumn" prefWidth="100" text="Sub-Functions"/>
+                <TableColumn fx:id="currentCreditsColumn" prefWidth="110" text="Current Credits"/>
+                <TableColumn fx:id="creditsSpentColumn" prefWidth="100" text="Credits Spent"/>
+                <TableColumn fx:id="totalRunsColumn" prefWidth="90" text="Total Runs"/>
             </columns>
 
             <placeholder>
-                <Label text="User management not yet implemented.\nThis feature will be available in a future update."
-                       styleClass="placeholder-text"/>
+                <Label styleClass="placeholder-text"
+                       text="User management not yet implemented.\nThis feature will be available in a future update."/>
             </placeholder>
 
         </TableView>
 
         <!-- Select User Button (disabled for now) -->
-        <Button fx:id="selectUserButton"
-                text="Unselect User"
-                onAction="#handleSelectUser"
-                maxWidth="Infinity"
-                styleClass="panel-button, select-button"
-                disable="true"/>
+        <Button fx:id="selectUserButton" disable="true" maxWidth="Infinity" onAction="#clearSelection"
+                styleClass="panel-button, select-button" text="Unselect User"/>
 
     </VBox>
 

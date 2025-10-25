@@ -83,4 +83,8 @@ public class User {
                 totalRuns
         );
     }
+
+    public int getTotalRuns() {
+        return totalRuns;
+    }
 }

@@ -1,9 +1,11 @@
 package ui.web.jfx.dashboard;
 
+import dto.engine.ExecutionResultStatisticsDTO;
 import dto.engine.FunctionMetadata;
 import dto.engine.ProgramMetadata;
 import dto.server.SystemResponse;
 import dto.server.UserDTO;
+import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -50,7 +52,9 @@ public class DashboardController {
 
     private final ListProperty<ProgramMetadata> programsMetadataListProperty = new SimpleListProperty<>();
     private final ListProperty<FunctionMetadata> functionsMetadataListProperty = new SimpleListProperty<>();
-    private final ListProperty<UserDTO> usersMetadataListProperty = new SimpleListProperty<>();
+    private final ListProperty<UserDTO> usersList = new SimpleListProperty<>();
+    private final ListProperty<ExecutionResultStatisticsDTO> userHistoryListProperty = new SimpleListProperty<>();
+    private final String originalUser = "";
 
     @FXML
     private HBox headerSection;
@@ -105,11 +109,13 @@ public class DashboardController {
 
             // Bind user selection across panels
             selectedUser.addListener((obs, oldVal, newVal) -> {
-                userSelected.set(newVal != null && !newVal.isEmpty());
-                System.out.println("Dashboard: User selected - " + newVal);
+                if (!oldVal.equals(newVal)) {
+                    userSelected.set(newVal != null && !newVal.isEmpty());
+                    System.out.println("Dashboard: User selected - " + newVal);
 
-                if (newVal != null) {
-                    loadUserHistory(newVal);
+                    if (newVal != null) {
+                        loadUserHistory(newVal);
+                    }
                 }
             });
 
@@ -128,7 +134,7 @@ public class DashboardController {
         FunctionTableRefresher functionTableRefresher =
                 new FunctionTableRefresher(engineController, functionsMetadataListProperty);
         UserTableRefresher userTableRefresher =
-                new UserTableRefresher(engineController, usersMetadataListProperty);
+                new UserTableRefresher(engineController, usersList);
         Timer programsTimer = new Timer();
         Timer functionsTimer = new Timer();
         Timer usersTimer = new Timer();
@@ -159,10 +165,9 @@ public class DashboardController {
         );
 
         // History panel: user statistics
-        historyPanelController.initComponent(selectedUser);
+        historyPanelController.initComponent(userHistoryListProperty);
 
-        // Initial data load
-        loadAvailableUsers();
+        usersPanelController.initComponent(usersList, selectedUser, originalUser);
     }
 
     /**
@@ -216,11 +221,7 @@ public class DashboardController {
 
             loadExecutionScene(programName);
             File programFile = new File(currentFilePath.get());
-            executionController.loadProgramToExecution(programFile, () -> {
-                // After file is loaded in AppController's engine, navigate
-                transitionToExecutionScreen();
-                System.out.println("Dashboard: Navigated to Execution screen for program: " + programName);
-            });
+            executionController.loadProgramToExecution(programName);
 
         } catch (Exception e) {
             System.err.println("Dashboard: Error executing program - " + e.getMessage());
@@ -255,19 +256,8 @@ public class DashboardController {
             System.out.println("Dashboard: Executing function '" + functionName + "'");
 
             // Load Execution scene if not already loaded
-            File programFile = loadExecutionScene(functionName);
-            executionController.loadProgramToExecution(programFile, () -> {
-                // After file is loaded, switch to the function
-                try {
-                    executionController.switchLoadedProgram(functionName);
-                } catch (Exception e) {
-                    System.err.println("Dashboard: Error switching to function: " + e.getMessage());
-                }
-
-                // Navigate to execution screen
-                transitionToExecutionScreen();
-                System.out.println("Dashboard: Navigated to Execution screen for function: " + functionName);
-            });
+            loadExecutionScene(functionName);
+            executionController.loadProgramToExecution(functionName);
 
         } catch (Exception e) {
             System.err.println("Dashboard: Error executing function - " + e.getMessage());
@@ -320,9 +310,6 @@ public class DashboardController {
             primaryStage.setScene(dashboardScene);
             primaryStage.setTitle("S-Emulator - Dashboard");
 
-            // Refresh dashboard panels when returning
-            refreshDashboardPanels();
-
             System.out.println("Dashboard: Switched back to Dashboard screen");
         } else {
             System.err.println("Dashboard: Cannot transition - dashboard scene not available");
@@ -339,33 +326,18 @@ public class DashboardController {
     }
 
     /**
-     * Load available users from server
-     */
-    private void loadAvailableUsers() {
-        // TODO: Integrate with user management server
-    }
-
-    /**
      * Load user execution history
      */
     private void loadUserHistory(@NotNull String username) {
-        // TODO: Integrate with history management server
         System.out.println("Dashboard: Loading history for user '" + username + "'");
-        historyPanelController.refreshHistory();
-    }
-
-    /**
-     * Clear all dashboard state (when logging out or resetting)
-     */
-    public void clearDashboard() {
-        selectedUser.set(null);
-        currentFilePath.set("");
-        fileLoaded.set(false);
-        programLoaded.set(false);
-        usersPanelController.clearSelection();
-        programsPanelController.clearPrograms();
-        functionsPanelController.clearFunctions();
-        historyPanelController.clearHistory();
-        System.out.println("Dashboard: Cleared all state");
+        engineController.FetchUserExecutionHistoryAsync(username, (response) -> {
+            if (response.isSuccess()) {
+                Platform.runLater(() -> userHistoryListProperty.setAll(response.userStatisticsDTOList()));
+                System.out.println("Dashboard: User history loaded successfully for '" + username + "'");
+            } else {
+                Platform.runLater(() -> showError("Failed to load user history: " + response.message()));
+                System.err.println("Dashboard: Error loading user history - " + response.message());
+            }
+        });
     }
 }

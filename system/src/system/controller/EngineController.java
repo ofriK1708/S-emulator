@@ -20,7 +20,7 @@ public interface EngineController {
     void LoadProgramFromFileAsync(@NotNull Path xmlFilePath, Consumer<SystemResponse> onResponse) throws LabelNotExist, JAXBException, IOException,
             FunctionNotFound;
 
-    void loadProgramAsync(String programName, @NotNull Consumer<SystemResponse> onResponse) throws IOException;
+    void loadProgramAsync(String programName, @NotNull Consumer<SystemResponse> onResponse);
 
     ProgramDTO loadProgram(String programName) throws IOException;
 
@@ -32,31 +32,31 @@ public interface EngineController {
 
     void clearLoadedProgram();
 
-    void getBasicProgramAsync(@NotNull Consumer<SystemResponse> onResponse) throws IOException;
+    void getBasicProgramAsync(@NotNull Consumer<SystemResponse> onResponse);
 
     ProgramDTO getBasicProgram();
 
-    void getProgramByExpandLevelAsync(int expandLevel, @NotNull Consumer<SystemResponse> onResponse) throws IOException;
+    void getProgramByExpandLevelAsync(int expandLevel, @NotNull Consumer<SystemResponse> onResponse);
 
     ProgramDTO getProgramByExpandLevel(int expandLevel);
 
     void runLoadedProgram(int expandLevel, @NotNull Map<String, Integer> arguments,
-                          @NotNull Consumer<SystemResponse> onResponse) throws IOException;
+                          @NotNull Consumer<SystemResponse> onResponse);
 
     void startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments,
-                           @NotNull Consumer<SystemResponse> onResponse) throws IOException;
+                           @NotNull Consumer<SystemResponse> onResponse);
 
-    void debugStepOver(@NotNull Consumer<SystemResponse> onResponse) throws IOException;
+    void debugStepOver(@NotNull Consumer<SystemResponse> onResponse);
 
-    void debugStepBack(@NotNull Consumer<SystemResponse> onResponse) throws IOException;
+    void debugStepBack(@NotNull Consumer<SystemResponse> onResponse);
 
-    void debugResume(@NotNull Consumer<SystemResponse> onResponse) throws IOException;
+    void debugResume(@NotNull Consumer<SystemResponse> onResponse);
 
-    void debugStop(@NotNull Consumer<SystemResponse> onResponse) throws IOException;
+    void debugStop(@NotNull Consumer<SystemResponse> onResponse);
 
-    void getUserStatistics(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse) throws IOException;
+    void FetchUserExecutionHistoryAsync(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse);
 
     List<UserDTO> getAllUsersDTO() throws IOException;
 
-    void registerUser(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse) throws IOException;
+    SystemResponse registerUser(@NotNull String username) throws IOException;
 }

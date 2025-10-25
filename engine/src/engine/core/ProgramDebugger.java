@@ -91,6 +91,8 @@ public class ProgramDebugger extends ProgramExecutor {
         // Prepare result DTO
         return new DebugStateChangeResultDTO(
                 ProgramUtils.extractSortedVariables(executedContextMap),
+                getPC(),
+                cyclesCount,
                 isDebugFinished()
         );
     }
@@ -100,7 +102,7 @@ public class ProgramDebugger extends ProgramExecutor {
             throw new IllegalStateException("Debug session not started");
         }
 
-        if (executedContextMap.get(PC_NAME) == 0) {
+        if (getPC() == 0) {
             // Can't go back further than the first instruction
             throw new IllegalStateException("Already at the beginning of the program");
         }
@@ -127,6 +129,8 @@ public class ProgramDebugger extends ProgramExecutor {
         // Prepare result DTO
         return new DebugStateChangeResultDTO(
                 ProgramUtils.extractSortedVariables(executedContextMap),
+                getPC(),
+                cyclesCount,
                 false // stepping back can never finish the program
         );
     }
@@ -139,13 +143,15 @@ public class ProgramDebugger extends ProgramExecutor {
         // Reset breakpoint statuses at start of resume
 
         // Execute remaining instructions, stopping at breakpoints
-        while (executedContextMap.get(PC_NAME) < executedInstructions.size()) {
+        while (getPC() < executedInstructions.size()) {
             executeStep();
         }
 
         // Prepare result DTO
         return new DebugStateChangeResultDTO(
                 ProgramUtils.extractSortedVariables(executedContextMap),
+                getPC(),
+                cyclesCount,
                 true // resume always finishes the program
         );
     }
@@ -157,6 +163,8 @@ public class ProgramDebugger extends ProgramExecutor {
         // prepare result DTO
         return new DebugStateChangeResultDTO(
                 ProgramUtils.extractSortedVariables(executedContextMap),
+                getPC(),
+                cyclesCount,
                 true // stopping the debug session marks it as finished
         );
     }
@@ -190,7 +198,8 @@ public class ProgramDebugger extends ProgramExecutor {
 
     // region private helpers
     private void executeStep() {
-        int creditCost = executeInstruction();
+        Instruction currentInstruction = executedInstructions.get(executedContextMap.get(PC_NAME));
+        int creditCost = executeInstruction(currentInstruction);
         // Save state
         debugStateHistory.add(new HashMap<>(executedContextMap));
         debugCyclesHistory.add(creditCost); // cycles = credit cost for this instruction;
@@ -200,7 +209,7 @@ public class ProgramDebugger extends ProgramExecutor {
     // endregion
 
     private boolean isDebugFinished() {
-        return debugMode && executedContextMap.get(PC_NAME) >= executedInstructions.size();
+        return debugMode && getPC() >= executedInstructions.size();
     }
 
     /**
@@ -228,7 +237,7 @@ public class ProgramDebugger extends ProgramExecutor {
             this.expandLevel = expandLevel;
         }
 
-        public Builder mainProgram(boolean isMainProgram) {
+        public Builder isMainProgram(boolean isMainProgram) {
             this.isMainProgram = isMainProgram;
             return this;
         }
@@ -238,24 +247,7 @@ public class ProgramDebugger extends ProgramExecutor {
             return this;
         }
 
-        public Builder setArchitectureType(@NotNull ArchitectureType architectureType) {
-            this.architectureType = architectureType;
-            return this;
-        }
-
-        /**
-         * Sets all metadata fields at once.
-         *
-         * @param isMainProgram    Whether it's the main program
-         * @param programName      Name of the program
-         * @param architectureType Architecture type
-         * @return Builder instance for chaining
-         */
-        public Builder metadata(boolean isMainProgram,
-                                @NotNull String programName,
-                                @NotNull ArchitectureType architectureType) {
-            this.isMainProgram = isMainProgram;
-            this.programName = programName;
+        public Builder architectureType(@NotNull ArchitectureType architectureType) {
             this.architectureType = architectureType;
             return this;
         }

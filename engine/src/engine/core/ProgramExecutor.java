@@ -24,10 +24,9 @@ public class ProgramExecutor {
         initialUserCredits = runningUserCredits = userCredits;
     }
 
-    protected int executeInstruction() {
+    protected int executeInstruction(Instruction instruction) {
         try {
             int currentPC = executedContextMap.get(PC_NAME);
-            Instruction instruction = executedInstructions.get(currentPC);
             int creditCost = calcCreditCost(instruction, executedContextMap);
             if (runningUserCredits < creditCost) {
                 throw new InsufficientCredits("Insufficient credits to execute instruction" +
@@ -49,5 +48,9 @@ public class ProgramExecutor {
         Map<String, Integer> tempContext = new HashMap<>(contextMap);
         instruction.execute(tempContext); // preform a dry run to calc dynamic instructions cost
         return instruction.getCycles();
+    }
+
+    protected int getPC() {
+        return executedContextMap.get(PC_NAME);
     }
 }

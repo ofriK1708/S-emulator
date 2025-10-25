@@ -259,7 +259,7 @@ final class InstructionSequence {
     }
 
     public @NotNull Set<String> getLabels(int expandLevel) {
-        return ProgramUtils.extractLabels(labelsByExpandLevel, expandLevel);
+        return labelsByExpandLevel.get(expandLevel);
     }
 
     public @NotNull Set<String> getAllVariablesNames(int expandLevel, boolean includeLabels) {
@@ -267,6 +267,20 @@ final class InstructionSequence {
             throw new IllegalArgumentException("Expand level out of bounds");
         }
         return extractAllVariables(contextMapsByExpandLevel.get(expandLevel), includeLabels);
+    }
+
+    /**
+     * Retrieves a sorted set of all variable and label names present in the context map at the specified expand level.
+     *
+     * @param expandLevel The expand level for which to retrieve variable and label names.
+     * @return A sorted set of variable and label names. sort order is - output, arguments, work vars, labels
+     * @throws IllegalArgumentException if the expand level is out of bounds.
+     */
+    public @NotNull Set<String> getAllVariablesAndLabelsNamesSorted(int expandLevel) {
+        if (expandLevel < 0 || expandLevel >= labelsByExpandLevel.size()) {
+            throw new IllegalArgumentException("Expand level out of bounds");
+        }
+        return ProgramUtils.extractSortedVariablesIncludingLabels(contextMapsByExpandLevel.get(expandLevel)).keySet();
     }
 
     public @NotNull Map<String, Integer> getSortedArgumentsMap(int expandLevel) {
@@ -286,6 +300,11 @@ final class InstructionSequence {
                 getInstructionsCopy(expandLevel),
                 getContextMapCopy(expandLevel)
         );
+    }
+
+    @Contract(pure = true)
+    public @NotNull ProgramExecutable getBasicProgramExecutable() {
+        return getProgramExecutableAtExpandLevel(0);
     }
 
     public int getMaxExpandLevel() {

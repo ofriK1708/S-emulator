@@ -1,5 +1,6 @@
 package ui.web.utils;
 
+import dto.engine.ExecutionResultStatisticsDTO;
 import dto.ui.VariableDTO;
 import engine.utils.ProgramUtils;
 import javafx.animation.FadeTransition;
@@ -108,7 +109,7 @@ public class UIUtils {
      * @param finalVariableStates Final variable states from the execution
      */
     public static void openShowRunDialog(
-            @NotNull ExecutionStatisticsDTO executionStats,
+            @NotNull ExecutionResultStatisticsDTO executionStats,
             @NotNull Map<String, Integer> finalVariableStates) {
 
         try {
@@ -124,7 +125,7 @@ public class UIUtils {
 
             // Create and configure the dialog stage
             Stage dialogStage = new Stage();
-            dialogStage.setTitle("Execution Details - Run #" + executionStats.executionNumber());
+            dialogStage.setTitle("Execution Details - Run #" + executionStats.runNumber());
             dialogStage.setScene(new Scene(root));
 
 
@@ -132,7 +133,7 @@ public class UIUtils {
             dialogStage.show();
 
             System.out.println("Show Run dialog opened for execution #" +
-                    executionStats.executionNumber() + " with integrated re-run functionality");
+                    executionStats.runNumber() + " with integrated re-run functionality");
 
         } catch (Exception e) {
             System.err.println("Error opening Show Run dialog: " + e.getMessage());
@@ -149,7 +150,7 @@ public class UIUtils {
      */
     public static @NotNull List<VariableDTO> formatArgumentsToVariableDTO(
             @NotNull Map<String, Integer> programArguments) {
-        return getSortedVariableDTOS(programArguments);
+        return toVariableDTO(programArguments);
     }
 
     /**
@@ -195,7 +196,7 @@ public class UIUtils {
 
         // Sort workVariables by name for consistent display
 
-        return getSortedVariableDTOS(sortedVars);
+        return toVariableDTO(sortedVars);
     }
 
     public static Map<String, Integer> sortVariableMapByName(Map<String, Integer> variableMap) {
@@ -208,7 +209,7 @@ public class UIUtils {
         return sortedMap;
     }
 
-    private static @NotNull List<VariableDTO> getSortedVariableDTOS(Map<String, Integer> allVariablesSorted) {
+    public static @NotNull List<VariableDTO> toVariableDTO(Map<String, Integer> allVariablesSorted) {
         List<VariableDTO> variablesList = new ArrayList<>();
 
         // Convert map entries to VariableDTO objects

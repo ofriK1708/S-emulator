@@ -84,7 +84,7 @@ public class ServletUtils {
         return true;
     }
     /**
-     * Extracts and validates 'programName' and 'expandLevel' parameters from the request.
+     * Extracts and validates 'displayName' and 'expandLevel' parameters from the request.
      * @param req: The HTTP request
      * @param resp: The HTTP response
      * @return An expandParams object containing the validated parameters, or null if an error response has been sent.
@@ -121,7 +121,7 @@ public class ServletUtils {
     }
 
     /**
-     * Extracts run/debug parameters. It gets 'programName' and 'expandLevel' from query parameters
+     * Extracts run/debug parameters. It gets 'displayName' and 'expandLevel' from query parameters
      * and the 'arguments' map from the JSON request body.
      * @param req: The HTTP request
      * @param resp: The HTTP response

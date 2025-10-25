@@ -2,20 +2,15 @@ package ui.web.jfx.dashboard.users;
 
 import dto.server.UserDTO;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Consumer;
-
-/**
- * Controller for the Users Panel.
- * NOTE: This panel is not yet fully implemented as per requirements.
- * The table structure is defined but functionality is disabled.
- */
 public class UsersPanelController {
 
     @FXML
@@ -34,7 +29,9 @@ public class UsersPanelController {
     private TableColumn<UserDTO, Number> totalRunsColumn;
     @FXML
     private Button selectUserButton;
-    private Consumer<String> selectUserCallback;
+
+    private StringProperty selectedUser;
+    private @NotNull String originalUser = "";
 
     @FXML
     public void initialize() {
@@ -58,18 +55,40 @@ public class UsersPanelController {
     @FXML
     private void handleSelectUser() {
         UserDTO selected = usersTableView.getSelectionModel().getSelectedItem();
-        if (selected != null && selectUserCallback != null) {
-            selectUserCallback.accept(selected.name());
+        if (selected != null) {
+            selectedUser.set(selected.name());
         }
     }
 
     public void initComponent(@NotNull ListProperty<UserDTO> usersList,
-                              @NotNull Consumer<String> selectUserCallback) {
-        this.selectUserCallback = selectUserCallback;
+                              @NotNull StringProperty selectedUser,
+                              @NotNull String originalUser) {
+
         usersTableView.itemsProperty().bind(usersList);
+        this.selectedUser = selectedUser;
+        this.originalUser = originalUser;
+
+        usersTableView.setRowFactory(tv -> {
+            TableRow<UserDTO> row = new TableRow<>() {
+                @Override
+                protected void updateItem(UserDTO item, boolean empty) {
+                    super.updateItem(item, empty);
+                }
+            };
+
+            row.setOnMouseClicked(event -> {
+                if (!row.isEmpty() && event.getClickCount() == 1) {
+                    System.out.println("Row clicked: " + row.getItem());
+                    UserDTO user = row.getItem();
+                    selectedUser.set(user.name());
+                }
+            });
+            return row;
+        });
     }
 
     public void clearSelection() {
-
+        usersTableView.getSelectionModel().clearSelection();
+        selectedUser.set(originalUser);
     }
 }

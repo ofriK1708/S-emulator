@@ -112,9 +112,9 @@ public class ProgramUtils {
     }
 
     /**
-     * Extracts and sorts all workVariables (output, arguments, work workVariables) from the given context map.
+     * Extracts and sorts all variables (output, arguments, work workVariables) from the given context map.
      * The output variable is placed first, followed by arguments and then work workVariables.
-     *
+     * <p>[y,x1,x2,...,z1,z2,....]</p>
      * @param contextMap the context map containing variable names and their values
      * @return a sorted map ({@code LinkedHashMap<String,Integer>}) of variable names to their values
      */
@@ -127,6 +127,24 @@ public class ProgramUtils {
         sortedContextMap.put(OUTPUT_NAME, outputValue);
         sortedContextMap.putAll(arguments);
         sortedContextMap.putAll(workVars);
+        return sortedContextMap;
+    }
+
+    /**
+     * Extracts and sorts all workVariables (output, arguments, work workVariables, and labels) from the given
+     * context map.
+     * The output variable is placed first, followed by arguments, work workVariables, and then labels.
+     * <p>[y,x1,x2,...,z1,z2,....,L1,L2,.....]</p>
+     *
+     * @param contextMap the context map containing variable names and their values
+     * @return a sorted map ({@code LinkedHashMap<String,Integer>}) of variable names to their values
+     */
+    public static @NotNull Map<String, Integer> extractSortedVariablesIncludingLabels(
+            @NotNull Map<String, Integer> contextMap) {
+        Map<String, Integer> sortedContextMap = extractSortedVariables(contextMap);
+        // Extract and sort labels
+        Map<String, Integer> sortedLabels = getVariableIntegerMap(contextMap, LABEL_PREFIX);
+        sortedContextMap.putAll(sortedLabels);
         return sortedContextMap;
     }
 
@@ -152,6 +170,13 @@ public class ProgramUtils {
         return getVariableIntegerMap(contextMap, ARG_PREFIX);
     }
 
+    /**
+     * Helper method to extract and sort variables with a specific prefix from the context map.
+     *
+     * @param contextMap the context map containing variable names and their values
+     * @param argPrefix  the prefix of the variable names to extract (e.g., "x" for arguments)
+     * @return a sorted map of variable names to their values ordered by their numeric suffix
+     */
     @Contract(pure = true)
     private static @NotNull Map<String, Integer> getVariableIntegerMap(@NotNull Map<String, Integer> contextMap,
                                                                        @NotNull String argPrefix) {
@@ -163,13 +188,6 @@ public class ProgramUtils {
         return sortedArguments;
     }
 
-    @Contract(pure = true)
-    public static @NotNull Set<String> extractLabels(@NotNull List<Set<String>> labelsByExpandLevel, int expandLevel) {
-        if (expandLevel < 0 || expandLevel >= labelsByExpandLevel.size()) {
-            throw new IllegalArgumentException("Invalid expand level: " + expandLevel);
-        }
-        return new HashSet<>(labelsByExpandLevel.get(expandLevel));
-    }
 
     public static boolean isFunctionCall(@NotNull String argName) {
         if (argName.startsWith("(") && argName.endsWith(")")) {

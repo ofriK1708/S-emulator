@@ -1,6 +1,7 @@
 package engine.core;
 
 import dto.engine.*;
+import engine.core.info.InnerRunResult;
 import engine.exception.*;
 import engine.generated_2.SFunction;
 import engine.generated_2.SProgram;
@@ -121,25 +122,58 @@ public class Engine {
         return instructionSequence.isVariableInContext(varName);
     }
 
-    public @NotNull FullExecutionResultDTO run(int expandLevel, @NotNull Map<String, Integer> arguments,
-                                               int userCredits,
-                                               @NotNull ArchitectureType architectureType)
+    public @NotNull FullExecutionResultDTO mainRun(int expandLevel, @NotNull Map<String, Integer> arguments,
+                                                   int userCredits,
+                                                   @NotNull ArchitectureType architectureType)
             throws ExpandLevelOutOfBounds, IllegalArchitectureType, InsufficientCredits {
-        validateRunPossibility(expandLevel, userCredits, architectureType);
+        userCredits -= validateRunPossibilityAndGetCreditCost(expandLevel, userCredits, architectureType, arguments);
         ProgramExecutable executable = instructionSequence.getProgramExecutableAtExpandLevel(expandLevel);
-        ProgramRunner runner = ProgramRunner.createFrom(executable, userCredits);
-        ExecutionResultValuesDTO valuesResult = runner.run(expandLevel, arguments);
+        ProgramRunner runner = ProgramRunner.createMainRunner(executable, arguments, userCredits);
+        ExecutionResultValuesDTO valuesResult = runner.run();
         averageCreditsCost = calcAverageCredits(valuesResult.creditsCost());
         numberOfExecutions++;
 
-        return FullExecutionResultDTO.from(
-                valuesResult, isMainProgram(), getRepresentationName(),
-                architectureType);
+        return FullExecutionResultDTO.builder()
+                .valuesDTO(valuesResult)
+                .expandLevel(expandLevel)
+                .isMainProgram(isMainProgram())
+                .programName(getRepresentationName())
+                .architectureType(architectureType)
+                .build();
     }
 
-    private void validateRunPossibility(int expandLevel, int userCredits,
-                                        @NotNull ArchitectureType architectureType)
+    /**
+     * Validates if the program/function can be run at the given expand level and architecture type,
+     * checks if all the arguments are non-negative integers, and returns the credit cost required to run it.
+     *
+     * @param expandLevel        the level of expansion for the program/function
+     * @param userCredits        the number of credits the user has
+     * @param loadedArchitecture the architecture type loaded for execution
+     * @param arguments          a map of argument names to their integer values
+     * @return the credit cost required to run the program/function
+     * @throws ExpandLevelOutOfBounds  if the expand level is out of bounds
+     * @throws IllegalArchitectureType if the architecture type is not sufficient
+     * @throws InsufficientCredits     if the user does not have enough credits
+     */
+    private int validateRunPossibilityAndGetCreditCost(int expandLevel,
+                                                       int userCredits,
+                                                       @NotNull ArchitectureType loadedArchitecture,
+                                                       @NotNull Map<String, Integer> arguments
+    )
             throws ExpandLevelOutOfBounds, IllegalArchitectureType, InsufficientCredits {
+        int requiredCredits = getAndValidateArchitecture(expandLevel, loadedArchitecture);
+        if (userCredits < requiredCredits) {
+            throw new InsufficientCredits("Not enough credits to run the program/function at the given architecture " +
+                    "type (" + loadedArchitecture + ")",
+                    requiredCredits, userCredits);
+        }
+        if (arguments.values().stream().allMatch(value -> (value == null) || (value < 0))) {
+            throw new IllegalArgumentException("All arguments must be non-negative integers.");
+        }
+        return requiredCredits;
+    }
+
+    private int getAndValidateArchitecture(int expandLevel, @NotNull ArchitectureType loadedArchitecture) {
         if (expandLevel < 0 || expandLevel > instructionSequence.getMaxExpandLevel()) {
             throw new ExpandLevelOutOfBounds("Expanding level out of bounds: ", expandLevel, 0,
                     instructionSequence.getMaxExpandLevel());
@@ -147,27 +181,26 @@ public class Engine {
 
         ArchitectureType requiredArchitecture = instructionSequence.
                 getMinimumArchitectureTypeNeededAtExpandLevel(expandLevel);
-        if (architectureType.compareTo(requiredArchitecture) < 0) {
+        if (loadedArchitecture.compareTo(requiredArchitecture) < 0) {
             throw new IllegalArchitectureType("Architecture type not sufficient for execution",
-                    requiredArchitecture, architectureType);
+                    requiredArchitecture, loadedArchitecture);
         }
 
-        int requiredCredits = requiredArchitecture.getCreditsCost();
-        if (userCredits < requiredCredits) {
-            throw new InsufficientCredits("Not enough credits to run the program/function at the given architecture " +
-                    "type (" + architectureType + ")",
-                    requiredCredits, userCredits);
-        }
+        return requiredArchitecture.getCreditsCost();
     }
 
     /**
      * this run happen internally, without user credits limitation and at expand level 0
      *
      * @param arguments a map of argument names to their integer values
-     * @return an ExecutionResultDTO containing the results of the execution
+     * @return InnerRunResult containing output and cycle count
      */
-    public FullExecutionResultDTO run(@NotNull Map<String, Integer> arguments) {
-        return run(0, arguments, Integer.MAX_VALUE, ArchitectureType.INNER_RUN_ARCHITECTURE);
+    public @NotNull InnerRunResult innerRun(@NotNull Map<String, Integer> arguments) {
+        ProgramRunner innerRunner = ProgramRunner.createInnerRunner(
+                instructionSequence.getBasicProgramExecutable(),
+                arguments);
+        ExecutionResultValuesDTO valuesResult = innerRunner.run();
+        return new InnerRunResult(valuesResult.output(), valuesResult.cycleCount());
     }
 
     private float calcAverageCredits(int latestRunCreditsCost) {
@@ -177,11 +210,14 @@ public class Engine {
     public @NotNull ProgramDebugger startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments,
                                                       int userCredits, @NotNull ArchitectureType architectureType)
             throws ExpandLevelOutOfBounds, IllegalArchitectureType, InsufficientCredits {
-        validateRunPossibility(expandLevel, userCredits, architectureType);
-        userCredits -= architectureType.getCreditsCost();
+        userCredits -= validateRunPossibilityAndGetCreditCost(expandLevel, userCredits, architectureType, arguments);
+
         ProgramExecutable executable = instructionSequence.getProgramExecutableAtExpandLevel(expandLevel);
+
         ProgramDebugger debugger = ProgramDebugger.builder(executable, userCredits, expandLevel)
-                .metadata(isMainProgram(), getRepresentationName(), architectureType)
+                .isMainProgram(isMainProgram())
+                .programName(getRepresentationName())
+                .architectureType(architectureType)
                 .build();
         return debugger.start(arguments);
     }
@@ -191,7 +227,7 @@ public class Engine {
         return new ProgramDTO(
                 programName,
                 getSortedArgumentsMap(),
-                new ArrayList<>(instructionSequence.getAllVariablesNames(expandLevel, true)),
+                new ArrayList<>(instructionSequence.getAllVariablesAndLabelsNamesSorted(expandLevel)),
                 instructionSequence.getMaxExpandLevel(),
                 IntStream.range(0, instructionsAtLevel.size())
                         .mapToObj(i -> instructionsAtLevel.get(i).toDTO(i))

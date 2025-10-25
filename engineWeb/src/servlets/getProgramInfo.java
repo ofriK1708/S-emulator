@@ -31,7 +31,7 @@ public class getProgramInfo extends HttpServlet {
             String programName = req.getParameter(PROGRAM_NAME_PARAM);
             ProgramManager pm = ServletUtils.getProgramManager(req.getServletContext());
             if (programName == null || programName.isEmpty()) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "programName parameter is missing or invalid");
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "displayName parameter is missing or invalid");
                 return;
             }
             String infoToGet = req.getParameter(INFO_PARAM);
