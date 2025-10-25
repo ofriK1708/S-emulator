@@ -26,7 +26,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import system.controller.EngineController;
 import system.controller.HttpEngineController;
-import system.controller.LocalEngineController;
 import ui.web.jfx.VariableInputDialog.VariableInputDialogController;
 import ui.web.jfx.cycles.CyclesController;
 import ui.web.jfx.debugger.DebuggerController;
@@ -46,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 
 import static ui.web.utils.UIUtils.*;
+import static ui.web.utils.clientConstants.TASK_PATH;
 
 public class ExecutionController {
 
@@ -212,15 +212,11 @@ public class ExecutionController {
 
     public void loadProgramToExecution(@NotNull String programName) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("task/program/ProgramTask.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(TASK_PATH));
             Parent root = loader.load();
             ProgramTaskController programTaskController = loader.getController();
 
-            Stage loadingStage = new Stage();
-            loadingStage.initModality(Modality.APPLICATION_MODAL);
-            loadingStage.setTitle("Loading File");
-            loadingStage.setScene(new Scene(root, 1000, 183));
-
+            Stage loadingStage = createTaskLoadingStage("Loading Program: " + programName, root);
             UIAdapter uiAdapter = buildUIAdapter(programName, loadingStage);
 
 
@@ -625,11 +621,6 @@ public class ExecutionController {
         if (isDebugFinished) {
             showInfo("Execution finished. Program has completed successfully.");
             return;
-        }
-
-        if (!isFirstDebugStep) {
-            previousDebugVariables.putAll(UIUtils.getAllVariablesMap((LocalEngineController) engineController,
-                    currentExpandLevel.get()));
         }
 
         engineController.debugStepOver(systemResponse -> {

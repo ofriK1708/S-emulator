@@ -24,11 +24,11 @@
                     </padding>
                     <!-- Execution Header-->
                     <fx:include fx:id="executionHeader"
-                                source="execution/header/executionheader.fxml"/>
+                                source="execution/header/executionHeader.fxml"/>
 
                     <!-- Program/Function Selector -->
                     <fx:include fx:id="programFunction"
-                                source="programDTO/function/programFunction.fxml"/>
+                                source="program/function/programFunction.fxml"/>
                 </VBox>
             </top>
 

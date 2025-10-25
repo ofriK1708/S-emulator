@@ -3,7 +3,6 @@ package ui.web.jfx.dashboard;
 import dto.engine.ExecutionResultStatisticsDTO;
 import dto.engine.FunctionMetadata;
 import dto.engine.ProgramMetadata;
-import dto.server.SystemResponse;
 import dto.server.UserDTO;
 import javafx.application.Platform;
 import javafx.beans.property.*;
@@ -26,14 +25,13 @@ import ui.web.jfx.dashboard.header.DashboardHeaderController;
 import ui.web.jfx.dashboard.history.HistoryPanelController;
 import ui.web.jfx.dashboard.programs.ProgramsPanelController;
 import ui.web.jfx.dashboard.users.UsersPanelController;
+import ui.web.jfx.task.program.ProgramTaskController;
 
 import java.io.File;
 import java.net.URL;
 import java.util.Timer;
-import java.util.function.Consumer;
 
-import static ui.web.utils.UIUtils.showError;
-import static ui.web.utils.UIUtils.showSuccess;
+import static ui.web.utils.UIUtils.*;
 import static ui.web.utils.clientConstants.*;
 
 /**
@@ -179,24 +177,32 @@ public class DashboardController {
         try {
             System.out.println("Dashboard: Loading file " + file.getName());
 
-            // Load the file using Dashboard's engine controller for preview
-            engineController.LoadProgramFromFileAsync(file.toPath(), (Consumer<SystemResponse>)
-                    systemResponse -> {
-                        if (systemResponse.isSuccess()) {
-                            // Update programs and functions metadata lists
-                            showSuccess(systemResponse.message());
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(TASK_PATH));
+            Parent root = loader.load();
+            ProgramTaskController programTaskController = loader.getController();
+
+            Stage loadingStage = createTaskLoadingStage("uploading File: " + file.getName(), root);
+
+            loadingStage.setOnShown(event -> programTaskController.initializeAndRunUploadTaskThread(
+                    file.toPath(), engineController,
+                    (isSucceeded) -> {
+                        if (isSucceeded) {
+                            currentFilePath.set(file.getAbsolutePath());
+                            fileLoaded.set(true);
+                            programLoaded.set(true);
+                            showSuccess("File loaded successfully: " + file.getName());
                         } else {
-                            showError(systemResponse.message());
+                            currentFilePath.set("");
+                            fileLoaded.set(false);
+                            programLoaded.set(false);
+                            showError("File loading failed: " + file.getName());
                         }
-                    });
+                        loadingStage.close();
+                    }));
 
+            loadingStage.show();
             // Store the file path for later use by Execution screen
-            currentFilePath.set(file.getAbsolutePath());
-            fileLoaded.set(true);
-            programLoaded.set(true);
 
-            System.out.println("Dashboard: File loaded successfully - " + file.getName());
-            System.out.println("Dashboard: Staying on Dashboard - awaiting execute button press");
 
         } catch (Exception e) {
             System.err.println("Dashboard: Error loading file - " + e.getMessage());
@@ -220,7 +226,6 @@ public class DashboardController {
             System.out.println("Dashboard: Executing program '" + programName + "'");
 
             loadExecutionScene(programName);
-            File programFile = new File(currentFilePath.get());
             executionController.loadProgramToExecution(programName);
 
         } catch (Exception e) {
@@ -272,7 +277,7 @@ public class DashboardController {
         System.out.println("Dashboard: Loading Execution scene...");
 
         FXMLLoader executionLoader = new FXMLLoader();
-        URL url = getClass().getResource("/ui/web/jfx/execution.fxml");
+        URL url = getClass().getResource(EXECUTION_PATH);
         assert url != null;
         executionLoader.setLocation(url);
 

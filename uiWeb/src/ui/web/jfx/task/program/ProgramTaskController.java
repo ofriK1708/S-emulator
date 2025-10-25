@@ -13,6 +13,7 @@ import ui.web.jfx.task.program.upload.UploadFileToSystemTask;
 import ui.web.utils.UIUtils;
 
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 public class ProgramTaskController {
 
@@ -27,12 +28,13 @@ public class ProgramTaskController {
     @FXML
     private ProgressBar progressBar;
 
-    public void initializeAndRunUploadTaskThread(@NotNull Path filePath, EngineController engineController) {
+    public void initializeAndRunUploadTaskThread(@NotNull Path filePath, EngineController engineController,
+                                                 Consumer<Boolean> onFinish) {
         taskTitle.setText("Uploading Program File");
-        initTaskMeasurements(filePath);
+        initTaskMeasurements(filePath.toString());
         UploadFileToSystemTask uploadFileToSystemTask = new UploadFileToSystemTask(
                 engineController, filePath);
-        bindUploadTaskToUIComponents(uploadFileToSystemTask);
+        bindUploadTaskToUIComponents(uploadFileToSystemTask, onFinish);
         Thread thread = new Thread(uploadFileToSystemTask, "FileLoaderTaskThread");
         thread.start();
     }
@@ -41,7 +43,7 @@ public class ProgramTaskController {
                                                @NotNull EngineController engineController,
                                                @NotNull UIAdapter uiAdapter) {
         taskTitle.setText("Loading Program");
-        initTaskMeasurements(Path.of(programName));
+        initTaskMeasurements(programName);
         LoadProgramToExecutionTask loadProgramToExecutionTask = new LoadProgramToExecutionTask(
                 engineController, uiAdapter, programName);
         bindLoadProgramToExecutionToUIComponents(loadProgramToExecutionTask, uiAdapter);
@@ -49,14 +51,26 @@ public class ProgramTaskController {
         thread.start();
     }
 
-    private void initTaskMeasurements(@NotNull Path filePath) {
-        taskOn.setText(filePath.toString());
+    private void initTaskMeasurements(@NotNull String loadingName) {
+        taskOn.setText(loadingName);
         percentLabel.setText("0%");
         progressBar.setProgress(0);
     }
 
-    private void bindUploadTaskToUIComponents(@NotNull UploadFileToSystemTask task) {
+    private void bindUploadTaskToUIComponents(@NotNull UploadFileToSystemTask task, Consumer<Boolean> onFinish) {
         bindUIComponents(task);
+        task.setOnSucceeded(e -> {
+            UIUtils.showSuccess("Program file uploaded successfully.");
+            onFinish.accept(true);
+        });
+        task.setOnCancelled(e -> {
+            UIUtils.showInfo("Program file upload cancelled.");
+            onFinish.accept(false);
+        });
+        task.setOnFailed(e -> {
+            UIUtils.showError("Failed to upload the program file: " + task.getException().getMessage());
+            onFinish.accept(false);
+        });
     }
 
     private void bindLoadProgramToExecutionToUIComponents(@NotNull LoadProgramToExecutionTask task,

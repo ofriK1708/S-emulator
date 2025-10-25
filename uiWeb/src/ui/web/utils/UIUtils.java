@@ -2,7 +2,6 @@ package ui.web.utils;
 
 import dto.engine.ExecutionResultStatisticsDTO;
 import dto.ui.VariableDTO;
-import engine.utils.ProgramUtils;
 import javafx.animation.FadeTransition;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -12,13 +11,17 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableRow;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
 import system.controller.LocalEngineController;
 import ui.web.jfx.ExecutionController;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 public class UIUtils {
     public static final String ArgumentResourcePath = "/ui/jfx/VariableInputDialog/VariableInputDialog.fxml";
@@ -27,11 +30,6 @@ public class UIUtils {
     public static boolean showInfoAndSuccess = false;
     // Reference to AppController for re-run functionality
     private static ExecutionController executionControllerInstance = null;
-
-    // for later use if needed
-    public static void setShowInfoAndSuccess(boolean showInfoAndSuccess) {
-        UIUtils.showInfoAndSuccess = showInfoAndSuccess;
-    }
 
     public static void setAppControllerInstance(ExecutionController executionController) {
         executionControllerInstance = executionController;
@@ -75,30 +73,6 @@ public class UIUtils {
         } catch (InterruptedException ignored) {
             // Ignored
         }
-    }
-
-    public static @NotNull List<String> sortAllProgramNames(@NotNull Set<String> programNames) {
-        List<String> sortedProgramNames = new ArrayList<>();
-        List<String> sortedLabels = new ArrayList<>();
-        List<String> sortedArguments = new ArrayList<>();
-        List<String> sortedWorkVars = new ArrayList<>();
-        for (String name : programNames) {
-            if (name.startsWith(ProgramUtils.LABEL_PREFIX)) {
-                sortedLabels.add(name);
-            } else if (name.startsWith(ProgramUtils.ARG_PREFIX)) {
-                sortedArguments.add(name);
-            } else if (name.startsWith(ProgramUtils.WORK_VAR_PREFIX)) {
-                sortedWorkVars.add(name);
-            }
-        }
-        sortedLabels.sort(programNameComparator);
-        sortedArguments.sort(programNameComparator);
-        sortedWorkVars.sort(programNameComparator);
-        sortedProgramNames.add(ProgramUtils.OUTPUT_NAME);
-        sortedProgramNames.addAll(sortedArguments);
-        sortedProgramNames.addAll(sortedWorkVars);
-        sortedProgramNames.addAll(sortedLabels);
-        return sortedProgramNames;
     }
 
     /**
@@ -153,61 +127,17 @@ public class UIUtils {
         return toVariableDTO(programArguments);
     }
 
-    /**
-     * Gets all workVariables from the engine controller as a map.
-     *
-     * @param engineController The engine controller instance
-     * @param expandLevel      The expansion level to get workVariables from
-     * @return Map of all variable names to their current values
-     */
-    public static @NotNull Map<String, Integer> getAllVariablesMap(
-            @NotNull LocalEngineController engineController,
-            int expandLevel) {
 
-        Map<String, Integer> allVariables = new LinkedHashMap<>();
+    public static @NotNull Stage createTaskLoadingStage(@NotNull String title, @NotNull Parent root) {
 
-        // Add work workVariables (z1, z2, etc.)
-        allVariables.putAll(engineController.getWorkVars(expandLevel));
+        Stage loadingStage = new Stage();
+        loadingStage.initModality(Modality.APPLICATION_MODAL);
+        loadingStage.setTitle(title);
+        loadingStage.setScene(new Scene(root, 1000, 183));
 
-        // Add arguments (x1, x2, etc.)
-        allVariables.putAll(engineController.getSortedArguments(expandLevel));
-
-        // Add output variable (y)
-        allVariables.put(ProgramUtils.OUTPUT_NAME, engineController.getProgramResult(expandLevel));
-
-        sortVariableMapByName(allVariables);
-
-        return allVariables;
+        return loadingStage;
     }
 
-    /**
-     * Converts all workVariables from engine controller to VariableDTO list for UI display.
-     *
-     * @param engineController The engine controller instance
-     * @param expandLevel      The expansion level to get workVariables from
-     * @return List of VariableDTO objects sorted by name
-     */
-    public static @NotNull List<VariableDTO> getAllVariablesDTOSorted(
-            @NotNull LocalEngineController engineController,
-            int expandLevel) {
-
-        Map<String, Integer> allVariables = getAllVariablesMap(engineController, expandLevel);
-        Map<String, Integer> sortedVars = sortVariableMapByName(allVariables);
-
-        // Sort workVariables by name for consistent display
-
-        return toVariableDTO(sortedVars);
-    }
-
-    public static Map<String, Integer> sortVariableMapByName(Map<String, Integer> variableMap) {
-        List<String> sortedVariablesNames = sortAllProgramNames(variableMap.keySet());
-        Map<String, Integer> sortedMap = new LinkedHashMap<>();
-
-        for (String key : sortedVariablesNames) {
-            sortedMap.put(key, variableMap.get(key));
-        }
-        return sortedMap;
-    }
 
     public static @NotNull List<VariableDTO> toVariableDTO(Map<String, Integer> allVariablesSorted) {
         List<VariableDTO> variablesList = new ArrayList<>();

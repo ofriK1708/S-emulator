@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.*?>
 <HBox xmlns:fx="http://javafx.com/fxml"
       xmlns="http://javafx.com/javafx"
@@ -9,7 +9,7 @@
       alignment="CENTER"
       spacing="15"
       styleClass="execution-header"
-      stylesheets="@executionheader.css"
+      stylesheets="@executionHeader.css"
       minHeight="60"
       prefHeight="60">
 
