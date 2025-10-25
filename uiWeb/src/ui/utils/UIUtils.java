@@ -15,7 +15,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
-import system.controller.LocalEngineController;
 import ui.execution.ExecutionController;
 
 import java.util.ArrayList;
@@ -37,7 +36,21 @@ public class UIUtils {
     }
 
     public static boolean isValidProgramArgument(String arg) {
-        return LocalEngineController.validArgumentValueCheck.test(arg);
+        try {
+            int res = Integer.parseInt(arg);
+            return res >= 0;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public static boolean isValidExpandChoice(String choice, int maxExpandLevel) {
+        try {
+            int res = Integer.parseInt(choice);
+            return res >= 0 && res <= maxExpandLevel;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     public static void showError(String message) {

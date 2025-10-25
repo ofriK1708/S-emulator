@@ -38,13 +38,6 @@ import static utils.ServletConstants.*;
  */
 public class HttpEngineController implements EngineController {
 
-    private HttpEngineController() {
-    }
-
-    public static @NotNull HttpEngineController getInstance() {
-        return Holder.INSTANCE;
-    }
-
     /**
      * Registers a new user on the server <strong>asynchronously</strong>.
      *
@@ -364,10 +357,6 @@ public class HttpEngineController implements EngineController {
                         .build();
             }
         }
-    }
-
-    private static class Holder {
-        private static final HttpEngineController INSTANCE = new HttpEngineController();
     }
 
     /**

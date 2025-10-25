@@ -141,7 +141,7 @@ public class ProgramFunctionController {
 
         Optional<String> result = dialog.showAndWait();
         if (result.isPresent()) {
-            if (UIUtils.isValidProgramArgument(result.get())) {
+            if (UIUtils.isValidExpandChoice(result.get(), maxLevel.get())) {
                 onExpandLevelChangeCallback.accept(Integer.parseInt(result.get().trim()));
             } else {
                 showInvalidChoice(maxLevel.get());

@@ -109,7 +109,7 @@ public class debugAction extends HttpServlet {
             executionHistoryManager.addExecutionResult(
                     user.getName(),
                     debugger.getProgramName(),
-                    ExecutionResultStatisticsDTO.of(fullExecutionResult));
+                    ExecutionResultStatisticsDTO.of(fullExecutionResult, user.getTotalRuns()));
             user.clearDebugger();
             user.chargeCredits(fullExecutionResult.creditsCost());
         }

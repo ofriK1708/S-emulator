@@ -15,7 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import system.controller.EngineController;
-import system.controller.LocalEngineController;
+import system.controller.HttpEngineController;
 import ui.dashboard.functions.FunctionsPanelController;
 import ui.dashboard.header.DashboardHeaderController;
 import ui.dashboard.history.HistoryPanelController;
@@ -87,7 +87,7 @@ public class DashboardController {
 
     public DashboardController() {
         // Initialize engine controller for Dashboard data preview
-        this.engineController = new LocalEngineController();
+        this.engineController = new HttpEngineController();
     }
 
     public void setupNavigation(@NotNull Stage primaryStage, @NotNull Scene dashboardScene) {
