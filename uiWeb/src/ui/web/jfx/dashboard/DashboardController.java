@@ -47,6 +47,7 @@ public class DashboardController {
     private final BooleanProperty userSelected = new SimpleBooleanProperty(false);
     private final BooleanProperty fileLoaded = new SimpleBooleanProperty(false);
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
+    private final StringProperty loggedInUserName = new SimpleStringProperty("Guest User");
 
     private final ListProperty<ProgramMetadata> programsMetadataListProperty = new SimpleListProperty<>();
     private final ListProperty<FunctionMetadata> functionsMetadataListProperty = new SimpleListProperty<>();
@@ -145,6 +146,7 @@ public class DashboardController {
     private void initializeSubControllers() {
         // Header: file loading and credits
         headerSectionController.initComponent(
+                loggedInUserName,
                 currentFilePath,
                 availableCredits,
                 this::handleFileLoadFromDashboard,
@@ -241,7 +243,7 @@ public class DashboardController {
         }
 
         // Configure execution screen with user info BEFORE loading file
-        executionController.setUserName(selectedUser.get() != null ? selectedUser.get() : "Guest User");
+        executionController.setUserName(loggedInUserName.get());
         executionController.setScreenTitle("S-Emulator - Execution: " + programName);
         executionController.setAvailableCredits(availableCredits.get());
 
@@ -263,6 +265,29 @@ public class DashboardController {
             // Load Execution scene if not already loaded
             loadExecutionScene(functionName);
             executionController.loadProgramToExecution(functionName);
+            if (executionScene == null || executionController == null) {
+                loadExecutionScene();
+            }
+
+            // Configure execution screen with user info BEFORE loading file
+            executionController.setUserName(loggedInUserName.get());
+            executionController.setScreenTitle("S-Emulator - Execution: " + functionName);
+            executionController.setAvailableCredits(availableCredits.get());
+
+            // Load the file in AppController's engine (with callback to navigate after load)
+            File programFile = new File(currentFilePath.get());
+            executionController.loadProgramFromFileExternal(programFile, () -> {
+                // After file is loaded, switch to the function
+                try {
+                    executionController.switchLoadedProgram(functionName);
+                } catch (Exception e) {
+                    System.err.println("Dashboard: Error switching to function: " + e.getMessage());
+                }
+
+                // Navigate to execution screen
+                transitionToExecutionScreen();
+                System.out.println("Dashboard: Navigated to Execution screen for function: " + functionName);
+            });
 
         } catch (Exception e) {
             System.err.println("Dashboard: Error executing function - " + e.getMessage());
@@ -344,5 +369,41 @@ public class DashboardController {
                 System.err.println("Dashboard: Error loading user history - " + response.message());
             }
         });
+        historyPanelController.refreshHistory();
+    }
+
+    /**
+     * Set the logged-in username.
+     * MUST be called before setupNavigation().
+     *
+     * @param username The logged-in username
+     */
+    public void setLoggedInUser(@NotNull String username) {
+        this.loggedInUserName.set(username);
+        System.out.println("Dashboard: Logged in user set to - " + username);
+    }
+
+    /**
+     * Get the logged-in username property.
+     *
+     * @return StringProperty for the logged-in username
+     */
+    public StringProperty loggedInUserNameProperty() {
+        return loggedInUserName;
+    }
+
+    /**
+     * Clear all dashboard state (when logging out or resetting)
+     */
+    public void clearDashboard() {
+        selectedUser.set(null);
+        currentFilePath.set("");
+        fileLoaded.set(false);
+        programLoaded.set(false);
+        usersPanelController.clearSelection();
+        programsPanelController.clearPrograms();
+        functionsPanelController.clearFunctions();
+        historyPanelController.clearHistory();
+        System.out.println("Dashboard: Cleared all state");
     }
 }

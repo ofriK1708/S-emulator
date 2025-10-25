@@ -24,7 +24,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import system.controller.EngineController;
 import system.controller.HttpEngineController;
 import ui.web.jfx.VariableInputDialog.VariableInputDialogController;
 import ui.web.jfx.cycles.CyclesController;
@@ -53,30 +52,31 @@ public class ExecutionController {
 
     private final ListProperty<VariableDTO> allVariablesDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-
     private final ListProperty<VariableDTO> previousVariablesDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-
     private final ListProperty<VariableDTO> argumentsDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-
     private final BooleanProperty argumentsLoaded = new SimpleBooleanProperty(false);
 
     private final ListProperty<InstructionDTO> programInstructions =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-
     private final ListProperty<InstructionDTO> derivedInstructions =
             new SimpleListProperty<>(FXCollections.observableArrayList());
 
     private final ListProperty<String> programVariablesNamesAndLabels =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-
     private final MapProperty<String, String> allSubFunction =
             new SimpleMapProperty<>(FXCollections.observableHashMap());
 
+    private final ListProperty<ExecutionResultStatisticsDTO> executionStatistics =
+            new SimpleListProperty<>(FXCollections.observableArrayList());
+
     private final StringProperty mainProgramName = new SimpleStringProperty("");
     private final StringProperty currentLoadedProgramName = new SimpleStringProperty("");
-    private final @NotNull EngineController engineController;
+
+    // Use LocalEngineController so we can call the synchronous methods used throughout this controller
+    private final @NotNull LocalEngineController engineController;
+
     private final Map<String, Integer> programArguments = new HashMap<>();
     private final BooleanProperty isAnimationsOn = new SimpleBooleanProperty(true);
     private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
@@ -140,6 +140,7 @@ public class ExecutionController {
     private DebuggerController debugControlsController;
     @FXML
     private Button backToDashboardButton;
+
     private @Nullable ProgramDTO loadedProgram = null;
     private Runnable returnToDashboardCallback = null;
     private boolean inDebugSession = false;
@@ -252,7 +253,6 @@ public class ExecutionController {
                 })
                 .build();
     }
-
     public void setScreenTitle(String title) {
         screenTitle.set(title);
     }
@@ -381,6 +381,47 @@ public class ExecutionController {
         } else {
             unbindTitlePanesExpansion();
         }
+    }
+
+    public void switchLoadedProgram(String functionName) {
+        if (functionName == null || functionName.isEmpty()) {
+            showError("Function name cannot be null or empty.");
+            return;
+        }
+        if (!allSubFunction.containsKey(functionName) && !functionName.equals(mainProgramName.get())) {
+            showError("Function '" + functionName + "' does not exist in the loaded program.");
+            return;
+        }
+        try {
+            setStageForLoadedProgram(functionName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Error retrieving instructions for function '" + functionName + "': " + e.getMessage());
+        }
+    }
+
+    private void setStageForLoadedProgram(String functionName) {
+
+        currentLoadedProgramName.set(loadedProgram.ProgramName());
+        maxExpandLevel.set(maxExpandLevel.get() + 1);
+        currentExpandLevel.set(0);
+        programLoaded.set(true);
+        argumentsLoaded.set(false);
+        programRunning.set(false);
+        programFinished.set(false);
+        programArguments.clear();
+        programInstructions.setAll(loadedProgram.instructions());
+        derivedInstructions.clear();
+        instructionsTableController.clearHighlighting();
+        derivedInstructionsTableController.clearHighlighting();
+        allVariablesDTO.clear();
+        argumentsDTO.clear();
+        currentCycles.set(0);
+        summaryLineController.updateCounts(loadedProgram.instructions());
+        programVariablesNamesAndLabels.setAll(sortAllProgramNames(engineController.
+                getAllVariablesAndLabelsNames(0, true)));
+        showSuccess("Function '" + functionName + "' loaded successfully.");
+        showInfo("Displaying instructions for function: " + functionName);
     }
 
     public void prepareForTakingArguments() {
