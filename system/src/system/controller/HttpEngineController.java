@@ -38,6 +38,54 @@ import static utils.ServletConstants.*;
  */
 public class HttpEngineController implements EngineController {
 
+    private HttpEngineController() {
+    }
+
+    public static @NotNull HttpEngineController getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    /**
+     * Registers a new user on the server <strong>asynchronously</strong>.
+     *
+     * @param username   The username of the user to register.
+     * @param onResponse A consumer that will be called with the SystemResponse when the operation is complete.
+     */
+    @Override
+    public void registerUserAsync(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse) {
+        Requests.postRegisterUserAsync(Endpoints.REGISTER_USER, username, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                SystemResponse systemResponse = SystemResponse.builder()
+                        .isSuccess(false)
+                        .message("Failed to register user: " + e.getMessage())
+                        .build();
+                onResponse.accept(systemResponse);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        String successMessage = getAndValidateBodyString(responseBody);
+
+                        SystemResponse systemResponse = SystemResponse.builder()
+                                .isSuccess(true)
+                                .message(successMessage)
+                                .build();
+                        onResponse.accept(systemResponse);
+                    } else {
+                        SystemResponse systemResponse = SystemResponse.builder()
+                                .isSuccess(false)
+                                .message("Failed to register user: " + response.body())
+                                .build();
+                        onResponse.accept(systemResponse);
+                    }
+                }
+            }
+        });
+    }
+
     private final @NotNull Gson gson = new GsonBuilder().create();
     // region private fields and helpers
     @Nullable String loadedProgramName = null;
@@ -316,7 +364,10 @@ public class HttpEngineController implements EngineController {
                         .build();
             }
         }
+    }
 
+    private static class Holder {
+        private static final HttpEngineController INSTANCE = new HttpEngineController();
     }
 
     /**

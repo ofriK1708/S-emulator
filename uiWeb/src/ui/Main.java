@@ -1,4 +1,4 @@
-package ui.execution;
+package ui;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -8,9 +8,12 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import ui.dashboard.DashboardController;
-import ui.execution.login.LoginController;
+import ui.login.LoginController;
 
 import java.net.URL;
+
+import static ui.utils.clientConstants.DASHBOARD_PATH;
+import static ui.utils.clientConstants.LOGIN_PATH;
 
 /**
  * Main application entry point.
@@ -37,7 +40,7 @@ public class Main extends Application {
 
         // Step 2: Load Dashboard as the main screen
         FXMLLoader dashboardLoader = new FXMLLoader();
-        URL dashboardResource = getClass().getResource("dashboard/Dashboard.fxml");
+        URL dashboardResource = getClass().getResource(DASHBOARD_PATH);
         dashboardLoader.setLocation(dashboardResource);
 
         if (dashboardResource == null) {
@@ -68,7 +71,7 @@ public class Main extends Application {
     private String showLoginDialog(@NotNull Stage owner) throws Exception {
         // Load Login FXML
         FXMLLoader loginLoader = new FXMLLoader();
-        URL loginResource = getClass().getResource("login/Login.fxml");
+        URL loginResource = getClass().getResource(LOGIN_PATH);
         loginLoader.setLocation(loginResource);
 
         if (loginResource == null) {
@@ -82,7 +85,6 @@ public class Main extends Application {
         loginStage.setTitle("S-Emulator - Login");
         loginStage.initModality(Modality.APPLICATION_MODAL);
         loginStage.initOwner(owner);
-        loginStage.setResizable(false);
 
         Scene loginScene = new Scene(loginRoot, 400, 300);
         loginStage.setScene(loginScene);

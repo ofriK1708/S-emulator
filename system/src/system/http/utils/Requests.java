@@ -393,6 +393,26 @@ public class Requests {
     }
 
     /**
+     * Sends a POST request to register a new user <strong>asynchronously</strong>.
+     *
+     * @param serverEndpoint The server endpoint URL.
+     * @param username       The username of the new user to register.
+     * @param callback       The callback to handle the response or failure.
+     */
+    public static void postRegisterUserAsync(@NotNull String serverEndpoint,
+                                             @NotNull String username,
+                                             @NotNull Callback callback) {
+        HttpUrl url = safeUrlBuilder(serverEndpoint)
+                .addQueryParameter(USERNAME_PARAM, username)
+                .build();
+
+        Request request = getPostNoBody(url);
+
+        Call call = HTTP_CLIENT.newCall(request);
+        call.enqueue(callback);
+    }
+
+    /**
      * Constructs a POST request without a body.
      *
      * @param url The URL to which the request will be sent.

@@ -1,16 +1,23 @@
-package ui.execution.login;
+package ui.login;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.Nullable;
+import system.controller.HttpEngineController;
+
+import static ui.utils.UIUtils.showError;
+import static ui.utils.UIUtils.showSuccess;
 
 /**
  * Controller for the Login screen.
  * Handles username input before accessing the Dashboard.
  */
 public class LoginController {
+
+    HttpEngineController httpEngineController = HttpEngineController.getInstance();
 
     @FXML
     private TextField usernameField;
@@ -38,11 +45,21 @@ public class LoginController {
             usernameField.setStyle("-fx-border-color: #d32f2f; -fx-border-width: 2px;");
             return;
         }
+        httpEngineController.registerUserAsync(username, systemResponse -> {
+            if (systemResponse.isSuccess()) {
+                enteredUsername = username;
+                Platform.runLater(() -> {
+                    showSuccess("User registered successfully: " + username);
+                    closeLoginWindow();
+                });
 
-        enteredUsername = username;
-        System.out.println("Login: User entered username - " + username);
-
-        closeLoginWindow();
+            } else {
+                Platform.runLater(() -> {
+                    showError("User registration failed: " + systemResponse.message());
+                    usernameField.setStyle("-fx-border-color: #d32f2f; -fx-border-width: 2px;");
+                });
+            }
+        });
     }
 
     /**

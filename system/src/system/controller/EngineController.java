@@ -59,4 +59,6 @@ public interface EngineController {
     List<UserDTO> getAllUsersDTO() throws IOException;
 
     SystemResponse registerUser(@NotNull String username) throws IOException;
+
+    void registerUserAsync(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse);
 }
