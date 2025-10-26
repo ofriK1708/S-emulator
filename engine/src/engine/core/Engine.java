@@ -204,7 +204,7 @@ public class Engine {
     }
 
     private float calcAverageCredits(int latestRunCreditsCost) {
-        return (averageCreditsCost * numberOfExecutions + latestRunCreditsCost) / numberOfExecutions + 1;
+        return (averageCreditsCost * numberOfExecutions + latestRunCreditsCost) / (numberOfExecutions + 1);
     }
 
     public @NotNull ProgramDebugger startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments,

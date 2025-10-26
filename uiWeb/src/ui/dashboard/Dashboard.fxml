@@ -7,7 +7,7 @@
 <ScrollPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/24.0.1"
             fx:controller="ui.dashboard.DashboardController">
     <content>
-        <BorderPane styleClass="dashboard-root" stylesheets="@dashboard.css">
+        <BorderPane styleClass="dashboard-root" stylesheets="@Dashboard.css">
 
             <!-- Header Section: User Name, File Path, Credits -->
             <top>
@@ -20,18 +20,6 @@
                     <padding>
                         <Insets bottom="10" left="10" right="10" top="10"/>
                     </padding>
-
-                    <!-- Column constraints: Left column 25%, Right column 75% -->
-                    <columnConstraints>
-                        <ColumnConstraints minWidth="200" percentWidth="25"/>
-                        <ColumnConstraints minWidth="400" percentWidth="75"/>
-                    </columnConstraints>
-
-                    <!-- Row constraints: Top row 50%, Bottom row 50% -->
-                    <rowConstraints>
-                        <RowConstraints minHeight="250" percentHeight="50"/>
-                        <RowConstraints minHeight="250" percentHeight="50"/>
-                    </rowConstraints>
 
                     <!-- Top-Left: Available Users Panel -->
                     <fx:include fx:id="usersPanel" source="users/UsersPanel.fxml" GridPane.columnIndex="0"

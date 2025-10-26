@@ -212,6 +212,7 @@ public class HttpEngineController implements EngineController {
             if (response.isSuccessful()) {
                 String jsonString = getAndValidateBodyString(response.body());
                 Set<ProgramMetadata> programsLinkedSet = gson.fromJson(jsonString, PROGRAMS_METADATA_SET_TYPE_TOKEN);
+                System.out.println(jsonString);
                 return List.copyOf(programsLinkedSet);
             } else {
                 String errorMessage = getAndValidateBodyString(response.body());

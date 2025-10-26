@@ -17,7 +17,7 @@
         <Label styleClass="panel-title" text="Available Users"/>
 
         <!-- Users Table -->
-        <TableView fx:id="usersTableView" disable="true" styleClass="users-table" VBox.vgrow="ALWAYS">
+        <TableView fx:id="usersTableView" styleClass="users-table" VBox.vgrow="ALWAYS">
 
             <columns>
                 <TableColumn fx:id="usernameColumn" prefWidth="100" text="Username"/>

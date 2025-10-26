@@ -67,6 +67,10 @@ public class RunControlsController {
                 runTypes.selectToggle(null);
             }
         });
+        archI.disableProperty().bind(programLoaded.not().or(variablesEntered.not()));
+        archII.disableProperty().bind(programLoaded.not().or(variablesEntered.not()));
+        archIII.disableProperty().bind(programLoaded.not().or(variablesEntered.not()));
+        archIV.disableProperty().bind(programLoaded.not().or(variablesEntered.not()));
         run.disableProperty().bind(runTypeChosen.not().or(archTypeChosen.not()));
     }
 
