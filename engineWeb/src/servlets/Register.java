@@ -24,10 +24,11 @@ public class Register extends HttpServlet {
         }
         username = username.trim();
         UserManager userManager = ServletUtils.getUserManager(getServletContext());
+        resp.setContentType("text/plain");
         synchronized (this) {
             if (userManager.isUserExists(username)) {
                 resp.setStatus(HttpServletResponse.SC_CONFLICT);
-                resp.getWriter().write("User with the username '" + username + "' already exists. " +
+                resp.getWriter().println("User with the username '" + username + "' already exists. " +
                         "Please choose a different username.");
             } else {
                 userManager.addUser(username);

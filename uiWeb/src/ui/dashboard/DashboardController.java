@@ -13,6 +13,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import system.controller.EngineController;
@@ -158,7 +159,7 @@ public class DashboardController {
         );
 
         // Programs panel: set engine and execution callback
-        programsPanelController.initComponent(this::handleProgramExecution,
+        programsPanelController.initComponent(this::handleLoadProgramToExecution,
                 programsMetadataListProperty// Navigation happens here
         );
 
@@ -222,12 +223,7 @@ public class DashboardController {
      * Handle program execution request from Programs panel.
      * CRITICAL: This is where navigation to Execution screen happens for programs.
      */
-    private void handleProgramExecution(@NotNull String programName) {
-        if (!programLoaded.get() || currentFilePath.get().isEmpty()) {
-            System.err.println("Dashboard: Cannot execute - no program loaded");
-            return;
-        }
-
+    private void handleLoadProgramToExecution(@NotNull String programName) {
         try {
             System.out.println("Dashboard: Executing program '" + programName + "'");
 
@@ -292,7 +288,9 @@ public class DashboardController {
 
         FXMLLoader executionLoader = new FXMLLoader();
         URL url = getClass().getResource(EXECUTION_PATH);
-        assert url != null;
+        if (url == null) {
+            throw new IllegalStateException("Execution.fxml not found");
+        }
         executionLoader.setLocation(url);
 
         Parent executionRoot = executionLoader.load();
@@ -304,6 +302,14 @@ public class DashboardController {
 
         // Set up return-to-dashboard callback
         executionController.setReturnToDashboardCallback(this::transitionToDashboardScreen);
+
+        Stage loadingStage = new Stage();
+        loadingStage.initModality(Modality.APPLICATION_MODAL);
+        loadingStage.setTitle("Loading Execution Scene");
+        loadingStage.setScene(executionScene);
+        loadingStage.show();
+
+
 
         System.out.println("Dashboard: Execution scene loaded successfully");
     }

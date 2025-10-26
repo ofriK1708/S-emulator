@@ -29,27 +29,31 @@ public class debugAction extends HttpServlet {
         // Get the user from the session and validate
         User user = ServletUtils.getUser(req, getServletContext());
         if (user == null) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "You must be logged in to perform debug actions.");
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            resp.getWriter().println("You must be logged in to perform debug actions.");
             return;
         }
         // Get the debugger for the user and validate
         ProgramDebugger debugger = user.getDebugger();
         if (debugger == null) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No active debug session found for user " +
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().println("No active debug session found for user " +
                     user.getName());
             return;
         }
         // Get the debug action parameter and perform the corresponding action
         String debugActionStr = req.getParameter(DEBUG_ACTION_PARAM);
         if (debugActionStr == null) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                    "Debug action parameter is missing. Available actions: " + getAllDebugActionsOptions());
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().println("Debug action parameter is missing. Available actions: " +
+                    getAllDebugActionsOptions());
             return;
         }
         DebugAction debugAction = DebugAction.fromString(debugActionStr);
         if (debugAction == null) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                    "Unknown debug action: " + debugActionStr + ". Available actions: " + getAllDebugActionsOptions());
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().println("Unknown debug action: " + debugActionStr + ". Available actions: " +
+                    getAllDebugActionsOptions());
             return;
         }
 
@@ -87,8 +91,8 @@ public class debugAction extends HttpServlet {
     }
 
     private void sendErrorMessage(HttpServletResponse resp, Exception e) throws IOException {
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                "Error executing debug action: " + e.getMessage());
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        resp.getWriter().println("Error executing debug action: " + e.getMessage());
     }
 
     /**

@@ -27,9 +27,9 @@ public class getSystemInfo extends HttpServlet {
         if (ServletUtils.checkAndHandleUnauthorized(req, resp, getServletContext())) {
             String infoToGet = req.getParameter(INFO_PARAM);
             if (infoToGet == null) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                        "item parameter is missing or invalid, available options are: " +
-                                getAllSystemInfoOptionsNames() + ".");
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().println("item parameter is missing or invalid, available options are: " +
+                        getAllSystemInfoOptionsNames() + ".");
                 return;
             }
             Gson gson = new Gson();
@@ -61,7 +61,10 @@ public class getSystemInfo extends HttpServlet {
                     resp.setContentType("application/json");
                     resp.getWriter().write(gson.toJson(userManager.getAllUsersDTO()));
                 }
-                default -> resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "item parameter is missing or invalid");
+                default -> {
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    resp.getWriter().println("item parameter is missing or invalid");
+                }
             }
         }
     }

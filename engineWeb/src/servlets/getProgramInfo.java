@@ -31,14 +31,15 @@ public class getProgramInfo extends HttpServlet {
             String programName = req.getParameter(PROGRAM_NAME_PARAM);
             ProgramManager pm = ServletUtils.getProgramManager(req.getServletContext());
             if (programName == null || programName.isEmpty()) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "displayName parameter is missing or invalid");
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().println("program name parameter is missing or invalid");
                 return;
             }
             String infoToGet = req.getParameter(INFO_PARAM);
             if (infoToGet == null) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                        "Info parameter is missing or invalid, available options are: " +
-                                getAllProgramInfoOptionsNames() + ".");
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().println("Info parameter is missing or invalid, available options are: " +
+                        getAllProgramInfoOptionsNames() + ".");
                 return;
             }
             Engine currentEngine = pm.getProgramOrFunctionEngine(programName);
@@ -72,9 +73,12 @@ public class getProgramInfo extends HttpServlet {
                 case WORK_VARS_INFO -> resp.getWriter().write(gson.toJson(currentEngine.
                         getSortedWorkVars(expandLevel)));
 
-                default -> resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                        "Info parameter is missing or invalid, if you want to see all available options," +
-                                "please send an OPTIONS request to this URL");
+                default -> {
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    resp.getWriter().println("Info parameter is missing or invalid, if you want to see all available " +
+                            "options," +
+                            "please send an OPTIONS request to this URL");
+                }
             }
         }
     }
@@ -84,17 +88,20 @@ public class getProgramInfo extends HttpServlet {
         int expandLevel;
         String expandLevelStr = req.getParameter(EXPAND_LEVEL_PARAM);
         if (expandLevelStr == null || expandLevelStr.isEmpty()) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "expandLevel parameter is missing");
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().println("expandLevel parameter is missing");
             throw new IOException("expandLevel parameter is missing");
         }
         try {
             expandLevel = Integer.parseInt(expandLevelStr);
         } catch (NumberFormatException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "expandLevel parameter is not a valid number");
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().println("expandLevel parameter is not a valid number");
             throw new IllegalArgumentException("expandLevel parameter is not a valid number");
         }
         if (expandLevel < 0 || expandLevel > engine.getMaxExpandLevel()) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "expandLevel must be between 0 and "
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().println("expandLevel must be between 0 and "
                     + engine.getMaxExpandLevel());
             throw new IllegalArgumentException("expandLevel must be between 0 and " + engine.getMaxExpandLevel());
         }

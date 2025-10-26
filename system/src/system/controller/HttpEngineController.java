@@ -68,9 +68,10 @@ public class HttpEngineController implements EngineController {
                                 .build();
                         onResponse.accept(systemResponse);
                     } else {
+                        String errorMessage = getAndValidateBodyString(responseBody);
                         SystemResponse systemResponse = SystemResponse.builder()
                                 .isSuccess(false)
-                                .message("Failed to register user: " + response.body())
+                                .message("Failed to register user: " + errorMessage)
                                 .build();
                         onResponse.accept(systemResponse);
                     }
@@ -128,7 +129,7 @@ public class HttpEngineController implements EngineController {
      * Loads a program from an XML file to the server <strong>asynchronously</strong>.
      *
      * @param xmlFilePath The path to the XML file containing the program.
-     * @param onResponse
+     * @param onResponse A consumer that will be called with the SystemResponse when the operation is complete.
      */
     @Override
     public void LoadProgramFromFileAsync(@NotNull Path xmlFilePath, Consumer<SystemResponse> onResponse)
@@ -157,7 +158,12 @@ public class HttpEngineController implements EngineController {
                         onResponse.accept(systemResponse);
 
                     } else {
-                        System.out.println("Failed to upload program: " + response.body());
+                        String errorMessage = getAndValidateBodyString(responseBody);
+                        SystemResponse systemResponse = SystemResponse.builder()
+                                .isSuccess(false)
+                                .message("Failed to upload program: " + errorMessage)
+                                .build();
+                        onResponse.accept(systemResponse);
                     }
                 }
             }
@@ -172,18 +178,18 @@ public class HttpEngineController implements EngineController {
      * </p>
      *
      * @param xmlFilePath The path to the XML file containing the program.
-     * @throws JAXBException If an error occurs while processing the XML.
      * @throws IOException   If an I/O error occurs.
      */
     @Override
-    public void loadProgramFromFile(@NotNull Path xmlFilePath) throws JAXBException, IOException {
+    public void loadProgramFromFile(@NotNull Path xmlFilePath) throws IOException {
         File xmlFile = xmlFilePath.toFile();
         try (Response response = Requests.uploadFile(Endpoints.UPLOAD_PROGRAM, xmlFile)) {
             if (response.isSuccessful()) {
                 String successMessage = getAndValidateBodyString(response.body());
                 System.out.println("Program uploaded successfully: " + successMessage);
             } else {
-                throw new IOException("Failed to upload program: " + response.body());
+                String errorMessage = getAndValidateBodyString(response.body());
+                throw new IOException("Failed to upload program: " + errorMessage);
             }
         }
     }
@@ -207,7 +213,8 @@ public class HttpEngineController implements EngineController {
                 Set<ProgramMetadata> programsLinkedSet = gson.fromJson(jsonString, PROGRAMS_METADATA_SET_TYPE_TOKEN);
                 return List.copyOf(programsLinkedSet);
             } else {
-                throw new IOException("Failed to get programs metadata: " + response.body());
+                String errorMessage = getAndValidateBodyString(response.body());
+                throw new IOException("Failed to get programs metadata: " + errorMessage);
             }
         }
     }
@@ -232,7 +239,8 @@ public class HttpEngineController implements EngineController {
                 Set<FunctionMetadata> functionLinkedSet = gson.fromJson(jsonString, FUNCTIONS_METADATA_SET_TYPE_TOKEN);
                 return List.copyOf(functionLinkedSet);
             } else {
-                throw new IOException("Failed to get functions metadata: " + response.body());
+                String errorMessage = getAndValidateBodyString(response.body());
+                throw new IOException("Failed to get functions metadata: " + errorMessage);
             }
         }
     }
@@ -255,7 +263,8 @@ public class HttpEngineController implements EngineController {
                 String jsonString = getAndValidateBodyString(response.body());
                 return gson.fromJson(jsonString, ProgramsAndFunctionsMetadata.class);
             } else {
-                throw new IOException("Failed to get programs and functions metadata: " + response.body());
+                String errorMessage = getAndValidateBodyString(response.body());
+                throw new IOException("Failed to get programs and functions metadata: " + errorMessage);
             }
         }
     }
@@ -279,7 +288,8 @@ public class HttpEngineController implements EngineController {
                 Set<UserDTO> usersLinkedSet = gson.fromJson(jsonString, USER_DTO_SET_TYPE_TOKEN);
                 return List.copyOf(usersLinkedSet);
             } else {
-                throw new IOException("Failed to get all users: " + response.body());
+                String errorMessage = getAndValidateBodyString(response.body());
+                throw new IOException("Failed to get all users DTO: " + errorMessage);
             }
         }
     }
@@ -318,9 +328,10 @@ public class HttpEngineController implements EngineController {
 
                         onResponse.accept(systemResponse);
                     } else {
+                        String errorMessage = getAndValidateBodyString(responseBody);
                         SystemResponse systemResponse = SystemResponse.builder()
                                 .isSuccess(false)
-                                .message("Failed to get user statistics: " + response.body())
+                                .message("Failed to get user statistics: " + errorMessage)
                                 .build();
                         onResponse.accept(systemResponse);
                     }
@@ -351,9 +362,10 @@ public class HttpEngineController implements EngineController {
                         .message(successMessage)
                         .build();
             } else {
+                String errorMessage = getAndValidateBodyString(response.body());
                 return SystemResponse.builder()
                         .isSuccess(false)
-                        .message("Failed to register user: " + response.body())
+                        .message("Failed to register user: " + errorMessage)
                         .build();
             }
         }
@@ -364,7 +376,6 @@ public class HttpEngineController implements EngineController {
      *
      * @param programName The name of the program to load.
      * @param onResponse  A consumer that will be called with the SystemResponse when the operation is complete.
-     * @throws IOException If an I/O error occurs.
      */
     @Override
     public void loadProgramAsync(@NotNull String programName, @NotNull Consumer<SystemResponse> onResponse) {
@@ -381,10 +392,9 @@ public class HttpEngineController implements EngineController {
      *
      * @param programName The name of the program to load.
      * @return A ProgramDTO object representing the loaded program.
-     * @throws IOException If an I/O error occurs.
      */
     @Override
-    public ProgramDTO loadProgram(String programName) throws IOException {
+    public ProgramDTO loadProgram(String programName) {
         this.loadedProgramName = programName;
         return getBasicProgram();
     }
@@ -443,9 +453,10 @@ public class HttpEngineController implements EngineController {
                                         .build();
                                 onResponse.accept(systemResponse);
                             } else {
+                                String errorMessage = getAndValidateBodyString(responseBody);
                                 SystemResponse systemResponse = SystemResponse.builder()
                                         .isSuccess(false)
-                                        .message("Failed to get basic program: " + response.body())
+                                        .message("Failed to get basic program: " + errorMessage)
                                         .build();
                                 onResponse.accept(systemResponse);
                             }
@@ -474,7 +485,8 @@ public class HttpEngineController implements EngineController {
                 String jsonString = getAndValidateBodyString(response.body());
                 return gson.fromJson(jsonString, ProgramDTO.class);
             } else {
-                throw new IOException("Failed to get program by expand level: " + response.body());
+                String errorMessage = getAndValidateBodyString(response.body());
+                throw new IOException("Failed to get program by expand level: " + errorMessage);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -534,13 +546,12 @@ public class HttpEngineController implements EngineController {
 
                                 onResponse.accept(systemResponse);
                             } else {
-                                System.out.println("Failed to run program: " + response.body());
-                            }
-                            try {
-                                response.close();
-                            } catch (Exception e) {
-                                System.out.println("Failed to close response: " + e.getMessage());
-                                e.printStackTrace();
+                                String errorMessage = getAndValidateBodyString(responseBody);
+                                SystemResponse systemResponse = SystemResponse.builder()
+                                        .isSuccess(false)
+                                        .message("Failed to run program: " + errorMessage)
+                                        .build();
+                                onResponse.accept(systemResponse);
                             }
                         }
                     }
@@ -586,7 +597,8 @@ public class HttpEngineController implements EngineController {
 
                                 onResponse.accept(systemResponse);
                             } else {
-                                System.out.println("Failed to start debug session: " + response.body());
+                                String errorMessage = getAndValidateBodyString(responseBody);
+                                System.out.println("Failed to start debug session: " + errorMessage);
                             }
                         }
                     }

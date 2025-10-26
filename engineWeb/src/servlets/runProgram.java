@@ -22,7 +22,8 @@ public class runProgram extends HttpServlet {
     protected synchronized void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         User user = ServletUtils.getUser(req, getServletContext());
         if (user == null) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "You must be logged in to run a program.");
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            resp.getWriter().println("You must be logged in to run a program.");
             return;
         }
 
@@ -71,6 +72,7 @@ public class runProgram extends HttpServlet {
                 expandLevel,
                 e.getMessage()
         );
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, errorMessage);
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        resp.getWriter().write(errorMessage);
     }
 }

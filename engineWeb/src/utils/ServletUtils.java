@@ -99,22 +99,23 @@ public class ServletUtils {
         try {
             expandLevel = Integer.parseInt(expandLevelStr);
         } catch (NumberFormatException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                    "The " + EXPAND_LEVEL_PARAM + " ( " + expandLevelStr + " ) parameter is missing or " +
-                            "is not a valid number.");
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().println("The " + EXPAND_LEVEL_PARAM + " ( " + expandLevelStr + " ) parameter is missing " +
+                    "or " +
+                    "is not a valid number.");
             return null;
         }
 
         ProgramManager pm = ServletUtils.getProgramManager(req.getServletContext());
         if (programName == null || programName.isEmpty()) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                    "The " + PROGRAM_NAME_PARAM + " parameter is missing or invalid.");
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().println("The " + PROGRAM_NAME_PARAM + " parameter is missing or invalid.");
             return null;
         }
 
         if (!pm.isFunctionOrProgramExists(programName)) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                    "The program/function with name '" + programName + "' does not exist.");
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().println("The program/function with name '" + programName + "' does not exist.");
             return null;
         }
         return new expandParams(programName, expandLevel, pm);
@@ -142,15 +143,15 @@ public class ServletUtils {
         // 2. get architecture type
         String architectureTypeStr = req.getParameter(ARCHITECTURE_TYPE_PARAM);
         if (architectureTypeStr == null || architectureTypeStr.isEmpty()) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                    "The " + ARCHITECTURE_TYPE_PARAM + " parameter is missing." +
-                            "the supported types are: " + ArchitectureType.getSupportedArchitectures());
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().println("The " + ARCHITECTURE_TYPE_PARAM + " parameter is missing." +
+                    " The supported types are: " + ArchitectureType.getSupportedArchitectures());
             return null;
         }
         if (!ArchitectureType.isValidArchitectureType(architectureTypeStr)) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                    "The " + ARCHITECTURE_TYPE_PARAM + " parameter is missing." +
-                            "the supported types are: " + ArchitectureType.getSupportedArchitectures());
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().println("The " + ARCHITECTURE_TYPE_PARAM + " parameter is missing." +
+                    " The supported types are: " + ArchitectureType.getSupportedArchitectures());
             return null;
         }
         ArchitectureType architectureType = ArchitectureType.fromString(architectureTypeStr);

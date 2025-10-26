@@ -8,18 +8,13 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static utils.ServletConstants.DEBUG_ACTION_PARAM;
-import static utils.ServletConstants.USERNAME_PARAM;
+import static utils.ServletConstants.*;
 
 public class Requests {
     private final static SimpleCookieManager cookieManager = new SimpleCookieManager();
     private final static OkHttpClient HTTP_CLIENT = new OkHttpClient.Builder()
             .cookieJar(cookieManager)
             .build();
-
-    private static final String INFO_PARAM = "info";
-    private static final String PROGRAM_NAME_PARAM = "displayName";
-    private static final String EXPAND_LEVEL_PARAM = "expandLevel";
 
     // TODO - remove this before submission
     static {

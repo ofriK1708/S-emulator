@@ -467,6 +467,7 @@ public class ExecutionController {
                     updatePropertiesAfterExecuting();
                     showSuccess("Program executed successfully!\n" +
                             "Cycles: " + currentCycles.get() + "\n");
+
                 });
             }
         });
