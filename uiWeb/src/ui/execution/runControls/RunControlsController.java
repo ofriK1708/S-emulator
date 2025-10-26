@@ -37,6 +37,7 @@ public class RunControlsController {
     @FXML
     public ToggleGroup ArchType;
     @Nullable ProgramRunType programRunType;
+
     @FXML
     private ToggleButton archI;
     @FXML
@@ -45,6 +46,7 @@ public class RunControlsController {
     private ToggleButton archIII;
     @FXML
     private ToggleButton archIV;
+
     private BiConsumer<ProgramRunType, ArchitectureType> runCallback;
     private Runnable setCallback;
     private @NotNull ArchitectureType architectureType = ArchitectureType.ARCHITECTURE_I;
@@ -104,18 +106,22 @@ public class RunControlsController {
         runCallback.accept(programRunType, architectureType);
     }
 
+    @FXML
     public void selectArchI(ActionEvent actionEvent) {
         mangeArchSelection(ArchitectureType.ARCHITECTURE_I, archI);
     }
 
+    @FXML
     public void selectArchII(ActionEvent actionEvent) {
         mangeArchSelection(ArchitectureType.ARCHITECTURE_II, archII);
     }
 
+    @FXML
     public void selectArchIII(ActionEvent actionEvent) {
         mangeArchSelection(ArchitectureType.ARCHITECTURE_III, archIII);
     }
 
+    @FXML
     public void selectArchIV(ActionEvent actionEvent) {
         mangeArchSelection(ArchitectureType.ARCHITECTURE_IV, archIV);
     }
