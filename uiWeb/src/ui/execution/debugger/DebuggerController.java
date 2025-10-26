@@ -2,6 +2,7 @@ package ui.execution.debugger;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import org.jetbrains.annotations.NotNull;
@@ -113,5 +114,9 @@ public class DebuggerController {
 
     public BooleanProperty executionFinishedProperty() {
         return executionFinished;
+    }
+
+    public void handleStepBackward(ActionEvent actionEvent) {
+        // Currently unimplemented
     }
 }
