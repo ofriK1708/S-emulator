@@ -1,0 +1,46 @@
+/* =========================
+   HISTORY PANEL STYLES
+   ========================= */
+.panel-container.history-panel {
+    -fx-background-color: #1E1E1E;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+}
+
+.panel-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #E0E0E0;
+}
+
+.history-table {
+    -fx-background-color: #2B2B2B;
+    -fx-border-color: #3C3C3C;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-table-cell-border-color: transparent;
+}
+
+.history-table .column-header {
+    -fx-background-color: #3C3C3C;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.history-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #E8E8E8;
+}
+
+.history-table .table-row-cell:filled:selected {
+    -fx-background-color: #007ACC;
+    -fx-text-fill: white;
+}
+
+.placeholder-text {
+    -fx-text-fill: #8A8A8A;
+    -fx-font-style: italic;
+    -fx-alignment: CENTER;
+    -fx-padding: 20;
+}
