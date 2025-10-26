@@ -13,7 +13,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
@@ -181,7 +180,6 @@ public class ExecutionController {
             );
             runControlsController.initComponent(this::RunProgram, this::prepareForTakingArguments,
                     programLoaded, argumentsLoaded);
-            summaryLineController.initComponent(currentLoadedProgramName);
             cyclesController.initComponent(currentCycles);
             instructionsTableController.initializeMainInstructionTable(programInstructions,
                     derivedInstructions, isAnimationsOn);
@@ -862,57 +860,8 @@ public class ExecutionController {
         }
     }
 
-    /**
-     * Handle the Show Info button click.
-     * Displays execution statistics and information in a dialog.
-     */
+    // TODO - fix this dumb function
     @FXML
     private void handleShowInfo() {
-        if (!programRanAtLeastOnce.get()) {
-            showError("No execution history available");
-            return;
-        }
-
-        try {
-            // Build information summary
-            StringBuilder info = new StringBuilder();
-            info.append("=== Execution Information ===\n\n");
-            info.append("Program: ").append(currentLoadedProgramName.get()).append("\n");
-            info.append("Expand Level: ").append(currentExpandLevel.get()).append("\n");
-            info.append("Max Expand Level: ").append(maxExpandLevel.get()).append("\n\n");
-
-            info.append("=== Last Execution Results ===\n\n");
-            info.append("Total Cycles: ").append(currentCycles.get()).append("\n");
-            info.append("Variables Count: ").append(allVariablesDTO.size()).append("\n\n");
-
-            if (!argumentsDTO.isEmpty()) {
-                info.append("=== Arguments ===\n\n");
-                for (VariableDTO arg : argumentsDTO) {
-                    info.append(String.format("  %s = %d\n", arg.name().get(), arg.value().get()));
-                }
-                info.append("\n");
-            }
-
-            if (!allVariablesDTO.isEmpty()) {
-                info.append("=== Final Variable Values ===\n\n");
-                for (VariableDTO var : allVariablesDTO) {
-                    info.append(String.format("  %s = %d\n", var.name().get(), var.value().get()));
-                }
-            }
-
-            // Display in alert dialog
-            Alert infoAlert = new Alert(Alert.AlertType.INFORMATION);
-            infoAlert.setTitle("Execution Information");
-            infoAlert.setHeaderText("Program Execution Details");
-            infoAlert.setContentText(info.toString());
-            infoAlert.getDialogPane().setPrefWidth(500);
-            infoAlert.showAndWait();
-
-            System.out.println("Show Info button clicked - displayed execution information");
-
-        } catch (Exception e) {
-            System.err.println("Error displaying execution info: " + e.getMessage());
-            showError("Error displaying execution information: " + e.getMessage());
-        }
     }
 }

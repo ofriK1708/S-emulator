@@ -44,7 +44,6 @@ public class DashboardController {
 
     // Shared properties
     private final StringProperty selectedUser = new SimpleStringProperty(null);
-    private final StringProperty currentFilePath = new SimpleStringProperty("");
     private final IntegerProperty availableCredits = new SimpleIntegerProperty(0);
     private final BooleanProperty userSelected = new SimpleBooleanProperty(false);
     private final BooleanProperty fileLoaded = new SimpleBooleanProperty(false);
@@ -154,7 +153,6 @@ public class DashboardController {
         // Header: file loading and credits
         headerSectionController.initComponent(
                 loggedInUserName,
-                currentFilePath,
                 availableCredits,
                 this::handleFileLoadFromDashboard,
                 this::handleChargeCredits
@@ -196,12 +194,10 @@ public class DashboardController {
                     file.toPath(), engineController,
                     (isSucceeded) -> {
                         if (isSucceeded) {
-                            currentFilePath.set(file.getAbsolutePath());
                             fileLoaded.set(true);
                             programLoaded.set(true);
                             showSuccess("File loaded successfully: " + file.getName());
                         } else {
-                            currentFilePath.set("");
                             fileLoaded.set(false);
                             programLoaded.set(false);
                             showError("File loading failed: " + file.getName());
@@ -236,16 +232,6 @@ public class DashboardController {
             System.err.println("Dashboard: Error executing program - " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    private void dumb(@NotNull String programName) throws Exception {
-        // Load Execution scene if not already loaded
-
-        // Configure execution screen with user info BEFORE loading file
-        executionController.setUserName(loggedInUserName.get());
-        executionController.setScreenTitle("S-Emulator - Execution: " + programName);
-        executionController.setAvailableCredits(availableCredits.get());
-
     }
 
     /**
@@ -286,19 +272,6 @@ public class DashboardController {
 
         // Set up return-to-dashboard callback
         executionController.setReturnToDashboardCallback(this::transitionToDashboardScreen);
-    }
-
-    /**
-     * Transition from Dashboard to Execution screen
-     */
-    private void transitionToExecutionScreen() {
-        if (executionScene != null && primaryStage != null) {
-            primaryStage.setScene(executionScene);
-            primaryStage.setTitle("S-Emulator - Execution");
-            System.out.println("Dashboard: Switched to Execution screen");
-        } else {
-            System.err.println("Dashboard: Cannot transition - execution scene not loaded");
-        }
     }
 
     /**

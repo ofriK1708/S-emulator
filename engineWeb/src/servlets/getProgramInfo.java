@@ -109,7 +109,8 @@ public class getProgramInfo extends HttpServlet {
     }
 
     private boolean isExpandLevelRequired(String infoToGet) {
-        return infoToGet.equals(ALL_VARIABLES_AND_LABELS_INFO) ||
+        return infoToGet.equals(PROGRAM_BY_EXPAND_LEVEL_INFO) ||
+                infoToGet.equals(ALL_VARIABLES_AND_LABELS_INFO) ||
                 infoToGet.equals(ARGUMENTS_INFO) ||
                 infoToGet.equals(PROGRAM_RESULT_INFO) ||
                 infoToGet.equals(WORK_VARS_INFO); // add other cases if needed

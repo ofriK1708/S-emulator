@@ -4,52 +4,33 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
-<HBox xmlns:fx="http://javafx.com/fxml"
-      xmlns="http://javafx.com/javafx"
-      fx:controller="ui.dashboard.header.DashboardHeaderController"
-      alignment="CENTER_LEFT"
-      spacing="15"
-      styleClass="dashboard-header"
-      stylesheets="dashboardheader.css">
+<HBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER_LEFT" spacing="15" styleClass="dashboard-header"
+      stylesheets="dashboardheader.css" xmlns="http://javafx.com/javafx/24.0.1"
+      fx:controller="ui.dashboard.header.DashboardHeaderController">
 
     <padding>
-        <Insets top="10" right="15" bottom="10" left="15"/>
+        <Insets bottom="10" left="15" right="15" top="10"/>
     </padding>
 
     <!-- User Name Label -->
-    <Label fx:id="userNameLabel" text="User Name" styleClass="header-label, user-label"/>
+    <Label fx:id="userNameLabel" styleClass="header-label, user-label" text="User Name"/>
 
     <!-- Load File Button -->
-    <Button fx:id="loadFileButton"
-            text="Load File"
-            onAction="#handleLoadFile"
-            styleClass="header-button, load-file-button"/>
-
-    <!-- File Path Display (grows to fill space) -->
-    <TextField fx:id="filePathField"
-               editable="false"
-               promptText="Currently Loaded File path"
-               styleClass="file-path-field"
-               HBox.hgrow="ALWAYS"/>
+    <Button fx:id="loadFileButton" onAction="#handleLoadFile" styleClass="header-button, load-file-button"
+            text="Load File"/>
 
     <!-- Spacer -->
     <Region HBox.hgrow="SOMETIMES"/>
 
     <!-- Available Credits Label -->
-    <Label text="Available Credits:" styleClass="header-label, credits-label"/>
+    <Label styleClass="header-label, credits-label" text="Available Credits:"/>
 
     <!-- Credits Display -->
-    <TextField fx:id="creditsField"
-               editable="false"
-               text="0"
-               prefWidth="80"
-               alignment="CENTER"
-               styleClass="credits-field"/>
+    <TextField fx:id="creditsField" alignment="CENTER" editable="false" prefWidth="80" styleClass="credits-field"
+               text="0"/>
 
     <!-- Charge Credits Button -->
-    <Button fx:id="chargeCreditsButton"
-            text="Charge Credits"
-            onAction="#handleChargeCredits"
-            styleClass="header-button, charge-credits-button"/>
+    <Button fx:id="chargeCreditsButton" onAction="#handleChargeCredits"
+            styleClass="header-button, charge-credits-button" text="Charge Credits"/>
 
 </HBox>

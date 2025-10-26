@@ -1,5 +1,6 @@
 package dto.engine;
 
+import engine.utils.ArchitectureType;
 import engine.utils.CommandType;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public record InstructionDTO(int index,
                              String label,
                              String command,
                              int cycles,
+                             ArchitectureType architectureType,
                              List<InstructionDTO> derivedFromInstructions)
 {
 }

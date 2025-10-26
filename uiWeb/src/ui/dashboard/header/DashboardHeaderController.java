@@ -23,8 +23,6 @@ public class DashboardHeaderController {
     @FXML
     private Button loadFileButton;
     @FXML
-    private TextField filePathField;
-    @FXML
     private TextField creditsField;
     @FXML
     private Button chargeCreditsButton;
@@ -36,14 +34,12 @@ public class DashboardHeaderController {
      * Initialize the header with callbacks and bindings
      *
      * @param loggedInUserName Property for displaying logged-in username
-     * @param currentFilePath  Property for displaying current file path
      * @param availableCredits Property for available credits display
      * @param onLoadFile       Callback to handle file loading (receives File)
      * @param onChargeCredits  Callback to handle credit charging (receives amount)
      */
     public void initComponent(
             @NotNull StringProperty loggedInUserName,
-            @NotNull StringProperty currentFilePath,
             @NotNull IntegerProperty availableCredits,
             @NotNull Consumer<File> onLoadFile,
             @NotNull Consumer<Integer> onChargeCredits) {
@@ -53,7 +49,6 @@ public class DashboardHeaderController {
 
         // Bind username, file path, and credits fields to properties
         userNameLabel.textProperty().bind(loggedInUserName);
-        filePathField.textProperty().bind(currentFilePath);
         creditsField.textProperty().bind(availableCredits.asString());
 
         System.out.println("DashboardHeaderController initialized with username binding");
@@ -81,42 +76,6 @@ public class DashboardHeaderController {
         if (onChargeCredits != null) {
             System.out.println("DashboardHeader: Charge Credits clicked");
             onChargeCredits.run();
-        }
-    }
-
-    /**
-     * Set user name display
-     */
-    public void setUserName(String username) {
-        if (userNameLabel != null) {
-            userNameLabel.setText(username != null ? username : "Guest User");
-        }
-    }
-
-    /**
-     * Set file path display (alternative to binding)
-     */
-    public void setFilePath(String filePath) {
-        if (filePathField != null) {
-            filePathField.setText(filePath != null ? filePath : "");
-        }
-    }
-
-    /**
-     * Clear file path display
-     */
-    public void clearFilePath() {
-        if (filePathField != null) {
-            filePathField.clear();
-        }
-    }
-
-    /**
-     * Set credits value directly (alternative to binding)
-     */
-    public void setCredits(int credits) {
-        if (creditsField != null) {
-            creditsField.setText(String.valueOf(credits));
         }
     }
 }

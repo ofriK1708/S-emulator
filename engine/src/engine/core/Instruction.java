@@ -154,6 +154,7 @@ public abstract class Instruction implements Command {
                 label,
                 getStringRepresentation(),
                 getCycles(),
+                getArchitectureType(),
                 getDerivedInstructions()
         );
     }
@@ -172,6 +173,7 @@ public abstract class Instruction implements Command {
                 label,
                 getStringRepresentation(),
                 getCycles(),
+                getArchitectureType(),
                 Collections.emptyList()
         );
     }

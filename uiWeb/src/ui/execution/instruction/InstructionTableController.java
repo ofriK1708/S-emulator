@@ -2,10 +2,7 @@ package ui.execution.instruction;
 
 import dto.engine.InstructionDTO;
 import javafx.animation.FadeTransition;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -36,6 +33,8 @@ public class InstructionTableController {
     private TableColumn<InstructionDTO, String> commandColumn;
     @FXML
     private TableColumn<InstructionDTO, Number> cyclesColumn;
+    @FXML
+    public TableColumn<InstructionDTO, String> architectureTypeColumn;
 
     @FXML
     private BooleanProperty animationsEnabledProperty = new SimpleBooleanProperty(true);
@@ -48,15 +47,17 @@ public class InstructionTableController {
     public void initialize() {
         // Bind columns
         indexColumn.setCellValueFactory(callData ->
-                new ReadOnlyObjectWrapper<>(callData.getValue().index() + 1));
+                new ReadOnlyIntegerWrapper(callData.getValue().index() + 1));
         typeColumn.setCellValueFactory(cellData ->
-                new ReadOnlyObjectWrapper<>(cellData.getValue().type().getSymbol()));
+                new ReadOnlyStringWrapper(cellData.getValue().type().getSymbol()));
         labelColumn.setCellValueFactory(cellData ->
-                new ReadOnlyObjectWrapper<>(cellData.getValue().label()));
+                new ReadOnlyStringWrapper(cellData.getValue().label()));
         commandColumn.setCellValueFactory(cellData ->
-                new ReadOnlyObjectWrapper<>(cellData.getValue().command()));
+                new ReadOnlyStringWrapper(cellData.getValue().command()));
         cyclesColumn.setCellValueFactory(cellData ->
-                new ReadOnlyObjectWrapper<>(cellData.getValue().cycles()));
+                new ReadOnlyIntegerWrapper(cellData.getValue().cycles()));
+        architectureTypeColumn.setCellValueFactory(cellData ->
+                new ReadOnlyStringWrapper(cellData.getValue().architectureType().getSymbol()));
     }
 
     public void initializeMainInstructionTable(@NotNull ListProperty<InstructionDTO> instructions,

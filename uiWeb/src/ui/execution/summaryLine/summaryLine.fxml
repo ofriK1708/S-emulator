@@ -13,8 +13,6 @@
             <Insets bottom="8.0" left="12.0" right="12.0" top="8.0"/>
         </padding>
         <children>
-            <Label styleClass="summary-label" text="Loaded programDTO:"/>
-            <Label fx:id="programLoadedLabel" styleClass="value-label"/>
             <Label alignment="CENTER" styleClass="summary-label" text="Synthetic Instructions:">
                 <font>
                     <Font size="14.0"/>
@@ -35,6 +33,14 @@
                     <Font size="14.0"/>
                 </font>
             </Label>
+            <Label styleClass="summary-label" text="Architecture I"/>
+            <Label fx:id="archICount" styleClass="value-label" text="0"/>
+            <Label text="Architecture II"/>
+            <Label fx:id="archIICount" styleClass="value-label" text="0"/>
+            <Label styleClass="summary-label" text="Architecture III"/>
+            <Label fx:id="archIIICount" styleClass="value-label" text="0"/>
+            <Label styleClass="summary-label" text="Architecture IV"/>
+            <Label fx:id="archIVCount" styleClass="value-label" text="0"/>
         </children>
     </HBox>
 </HBox>
