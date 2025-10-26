@@ -12,6 +12,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
@@ -91,6 +92,13 @@ public class ExecutionController {
     private final boolean isInDebugResume = false;
 
     private Scene scene;
+
+    @FXML
+    private TitledPane executionActionsTitledPane;
+    @FXML
+    private Button rerunButton;
+    @FXML
+    private Button showInfoButton;
 
     @FXML
     private HBox executionHeader;
@@ -193,7 +201,7 @@ public class ExecutionController {
             }
 
             initializeExecutionHeader();
-
+            initializeExecutionActionButtons();
             System.out.println("AppController initialized with cleaned architecture");
         } else {
             System.err.println("One or more controllers are not injected properly!");
@@ -201,6 +209,30 @@ public class ExecutionController {
         }
     }
 
+    private void initializeExecutionActionButtons() {
+        if (rerunButton != null && showInfoButton != null) {
+            // Rerun button: enabled when program has finished execution and we have arguments
+            rerunButton.disableProperty().bind(
+                    programFinished.not()
+                            .or(argumentsDTO.emptyProperty())
+                            .or(programLoaded.not())
+            );
+
+            // Show Info button: enabled when program has run at least once
+            showInfoButton.disableProperty().bind(
+                    programRanAtLeastOnce.not()
+            );
+
+            // Bind the execution actions pane expansion
+            executionActionsTitledPane.expandedProperty().bind(
+                    Bindings.and(programLoaded, programRanAtLeastOnce)
+            );
+
+            System.out.println("Execution action buttons initialized and bound");
+        } else {
+            System.err.println("Execution action buttons not injected!");
+        }
+    }
     private void initializeExecutionHeader() {
         if (executionHeaderController != null) {
             executionHeaderController.initComponent(
@@ -372,15 +404,13 @@ public class ExecutionController {
                 Bindings.and(debugMode, programFinished.not())));
         variablesTitledPane.expandedProperty().bind(Bindings.and(programLoaded,
                 Bindings.or(argumentsLoaded, Bindings.or(programFinished, debugMode))));
-        statisticsTitledPane.expandedProperty().bind(Bindings.and(programLoaded,
-                Bindings.and(programRunning.not(), programRanAtLeastOnce)));
+        executionActionsTitledPane.expandedProperty().bind(Bindings.and(programLoaded, programRanAtLeastOnce));
     }
-
     private void unbindTitlePanesExpansion() {
         runControlsTitledPane.expandedProperty().unbind();
         debugControlsTitledPane.expandedProperty().unbind();
         variablesTitledPane.expandedProperty().unbind();
-        statisticsTitledPane.expandedProperty().unbind();
+        executionActionsTitledPane.expandedProperty().unbind();
     }
 
     public void setPaneMode(PaneMode paneMode) {
@@ -778,5 +808,101 @@ public class ExecutionController {
             showError("Navigation to Dashboard is not configured");
         }
     }
+    @FXML
+    private void handleRerun() {
+        if (!programLoaded.get()) {
+            showError("No program loaded");
+            return;
+        }
 
+        if (argumentsDTO.isEmpty()) {
+            showError("No previous execution found. Please run the program first.");
+            return;
+        }
+
+        try {
+            // Extract arguments from current argumentsDTO
+            Map<String, Integer> previousArguments = new HashMap<>();
+            for (VariableDTO varDTO : argumentsDTO) {
+                previousArguments.put(varDTO.name().get(), varDTO.value().get());
+            }
+
+            int expandLevel = currentExpandLevel.get();
+            boolean wasInDebugMode = debugMode.get();
+
+            System.out.println("Rerun button clicked - preparing rerun with level " + expandLevel +
+                    ", debug mode: " + wasInDebugMode);
+
+            // Prepare for rerun (sets up arguments and state)
+            handleRerunRequest(expandLevel, previousArguments);
+
+            // Now automatically execute the program
+            // The handleRerunRequest already set argumentsLoaded to false, so we need to set it back to true
+            argumentsLoaded.set(true);
+
+            // Determine execution type based on preserved debug mode
+            ProgramRunType runType = wasInDebugMode ? ProgramRunType.DEBUG : ProgramRunType.REGULAR;
+
+            System.out.println("Executing rerun in " + runType + " mode");
+            RunProgram(runType);
+
+        } catch (Exception e) {
+            System.err.println("Error handling rerun: " + e.getMessage());
+            showError("Error initiating rerun: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Handle the Show Info button click.
+     * Displays execution statistics and information in a dialog.
+     */
+    @FXML
+    private void handleShowInfo() {
+        if (!programRanAtLeastOnce.get()) {
+            showError("No execution history available");
+            return;
+        }
+
+        try {
+            // Build information summary
+            StringBuilder info = new StringBuilder();
+            info.append("=== Execution Information ===\n\n");
+            info.append("Program: ").append(currentLoadedProgramName.get()).append("\n");
+            info.append("Expand Level: ").append(currentExpandLevel.get()).append("\n");
+            info.append("Max Expand Level: ").append(maxExpandLevel.get()).append("\n\n");
+
+            info.append("=== Last Execution Results ===\n\n");
+            info.append("Total Cycles: ").append(currentCycles.get()).append("\n");
+            info.append("Variables Count: ").append(allVariablesDTO.size()).append("\n\n");
+
+            if (!argumentsDTO.isEmpty()) {
+                info.append("=== Arguments ===\n\n");
+                for (VariableDTO arg : argumentsDTO) {
+                    info.append(String.format("  %s = %d\n", arg.name().get(), arg.value().get()));
+                }
+                info.append("\n");
+            }
+
+            if (!allVariablesDTO.isEmpty()) {
+                info.append("=== Final Variable Values ===\n\n");
+                for (VariableDTO var : allVariablesDTO) {
+                    info.append(String.format("  %s = %d\n", var.name().get(), var.value().get()));
+                }
+            }
+
+            // Display in alert dialog
+            Alert infoAlert = new Alert(Alert.AlertType.INFORMATION);
+            infoAlert.setTitle("Execution Information");
+            infoAlert.setHeaderText("Program Execution Details");
+            infoAlert.setContentText(info.toString());
+            infoAlert.getDialogPane().setPrefWidth(500);
+            infoAlert.showAndWait();
+
+            System.out.println("Show Info button clicked - displayed execution information");
+
+        } catch (Exception e) {
+            System.err.println("Error displaying execution info: " + e.getMessage());
+            showError("Error displaying execution information: " + e.getMessage());
+        }
+    }
 }
