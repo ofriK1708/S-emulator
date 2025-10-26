@@ -26,6 +26,11 @@ public class SimpleCookieManager implements CookieJar {
         this.logData = logData;
     }
 
+    public void disableLogging() {
+        this.logData = s -> {
+        };
+    }
+
     @Override
     public @NotNull List<Cookie> loadForRequest(@NotNull HttpUrl httpUrl) {
         String host = httpUrl.host();

@@ -308,6 +308,7 @@ public class ExecutionController {
         availableCredits.set(credits);
     }
 
+    @FXML
     public void handleReturnToDashboard() {
         if (returnToDashboardCallback != null) {
             if (inDebugSession) {
@@ -806,6 +807,8 @@ public class ExecutionController {
                     System.err.println("Error stopping debug session: " + e.getMessage());
                 }
             }
+            Stage stage = (Stage) backToDashboardButton.getScene().getWindow();
+            stage.close();
             returnToDashboardCallback.run();
             System.out.println("Returning to Dashboard from execution screen...");
         } else {

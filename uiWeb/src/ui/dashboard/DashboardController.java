@@ -113,13 +113,15 @@ public class DashboardController {
 
             // Bind user selection across panels
             selectedUser.addListener((obs, oldVal, newVal) -> {
-                if (!oldVal.equals(newVal)) {
+                if ((oldVal == null && newVal != null) || !oldVal.equals(newVal)) {
                     userSelected.set(newVal != null && !newVal.isEmpty());
                     System.out.println("Dashboard: User selected - " + newVal);
 
                     if (newVal != null) {
                         loadUserHistory(newVal);
                     }
+                } else {
+                    System.out.println("old val is " + oldVal + " new val is " + newVal);
                 }
             });
 
@@ -159,14 +161,14 @@ public class DashboardController {
         );
 
         // Programs panel: set engine and execution callback
-        programsPanelController.initComponent(this::handleLoadProgramToExecution,
+        programsPanelController.initComponent(this::handleLoadProgramOrFunctionToExecution,
                 programsMetadataListProperty// Navigation happens here
         );
 
         // Functions panel: set engine and execution callback
         functionsPanelController.initComponent(
                 functionsMetadataListProperty,
-                this::handleFunctionExecution  // Navigation happens here
+                this::handleLoadProgramOrFunctionToExecution  // Navigation happens here
         );
 
         // History panel: user statistics
@@ -223,7 +225,7 @@ public class DashboardController {
      * Handle program execution request from Programs panel.
      * CRITICAL: This is where navigation to Execution screen happens for programs.
      */
-    private void handleLoadProgramToExecution(@NotNull String programName) {
+    private void handleLoadProgramOrFunctionToExecution(@NotNull String programName) {
         try {
             System.out.println("Dashboard: Executing program '" + programName + "'");
 
@@ -236,11 +238,8 @@ public class DashboardController {
         }
     }
 
-    private void loadExecutionScene(@NotNull String programName) throws Exception {
+    private void dumb(@NotNull String programName) throws Exception {
         // Load Execution scene if not already loaded
-        if (executionScene == null || executionController == null) {
-            loadExecutionScene();
-        }
 
         // Configure execution screen with user info BEFORE loading file
         executionController.setUserName(loggedInUserName.get());
@@ -250,40 +249,9 @@ public class DashboardController {
     }
 
     /**
-     * Handle function execution request from Functions panel.
-     * CRITICAL: This is where navigation to Execution screen happens for functions.
-     */
-    private void handleFunctionExecution(@NotNull String functionName) {
-        if (!programLoaded.get() || currentFilePath.get().isEmpty()) {
-            System.err.println("Dashboard: Cannot execute - no program loaded");
-            return;
-        }
-
-        try {
-            System.out.println("Dashboard: Executing function '" + functionName + "'");
-
-            // Load Execution scene if not already loaded
-            loadExecutionScene(functionName);
-            executionController.loadProgramToExecution(functionName);
-            if (executionScene == null || executionController == null) {
-                loadExecutionScene();
-            }
-
-            // Configure execution screen with user info BEFORE loading file
-            executionController.setUserName(loggedInUserName.get());
-            executionController.setScreenTitle("S-Emulator - Execution: " + functionName);
-            executionController.setAvailableCredits(availableCredits.get());
-
-        } catch (Exception e) {
-            System.err.println("Dashboard: Error executing function - " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Load the Execution scene and AppController (lazy initialization)
      */
-    private void loadExecutionScene() throws Exception {
+    private void loadExecutionScene(String programName) throws Exception {
         System.out.println("Dashboard: Loading Execution scene...");
 
         FXMLLoader executionLoader = new FXMLLoader();
@@ -296,12 +264,7 @@ public class DashboardController {
         Parent executionRoot = executionLoader.load();
         executionScene = new Scene(executionRoot, 1400, 800);
 
-        // Get AppController and configure it
-        executionController = executionLoader.getController();
-        executionController.setScene(executionScene);
-
-        // Set up return-to-dashboard callback
-        executionController.setReturnToDashboardCallback(this::transitionToDashboardScreen);
+        configureExecutionController(executionLoader, programName);
 
         Stage loadingStage = new Stage();
         loadingStage.initModality(Modality.APPLICATION_MODAL);
@@ -310,8 +273,19 @@ public class DashboardController {
         loadingStage.show();
 
 
-
         System.out.println("Dashboard: Execution scene loaded successfully");
+    }
+
+    private void configureExecutionController(FXMLLoader executionLoader, String programName) {
+        // Get AppController and configure it
+        executionController = executionLoader.getController();
+        executionController.setScene(executionScene);
+        executionController.setUserName(loggedInUserName.get());
+        executionController.setScreenTitle("S-Emulator - Execution: " + programName);
+        executionController.setAvailableCredits(availableCredits.get());
+
+        // Set up return-to-dashboard callback
+        executionController.setReturnToDashboardCallback(this::transitionToDashboardScreen);
     }
 
     /**

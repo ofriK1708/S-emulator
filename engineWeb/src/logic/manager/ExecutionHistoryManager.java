@@ -51,13 +51,27 @@ public class ExecutionHistoryManager {
         try {
             executionResultDTOList.add(executionResultStatisticsDTO);
 
+            List<ExecutionResultStatisticsDTO> userHistory = userToExecutionHistory.get(username);
+            if (userHistory == null) {
+                throw new IllegalStateException("User history not initialized for user: " + username);
+            }
+
             userToExecutionHistory
-                    .computeIfAbsent(username, k -> new ArrayList<>())
+                    .get(username)
                     .add(executionResultStatisticsDTO);
 
             programToExecutionHistory
                     .computeIfAbsent(programName, k -> new ArrayList<>())
                     .add(executionResultStatisticsDTO);
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    public void initUserHistory(String username) {
+        writeLock.lock();
+        try {
+            userToExecutionHistory.putIfAbsent(username, new ArrayList<>());
         } finally {
             writeLock.unlock();
         }

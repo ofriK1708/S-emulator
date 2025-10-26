@@ -20,6 +20,7 @@ public class Requests {
     // TODO - remove this before submission
     static {
         Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
+        cookieManager.disableLogging();
     }
 
     /**

@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import java.lang.String?>
 <ScrollPane xmlns:fx="http://javafx.com/fxml/1" fitToHeight="true" fitToWidth="true" stylesheets="@styles/style.css"
             xmlns="http://javafx.com/javafx/24.0.1" fx:controller="ui.execution.ExecutionController">
     <content>
@@ -89,19 +90,7 @@
                                                 text="Arguments / Variables / Cycles" VBox.vgrow="ALWAYS">
                                         <content>
                                             <GridPane alignment="CENTER" hgap="20.0" maxHeight="1.7976931348623157E308"
-                                                      maxWidth="1.7976931348623157E308">
-                                                <columnConstraints>
-                                                    <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308"
-                                                                       minWidth="10.0"/>
-                                                    <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308"
-                                                                       minWidth="10.0"/>
-                                                </columnConstraints>
-                                                <rowConstraints>
-                                                    <RowConstraints maxHeight="228.0" minHeight="10.0" vgrow="ALWAYS"/>
-                                                    <RowConstraints maxHeight="278.0" minHeight="0.0" vgrow="ALWAYS"/>
-                                                    <RowConstraints maxHeight="10.0" minHeight="0.0" vgrow="NEVER"/>
-                                                    <RowConstraints maxHeight="60.0" minHeight="0.0" vgrow="ALWAYS"/>
-                                                </rowConstraints>
+                                                      maxWidth="1.7976931348623157E308" vgap="5.0">
                                                 <children>
                                                     <!-- Arguments Table -->
                                                     <fx:include fx:id="argumentsTable"
@@ -114,7 +103,7 @@
                                                     <fx:include fx:id="allVarsTable"
                                                                 source="variables/variablesTable.fxml"
                                                                 GridPane.columnIndex="1" GridPane.hgrow="ALWAYS"
-                                                                GridPane.rowSpan="4" GridPane.vgrow="ALWAYS"/>
+                                                                GridPane.vgrow="ALWAYS"/>
 
                                                     <!-- Cycles Display -->
                                                     <fx:include fx:id="cycles" source="cycles/cycles.fxml"
@@ -122,9 +111,32 @@
                                                                 GridPane.rowIndex="3" GridPane.valignment="CENTER"
                                                                 GridPane.vgrow="ALWAYS"/>
                                                 </children>
+                                                <columnConstraints>
+                                                    <ColumnConstraints/>
+                                                    <ColumnConstraints/>
+                                                </columnConstraints>
+                                                <rowConstraints>
+                                                    <RowConstraints/>
+                                                    <RowConstraints/>
+                                                    <RowConstraints/>
+                                                    <RowConstraints/>
+                                                </rowConstraints>
                                             </GridPane>
                                         </content>
                                     </TitledPane>
+                                    <HBox alignment="CENTER" VBox.vgrow="ALWAYS">
+                                        <children>
+                                            <Button fx:id="backToDashboardButton" cancelButton="true"
+                                                    mnemonicParsing="false" onAction="#handleBackToDashboard"
+                                                    prefHeight="43.0" prefWidth="688.0" text="Back to Dashboard"
+                                                    HBox.hgrow="ALWAYS">
+                                                <styleClass>
+                                                    <String fx:value="pill-button"/>
+                                                    <String fx:value="pill-green"/>
+                                                </styleClass>
+                                            </Button>
+                                        </children>
+                                    </HBox>
 
                                 </VBox>
                             </content>

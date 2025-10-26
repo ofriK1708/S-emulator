@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import logic.manager.ExecutionHistoryManager;
 import logic.manager.UserManager;
 import utils.ServletUtils;
 
@@ -32,6 +33,9 @@ public class Register extends HttpServlet {
                         "Please choose a different username.");
             } else {
                 userManager.addUser(username);
+                ExecutionHistoryManager executionHistoryManager =
+                        ServletUtils.getExecutionHistoryManager(getServletContext());
+                executionHistoryManager.initUserHistory(username);
                 resp.setStatus(HttpServletResponse.SC_OK);
                 resp.setContentType("text/plain");
                 resp.getWriter().println("user " + username + " has been successfully registered.");
