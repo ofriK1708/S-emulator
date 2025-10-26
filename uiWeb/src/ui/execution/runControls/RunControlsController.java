@@ -1,5 +1,6 @@
 package ui.execution.runControls;
 
+import engine.utils.ArchitectureType;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
@@ -11,19 +12,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ui.execution.ProgramRunType;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public class RunControlsController {
 
-    final BooleanProperty runTypeChosen = new SimpleBooleanProperty(false);
-    private final @NotNull BooleanProperty debugModeActive = new SimpleBooleanProperty(false);
     @FXML
     public Button run;
-    @Nullable ProgramRunType programRunType;
-    private Consumer<ProgramRunType> runCallback;
-    private Runnable setCallback;
+
+    final BooleanProperty runTypeChosen = new SimpleBooleanProperty(false);
+
     @FXML
     private ToggleButton debugType;
+
     @FXML
     private ToggleButton runType;
 
@@ -32,8 +32,24 @@ public class RunControlsController {
 
     @FXML
     private Button setRun;
+    final BooleanProperty archTypeChosen = new SimpleBooleanProperty(false);
+    private final @NotNull BooleanProperty debugModeActive = new SimpleBooleanProperty(false);
+    @FXML
+    public ToggleGroup ArchType;
+    @Nullable ProgramRunType programRunType;
+    @FXML
+    private ToggleButton archI;
+    @FXML
+    private ToggleButton archII;
+    @FXML
+    private ToggleButton archIII;
+    @FXML
+    private ToggleButton archIV;
+    private BiConsumer<ProgramRunType, ArchitectureType> runCallback;
+    private Runnable setCallback;
+    private @NotNull ArchitectureType architectureType = ArchitectureType.ARCHITECTURE_I;
 
-    public void initComponent(Consumer<ProgramRunType> runCallback, Runnable setCallback,
+    public void initComponent(BiConsumer<ProgramRunType, ArchitectureType> runCallback, Runnable setCallback,
                               @NotNull BooleanProperty programLoaded, @NotNull BooleanProperty variablesEntered) {
         this.runCallback = runCallback;
         this.setCallback = setCallback;
@@ -49,7 +65,7 @@ public class RunControlsController {
                 runTypes.selectToggle(null);
             }
         });
-        run.disableProperty().bind(runTypeChosen.not());
+        run.disableProperty().bind(runTypeChosen.not().or(archTypeChosen.not()));
     }
 
     @FXML
@@ -85,7 +101,32 @@ public class RunControlsController {
 
     @FXML
     void run(ActionEvent event) {
-        runCallback.accept(programRunType);
+        runCallback.accept(programRunType, architectureType);
+    }
+
+    public void selectArchI(ActionEvent actionEvent) {
+        mangeArchSelection(ArchitectureType.ARCHITECTURE_I, archI);
+    }
+
+    public void selectArchII(ActionEvent actionEvent) {
+        mangeArchSelection(ArchitectureType.ARCHITECTURE_II, archII);
+    }
+
+    public void selectArchIII(ActionEvent actionEvent) {
+        mangeArchSelection(ArchitectureType.ARCHITECTURE_III, archIII);
+    }
+
+    public void selectArchIV(ActionEvent actionEvent) {
+        mangeArchSelection(ArchitectureType.ARCHITECTURE_IV, archIV);
+    }
+
+    public void mangeArchSelection(ArchitectureType architectureType, ToggleButton toggleButton) {
+        if (toggleButton.isSelected()) {
+            this.architectureType = architectureType;
+            archTypeChosen.set(true);
+        } else {
+            archTypeChosen.set(false);
+        }
     }
 
 }

@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import dto.engine.*;
 import dto.server.SystemResponse;
 import dto.server.UserDTO;
+import engine.utils.ArchitectureType;
 import engine.utils.DebugAction;
 import jakarta.xml.bind.JAXBException;
 import okhttp3.Call;
@@ -129,7 +130,7 @@ public class HttpEngineController implements EngineController {
      * Loads a program from an XML file to the server <strong>asynchronously</strong>.
      *
      * @param xmlFilePath The path to the XML file containing the program.
-     * @param onResponse A consumer that will be called with the SystemResponse when the operation is complete.
+     * @param onResponse  A consumer that will be called with the SystemResponse when the operation is complete.
      */
     @Override
     public void LoadProgramFromFileAsync(@NotNull Path xmlFilePath, Consumer<SystemResponse> onResponse)
@@ -178,7 +179,7 @@ public class HttpEngineController implements EngineController {
      * </p>
      *
      * @param xmlFilePath The path to the XML file containing the program.
-     * @throws IOException   If an I/O error occurs.
+     * @throws IOException If an I/O error occurs.
      */
     @Override
     public void loadProgramFromFile(@NotNull Path xmlFilePath) throws IOException {
@@ -345,7 +346,7 @@ public class HttpEngineController implements EngineController {
      * Registers a new user on the server <strong>synchronously</strong>.
      * we cant proceed without registering. so this must be sync.
      *
-     * @param username   The username of the user to register.
+     * @param username The username of the user to register.
      * @return A SystemResponse indicating the success or failure of the registration.
      * @throws IOException If an I/O error occurs.
      */
@@ -510,16 +511,17 @@ public class HttpEngineController implements EngineController {
     /**
      * Runs the loaded program with the given arguments and expand level <strong>asynchronously</strong>.
      *
-     * @param expandLevel The expand level for the program execution.
-     * @param arguments   A map of argument names to their integer values.
-     * @param onResponse  A consumer that will be called with the SystemResponse when the operation is complete.
+     * @param expandLevel      The expand level for the program execution.
+     * @param arguments        A map of argument names to their integer values.
+     * @param architectureType
+     * @param onResponse       A consumer that will be called with the SystemResponse when the operation is complete.
      */
     @Override
     public void runLoadedProgram(int expandLevel, @NotNull Map<String, Integer> arguments,
-                                 @NotNull Consumer<SystemResponse> onResponse) {
+                                 ArchitectureType architectureType, @NotNull Consumer<SystemResponse> onResponse) {
         String programName = getAndValidateProgramLoaded();
         String jsonBody = gson.toJson(arguments);
-        Requests.postRunProgramAsync(Endpoints.RUN_PROGRAM, programName, expandLevel, jsonBody,
+        Requests.postRunProgramAsync(Endpoints.RUN_PROGRAM, programName, expandLevel, architectureType, jsonBody,
                 new Callback() {
                     @Override
                     public void onFailure(@NotNull Call call, @NotNull IOException e) {
@@ -562,17 +564,19 @@ public class HttpEngineController implements EngineController {
      * Starts a debug session for the loaded program with the given arguments and expand
      * level <strong>asynchronously</strong>.
      *
-     * @param expandLevel The expand level for the debug session.
-     * @param arguments   A map of argument names to their integer values.
-     * @param onResponse  A consumer that will be called with the SystemResponse when the operation is complete.
+     * @param expandLevel      The expand level for the debug session.
+     * @param arguments        A map of argument names to their integer values.
+     * @param architectureType
+     * @param onResponse       A consumer that will be called with the SystemResponse when the operation is complete.
      */
     @Override
     public void startDebugSession(int expandLevel,
                                   @NotNull Map<String, Integer> arguments,
-                                  @NotNull Consumer<SystemResponse> onResponse) {
+                                  ArchitectureType architectureType, @NotNull Consumer<SystemResponse> onResponse) {
         String programName = getAndValidateProgramLoaded();
         String jsonBody = gson.toJson(arguments);
-        Requests.postStartDebugAsync(Endpoints.START_DEBUG_PROGRAM, programName, jsonBody, expandLevel,
+        Requests.postStartDebugAsync(Endpoints.START_DEBUG_PROGRAM, programName, architectureType, jsonBody,
+                expandLevel,
                 new Callback() {
                     @Override
                     public void onFailure(@NotNull Call call, @NotNull IOException e) {

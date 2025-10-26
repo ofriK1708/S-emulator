@@ -3,7 +3,7 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.shape.*?>
 <?import javafx.scene.text.Font?>
 <?import java.lang.String?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" stylesheets="@RunControls.css"
@@ -53,6 +53,57 @@
                     <HBox.margin>
                         <Insets/>
                     </HBox.margin>
+                </VBox>
+                <VBox alignment="CENTER" spacing="6.0">
+                    <children>
+                        <HBox alignment="CENTER">
+                            <children>
+                                <Label styleClass="pill-label" text="Choose Architecture type"/>
+                            </children>
+                        </HBox>
+                        <HBox alignment="CENTER" spacing="5.0">
+                            <children>
+                                <ToggleButton mnemonicParsing="false" onAction="#selectArchI" prefHeight="35.0"
+                                              prefWidth="54.0" styleClass="button-green-black">
+                                    <graphic>
+                                        <SVGPath content="M14 7v2h-1v6h1v2h-4v-2h1V9h-1V7z" fill="#00f800" scaleX="2.0"
+                                                 scaleY="2.0"/>
+                                    </graphic>
+                                    <toggleGroup>
+                                        <ToggleGroup fx:id="ArchType"/>
+                                    </toggleGroup>
+                                </ToggleButton>
+                                <ToggleButton mnemonicParsing="false" onAction="#selectArchII" prefHeight="35.0"
+                                              prefWidth="54.0" styleClass="button-green-black" toggleGroup="$ArchType">
+                                    <graphic>
+                                        <SVGPath content="M11 7v2h-1v6h1v2H7v-2h1V9H7V7zm6 0v2h-1v6h1v2h-4v-2h1V9h-1V7z"
+                                                 fill="#00f800" scaleX="2.0" scaleY="2.0"/>
+                                    </graphic>
+                                </ToggleButton>
+                                <ToggleButton mnemonicParsing="false" onAction="#selectArchIII" prefHeight="35.0"
+                                              prefWidth="54.0" styleClass="button-green-black" toggleGroup="$ArchType">
+                                    <graphic>
+                                        <SVGPath
+                                                content="M9 7v2H8v6h1v2H5v-2h1V9H5V7zm5 0v2h-1v6h1v2h-4v-2h1V9h-1V7zm5 0v2h-1v6h1v2h-4v-2h1V9h-1V7z"
+                                                fill="#00f800" scaleX="2.0" scaleY="2.0"/>
+                                    </graphic>
+                                </ToggleButton>
+                                <ToggleButton mnemonicParsing="false" onAction="#selectArchIV" prefHeight="35.0"
+                                              prefWidth="54.0" styleClass="button-green-black" toggleGroup="$ArchType">
+                                    <graphic>
+                                        <SVGPath content="m12 7l2 10h2l2-10h-2l-1 5l-1-5zm-1 0v2h-1v6h1v2H7v-2h1V9H7V7z"
+                                                 fill="#00f800" scaleX="2.0" scaleY="2.0"/>
+                                    </graphic>
+                                </ToggleButton>
+                            </children>
+                            <VBox.margin>
+                                <Insets/>
+                            </VBox.margin>
+                        </HBox>
+                    </children>
+                    <padding>
+                        <Insets bottom="10.0"/>
+                    </padding>
                 </VBox>
                 <VBox spacing="2.0">
                     <children>

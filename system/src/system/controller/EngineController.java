@@ -7,6 +7,7 @@ import dto.server.SystemResponse;
 import dto.server.UserDTO;
 import engine.exception.FunctionNotFound;
 import engine.exception.LabelNotExist;
+import engine.utils.ArchitectureType;
 import jakarta.xml.bind.JAXBException;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,10 +41,10 @@ public interface EngineController {
 
     ProgramDTO getProgramByExpandLevel(int expandLevel);
 
-    void runLoadedProgram(int expandLevel, @NotNull Map<String, Integer> arguments,
+    void runLoadedProgram(int expandLevel, @NotNull Map<String, Integer> arguments, ArchitectureType architectureType,
                           @NotNull Consumer<SystemResponse> onResponse);
 
-    void startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments,
+    void startDebugSession(int expandLevel, @NotNull Map<String, Integer> arguments, ArchitectureType architectureType,
                            @NotNull Consumer<SystemResponse> onResponse);
 
     void debugStepOver(@NotNull Consumer<SystemResponse> onResponse);

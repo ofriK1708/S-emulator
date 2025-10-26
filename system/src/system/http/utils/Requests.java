@@ -1,5 +1,6 @@
 package system.http.utils;
 
+import engine.utils.ArchitectureType;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -235,9 +236,11 @@ public class Requests {
     public static void postRunProgramAsync(@NotNull String serverEndpoint,
                                            @NotNull String currentLoadedProgramName,
                                            int expandLevel,
+                                           @NotNull ArchitectureType architectureType,
                                            @NotNull String jsonArguments,
                                            @NotNull Callback callback) {
-        postRunOrDebugProgramAsync(serverEndpoint, currentLoadedProgramName, jsonArguments, callback, expandLevel);
+        postRunOrDebugProgramAsync(serverEndpoint, currentLoadedProgramName, architectureType, jsonArguments, callback
+                , expandLevel);
     }
 
     /**
@@ -251,11 +254,12 @@ public class Requests {
      */
     public static void postStartDebugAsync(@NotNull String serverEndpoint,
                                            @NotNull String programName,
+                                           @NotNull ArchitectureType architectureType,
                                            @NotNull String jsonArguments,
                                            int expandLevel,
                                            @NotNull Callback callback
     ) {
-        postRunOrDebugProgramAsync(serverEndpoint, programName, jsonArguments, callback, expandLevel);
+        postRunOrDebugProgramAsync(serverEndpoint, programName, architectureType, jsonArguments, callback, expandLevel);
     }
 
     /**
@@ -269,10 +273,12 @@ public class Requests {
      */
     private static void postRunOrDebugProgramAsync(@NotNull String serverEndpoint,
                                                    @NotNull String currentLoadedProgramName,
+                                                   @NotNull ArchitectureType architectureType,
                                                    @NotNull String jsonArguments,
                                                    @NotNull Callback callback,
                                                    int expandLevel) {
-        Call call = buildRunOrDebugProgramCall(serverEndpoint, currentLoadedProgramName, jsonArguments, expandLevel);
+        Call call = buildRunOrDebugProgramCall(serverEndpoint, currentLoadedProgramName, architectureType,
+                jsonArguments, expandLevel);
 
         call.enqueue(callback);
     }
@@ -288,10 +294,12 @@ public class Requests {
      */
     private static @NotNull Call buildRunOrDebugProgramCall(@NotNull String serverEndpoint,
                                                             @NotNull String currentLoadedProgramName,
+                                                            @NotNull ArchitectureType architectureType,
                                                             @NotNull String jsonArguments, int expandLevel) {
         HttpUrl url = safeUrlBuilder(serverEndpoint)
                 .addQueryParameter(PROGRAM_NAME_PARAM, currentLoadedProgramName)
                 .addQueryParameter(EXPAND_LEVEL_PARAM, String.valueOf(expandLevel))
+                .addQueryParameter(ARCHITECTURE_TYPE_PARAM, architectureType.getSymbol())
                 .build();
 
         System.out.println("about to send request to: " + url);

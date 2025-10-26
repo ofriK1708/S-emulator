@@ -5,7 +5,10 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<ScrollPane xmlns:fx="http://javafx.com/fxml/1" fitToHeight="true" fitToWidth="true" stylesheets="@AppLayout.css"
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1"
+            fitToHeight="true"
+            fitToWidth="true"
+            stylesheets="@styles/style.css"
             xmlns="http://javafx.com/javafx/24.0.1" fx:controller="ui.jfx.AppController">
     <content>
         <BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity"

@@ -3,6 +3,7 @@ package ui.execution;
 import dto.engine.*;
 import dto.server.SystemResponse;
 import dto.ui.VariableDTO;
+import engine.utils.ArchitectureType;
 import engine.utils.ProgramUtils;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -233,6 +234,7 @@ public class ExecutionController {
             System.err.println("Execution action buttons not injected!");
         }
     }
+
     private void initializeExecutionHeader() {
         if (executionHeaderController != null) {
             executionHeaderController.initComponent(
@@ -293,6 +295,7 @@ public class ExecutionController {
                 })
                 .build();
     }
+
     public void setScreenTitle(String title) {
         screenTitle.set(title);
     }
@@ -406,6 +409,7 @@ public class ExecutionController {
                 Bindings.or(argumentsLoaded, Bindings.or(programFinished, debugMode))));
         executionActionsTitledPane.expandedProperty().bind(Bindings.and(programLoaded, programRanAtLeastOnce));
     }
+
     private void unbindTitlePanesExpansion() {
         runControlsTitledPane.expandedProperty().unbind();
         debugControlsTitledPane.expandedProperty().unbind();
@@ -462,7 +466,7 @@ public class ExecutionController {
         }
     }
 
-    public void RunProgram(@NotNull ProgramRunType programRunType) {
+    public void RunProgram(@NotNull ProgramRunType programRunType, @NotNull ArchitectureType architectureType) {
         if (!programLoaded.get()) {
             showError("No program loaded");
             return;
@@ -473,17 +477,17 @@ public class ExecutionController {
         }
 
         switch (programRunType) {
-            case REGULAR -> startRegularExecution();
-            case DEBUG -> startDebugExecution();
+            case REGULAR -> startRegularExecution(architectureType);
+            case DEBUG -> startDebugExecution(architectureType);
             default -> showError("Unknown run type selected.");
         }
         argumentsLoaded.set(false);
     }
 
-    public void startRegularExecution() {
+    public void startRegularExecution(ArchitectureType architectureType) {
         int expandLevel = currentExpandLevel.get();
         programRunning.set(true);
-        engineController.runLoadedProgram(expandLevel, programArguments, systemResponse -> {
+        engineController.runLoadedProgram(expandLevel, programArguments, architectureType, systemResponse -> {
             if (!systemResponse.isSuccess()) {
                 Platform.runLater(() -> {
                     showError("Error during execution: " + systemResponse.message());
@@ -618,10 +622,10 @@ public class ExecutionController {
         }
     }
 
-    public void startDebugExecution() {
+    public void startDebugExecution(ArchitectureType architectureType) {
         int expandLevel = prepareForDebugSession();
 
-        engineController.startDebugSession(expandLevel, programArguments, systemResponse -> {
+        engineController.startDebugSession(expandLevel, programArguments, architectureType, systemResponse -> {
             if (!systemResponse.isSuccess()) {
                 Platform.runLater(() -> {
                     showError("Error starting debug session: " + systemResponse.message());
@@ -809,6 +813,8 @@ public class ExecutionController {
             showError("Navigation to Dashboard is not configured");
         }
     }
+
+    // todo - fix this dumb ass function that does fucking work with the server
     @FXML
     private void handleRerun() {
         if (!programLoaded.get()) {
@@ -845,7 +851,7 @@ public class ExecutionController {
             ProgramRunType runType = wasInDebugMode ? ProgramRunType.DEBUG : ProgramRunType.REGULAR;
 
             System.out.println("Executing rerun in " + runType + " mode");
-            RunProgram(runType);
+            RunProgram(runType, ArchitectureType.ARCHITECTURE_I);
 
         } catch (Exception e) {
             System.err.println("Error handling rerun: " + e.getMessage());
