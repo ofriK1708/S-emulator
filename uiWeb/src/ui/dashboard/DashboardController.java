@@ -57,7 +57,7 @@ public class DashboardController {
     private final ListProperty<UserDTO> usersList = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final ListProperty<ExecutionResultStatisticsDTO> userHistoryListProperty =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final String originalUser = "";
+    private String originalUser = "";
 
     @FXML
     private HBox headerSection;
@@ -85,6 +85,7 @@ public class DashboardController {
     private Scene dashboardScene;
     private Scene executionScene;
     private ExecutionController executionController;
+    private FXMLLoader executionLoader;
 
     // Engine controller for Dashboard data preview
     private final EngineController engineController;
@@ -92,6 +93,17 @@ public class DashboardController {
     public DashboardController() {
         // Initialize engine controller for Dashboard data preview
         this.engineController = new HttpEngineController();
+    }
+
+    /**
+     * Set the logged-in username.
+     *
+     * @param username The logged-in username
+     */
+    public void setLoggedInUser(@NotNull String username) {
+        this.loggedInUserName.set(username);
+        this.originalUser = username;
+        System.out.println("Dashboard: Logged in user set to - " + username);
     }
 
     public void setupNavigation(@NotNull Stage primaryStage, @NotNull Scene dashboardScene) {
@@ -126,6 +138,7 @@ public class DashboardController {
 
             // Initialize sub-controllers
             initializeSubControllers();
+            initializeExecutionScreen();
 
         } else {
             System.err.println("DashboardController: One or more sub-controllers are null!");
@@ -149,6 +162,17 @@ public class DashboardController {
 
     }
 
+    private void initializeExecutionScreen() {
+        try {
+            executionLoader = loadExecutionLoader();
+            Parent executionRoot = executionLoader.load();
+            executionScene = new Scene(executionRoot, 1400, 800);
+        } catch (Exception e) {
+            System.err.println("Dashboard: Error initializing Execution screen - " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     private void initializeSubControllers() {
         // Header: file loading and credits
         headerSectionController.initComponent(
@@ -170,9 +194,9 @@ public class DashboardController {
         );
 
         // History panel: user statistics
-        historyPanelController.initComponent(userHistoryListProperty);
+        historyPanelController.initComponent(userHistoryListProperty, this::onRerunRequested);
 
-        usersPanelController.initComponent(usersList, selectedUser, originalUser);
+        usersPanelController.initComponent(usersList, () -> selectedUser.set(originalUser), selectedUser);
     }
 
     /**
@@ -225,7 +249,8 @@ public class DashboardController {
         try {
             System.out.println("Dashboard: Executing program '" + programName + "'");
 
-            loadExecutionScene(programName);
+            configureExecutionController(programName);
+            setStageAndShow();
             executionController.loadProgramToExecution(programName);
 
         } catch (Exception e) {
@@ -237,7 +262,7 @@ public class DashboardController {
     /**
      * Load the Execution scene and AppController (lazy initialization)
      */
-    private void loadExecutionScene(String programName) throws Exception {
+    private FXMLLoader loadExecutionLoader() throws Exception {
         System.out.println("Dashboard: Loading Execution scene...");
 
         FXMLLoader executionLoader = new FXMLLoader();
@@ -246,26 +271,41 @@ public class DashboardController {
             throw new IllegalStateException("Execution.fxml not found");
         }
         executionLoader.setLocation(url);
+        return executionLoader;
+    }
 
-        Parent executionRoot = executionLoader.load();
-        executionScene = new Scene(executionRoot, 1400, 800);
+    private void onRerunRequested(@NotNull ExecutionResultStatisticsDTO selectedExecutionResultStatisticsDTO) {
+        try {
+            String programName = selectedExecutionResultStatisticsDTO.displayName();
+            System.out.println("Dashboard: Re-running program '" + programName + "'");
 
-        configureExecutionController(executionLoader, programName);
+            configureExecutionController(programName);
+            setStageAndShow();
+            executionController.loadProgramToExecution(programName, selectedExecutionResultStatisticsDTO);
+
+        } catch (Exception e) {
+            System.err.println("Dashboard: Error re-running program - " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
+    private void setStageAndShow() {
 
         Stage loadingStage = new Stage();
         loadingStage.initModality(Modality.APPLICATION_MODAL);
         loadingStage.setTitle("Loading Execution Scene");
         loadingStage.setScene(executionScene);
+        executionController.setStage(loadingStage);
         loadingStage.show();
-
-
-        System.out.println("Dashboard: Execution scene loaded successfully");
     }
 
-    private void configureExecutionController(FXMLLoader executionLoader, String programName) {
+    private void configureExecutionController(String programName) {
         // Get AppController and configure it
         executionController = executionLoader.getController();
-        executionController.setScene(executionScene);
+        if (executionController == null) {
+            throw new IllegalStateException("Dashboard: ExecutionController is null!");
+        }
         executionController.setUserName(loggedInUserName.get());
         executionController.setScreenTitle("S-Emulator - Execution: " + programName);
         executionController.setAvailableCredits(availableCredits.get());
@@ -281,10 +321,20 @@ public class DashboardController {
         if (dashboardScene != null && primaryStage != null) {
             primaryStage.setScene(dashboardScene);
             primaryStage.setTitle("S-Emulator - Dashboard");
+            checkIfShouldFetchUserHistory();
 
             System.out.println("Dashboard: Switched back to Dashboard screen");
         } else {
             System.err.println("Dashboard: Cannot transition - dashboard scene not available");
+        }
+    }
+
+    private void checkIfShouldFetchUserHistory() {
+        System.out.println("Dashboard: Checking if user history needs refresh for user '" + originalUser + "'");
+        System.out.println("originalUser: " + originalUser + ", selectedUser: " + selectedUser.get());
+        if (originalUser.equals(selectedUser.get()) || selectedUser.get() == null) {
+            System.out.println("Dashboard: Refreshing user history for '" + originalUser + "'");
+            loadUserHistory(originalUser);
         }
     }
 
@@ -313,23 +363,4 @@ public class DashboardController {
         });
     }
 
-    /**
-     * Set the logged-in username.
-     * MUST be called before setupNavigation().
-     *
-     * @param username The logged-in username
-     */
-    public void setLoggedInUser(@NotNull String username) {
-        this.loggedInUserName.set(username);
-        System.out.println("Dashboard: Logged in user set to - " + username);
-    }
-
-    /**
-     * Get the logged-in username property.
-     *
-     * @return StringProperty for the logged-in username
-     */
-    public StringProperty loggedInUserNameProperty() {
-        return loggedInUserName;
-    }
 }

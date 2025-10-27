@@ -48,7 +48,7 @@ import static ui.utils.clientConstants.TASK_PATH;
 public class ExecutionController {
 
     private final Map<String, Integer> previousDebugVariables = new HashMap<>();
-
+    private final BooleanProperty isProgramLoaded = new SimpleBooleanProperty(false);
     private final ListProperty<VariableDTO> allVariablesDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
     private final ListProperty<VariableDTO> previousVariablesDTO =
@@ -64,11 +64,6 @@ public class ExecutionController {
 
     private final ListProperty<String> programVariablesNamesAndLabels =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final MapProperty<String, String> allSubFunction =
-            new SimpleMapProperty<>(FXCollections.observableHashMap());
-
-    private final ListProperty<ExecutionResultStatisticsDTO> executionStatistics =
-            new SimpleListProperty<>(FXCollections.observableArrayList());
 
     private final StringProperty mainProgramName = new SimpleStringProperty("");
     private final StringProperty currentLoadedProgramName = new SimpleStringProperty("");
@@ -78,20 +73,18 @@ public class ExecutionController {
 
     private final Map<String, Integer> programArguments = new HashMap<>();
     private final BooleanProperty isAnimationsOn = new SimpleBooleanProperty(true);
-    private final BooleanProperty programLoaded = new SimpleBooleanProperty(false);
-    private final BooleanProperty debugMode = new SimpleBooleanProperty(false);
-    private final BooleanProperty programRanAtLeastOnce = new SimpleBooleanProperty(false);
-    private final BooleanProperty programRunning = new SimpleBooleanProperty(false);
-    private final BooleanProperty programFinished = new SimpleBooleanProperty(false);
+    private final BooleanProperty isInDebugMode = new SimpleBooleanProperty(false);
+    private final BooleanProperty didProgramRanAtLeastOnce = new SimpleBooleanProperty(false);
+    private final BooleanProperty isProgramRunning = new SimpleBooleanProperty(false);
+    private final BooleanProperty isProgramFinished = new SimpleBooleanProperty(false);
+    private Stage stage;
     private final IntegerProperty maxExpandLevel = new SimpleIntegerProperty(0);
     private final IntegerProperty currentExpandLevel = new SimpleIntegerProperty(0);
     private final IntegerProperty currentCycles = new SimpleIntegerProperty(0);
     private final StringProperty currentUserName = new SimpleStringProperty("Guest User");
     private final StringProperty screenTitle = new SimpleStringProperty("S-Emulator Execution");
     private final IntegerProperty availableCredits = new SimpleIntegerProperty(0);
-    private final boolean isInDebugResume = false;
 
-    private Scene scene;
 
     @FXML
     private TitledPane executionActionsTitledPane;
@@ -157,7 +150,6 @@ public class ExecutionController {
 
     public ExecutionController() {
         this.engineController = new HttpEngineController();
-        UIUtils.setAppControllerInstance(this);
     }
 
     @FXML
@@ -173,20 +165,32 @@ public class ExecutionController {
                     this::setPaneMode,
                     currentExpandLevel,
                     maxExpandLevel,
-                    programLoaded,
+                    isProgramLoaded,
                     this::handleVariableSelection,
                     programVariablesNamesAndLabels,
                     isAnimationsOn
             );
-            runControlsController.initComponent(this::RunProgram, this::prepareForTakingArguments,
-                    programLoaded, argumentsLoaded);
+            runControlsController.initComponent(this::RunProgram,
+                    this::prepareForTakingArguments,
+                    isProgramLoaded,
+                    argumentsLoaded
+            );
             cyclesController.initComponent(currentCycles);
+
             instructionsTableController.initializeMainInstructionTable(programInstructions,
-                    derivedInstructions, isAnimationsOn);
+                    derivedInstructions,
+                    isAnimationsOn
+            );
             derivedInstructionsTableController.markAsDerivedInstructionsTable();
-            derivedInstructionsTableController.setDerivedInstructionsTable(derivedInstructions, isAnimationsOn);
-            argumentsTableController.initArgsTable(argumentsDTO, isAnimationsOn);
-            allVarsTableController.initAllVarsTable(allVariablesDTO, isAnimationsOn);
+            derivedInstructionsTableController.setDerivedInstructionsTable(
+                    derivedInstructions,
+                    isAnimationsOn
+            );
+            argumentsTableController.initArgsTable(argumentsDTO,
+                    isAnimationsOn
+            );
+            allVarsTableController.initAllVarsTable(allVariablesDTO, isAnimationsOn
+            );
 
             // Set back button callback in DebuggerController
             if (debugControlsController != null) {
@@ -212,19 +216,19 @@ public class ExecutionController {
         if (rerunButton != null && showInfoButton != null) {
             // Rerun button: enabled when program has finished execution and we have arguments
             rerunButton.disableProperty().bind(
-                    programFinished.not()
+                    isProgramFinished.not()
                             .or(argumentsDTO.emptyProperty())
-                            .or(programLoaded.not())
+                            .or(isProgramLoaded.not())
             );
 
             // Show Info button: enabled when program has run at least once
             showInfoButton.disableProperty().bind(
-                    programRanAtLeastOnce.not()
+                    didProgramRanAtLeastOnce.not()
             );
 
             // Bind the execution actions pane expansion
             executionActionsTitledPane.expandedProperty().bind(
-                    Bindings.and(programLoaded, programRanAtLeastOnce)
+                    Bindings.and(isProgramLoaded, didProgramRanAtLeastOnce)
             );
 
             System.out.println("Execution action buttons initialized and bound");
@@ -251,14 +255,33 @@ public class ExecutionController {
         System.out.println("AppController: Return to Dashboard callback registered");
     }
 
+    public void setStage(Stage stage) {
+        this.stage = stage;
+        this.stage.setOnCloseRequest(event -> {
+            event.consume(); // Prevent the window from closing immediately
+            handleBackToDashboard();
+        });
+    }
+
     public void loadProgramToExecution(@NotNull String programName) {
+        loadProgramToExecution(programName, null);
+    }
+
+    /**
+     * Load a program into the execution environment asynchronously.
+     *
+     * @param programName                  Name of the program to load
+     * @param executionResultStatisticsDTO Optional statistics from previous executions otherwise null
+     */
+    public void loadProgramToExecution(@NotNull String programName,
+                                       @Nullable ExecutionResultStatisticsDTO executionResultStatisticsDTO) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(TASK_PATH));
             Parent root = loader.load();
             ProgramTaskController programTaskController = loader.getController();
 
             Stage loadingStage = createTaskLoadingStage("Loading Program: " + programName, root);
-            UIAdapter uiAdapter = buildUIAdapter(programName, loadingStage);
+            UIAdapter uiAdapter = buildUIAdapter(programName, loadingStage, executionResultStatisticsDTO);
 
 
             loadingStage.setOnShown(event -> programTaskController.initializeAndRunLoadTaskThread(
@@ -271,9 +294,18 @@ public class ExecutionController {
         }
     }
 
-    private UIAdapter buildUIAdapter(@NotNull String programName, Stage loadingStage) {
+    /**
+     * Build the UIAdapter for program loading callbacks.
+     *
+     * @param programName                  the name of the program being loaded
+     * @param loadingStage                 the stage showing the loading progress
+     * @param executionResultStatisticsDTO optional previous execution statistics
+     * @return the constructed UIAdapter
+     */
+    private UIAdapter buildUIAdapter(@NotNull String programName, Stage loadingStage,
+                                     @Nullable ExecutionResultStatisticsDTO executionResultStatisticsDTO) {
         return UIAdapter.builder()
-                .programLoadedDelegate(programLoaded::set)
+                .programLoadedDelegate(isProgramLoaded::set)
                 .argumentsEnteredDelegate(argumentsLoaded::set)
                 .variablesAndLabelsNamesDelegate(programVariablesNamesAndLabels::setAll)
                 .programInstructionsDelegate(programInstructions::setAll)
@@ -288,6 +320,10 @@ public class ExecutionController {
                         loadedProgram = program;
                         mainProgramName.set(program.ProgramName());
                         currentLoadedProgramName.set(program.ProgramName());
+                        isProgramLoaded.set(true);
+                        if (executionResultStatisticsDTO != null) {
+                            handleRerunRequest(executionResultStatisticsDTO);
+                        }
                     }
                     loadingStage.close();
                 })
@@ -319,72 +355,38 @@ public class ExecutionController {
         }
     }
 
-    public void handleRerunRequest(int expandLevel, @NotNull Map<String, Integer> previousArguments) {
-        if (!programLoaded.get()) {
+    public void handleRerunRequest(@NotNull ExecutionResultStatisticsDTO executionResultStatisticsDTO) {
+        if (!isProgramLoaded.get()) {
             showError("No program loaded");
             return;
         }
-
-        try {
-            System.out.println("Preparing re-run with expand level " + expandLevel +
-                    " and arguments: " + previousArguments);
-
-            boolean wasInDebugMode = debugMode.get();
-            System.out.println("Preserving debug mode state: " + wasInDebugMode);
-
-            resetForRerun(wasInDebugMode);
-            expandProgramToLevel(expandLevel);
-
-            programArguments.clear();
-            programArguments.putAll(previousArguments);
-
-            String modeText = debugMode.get() ? "Debug" : "Regular";
-            showSuccess("Re-run arguments configured successfully!\n" +
-                    "Values were pre-populated from previous execution.\n" +
-                    "Current mode: " + modeText + "\n" +
-                    "Click 'Run Program' to execute in " + modeText.toLowerCase() + " mode.");
-
-            debugMode.set(wasInDebugMode);
-
-            System.out.println("Re-run preparation completed");
-            System.out.println("Debug mode preserved: " + debugMode.get());
-
-        } catch (Exception e) {
-            System.err.println("Error preparing re-run: " + e.getMessage());
-            showError("Error preparing re-run: " + e.getMessage());
+        if (loadedProgram == null) {
+            showError("Loaded program is not available");
+            return;
         }
+        int expandLevel = executionResultStatisticsDTO.expandLevel();
+        Map<String, Integer> previousArguments = executionResultStatisticsDTO.arguments();
+        ArchitectureType architectureType = executionResultStatisticsDTO.architectureType();
+
+        System.out.println("Preparing re-run with expand level " + expandLevel +
+                " and arguments: " + previousArguments);
+
+        resetForRerun();
+        expandProgramToLevel(expandLevel);
+
+        programArguments.clear();
+        programArguments.putAll(previousArguments);
+        argumentsDTO.setAll(formatArgumentsToVariableDTO(previousArguments));
+        argumentsLoaded.set(true);
+
+        runControlsController.setArchitectureType(architectureType);
+        showSuccess("arguments loaded: " + previousArguments + "\nArchitecture: " + architectureType +
+                "\nReady to re-run program: " + loadedProgram.ProgramName());
     }
 
-    private void resetForRerun(boolean preserveDebugMode) {
-        programRunning.set(false);
-        programFinished.set(false);
-
-        if (!preserveDebugMode) {
-            debugMode.set(false);
-        } else {
-            System.out.println("Debug mode preserved for rerun: " + debugMode.get());
-        }
-
-        if (inDebugSession) {
-            try {
-                engineController.debugStop(systemResponse -> {
-                    if (systemResponse.isSuccess()) {
-                        System.out.println("Debug session stopped successfully during rerun reset");
-                    } else {
-                        System.err.println("Warning: Failed to stop debug session during rerun reset: "
-                                + systemResponse.message());
-                    }
-
-                });
-            } catch (Exception e) {
-                System.err.println("Warning: Error stopping debug session during rerun reset: " + e.getMessage());
-            }
-            inDebugSession = false;
-
-            if (!preserveDebugMode && debugControlsController != null) {
-                debugControlsController.notifyDebugSessionEnded();
-            }
-        }
+    private void resetForRerun() {
+        isProgramRunning.set(false);
+        isProgramFinished.set(false);
 
         previousDebugVariables.clear();
         isFirstDebugStep = true;
@@ -401,12 +403,12 @@ public class ExecutionController {
     }
 
     private void bindTitlePanesExpansion() {
-        runControlsTitledPane.expandedProperty().bind(Bindings.and(programLoaded, programRunning.not()));
-        debugControlsTitledPane.expandedProperty().bind(Bindings.and(programLoaded,
-                Bindings.and(debugMode, programFinished.not())));
-        variablesTitledPane.expandedProperty().bind(Bindings.and(programLoaded,
-                Bindings.or(argumentsLoaded, Bindings.or(programFinished, debugMode))));
-        executionActionsTitledPane.expandedProperty().bind(Bindings.and(programLoaded, programRanAtLeastOnce));
+        runControlsTitledPane.expandedProperty().bind(Bindings.and(isProgramLoaded, isProgramRunning.not()));
+        debugControlsTitledPane.expandedProperty().bind(Bindings.and(isProgramLoaded,
+                Bindings.and(isInDebugMode, isProgramFinished.not())));
+        variablesTitledPane.expandedProperty().bind(Bindings.and(isProgramLoaded,
+                Bindings.or(argumentsLoaded, Bindings.or(isProgramFinished, isInDebugMode))));
+        executionActionsTitledPane.expandedProperty().bind(Bindings.and(isProgramLoaded, didProgramRanAtLeastOnce));
     }
 
     private void unbindTitlePanesExpansion() {
@@ -436,16 +438,13 @@ public class ExecutionController {
 
         if (programArguments.isEmpty()) {
             argumentsLoaded.set(true);
-            showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() +
-                    "\nNo workVariables required.");
+            showInfo("No arguments required for this program.");
             return;
         }
 
         getArgumentsFromUser();
         argumentsLoaded.set(true);
         argumentsDTO.setAll(UIUtils.formatArgumentsToVariableDTO(programArguments));
-        showSuccess("Program loaded successfully from: " + loadedProgram.ProgramName() +
-                "\nArguments captured.");
     }
 
     public void getArgumentsFromUser() {
@@ -466,7 +465,7 @@ public class ExecutionController {
     }
 
     public void RunProgram(@NotNull ProgramRunType programRunType, @NotNull ArchitectureType architectureType) {
-        if (!programLoaded.get()) {
+        if (!isProgramLoaded.get()) {
             showError("No program loaded");
             return;
         }
@@ -485,7 +484,7 @@ public class ExecutionController {
 
     public void startRegularExecution(ArchitectureType architectureType) {
         int expandLevel = currentExpandLevel.get();
-        programRunning.set(true);
+        isProgramRunning.set(true);
         engineController.runLoadedProgram(expandLevel, programArguments, architectureType, systemResponse -> {
             if (!systemResponse.isSuccess()) {
                 Platform.runLater(() -> {
@@ -498,9 +497,6 @@ public class ExecutionController {
                     allVariablesDTO.setAll(toVariableDTO(resultDTO.getAllVariablesSorted()));
                     currentCycles.set(resultDTO.cycleCount());
                     updatePropertiesAfterExecuting();
-                    showSuccess("Program executed successfully!\n" +
-                            "Cycles: " + currentCycles.get() + "\n");
-
                 });
             }
         });
@@ -508,13 +504,13 @@ public class ExecutionController {
     }
 
     private void updatePropertiesAfterExecuting() {
-        programRunning.set(false);
-        programFinished.set(true);
-        programRanAtLeastOnce.set(true);
+        isProgramRunning.set(false);
+        isProgramFinished.set(true);
+        didProgramRanAtLeastOnce.set(true);
     }
 
     public void expandProgramToLevel(int expandLevel) {
-        if (!programLoaded.get()) {
+        if (!isProgramLoaded.get()) {
             showError("No program loaded");
             return;
         }
@@ -553,37 +549,6 @@ public class ExecutionController {
 // Debug Methods - Continuation of AppController.java
 
 // Debug Methods - Continuation of AppController.java
-
-    public void clearLoadedProgram() {
-        programLoaded.set(false);
-        currentLoadedProgramName.set("");
-        mainProgramName.set("");
-        argumentsLoaded.set(false);
-        maxExpandLevel.set(0);
-        currentExpandLevel.set(0);
-        loadedProgram = null;
-        programArguments.clear();
-
-        engineController.clearLoadedProgram();
-        programInstructions.clear();
-        derivedInstructions.clear();
-        allVariablesDTO.clear();
-        argumentsDTO.clear();
-        currentCycles.set(0);
-        summaryLineController.clearCounts();
-        instructionsTableController.clearHighlighting();
-        derivedInstructionsTableController.clearHighlighting();
-        programVariablesNamesAndLabels.clear();
-        allSubFunction.clear();
-        previousDebugVariables.clear();
-        isFirstDebugStep = true;
-        inDebugSession = false;
-        debugMode.set(false);
-        programRunning.set(false);
-        programFinished.set(false);
-        programRanAtLeastOnce.set(false);
-        showSuccess("Program cleared.");
-    }
 
     private void handleVariableSelection(@Nullable String variableName) {
         instructionsTableController.highlightVariable(variableName);
@@ -632,7 +597,6 @@ public class ExecutionController {
                 });
             } else {
                 Platform.runLater(() -> {
-                    showSuccess("Debug session started successfully.");
                     inDebugSession = true;
                     highlightCurrentInstruction(0);
                 });
@@ -642,9 +606,9 @@ public class ExecutionController {
 
     private int prepareForDebugSession() {
         int expandLevel = currentExpandLevel.get();
-        programRunning.set(true);
-        debugMode.set(true);
-        programFinished.set(false);
+        isProgramRunning.set(true);
+        isInDebugMode.set(true);
+        isProgramFinished.set(false);
         currentCycles.set(0);
 
         previousDebugVariables.clear();
@@ -673,14 +637,7 @@ public class ExecutionController {
                 });
             } else {
                 Platform.runLater(() -> {
-                    showSuccess("Debug step completed successfully.");
-                    DebugStateChangeResultDTO stateChangeResultDTO = systemResponse.debugStateChangeResultDTO();
-                    int currentPC = stateChangeResultDTO.debugPC();
-                    highlightCurrentInstruction(currentPC);
-                    currentCycles.set(stateChangeResultDTO.debugCycles());
-                    updateDebugVariableState(stateChangeResultDTO.allVarsValue());
-                    isDebugFinished = stateChangeResultDTO.isFinished();
-                    showInfo("Step executed. PC: " + currentPC + ", Total cycles: " + currentCycles.get());
+                    afterDebugAction(systemResponse);
                 });
             }
         });
@@ -712,23 +669,20 @@ public class ExecutionController {
                 });
             } else {
                 Platform.runLater(() -> {
-                    showSuccess("Debug resume completed successfully.");
-                    int currentPC = afterDebugAction(systemResponse);
                     isDebugFinished = true; // resume always finishes the program
-                    showInfo("Program resumed. PC: " + currentPC + ", Total cycles: " + currentCycles.get());
                     handleExecutionFinished();
                 });
             }
         });
     }
 
-    private int afterDebugAction(SystemResponse systemResponse) {
+    private void afterDebugAction(SystemResponse systemResponse) {
         DebugStateChangeResultDTO stateChangeResultDTO = systemResponse.debugStateChangeResultDTO();
         int currentPC = stateChangeResultDTO.debugPC();
         highlightCurrentInstruction(currentPC);
         currentCycles.set(stateChangeResultDTO.debugCycles());
         updateDebugVariableState(stateChangeResultDTO.allVarsValue());
-        return currentPC;
+        isDebugFinished = stateChangeResultDTO.isFinished();
     }
 
     private void updateDebugVariableState(Map<String, Integer> allVarsAfterStep) {
@@ -768,9 +722,6 @@ public class ExecutionController {
     private void handleExecutionFinished() {
         try {
             endDebugSession();
-            showSuccess("Execution completed successfully!\n" +
-                    "Total cycles: " + currentCycles.get() + "\n" +
-                    "Program finished. Use 'Run' to start a new execution.");
         } catch (Exception e) {
             System.err.println("Error handling execution completion: " + e.getMessage());
             showError("Error completing execution: " + e.getMessage());
@@ -779,21 +730,18 @@ public class ExecutionController {
 
     private void endDebugSession() {
         inDebugSession = false;
-        debugMode.set(false);
-        programRunning.set(false);
-        programFinished.set(true);
+        isInDebugMode.set(false);
+        isProgramRunning.set(false);
+        isProgramFinished.set(true);
         previousDebugVariables.clear();
         isFirstDebugStep = true;
-        programRanAtLeastOnce.set(true);
+        didProgramRanAtLeastOnce.set(true);
         debugControlsController.notifyDebugSessionEnded();
         instructionsTableController.clearAllDebugHighlighting();
 
         System.out.println("Debug session ended - ready for new execution");
     }
 
-    public void setScene(Scene scene) {
-        this.scene = scene;
-    }
 
     @FXML
     private void handleBackToDashboard() {
@@ -805,63 +753,14 @@ public class ExecutionController {
                     System.err.println("Error stopping debug session: " + e.getMessage());
                 }
             }
-            Stage stage = (Stage) backToDashboardButton.getScene().getWindow();
-            stage.close();
+            if (stage != null) {
+                stage.close();
+            }
             returnToDashboardCallback.run();
             System.out.println("Returning to Dashboard from execution screen...");
         } else {
             System.err.println("Return to Dashboard callback not set");
             showError("Navigation to Dashboard is not configured");
         }
-    }
-
-    // todo - fix this dumb ass function that does fucking work with the server
-    @FXML
-    private void handleRerun() {
-        if (!programLoaded.get()) {
-            showError("No program loaded");
-            return;
-        }
-
-        if (argumentsDTO.isEmpty()) {
-            showError("No previous execution found. Please run the program first.");
-            return;
-        }
-
-        try {
-            // Extract arguments from current argumentsDTO
-            Map<String, Integer> previousArguments = new HashMap<>();
-            for (VariableDTO varDTO : argumentsDTO) {
-                previousArguments.put(varDTO.name().get(), varDTO.value().get());
-            }
-
-            int expandLevel = currentExpandLevel.get();
-            boolean wasInDebugMode = debugMode.get();
-
-            System.out.println("Rerun button clicked - preparing rerun with level " + expandLevel +
-                    ", debug mode: " + wasInDebugMode);
-
-            // Prepare for rerun (sets up arguments and state)
-            handleRerunRequest(expandLevel, previousArguments);
-
-            // Now automatically execute the program
-            // The handleRerunRequest already set argumentsLoaded to false, so we need to set it back to true
-            argumentsLoaded.set(true);
-
-            // Determine execution type based on preserved debug mode
-            ProgramRunType runType = wasInDebugMode ? ProgramRunType.DEBUG : ProgramRunType.REGULAR;
-
-            System.out.println("Executing rerun in " + runType + " mode");
-            RunProgram(runType, ArchitectureType.ARCHITECTURE_I);
-
-        } catch (Exception e) {
-            System.err.println("Error handling rerun: " + e.getMessage());
-            showError("Error initiating rerun: " + e.getMessage());
-        }
-    }
-
-    // TODO - fix this dumb function
-    @FXML
-    private void handleShowInfo() {
     }
 }

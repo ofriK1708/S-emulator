@@ -9,8 +9,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import org.jetbrains.annotations.NotNull;
 import ui.utils.UIUtils;
 
+import java.util.function.Consumer;
+
+import static ui.utils.UIUtils.showError;
 import static ui.utils.UIUtils.showInfo;
 
 /**
@@ -41,11 +45,23 @@ public class HistoryPanelController {
     private TableColumn<ExecutionResultStatisticsDTO, Number> cycleCountColumn;
 
 
+    private Consumer<@NotNull ExecutionResultStatisticsDTO> onRerunCallback;
+
     @FXML
     public void initialize() {
         setupTableColumns();
 
+        // Enable/disable buttons based on selection
+        showInfoButton.disableProperty().bind(historyTableView.getSelectionModel().selectedItemProperty().isNull());
+        rerunButton.disableProperty().bind(historyTableView.getSelectionModel().selectedItemProperty().isNull());
+
         System.out.println("HistoryPanelController initialized");
+    }
+
+    public void initComponent(ListProperty<@NotNull ExecutionResultStatisticsDTO> userStats,
+                              Consumer<ExecutionResultStatisticsDTO> onRerunCallback) {
+        historyTableView.itemsProperty().bind(userStats);
+        this.onRerunCallback = onRerunCallback;
     }
 
     private void setupTableColumns() {
@@ -61,7 +77,7 @@ public class HistoryPanelController {
                 new SimpleStringProperty(callData.getValue().displayName()));
 
         architectureTypeColumn.setCellValueFactory(callData ->
-                new SimpleStringProperty(callData.getValue().architectureType().name()));
+                new SimpleStringProperty(callData.getValue().architectureType().getSymbol()));
 
         executionLevelColumn.setCellValueFactory(callData ->
                 new SimpleIntegerProperty(callData.getValue().expandLevel()));
@@ -74,17 +90,19 @@ public class HistoryPanelController {
 
     }
 
-    public void initComponent(ListProperty<ExecutionResultStatisticsDTO> userStats) {
-        historyTableView.itemsProperty().bind(userStats);
-    }
-
     public void handleRerun(ActionEvent actionEvent) {
-
+        ExecutionResultStatisticsDTO selectedExecution = historyTableView.getSelectionModel().getSelectedItem();
+        if (selectedExecution == null) {
+            showError("Please select an Execution First");
+            return;
+        }
+        onRerunCallback.accept(selectedExecution);
     }
 
     public void handleShow(ActionEvent actionEvent) {
         ExecutionResultStatisticsDTO selectedExecution = historyTableView.getSelectionModel().getSelectedItem();
         if (selectedExecution == null) {
+            showError("Please select an Execution First");
             return;
         }
 

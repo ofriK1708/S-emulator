@@ -29,17 +29,16 @@ public class UsersPanelController {
     @FXML
     private TableColumn<UserDTO, Number> totalRunsColumn;
     @FXML
-    private Button selectUserButton;
+    private Button clearChoice;
 
+    private @NotNull Runnable onClearSelectionCallback = () -> {
+    };
     private StringProperty selectedUser;
-    private @NotNull String originalUser = "";
 
     @FXML
     public void initialize() {
         setupTableColumns();
-        // Mock data disabled - panel not yet implemented
-        // loadMockData();
-
+        clearChoice.disableProperty().bind(usersTableView.getSelectionModel().selectedItemProperty().isNull());
         System.out.println("UsersPanelController initialized (disabled)");
     }
 
@@ -73,12 +72,12 @@ public class UsersPanelController {
     }
 
     public void initComponent(@NotNull ListProperty<UserDTO> usersList,
-                              @NotNull StringProperty selectedUser,
-                              @NotNull String originalUser) {
+                              @NotNull Runnable onClearSelectionCallback,
+                              @NotNull StringProperty selectedUser) {
 
         usersTableView.itemsProperty().bind(usersList);
         this.selectedUser = selectedUser;
-        this.originalUser = originalUser;
+        this.onClearSelectionCallback = onClearSelectionCallback;
 
         usersTableView.setRowFactory(tv -> {
             TableRow<UserDTO> row = new TableRow<>() {
@@ -101,6 +100,6 @@ public class UsersPanelController {
 
     public void clearSelection() {
         usersTableView.getSelectionModel().clearSelection();
-        selectedUser.set(originalUser);
+        onClearSelectionCallback.run();
     }
 }

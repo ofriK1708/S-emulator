@@ -39,8 +39,8 @@
         </TableView>
 
         <!-- Select User Button (disabled for now) -->
-        <Button fx:id="selectUserButton" disable="true" maxWidth="Infinity" onAction="#clearSelection"
-                styleClass="panel-button, select-button" text="Unselect User"/>
+        <Button fx:id="clearChoice" maxWidth="Infinity" onAction="#clearSelection"
+                styleClass="panel-button, select-button" text="Clear Choice"/>
 
     </VBox>
 

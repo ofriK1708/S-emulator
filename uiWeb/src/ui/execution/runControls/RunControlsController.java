@@ -52,14 +52,14 @@ public class RunControlsController {
     private @NotNull ArchitectureType architectureType = ArchitectureType.ARCHITECTURE_I;
 
     public void initComponent(BiConsumer<ProgramRunType, ArchitectureType> runCallback, Runnable setCallback,
-                              @NotNull BooleanProperty programLoaded, @NotNull BooleanProperty variablesEntered) {
+                              @NotNull BooleanProperty programLoaded, @NotNull BooleanProperty argumentsEntered) {
         this.runCallback = runCallback;
         this.setCallback = setCallback;
 
         setRun.disableProperty().bind(programLoaded.not());
-        runType.disableProperty().bind(programLoaded.not().or(variablesEntered.not()));
-        debugType.disableProperty().bind(programLoaded.not().or(variablesEntered.not()));
-        variablesEntered.addListener((change, oldValue, newValue) -> {
+        runType.disableProperty().bind(programLoaded.not().or(argumentsEntered.not()));
+        debugType.disableProperty().bind(programLoaded.not().or(argumentsEntered.not()));
+        argumentsEntered.addListener((change, oldValue, newValue) -> {
             if (!newValue) {
                 runTypeChosen.set(false);
                 programRunType = null;
@@ -67,10 +67,10 @@ public class RunControlsController {
                 runTypes.selectToggle(null);
             }
         });
-        archI.disableProperty().bind(programLoaded.not().or(variablesEntered.not()));
-        archII.disableProperty().bind(programLoaded.not().or(variablesEntered.not()));
-        archIII.disableProperty().bind(programLoaded.not().or(variablesEntered.not()));
-        archIV.disableProperty().bind(programLoaded.not().or(variablesEntered.not()));
+        archI.disableProperty().bind(programLoaded.not().or(argumentsEntered.not()));
+        archII.disableProperty().bind(programLoaded.not().or(argumentsEntered.not()));
+        archIII.disableProperty().bind(programLoaded.not().or(argumentsEntered.not()));
+        archIV.disableProperty().bind(programLoaded.not().or(argumentsEntered.not()));
         run.disableProperty().bind(runTypeChosen.not().or(archTypeChosen.not()));
     }
 
@@ -137,6 +137,17 @@ public class RunControlsController {
         } else {
             archTypeChosen.set(false);
         }
+    }
+
+    public void setArchitectureType(@NotNull ArchitectureType architectureType) {
+        this.architectureType = architectureType;
+        switch (architectureType) {
+            case ARCHITECTURE_I -> archI.setSelected(true);
+            case ARCHITECTURE_II -> archII.setSelected(true);
+            case ARCHITECTURE_III -> archIII.setSelected(true);
+            case ARCHITECTURE_IV -> archIV.setSelected(true);
+        }
+        archTypeChosen.set(true);
     }
 
 }

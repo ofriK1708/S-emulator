@@ -16,7 +16,6 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
 import ui.dashboard.history.info.ShowRunController;
-import ui.execution.ExecutionController;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,14 +28,7 @@ public class UIUtils {
     public static final String ArgumentResourcePath = "/ui/execution/VariableInputDialog/VariableInputDialog.fxml";
     public static final Comparator<String> programNameComparator =
             Comparator.comparingInt(str -> Integer.parseInt(str.substring(1)));
-    public static boolean showInfoAndSuccess = false;
-    // Reference to AppController for re-run functionality
-    private static ExecutionController executionControllerInstance = null;
-
-    public static void setAppControllerInstance(ExecutionController executionController) {
-        executionControllerInstance = executionController;
-        System.out.println("AppController instance set for UIUtils re-run functionality");
-    }
+    public static boolean showInfoAndSuccess = true;
 
     public static boolean isValidProgramArgument(String arg) {
         try {
@@ -95,7 +87,7 @@ public class UIUtils {
      * SIMPLIFIED: Open Show Run dialog without re-run callback.
      * Re-run functionality is now handled internally by the Show dialog.
      *
-     * @param executionStats      Execution statistics to display
+     * @param executionStats Execution statistics to display
      */
     public static void openShowRunDialog(
             @NotNull ExecutionResultStatisticsDTO executionStats) {
@@ -167,15 +159,6 @@ public class UIUtils {
             variablesList.add(variableDTO);
         }
         return variablesList;
-    }
-
-    public static void executeRerunFromShowDialog(int expandLevel, Map<String, Integer> arguments) {
-        if (executionControllerInstance == null) {
-            throw new IllegalStateException("AppController instance not set in UIUtils");
-        }
-
-        // This should trigger the complete rerun process
-        executionControllerInstance.handleRerunRequest(expandLevel, arguments);
     }
 
     public static void checkIfShouldAnimate(@NotNull TableRow<?> row, boolean isAnimationsOn) {
