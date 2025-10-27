@@ -30,7 +30,7 @@
                                 GridPane.rowIndex="0"/>
 
                     <!-- Bottom-Left: Users History/Statistics Panel -->
-                    <fx:include fx:id="historyPanel" source="history/HistoryPanel.fxml" GridPane.columnIndex="0"
+                    <fx:include fx:id="historyPanel" source="history/table/HistoryPanel.fxml" GridPane.columnIndex="0"
                                 GridPane.rowIndex="1"/>
 
                     <!-- Bottom-Right: Available Functions Panel -->

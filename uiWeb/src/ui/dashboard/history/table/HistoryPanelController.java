@@ -1,13 +1,17 @@
-package ui.dashboard.history;
+package ui.dashboard.history.table;
 
 import dto.engine.ExecutionResultStatisticsDTO;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import ui.utils.UIUtils;
+
+import static ui.utils.UIUtils.showInfo;
 
 /**
  * Controller for the History Panel.
@@ -15,6 +19,10 @@ import javafx.scene.control.TableView;
  */
 public class HistoryPanelController {
 
+    @FXML
+    public Button showInfoButton;
+    @FXML
+    public Button rerunButton;
     @FXML
     private TableView<ExecutionResultStatisticsDTO> historyTableView;
     @FXML
@@ -32,7 +40,6 @@ public class HistoryPanelController {
     @FXML
     private TableColumn<ExecutionResultStatisticsDTO, Number> cycleCountColumn;
 
-    private StringProperty selectedUser;
 
     @FXML
     public void initialize() {
@@ -71,4 +78,25 @@ public class HistoryPanelController {
         historyTableView.itemsProperty().bind(userStats);
     }
 
+    public void handleRerun(ActionEvent actionEvent) {
+
+    }
+
+    public void handleShow(ActionEvent actionEvent) {
+        ExecutionResultStatisticsDTO selectedExecution = historyTableView.getSelectionModel().getSelectedItem();
+        if (selectedExecution == null) {
+            return;
+        }
+
+        try {
+            System.out.println("Show clicked for execution #" + selectedExecution.runNumber());
+            UIUtils.openShowRunDialog(selectedExecution);
+
+
+        } catch (Exception e) {
+            System.err.println("Error opening Show dialog: " + e.getMessage());
+            showInfo("Error displaying execution details: " + e.getMessage());
+        }
+
+    }
 }

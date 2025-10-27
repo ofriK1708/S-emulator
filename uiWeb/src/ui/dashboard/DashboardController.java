@@ -20,7 +20,7 @@ import system.controller.EngineController;
 import system.controller.HttpEngineController;
 import ui.dashboard.functions.FunctionsPanelController;
 import ui.dashboard.header.DashboardHeaderController;
-import ui.dashboard.history.HistoryPanelController;
+import ui.dashboard.history.table.HistoryPanelController;
 import ui.dashboard.programs.ProgramsPanelController;
 import ui.dashboard.users.UsersPanelController;
 import ui.execution.ExecutionController;

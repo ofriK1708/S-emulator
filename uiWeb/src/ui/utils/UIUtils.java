@@ -15,12 +15,15 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
+import ui.dashboard.history.info.ShowRunController;
 import ui.execution.ExecutionController;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+
+import static ui.utils.clientConstants.SHOW_INFO_PATH;
 
 public class UIUtils {
     public static final String ArgumentResourcePath = "/ui/execution/VariableInputDialog/VariableInputDialog.fxml";
@@ -93,22 +96,20 @@ public class UIUtils {
      * Re-run functionality is now handled internally by the Show dialog.
      *
      * @param executionStats      Execution statistics to display
-     * @param finalVariableStates Final variable states from the execution
      */
     public static void openShowRunDialog(
-            @NotNull ExecutionResultStatisticsDTO executionStats,
-            @NotNull Map<String, Integer> finalVariableStates) {
+            @NotNull ExecutionResultStatisticsDTO executionStats) {
 
         try {
             // Load the FXML file for the Show Run dialog
             FXMLLoader loader = new FXMLLoader(
-                    UIUtils.class.getResource("/ui/execution/statistics/ShowRunView.fxml")
+                    UIUtils.class.getResource(SHOW_INFO_PATH)
             );
             Parent root = loader.load();
 
             // Get the controller and initialize it with data
-//            ShowRunController controller = loader.getController();
-//            controller.initializeWithData(executionStats, finalVariableStates);
+            ShowRunController controller = loader.getController();
+            controller.initializeWithData(executionStats);
 
             // Create and configure the dialog stage
             Stage dialogStage = new Stage();
