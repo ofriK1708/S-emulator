@@ -39,51 +39,10 @@ import static utils.ServletConstants.*;
  */
 public class HttpEngineController implements EngineController {
 
-    /**
-     * Registers a new user on the server <strong>asynchronously</strong>.
-     *
-     * @param username   The username of the user to register.
-     * @param onResponse A consumer that will be called with the SystemResponse when the operation is complete.
-     */
-    @Override
-    public void registerUserAsync(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse) {
-        Requests.postRegisterUserAsync(Endpoints.REGISTER_USER, username, new Callback() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                SystemResponse systemResponse = SystemResponse.builder()
-                        .isSuccess(false)
-                        .message("Failed to register user: " + e.getMessage())
-                        .build();
-                onResponse.accept(systemResponse);
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                try (ResponseBody responseBody = response.body()) {
-                    if (response.isSuccessful()) {
-                        String successMessage = getAndValidateBodyString(responseBody);
-
-                        SystemResponse systemResponse = SystemResponse.builder()
-                                .isSuccess(true)
-                                .message(successMessage)
-                                .build();
-                        onResponse.accept(systemResponse);
-                    } else {
-                        String errorMessage = getAndValidateBodyString(responseBody);
-                        SystemResponse systemResponse = SystemResponse.builder()
-                                .isSuccess(false)
-                                .message("Failed to register user: " + errorMessage)
-                                .build();
-                        onResponse.accept(systemResponse);
-                    }
-                }
-            }
-        });
-    }
-
-    private final @NotNull Gson gson = new GsonBuilder().create();
     // region private fields and helpers
     @Nullable String loadedProgramName = null;
+
+    private static final @NotNull Gson gson = new GsonBuilder().create();
 
     /**
      * Validates and retrieves the body string from the response body.
@@ -97,6 +56,18 @@ public class HttpEngineController implements EngineController {
             throw new IOException("Response body is null");
         }
         return responseBody.string();
+    }
+
+    /**
+     * Validates and retrieves the SystemResponse from the response body.
+     *
+     * @param responseBody The response body to validate and retrieve the SystemResponse from.
+     * @return The SystemResponse.
+     * @throws IOException If the response body is null or an I/O error occurs.
+     */
+    public static @NotNull SystemResponse getAndValidateBodySystemResponse(@Nullable ResponseBody responseBody) throws IOException {
+        String bodyString = getAndValidateBodyString(responseBody);
+        return gson.fromJson(bodyString, SystemResponse.class);
     }
 
     /**
@@ -124,7 +95,7 @@ public class HttpEngineController implements EngineController {
     }
     // endregion
 
-    // region EngineController implementation
+    // region load and get program methods
 
     /**
      * Loads a program from an XML file to the server <strong>asynchronously</strong>.
@@ -271,6 +242,145 @@ public class HttpEngineController implements EngineController {
     }
 
     /**
+     * Loads a program by name from the server to be executed.
+     *
+     * @param programName The name of the program to load.
+     * @param onResponse  A consumer that will be called with the SystemResponse when the operation is complete.
+     */
+    @Override
+    public void loadProgramAsync(@NotNull String programName, @NotNull Consumer<SystemResponse> onResponse) {
+        this.loadedProgramName = programName;
+        getBasicProgramAsync(onResponse);
+    }
+
+    /**
+     * Loads a program by name from the server to be executed.
+     * this happens <strong>synchronously</strong>.
+     * <p>
+     * call this with 'pulling' threads or async tasks. <strong>NOT THE JAT!</strong>
+     * </p>
+     *
+     * @param programName The name of the program to load.
+     * @return A ProgramDTO object representing the loaded program.
+     */
+    @Override
+    public ProgramDTO loadProgram(String programName) {
+        this.loadedProgramName = programName;
+        return getBasicProgram();
+    }
+
+    /**
+     * Clears the currently loaded program.
+     */
+    @Override
+    public void clearLoadedProgram() {
+        this.loadedProgramName = null;
+    }
+
+    /**
+     * Gets the program information by expand level from the server.
+     * this happens <strong>synchronously</strong>.
+     * <p>
+     * call this with 'pulling' threads or async tasks. <strong>NOT THE JAT!</strong>
+     * </p>
+     *
+     * @param expandLevel The expand level for the program information.
+     * @return A ProgramDTO object representing the program information.
+     */
+    @Override
+    public ProgramDTO getProgramByExpandLevel(int expandLevel) {
+        String programName = getAndValidateProgramLoaded();
+        try (Response response = Requests
+                .getProgramInfo(Endpoints.GET_PROGRAM_INFO, PROGRAM_BY_EXPAND_LEVEL_INFO, programName, expandLevel)) {
+
+            if (response.isSuccessful()) {
+                String jsonString = getAndValidateBodyString(response.body());
+                return gson.fromJson(jsonString, ProgramDTO.class);
+            } else {
+                String errorMessage = getAndValidateBodyString(response.body());
+                throw new IOException("Failed to get program by expand level: " + errorMessage);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Gets the basic program information from the server.
+     * this happens <strong>synchronously</strong>.
+     * <p>
+     * call this with 'pulling' threads or async tasks. <strong>NOT THE JAT!</strong>
+     * </p>
+     *
+     * @return A ProgramDTO object representing the basic program information.
+     */
+    @Override
+    public ProgramDTO getBasicProgram() {
+        return getProgramByExpandLevel(0);
+    }
+
+    /**
+     * Gets the basic program information from the server <strong>asynchronously</strong>.
+     *
+     * @param onResponse A consumer that will be called with the SystemResponse when the operation is complete.
+     */
+    @Override
+    public void getBasicProgramAsync(@NotNull Consumer<SystemResponse> onResponse) {
+        getProgramByExpandLevelAsync(0, onResponse);
+    }
+
+    /**
+     * Gets the program information by expand level from the server <strong>asynchronously</strong>.
+     *
+     * @param expandLevel The expand level for the program information.
+     * @param onResponse  A consumer that will be called with the SystemResponse when the operation is complete.
+     */
+    @Override
+    public void getProgramByExpandLevelAsync(int expandLevel,
+                                             @NotNull Consumer<SystemResponse> onResponse) {
+        String programName = getAndValidateProgramLoaded();
+        Requests.getProgramInfoAsync(Endpoints.GET_PROGRAM_INFO, PROGRAM_BY_EXPAND_LEVEL_INFO, programName, expandLevel,
+                new Callback() {
+                    @Override
+                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+
+                        SystemResponse systemResponse = SystemResponse.builder()
+                                .isSuccess(false)
+                                .message("Failed to get basic program: " + e.getMessage())
+                                .build();
+
+                        onResponse.accept(systemResponse);
+                    }
+
+                    @Override
+                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                        try (ResponseBody responseBody = response.body()) {
+                            if (response.isSuccessful()) {
+                                String jsonString = getAndValidateBodyString(responseBody);
+                                ProgramDTO programDTO = gson.fromJson(jsonString, ProgramDTO.class);
+
+                                SystemResponse systemResponse = SystemResponse.builder()
+                                        .isSuccess(true)
+                                        .programDTO(programDTO)
+                                        .build();
+                                onResponse.accept(systemResponse);
+                            } else {
+                                String errorMessage = getAndValidateBodyString(responseBody);
+                                SystemResponse systemResponse = SystemResponse.builder()
+                                        .isSuccess(false)
+                                        .message("Failed to get basic program: " + errorMessage)
+                                        .build();
+                                onResponse.accept(systemResponse);
+                            }
+                        }
+                    }
+                });
+    }
+    // endregion
+
+    // region user methods
+
+    /**
      * Gets all users DTO from the server.
      * this happens <strong>synchronously</strong>.
      * <p>
@@ -294,6 +404,7 @@ public class HttpEngineController implements EngineController {
             }
         }
     }
+
 
     /**
      * Gets the user statistics from the server <strong>asynchronously</strong>.
@@ -373,147 +484,97 @@ public class HttpEngineController implements EngineController {
     }
 
     /**
-     * Loads a program by name from the server to be executed.
+     * Registers a new user on the server <strong>asynchronously</strong>.
      *
-     * @param programName The name of the program to load.
-     * @param onResponse  A consumer that will be called with the SystemResponse when the operation is complete.
-     */
-    @Override
-    public void loadProgramAsync(@NotNull String programName, @NotNull Consumer<SystemResponse> onResponse) {
-        this.loadedProgramName = programName;
-        getBasicProgramAsync(onResponse);
-    }
-
-    /**
-     * Loads a program by name from the server to be executed.
-     * this happens <strong>synchronously</strong>.
-     * <p>
-     * call this with 'pulling' threads or async tasks. <strong>NOT THE JAT!</strong>
-     * </p>
-     *
-     * @param programName The name of the program to load.
-     * @return A ProgramDTO object representing the loaded program.
-     */
-    @Override
-    public ProgramDTO loadProgram(String programName) {
-        this.loadedProgramName = programName;
-        return getBasicProgram();
-    }
-
-    /**
-     * Clears the currently loaded program.
-     */
-    @Override
-    public void clearLoadedProgram() {
-        this.loadedProgramName = null;
-    }
-
-    /**
-     * Gets the basic program information from the server <strong>asynchronously</strong>.
-     *
+     * @param username   The username of the user to register.
      * @param onResponse A consumer that will be called with the SystemResponse when the operation is complete.
      */
     @Override
-    public void getBasicProgramAsync(@NotNull Consumer<SystemResponse> onResponse) {
-        getProgramByExpandLevelAsync(0, onResponse);
+    public void registerUserAsync(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse) {
+        Requests.postRegisterUserAsync(Endpoints.REGISTER_USER, username, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                SystemResponse systemResponse = SystemResponse.builder()
+                        .isSuccess(false)
+                        .message("Failed to register user: " + e.getMessage())
+                        .build();
+                onResponse.accept(systemResponse);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+                    if (response.isSuccessful()) {
+                        String successMessage = getAndValidateBodyString(responseBody);
+
+                        SystemResponse systemResponse = SystemResponse.builder()
+                                .isSuccess(true)
+                                .message(successMessage)
+                                .build();
+                        onResponse.accept(systemResponse);
+                    } else {
+                        String errorMessage = getAndValidateBodyString(responseBody);
+                        SystemResponse systemResponse = SystemResponse.builder()
+                                .isSuccess(false)
+                                .message("Failed to register user: " + errorMessage)
+                                .build();
+                        onResponse.accept(systemResponse);
+                    }
+                }
+            }
+        });
     }
 
-    /**
-     * Gets the program information by expand level from the server <strong>asynchronously</strong>.
-     *
-     * @param expandLevel The expand level for the program information.
-     * @param onResponse  A consumer that will be called with the SystemResponse when the operation is complete.
-     */
     @Override
-    public void getProgramByExpandLevelAsync(int expandLevel,
-                                             @NotNull Consumer<SystemResponse> onResponse) {
-        String programName = getAndValidateProgramLoaded();
-        Requests.getProgramInfoAsync(Endpoints.GET_PROGRAM_INFO, PROGRAM_BY_EXPAND_LEVEL_INFO, programName, expandLevel,
+    public void setUserCreditsAsync(@NotNull String username, int credits,
+                                    @NotNull Consumer<SystemResponse> onResponse) {
+        String creditsStr = String.valueOf(credits);
+        Requests.patchUserInfoAsync(Endpoints.UPDATE_USER_INFO, username, UPDATE_CREDITS_INFO, creditsStr,
                 new Callback() {
                     @Override
                     public void onFailure(@NotNull Call call, @NotNull IOException e) {
-
-                        SystemResponse systemResponse = SystemResponse.builder()
-                                .isSuccess(false)
-                                .message("Failed to get basic program: " + e.getMessage())
-                                .build();
-
-                        onResponse.accept(systemResponse);
+                        System.out.println("Failed to update user credits: " + e.getMessage());
                     }
 
                     @Override
                     public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                         try (ResponseBody responseBody = response.body()) {
                             if (response.isSuccessful()) {
-                                String jsonString = getAndValidateBodyString(responseBody);
-                                ProgramDTO programDTO = gson.fromJson(jsonString, ProgramDTO.class);
+                                String successMessage = getAndValidateBodyString(responseBody);
 
                                 SystemResponse systemResponse = SystemResponse.builder()
                                         .isSuccess(true)
-                                        .programDTO(programDTO)
+                                        .message(successMessage)
                                         .build();
+
                                 onResponse.accept(systemResponse);
                             } else {
                                 String errorMessage = getAndValidateBodyString(responseBody);
+
                                 SystemResponse systemResponse = SystemResponse.builder()
                                         .isSuccess(false)
-                                        .message("Failed to get basic program: " + errorMessage)
+                                        .message("Failed to update user credits: " + errorMessage)
                                         .build();
+
                                 onResponse.accept(systemResponse);
                             }
                         }
                     }
                 });
+
+
     }
 
-    /**
-     * Gets the program information by expand level from the server.
-     * this happens <strong>synchronously</strong>.
-     * <p>
-     * call this with 'pulling' threads or async tasks. <strong>NOT THE JAT!</strong>
-     * </p>
-     *
-     * @param expandLevel The expand level for the program information.
-     * @return A ProgramDTO object representing the program information.
-     */
-    @Override
-    public ProgramDTO getProgramByExpandLevel(int expandLevel) {
-        String programName = getAndValidateProgramLoaded();
-        try (Response response = Requests
-                .getProgramInfo(Endpoints.GET_PROGRAM_INFO, PROGRAM_BY_EXPAND_LEVEL_INFO, programName, expandLevel)) {
+    // endregion
 
-            if (response.isSuccessful()) {
-                String jsonString = getAndValidateBodyString(response.body());
-                return gson.fromJson(jsonString, ProgramDTO.class);
-            } else {
-                String errorMessage = getAndValidateBodyString(response.body());
-                throw new IOException("Failed to get program by expand level: " + errorMessage);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Gets the basic program information from the server.
-     * this happens <strong>synchronously</strong>.
-     * <p>
-     * call this with 'pulling' threads or async tasks. <strong>NOT THE JAT!</strong>
-     * </p>
-     *
-     * @return A ProgramDTO object representing the basic program information.
-     */
-    @Override
-    public ProgramDTO getBasicProgram() {
-        return getProgramByExpandLevel(0);
-    }
+    // region run and debug methods
 
     /**
      * Runs the loaded program with the given arguments and expand level <strong>asynchronously</strong>.
      *
      * @param expandLevel      The expand level for the program execution.
      * @param arguments        A map of argument names to their integer values.
-     * @param architectureType
+     * @param architectureType The architecture type for the program execution.
      * @param onResponse       A consumer that will be called with the SystemResponse when the operation is complete.
      */
     @Override
@@ -548,12 +609,8 @@ public class HttpEngineController implements EngineController {
 
                                 onResponse.accept(systemResponse);
                             } else {
-                                String errorMessage = getAndValidateBodyString(responseBody);
-                                SystemResponse systemResponse = SystemResponse.builder()
-                                        .isSuccess(false)
-                                        .message("Failed to run program: " + errorMessage)
-                                        .build();
-                                onResponse.accept(systemResponse);
+                                SystemResponse errorResponse = getAndValidateBodySystemResponse(responseBody);
+                                onResponse.accept(errorResponse);
                             }
                         }
                     }
@@ -566,7 +623,7 @@ public class HttpEngineController implements EngineController {
      *
      * @param expandLevel      The expand level for the debug session.
      * @param arguments        A map of argument names to their integer values.
-     * @param architectureType
+     * @param architectureType The architecture type for the debug session.
      * @param onResponse       A consumer that will be called with the SystemResponse when the operation is complete.
      */
     @Override
@@ -592,12 +649,7 @@ public class HttpEngineController implements EngineController {
                         try (ResponseBody responseBody = response.body()) {
                             if (response.isSuccessful()) {
 
-                                String message = getAndValidateBodyString(responseBody);
-
-                                SystemResponse systemResponse = SystemResponse.builder()
-                                        .isSuccess(true)
-                                        .message(message)
-                                        .build();
+                                SystemResponse systemResponse = getAndValidateBodySystemResponse(responseBody);
 
                                 onResponse.accept(systemResponse);
                             } else {
@@ -660,4 +712,5 @@ public class HttpEngineController implements EngineController {
                 new DebugActionCallback(onResponse));
 
     }
+    // endregion
 }

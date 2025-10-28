@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 import static system.controller.HttpEngineController.getAndValidateBodyString;
+import static system.controller.HttpEngineController.getAndValidateBodySystemResponse;
 
 public class DebugActionCallback implements Callback {
     private final @NotNull Consumer<SystemResponse> onResponse;
@@ -47,7 +48,8 @@ public class DebugActionCallback implements Callback {
 
                 onResponse.accept(systemResponse);
             } else {
-                System.out.println("Failed to step back in debug session: " + response.body());
+                SystemResponse systemResponse = getAndValidateBodySystemResponse(responseBody);
+                onResponse.accept(systemResponse);
             }
         }
     }

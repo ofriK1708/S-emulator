@@ -4,7 +4,9 @@ import com.google.gson.Gson;
 import dto.engine.DebugStateChangeResultDTO;
 import dto.engine.ExecutionResultStatisticsDTO;
 import dto.engine.FullExecutionResultDTO;
+import dto.server.SystemResponse;
 import engine.core.ProgramDebugger;
+import engine.exception.InstructionExecutionException;
 import engine.exception.InsufficientCredits;
 import engine.utils.DebugAction;
 import jakarta.servlet.ServletException;
@@ -82,17 +84,39 @@ public class debugAction extends HttpServlet {
                 }
             }
         } catch (InsufficientCredits insufficientCredits) {
-            user.setRemainingCredits(insufficientCredits.getCreditsLeft());
-            user.clearDebugger();
-            sendErrorMessage(resp, insufficientCredits);
-        } catch (Exception e) {
-            sendErrorMessage(resp, e);
+            String errorMessage = getErrorMessage(insufficientCredits);
+            int creditLeft = insufficientCredits.getCreditsLeft();
+            handelFailedAction(errorMessage, creditLeft, user, resp,
+                    HttpServletResponse.SC_PAYMENT_REQUIRED);
+        } catch (InstructionExecutionException e) {
+            String errorMessage = getErrorMessage(e);
+            int creditsLeft = debugger.getRunningUserCredits();
+            handelFailedAction(errorMessage, creditsLeft, user, resp,
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
-    private void sendErrorMessage(HttpServletResponse resp, Exception e) throws IOException {
-        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        resp.getWriter().println("Error executing debug action: " + e.getMessage());
+    private void handelFailedAction(String errorMessage, int creditsLeft, User user,
+                                    HttpServletResponse resp, int errorStatus) throws IOException {
+        Gson gson = new Gson();
+        SystemResponse errorResponse = getErrorResponse(errorMessage, creditsLeft);
+        user.setRemainingCredits(creditsLeft);
+        user.clearDebugger();
+        resp.setStatus(errorStatus);
+        resp.setContentType("application/json");
+        resp.getWriter().write(gson.toJson(errorResponse));
+    }
+
+    private String getErrorMessage(Exception e) throws IOException {
+        return "Error executing debug action: " + e.getMessage();
+    }
+
+    private SystemResponse getErrorResponse(String errorMessage, int creditsLeft) throws IOException {
+        return SystemResponse.builder()
+                .isSuccess(false)
+                .message(errorMessage)
+                .creditsLeft(creditsLeft)
+                .build();
     }
 
     /**

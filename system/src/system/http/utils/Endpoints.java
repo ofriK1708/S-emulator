@@ -11,5 +11,6 @@ public class Endpoints {
     public static final String GET_ALL_USERS = BASE_URL + "/getAllUsersInSystem";
     public static final String GET_USER_EXECUTION_HISTORY = BASE_URL + "/user/ExecutionStatistics";
     public static final String REGISTER_USER = BASE_URL + "/users/register";
+    public static final String UPDATE_USER_INFO = BASE_URL + "/updateUserInfo";
 
 }

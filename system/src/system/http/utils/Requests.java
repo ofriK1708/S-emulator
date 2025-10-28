@@ -1,5 +1,7 @@
 package system.http.utils;
 
+import com.google.gson.Gson;
+import dto.server.UpdateUserInfoBody;
 import engine.utils.ArchitectureType;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +18,7 @@ public class Requests {
     private final static OkHttpClient HTTP_CLIENT = new OkHttpClient.Builder()
             .cookieJar(cookieManager)
             .build();
+    private final static Gson gson = new Gson();
 
     // TODO - remove this before submission
     static {
@@ -225,6 +228,24 @@ public class Requests {
         return HTTP_CLIENT.newCall(request);
     }
 
+    public static void patchUserInfoAsync(@NotNull String serverEndpoint,
+                                          @NotNull String username,
+                                          @NotNull String infoToUpdate,
+                                          @NotNull String newValue,
+                                          @NotNull Callback callback) {
+        HttpUrl url = safeUrlBuilder(serverEndpoint)
+                .addQueryParameter(USERNAME_PARAM, username)
+                .build();
+
+        UpdateUserInfoBody updateUserInfoBody = new UpdateUserInfoBody(username, infoToUpdate, newValue);
+        String jsonUserInfo = gson.toJson(updateUserInfoBody);
+
+        Request request = getPatchJsonRequest(jsonUserInfo, url);
+
+        Call call = HTTP_CLIENT.newCall(request);
+        call.enqueue(callback);
+    }
+
     /**
      * Sends a POST request to run a program <strong>asynchronously</strong>.
      *
@@ -322,6 +343,14 @@ public class Requests {
         return new Request.Builder()
                 .url(url)
                 .post(body)
+                .build();
+    }
+
+    private static @NotNull Request getPatchJsonRequest(@NotNull String jsonArguments, HttpUrl url) {
+        RequestBody body = RequestBody.create(jsonArguments, MediaType.parse("application/json"));
+        return new Request.Builder()
+                .url(url)
+                .patch(body)
                 .build();
     }
 

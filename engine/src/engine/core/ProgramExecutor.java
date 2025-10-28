@@ -1,5 +1,6 @@
 package engine.core;
 
+import engine.exception.InstructionExecutionException;
 import engine.exception.InsufficientCredits;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,7 +19,7 @@ public class ProgramExecutor {
 
     protected ProgramExecutor(@NotNull List<Instruction> executedInstructions,
                               @NotNull Map<String, Integer> executedContextMap,
-                              int userCredits) {
+                              int userCredits) throws InsufficientCredits, InstructionExecutionException {
         this.executedInstructions = executedInstructions;
         this.executedContextMap = executedContextMap;
         initialUserCredits = runningUserCredits = userCredits;
@@ -29,8 +30,8 @@ public class ProgramExecutor {
             int currentPC = executedContextMap.get(PC_NAME);
             int creditCost = calcCreditCost(instruction, executedContextMap);
             if (runningUserCredits < creditCost) {
-                throw new InsufficientCredits("Insufficient credits to execute instruction" +
-                        instruction.getStringRepresentation() + " at PC=" + currentPC,
+                throw new InsufficientCredits("Insufficient credits to execute instruction\n" +
+                        instruction.getStringRepresentation() + "\n at PC = " + currentPC,
                         runningUserCredits, creditCost);
             }
             runningUserCredits -= creditCost;
@@ -38,9 +39,9 @@ public class ProgramExecutor {
             instruction.execute(executedContextMap);
             return creditCost;
 
-        } catch (Exception e) {
-            throw new RuntimeException("Error executing instruction at PC=" +
-                    executedContextMap.get(PC_NAME) + ": " + e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new InstructionExecutionException("Error executing instruction at PC=" +
+                    executedContextMap.get(PC_NAME) + ": " + e.getMessage(), e, runningUserCredits);
         }
     }
 
@@ -52,5 +53,9 @@ public class ProgramExecutor {
 
     protected int getPC() {
         return executedContextMap.get(PC_NAME);
+    }
+
+    public int getRunningUserCredits() {
+        return runningUserCredits;
     }
 }

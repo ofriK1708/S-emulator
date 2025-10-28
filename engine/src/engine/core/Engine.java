@@ -165,7 +165,7 @@ public class Engine {
         if (userCredits < requiredCredits) {
             throw new InsufficientCredits("Not enough credits to run the program/function at the given architecture " +
                     "type (" + loadedArchitecture + ")",
-                    requiredCredits, userCredits);
+                    userCredits, requiredCredits);
         }
         if (arguments.values().stream().allMatch(value -> (value == null) || (value < 0))) {
             throw new IllegalArgumentException("All arguments must be non-negative integers.");

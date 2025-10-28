@@ -3,7 +3,9 @@ package servlets;
 import com.google.gson.Gson;
 import dto.engine.ExecutionResultStatisticsDTO;
 import dto.engine.FullExecutionResultDTO;
+import dto.server.SystemResponse;
 import engine.core.Engine;
+import engine.exception.InstructionExecutionException;
 import engine.exception.InsufficientCredits;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -56,23 +58,41 @@ public class runProgram extends HttpServlet {
             resp.getWriter().write(gson.toJson(fullExecutionResultDTO));
 
         } catch (InsufficientCredits insufficientCredits) {
-            user.setRemainingCredits(insufficientCredits.getCreditsLeft());
-            writeErrorMessage(resp, insufficientCredits, runAndDebugParams, expandLevel);
-        } catch (Exception e) {
-            writeErrorMessage(resp, e, runAndDebugParams, expandLevel);
+            String errorMessage = getErrorMessage(insufficientCredits, runAndDebugParams, expandLevel);
+            handelFailedRun(resp, HttpServletResponse.SC_PAYMENT_REQUIRED, errorMessage,
+                    insufficientCredits.getCreditsLeft(), user);
+        } catch (InstructionExecutionException e) {
+            String errorMessage = getErrorMessage(e, runAndDebugParams, expandLevel);
+            handelFailedRun(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, errorMessage, e.getRemainingCredits()
+                    , user);
         }
     }
 
-    private void writeErrorMessage(HttpServletResponse resp, Exception e,
+    private void handelFailedRun(HttpServletResponse resp, int statusCode, String errorMessage, int creditsLeft,
+                                 User user) throws IOException {
+        Gson gson = new Gson();
+        user.setRemainingCredits(creditsLeft);
+        resp.setStatus(statusCode);
+        resp.setContentType("application/json");
+        SystemResponse errorResponse = getErrorResponse(errorMessage, creditsLeft);
+        resp.getWriter().write(gson.toJson(errorResponse));
+    }
+
+    private String getErrorMessage(Exception e,
                                    ServletUtils.runAndDebugParams runAndDebugParams, int expandLevel) throws IOException {
-        resp.setContentType("text/plain");
-        String errorMessage = String.format(
+        return String.format(
                 "Error trying to run %s at expand level %d: %s",
                 runAndDebugParams.programName(),
                 expandLevel,
                 e.getMessage()
         );
-        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        resp.getWriter().write(errorMessage);
+    }
+
+    private SystemResponse getErrorResponse(String errorMessage, int creditLeft) throws IOException {
+        return SystemResponse.builder()
+                .isSuccess(false)
+                .message(errorMessage)
+                .creditsLeft(creditLeft)
+                .build();
     }
 }

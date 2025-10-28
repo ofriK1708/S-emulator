@@ -4,12 +4,15 @@ import dto.engine.ExecutionResultStatisticsDTO;
 import dto.server.UserDTO;
 import logic.User;
 import org.jetbrains.annotations.NotNull;
+import utils.ServletUtils;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
+
+import static utils.ServletConstants.UPDATE_CREDITS_INFO;
 
 public class UserManager {
     // region data structures
@@ -53,6 +56,7 @@ public class UserManager {
     }
     // endregion
     // region user management methods
+
     /**
      * Add a new user to the system. keeps the order of insertion (users registration order).
      *
@@ -72,6 +76,7 @@ public class UserManager {
 
     /**
      * Get a user by username.
+     *
      * @param userName the username of the user to retrieve
      * @return the User object if found, null otherwise
      */
@@ -107,6 +112,32 @@ public class UserManager {
             readLock.unlock();
         }
     }
+
+    public void updateUserInfo(String username, String infoToUpdate, String newValue) {
+        // now a small switch statement can later be added to update different info types
+        switch (infoToUpdate) {
+            case UPDATE_CREDITS_INFO -> {
+                writeLock.lock();
+                try {
+                    User user = users.get(username);
+                    if (user != null) {
+                        if (ServletUtils.isCreditAmountValid(newValue)) {
+                            int creditsToSet = Integer.parseInt(newValue);
+                            user.setAvailableCredits(creditsToSet);
+                        } else {
+                            throw new IllegalArgumentException("Invalid credit amount: " + newValue);
+                        }
+                    } else {
+                        throw new IllegalArgumentException("User not found: " + username);
+                    }
+                } finally {
+                    writeLock.unlock();
+                }
+            }
+            default -> throw new IllegalArgumentException("Unknown info to update: " + infoToUpdate);
+        }
+    }
+
 
     // endregion
     // region singleton pattern

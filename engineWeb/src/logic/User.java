@@ -10,7 +10,7 @@ public class User {
     final String name;
     private int mainProgramsUploaded = 0;
     private int subFunctionsContributed = 0;
-    private int currentCredits = Integer.MAX_VALUE; // TODO - change this later to 0, only for testing
+    private int currentCredits = 0;
     private int usedCredits = 0;
     private int totalRuns = 0;
     private @Nullable ProgramDebugger debugger = null;
@@ -86,5 +86,9 @@ public class User {
 
     public int getTotalRuns() {
         return totalRuns;
+    }
+
+    public void setAvailableCredits(int creditsToSet) {
+        this.currentCredits = creditsToSet;
     }
 }

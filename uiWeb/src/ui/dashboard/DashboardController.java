@@ -124,7 +124,7 @@ public class DashboardController {
 
             // Bind user selection across panels
             selectedUser.addListener((obs, oldVal, newVal) -> {
-                if ((oldVal == null && newVal != null) || !oldVal.equals(newVal)) {
+                if ((oldVal == null && newVal != null) || (oldVal != null && !oldVal.equals(newVal))) {
                     userSelected.set(newVal != null && !newVal.isEmpty());
                     System.out.println("Dashboard: User selected - " + newVal);
 
@@ -262,7 +262,7 @@ public class DashboardController {
     /**
      * Load the Execution scene and AppController (lazy initialization)
      */
-    private FXMLLoader loadExecutionLoader() throws Exception {
+    private FXMLLoader loadExecutionLoader() {
         System.out.println("Dashboard: Loading Execution scene...");
 
         FXMLLoader executionLoader = new FXMLLoader();
@@ -308,7 +308,7 @@ public class DashboardController {
         }
         executionController.setUserName(loggedInUserName.get());
         executionController.setScreenTitle("S-Emulator - Execution: " + programName);
-        executionController.setAvailableCredits(availableCredits.get());
+        executionController.setAvailableCredits(availableCredits);
 
         // Set up return-to-dashboard callback
         executionController.setReturnToDashboardCallback(this::transitionToDashboardScreen);
@@ -341,9 +341,17 @@ public class DashboardController {
     /**
      * Handle credits charging
      */
-    private void handleChargeCredits(int amount) {
-        int current = availableCredits.get();
-        availableCredits.set(current + amount);
+    private void handleChargeCredits(int newAmount) {
+        availableCredits.set(newAmount);
+        engineController.setUserCreditsAsync(originalUser, newAmount, (response) -> {
+            if (response.isSuccess()) {
+                Platform.runLater(() -> showSuccess("Credits updated successfully to " + newAmount));
+                System.out.println("Dashboard: Credits updated successfully to " + newAmount);
+            } else {
+                Platform.runLater(() -> showError("Failed to update credits: " + response.message()));
+                System.err.println("Dashboard: Error updating credits - " + response.message());
+            }
+        });
         System.out.println("Dashboard: Credits charged. New balance: " + availableCredits.get());
     }
 
@@ -354,7 +362,7 @@ public class DashboardController {
         System.out.println("Dashboard: Loading history for user '" + username + "'");
         engineController.FetchUserExecutionHistoryAsync(username, (response) -> {
             if (response.isSuccess()) {
-                Platform.runLater(() -> userHistoryListProperty.setAll(response.userStatisticsDTOList()));
+                Platform.runLater(() -> userHistoryListProperty.setAll(response.getSafeUserStatisticsDTOList()));
                 System.out.println("Dashboard: User history loaded successfully for '" + username + "'");
             } else {
                 Platform.runLater(() -> showError("Failed to load user history: " + response.message()));

@@ -1,5 +1,7 @@
 package servlets;
 
+import com.google.gson.Gson;
+import dto.server.SystemResponse;
 import engine.core.Engine;
 import engine.core.ProgramDebugger;
 import jakarta.servlet.ServletException;
@@ -18,6 +20,7 @@ public class startDebugProgram extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (ServletUtils.checkAndHandleUnauthorized(req, resp, getServletContext())) {
             User user = ServletUtils.getUser(req, getServletContext());
+            Gson gson = new Gson();
             if (user == null) {
                 resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 resp.getWriter().write("Error! User is not logged in.");
@@ -34,9 +37,18 @@ public class startDebugProgram extends HttpServlet {
                 ProgramDebugger debugger = engine.startDebugSession(expandLevel, rdp.arguments(),
                         user.getCurrentCredits(), rdp.architectureType());
                 user.setDebugger(debugger);
+                int creditsLeft = debugger.getRunningUserCredits();
+                user.setRemainingCredits(creditsLeft);
                 resp.setStatus(HttpServletResponse.SC_OK);
-                resp.getWriter().println("Debug session for program " + rdp.programName() +
-                        " started successfully");
+
+                SystemResponse response = SystemResponse.builder()
+                        .isSuccess(true)
+                        .message("Debug session for program " + rdp.programName() +
+                                " started successfully")
+                        .creditsLeft(creditsLeft)
+                        .build();
+
+                resp.getWriter().write(gson.toJson(response));
             } catch (Exception e) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.setContentType("text/plain");

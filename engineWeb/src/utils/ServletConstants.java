@@ -47,6 +47,10 @@ public class ServletConstants {
     public static final String WORK_VARS_INFO = "work_vars";
     // endregion
 
+    // region info to update
+    public static final String UPDATE_CREDITS_INFO = "credits";
+    // endregion
+
     // region Debug Actions Names
     public static final String DEBUG_ACTION_STEP_OVER = DebugAction.STEP_OVER.toString();
     public static final String DEBUG_ACTION_STEP_BACK = DebugAction.STEP_BACK.toString();

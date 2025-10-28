@@ -9,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * A response object representing the result of a system operation.
@@ -22,18 +21,17 @@ import java.util.Set;
  * @param debugStateChangeResultDTO An optional DebugStateChangeResultDTO object representing the debug state change
  *                                  result.
  *                                  can be null if not needed.
- * @param allUsersDTO               An optional set of UserDTO objects representing all users in the system.
- *                                  can be null if not needed.
  * @param userStatisticsDTOList     An optional list of ExecutionResultStatisticsDTO objects representing user
  *                                  execution statistics.
  *                                  can be null if not needed.
  * @param fullExecutionResultDTO    A FullExecutionResultDTO object representing the full execution result.
+ * @param creditsLeft               An integer representing the number of credits left for the user
  */
 public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullable ProgramDTO programDTO,
                              @Nullable DebugStateChangeResultDTO debugStateChangeResultDTO,
-                             @Nullable Set<UserDTO> allUsersDTO,
                              @Nullable List<ExecutionResultStatisticsDTO> userStatisticsDTOList,
-                             @Nullable FullExecutionResultDTO fullExecutionResultDTO) {
+                             @Nullable FullExecutionResultDTO fullExecutionResultDTO,
+                             Integer creditsLeft) {
     /**
      * Indicates whether the operation was successful.
      *
@@ -44,23 +42,12 @@ public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullab
     }
 
     /**
-     * Returns the message providing additional information about the operation result.
-     *
-     * @return the message string
-     */
-    @Override
-    public @NotNull String message() {
-        return message;
-    }
-
-    /**
      * Returns the ProgramDTO object associated with the response.
      *
      * @return the ProgramDTO object
      * @throws IllegalStateException if the ProgramDTO is not available in this response
      */
-    @Override
-    public @NotNull ProgramDTO programDTO() {
+    public @NotNull ProgramDTO getSafeProgramDTO() {
         if (programDTO == null) {
             throw new IllegalStateException("ProgramDTO is not available in this response.");
         }
@@ -73,27 +60,13 @@ public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullab
      * @return the DebugStateChangeResultDTO object
      * @throws IllegalStateException if the DebugStateChangeResultDTO is not available in this response
      */
-    @Override
-    public @NotNull DebugStateChangeResultDTO debugStateChangeResultDTO() {
+    public @NotNull DebugStateChangeResultDTO getSafeDebugStateChangeResultDTO() {
         if (debugStateChangeResultDTO == null) {
             throw new IllegalStateException("DebugStateChangeResultDTO is not available in this response.");
         }
         return debugStateChangeResultDTO;
     }
 
-    /**
-     * Returns the set of UserDTO objects representing all users in the system.
-     *
-     * @return the set of UserDTO objects
-     * @throws IllegalStateException if the AllUsersDTO is not available in this response
-     */
-    @Override
-    public @NotNull Set<UserDTO> allUsersDTO() {
-        if (allUsersDTO == null) {
-            throw new IllegalStateException("AllUsersDTO is not available in this response.");
-        }
-        return allUsersDTO;
-    }
 
     /**
      * Returns the list of ExecutionResultStatisticsDTO objects representing user execution statistics.
@@ -101,20 +74,38 @@ public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullab
      * @return the list of ExecutionResultStatisticsDTO objects
      * @throws IllegalStateException if the UserStatisticsDTOList is not available in this response
      */
-    @Override
-    public @NotNull List<ExecutionResultStatisticsDTO> userStatisticsDTOList() {
+    public @NotNull List<ExecutionResultStatisticsDTO> getSafeUserStatisticsDTOList() {
         if (userStatisticsDTOList == null) {
             throw new IllegalStateException("UserStatisticsDTOList is not available in this response.");
         }
         return userStatisticsDTOList;
+
     }
 
-    @Override
-    public @NotNull FullExecutionResultDTO fullExecutionResultDTO() {
+    /**
+     * Returns the FullExecutionResultDTO object associated with the response.
+     *
+     * @return the FullExecutionResultDTO object
+     * @throws IllegalStateException if the FullExecutionResultDTO is not available in this response
+     */
+    public @NotNull FullExecutionResultDTO getSafeFullExecutionResultDTO() {
         if (fullExecutionResultDTO == null) {
             throw new IllegalStateException("FullExecutionResultDTO is not available in this response.");
         }
         return fullExecutionResultDTO;
+    }
+
+    /**
+     * Returns the number of credits left for the user.
+     *
+     * @return the number of credits left
+     * @throws IllegalStateException if the creditsLeft is not available in this response
+     */
+    public @NotNull Integer getSafeCreditLeft() {
+        if (creditsLeft == null) {
+            throw new IllegalStateException("creditsLeft is not available in this response.");
+        }
+        return creditsLeft;
     }
 
     @Contract(value = " -> new", pure = true)
@@ -132,9 +123,9 @@ public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullab
         private @NotNull String message = "";
         private @Nullable ProgramDTO programDTO;
         private @Nullable DebugStateChangeResultDTO debugStateChangeResultDTO;
-        private @Nullable Set<UserDTO> allUsersDTO;
         private @Nullable List<ExecutionResultStatisticsDTO> userStatisticsDTOList;
         private @Nullable FullExecutionResultDTO fullExecutionResultDTO;
+        private @Nullable Integer creditsLeft;
 
         /**
          * Sets the {@link SystemResponse#isSuccess} for the SystemResponse.
@@ -186,18 +177,6 @@ public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullab
             return this;
         }
 
-        /**
-         * Sets the {@link SystemResponse#allUsersDTO} for the SystemResponse
-         *
-         * @param allUsersDTO the set of UserDTO to set
-         * @return the Builder instance
-         * @see UserDTO
-         * @see SystemResponse
-         */
-        public Builder allUsersDTO(@NotNull Set<UserDTO> allUsersDTO) {
-            this.allUsersDTO = allUsersDTO;
-            return this;
-        }
 
         /**
          * Sets the {@link SystemResponse#userStatisticsDTOList} for the SystemResponse
@@ -225,6 +204,11 @@ public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullab
             return this;
         }
 
+        public Builder creditsLeft(@NotNull Integer creditsLeft) {
+            this.creditsLeft = creditsLeft;
+            return this;
+        }
+
         /**
          * Builds and returns the SystemResponse object.
          *
@@ -235,7 +219,7 @@ public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullab
                 throw new IllegalStateException("isSuccess must be set");
             }
             return new SystemResponse(isSuccess, message, programDTO, debugStateChangeResultDTO,
-                    allUsersDTO, userStatisticsDTOList, fullExecutionResultDTO);
+                    userStatisticsDTOList, fullExecutionResultDTO, creditsLeft);
         }
     }
 }

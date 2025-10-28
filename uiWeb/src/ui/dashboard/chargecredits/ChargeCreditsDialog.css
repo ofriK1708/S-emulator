@@ -1,0 +1,65 @@
+.root {
+    -fx-background-color: linear-gradient(to bottom right, #e0f7fa, #b2ebf2);
+    -fx-background-radius: 12px;
+    -fx-padding: 24px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.10), 8, 0, 0, 2);
+}
+
+.final-amount-label {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+.button {
+    -fx-background-radius: 20px;
+    -fx-background-color: linear-gradient(to bottom, #25a5a0, #1e8883);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 24px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 2, 0, 0, 1);
+    -fx-border-width: 0;
+}
+
+.button:hover {
+    -fx-background-color: linear-gradient(to bottom, #2bb8b2, #21968f);
+}
+
+#confirmButton {
+    -fx-background-color: #28a745;
+}
+
+#confirmButton:hover {
+    -fx-background-color: #218838;
+}
+
+#cancelButton {
+    -fx-background-color: #dc3545;
+}
+
+#cancelButton:hover {
+    -fx-background-color: #c82333;
+}
+
+.error-label {
+    -fx-text-fill: #d32f2f;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.text-field {
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #25a5a0;
+    -fx-border-width: 2px;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 14px;
+}
+
+.text-field.error {
+    -fx-border-color: #d32f2f !important;
+    -fx-background-color: #ffebee;
+}

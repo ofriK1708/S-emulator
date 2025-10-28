@@ -2,6 +2,7 @@ package engine.core;
 
 import dto.engine.DebugStateChangeResultDTO;
 import dto.engine.FullExecutionResultDTO;
+import engine.exception.InstructionExecutionException;
 import engine.exception.InsufficientCredits;
 import engine.utils.ArchitectureType;
 import engine.utils.ProgramUtils;
@@ -36,7 +37,6 @@ public class ProgramDebugger extends ProgramExecutor {
     private final @NotNull List<Integer> debugCyclesHistory = new ArrayList<>();
     private @NotNull Map<String, Integer> debugArguments = new HashMap<>();
     private boolean debugMode = false;
-    private int runningUserCredits;
     // endregion
 
     // region class ctor and builder
@@ -93,6 +93,7 @@ public class ProgramDebugger extends ProgramExecutor {
                 ProgramUtils.extractSortedVariables(executedContextMap),
                 getPC(),
                 cyclesCount,
+                runningUserCredits,
                 isDebugFinished()
         );
     }
@@ -131,6 +132,7 @@ public class ProgramDebugger extends ProgramExecutor {
                 ProgramUtils.extractSortedVariables(executedContextMap),
                 getPC(),
                 cyclesCount,
+                runningUserCredits,
                 false // stepping back can never finish the program
         );
     }
@@ -152,6 +154,7 @@ public class ProgramDebugger extends ProgramExecutor {
                 ProgramUtils.extractSortedVariables(executedContextMap),
                 getPC(),
                 cyclesCount,
+                runningUserCredits,
                 true // resume always finishes the program
         );
     }
@@ -165,6 +168,7 @@ public class ProgramDebugger extends ProgramExecutor {
                 ProgramUtils.extractSortedVariables(executedContextMap),
                 getPC(),
                 cyclesCount,
+                runningUserCredits,
                 true // stopping the debug session marks it as finished
         );
     }
@@ -197,7 +201,7 @@ public class ProgramDebugger extends ProgramExecutor {
     }
 
     // region private helpers
-    private void executeStep() {
+    private void executeStep() throws InsufficientCredits, InstructionExecutionException {
         Instruction currentInstruction = executedInstructions.get(executedContextMap.get(PC_NAME));
         int creditCost = executeInstruction(currentInstruction);
         // Save state

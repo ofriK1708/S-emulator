@@ -51,8 +51,6 @@ public class ExecutionController {
     private final BooleanProperty isProgramLoaded = new SimpleBooleanProperty(false);
     private final ListProperty<VariableDTO> allVariablesDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final ListProperty<VariableDTO> previousVariablesDTO =
-            new SimpleListProperty<>(FXCollections.observableArrayList());
     private final ListProperty<VariableDTO> argumentsDTO =
             new SimpleListProperty<>(FXCollections.observableArrayList());
     private final BooleanProperty argumentsLoaded = new SimpleBooleanProperty(false);
@@ -338,21 +336,8 @@ public class ExecutionController {
         currentUserName.set(name);
     }
 
-    public void setAvailableCredits(int credits) {
-        availableCredits.set(credits);
-    }
-
-    @FXML
-    public void handleReturnToDashboard() {
-        if (returnToDashboardCallback != null) {
-            if (inDebugSession) {
-                stopDebugSession();
-            }
-            returnToDashboardCallback.run();
-            System.out.println("Returning to Dashboard...");
-        } else {
-            System.err.println("Return to Dashboard callback not set");
-        }
+    public void setAvailableCredits(IntegerProperty credits) {
+        availableCredits.bindBidirectional(credits);
     }
 
     public void handleRerunRequest(@NotNull ExecutionResultStatisticsDTO executionResultStatisticsDTO) {
@@ -400,6 +385,33 @@ public class ExecutionController {
         derivedInstructionsTableController.highlightVariable(null);
 
         System.out.println("System state reset completed for rerun");
+    }
+
+    public void clearLoadedProgram() {
+        isProgramLoaded.set(false);
+        currentLoadedProgramName.set("");
+        mainProgramName.set("");
+        argumentsLoaded.set(false);
+        maxExpandLevel.set(0);
+        currentExpandLevel.set(0);
+        loadedProgram = null;
+        programArguments.clear();
+
+        programInstructions.clear();
+        derivedInstructions.clear();
+        allVariablesDTO.clear();
+        argumentsDTO.clear();
+        currentCycles.set(0);
+        summaryLineController.clearCounts();
+        instructionsTableController.clearHighlighting();
+        derivedInstructionsTableController.clearHighlighting();
+        programVariablesNamesAndLabels.clear();
+        previousDebugVariables.clear();
+        isFirstDebugStep = true;
+        inDebugSession = false;
+        isProgramRunning.set(false);
+        isProgramFinished.set(false);
+        didProgramRanAtLeastOnce.set(false);
     }
 
     private void bindTitlePanesExpansion() {
@@ -489,13 +501,16 @@ public class ExecutionController {
             if (!systemResponse.isSuccess()) {
                 Platform.runLater(() -> {
                     showError("Error during execution: " + systemResponse.message());
+                    availableCredits.set(systemResponse.getSafeCreditLeft());
+                    handleBackToDashboard();
                 });
             } else {
                 System.out.println("Program executed successfully in regular mode.");
                 Platform.runLater(() -> {
-                    FullExecutionResultDTO resultDTO = systemResponse.fullExecutionResultDTO();
+                    FullExecutionResultDTO resultDTO = systemResponse.getSafeFullExecutionResultDTO();
                     allVariablesDTO.setAll(toVariableDTO(resultDTO.getAllVariablesSorted()));
                     currentCycles.set(resultDTO.cycleCount());
+                    availableCredits.set(availableCredits.get() - resultDTO.creditsCost());
                     updatePropertiesAfterExecuting();
                 });
             }
@@ -526,11 +541,11 @@ public class ExecutionController {
                 Platform.runLater(() -> showError("Error expanding program: " + SystemResponse.message()));
             } else {
                 Platform.runLater(() -> {
-                    loadedProgram = SystemResponse.programDTO();
+                    loadedProgram = SystemResponse.getSafeProgramDTO();
                     programInstructions.setAll(loadedProgram.instructions());
                     summaryLineController.updateCounts(loadedProgram.instructions());
                     programVariablesNamesAndLabels.setAll(loadedProgram.allVariablesIncludingLabelsNames());
-                    showInfo("Program expanded to level " + expandLevel);
+                    System.out.println("Program expanded to level " + expandLevel + " successfully.");
 
                 });
             }
@@ -575,9 +590,7 @@ public class ExecutionController {
                         handleExecutionFinished();
                     });
                 } else {
-                    Platform.runLater(() -> {
-                        showError("Error stopping debug session: " + systemResponse.message());
-                    });
+                    Platform.runLater(() -> showError("Error stopping debug session: " + systemResponse.message()));
                 }
             });
         } catch (Exception e) {
@@ -593,12 +606,13 @@ public class ExecutionController {
             if (!systemResponse.isSuccess()) {
                 Platform.runLater(() -> {
                     showError("Error starting debug session: " + systemResponse.message());
-                    endDebugSession();
+                    endUnsuccessfulDebugSession(systemResponse);
                 });
             } else {
                 Platform.runLater(() -> {
                     inDebugSession = true;
                     highlightCurrentInstruction(0);
+                    availableCredits.set(systemResponse.getSafeCreditLeft());
                 });
             }
         });
@@ -633,20 +647,15 @@ public class ExecutionController {
             if (!systemResponse.isSuccess()) {
                 Platform.runLater(() -> {
                     showError("Error during debug step: " + systemResponse.message());
-                    endDebugSession();
+                    endUnsuccessfulDebugSession(systemResponse);
                 });
             } else {
-                Platform.runLater(() -> {
-                    afterDebugAction(systemResponse);
-                });
+                Platform.runLater(() -> afterDebugAction(systemResponse));
             }
         });
 
         if (isFirstDebugStep) {
             isFirstDebugStep = false;
-        }
-        if (isDebugFinished) {
-            handleExecutionFinished();
         }
     }
 
@@ -677,12 +686,19 @@ public class ExecutionController {
     }
 
     private void afterDebugAction(SystemResponse systemResponse) {
-        DebugStateChangeResultDTO stateChangeResultDTO = systemResponse.debugStateChangeResultDTO();
+        DebugStateChangeResultDTO stateChangeResultDTO = systemResponse.getSafeDebugStateChangeResultDTO();
         int currentPC = stateChangeResultDTO.debugPC();
         highlightCurrentInstruction(currentPC);
         currentCycles.set(stateChangeResultDTO.debugCycles());
         updateDebugVariableState(stateChangeResultDTO.allVarsValue());
         isDebugFinished = stateChangeResultDTO.isFinished();
+        if (isDebugFinished) {
+            handleExecutionFinished();
+        } else {
+            availableCredits.set(stateChangeResultDTO.creditLeft());
+            System.out.println("Debug step completed - PC: " + currentPC + ", Cycles: " +
+                    stateChangeResultDTO.debugCycles() + ", Credits left: " + stateChangeResultDTO.creditLeft());
+        }
     }
 
     private void updateDebugVariableState(Map<String, Integer> allVarsAfterStep) {
@@ -728,6 +744,12 @@ public class ExecutionController {
         }
     }
 
+    private void endUnsuccessfulDebugSession(SystemResponse systemResponse) {
+        stopDebugSession();
+        availableCredits.set(systemResponse.getSafeCreditLeft());
+        handleBackToDashboard();
+    }
+
     private void endDebugSession() {
         inDebugSession = false;
         isInDebugMode.set(false);
@@ -746,16 +768,10 @@ public class ExecutionController {
     @FXML
     private void handleBackToDashboard() {
         if (returnToDashboardCallback != null) {
-            if (inDebugSession) {
-                try {
-                    stopDebugSession();
-                } catch (Exception e) {
-                    System.err.println("Error stopping debug session: " + e.getMessage());
-                }
-            }
             if (stage != null) {
                 stage.close();
             }
+            clearLoadedProgram();
             returnToDashboardCallback.run();
             System.out.println("Returning to Dashboard from execution screen...");
         } else {

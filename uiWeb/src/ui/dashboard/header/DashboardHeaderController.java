@@ -3,14 +3,23 @@ package ui.dashboard.header;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
+import ui.dashboard.chargecredits.ChargeCreditsDialogController;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.function.Consumer;
+
+import static ui.utils.UIUtils.showError;
 
 /**
  * Controller for the Dashboard header bar.
@@ -28,7 +37,8 @@ public class DashboardHeaderController {
     private Button chargeCreditsButton;
 
     private Consumer<File> onLoadFile;
-    private Runnable onChargeCredits;
+    private Consumer<Integer> onChargeCredits;
+    private IntegerProperty availableCredits;
 
     /**
      * Initialize the header with callbacks and bindings
@@ -45,7 +55,8 @@ public class DashboardHeaderController {
             @NotNull Consumer<Integer> onChargeCredits) {
 
         this.onLoadFile = onLoadFile;
-        this.onChargeCredits = () -> onChargeCredits.accept(50);
+        this.onChargeCredits = onChargeCredits;
+        this.availableCredits = availableCredits;
 
         // Bind username, file path, and credits fields to properties
         userNameLabel.textProperty().bind(loggedInUserName);
@@ -73,9 +84,35 @@ public class DashboardHeaderController {
 
     @FXML
     private void handleChargeCredits() {
-        if (onChargeCredits != null) {
-            System.out.println("DashboardHeader: Charge Credits clicked");
-            onChargeCredits.run();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/dashboard/chargecredits" +
+                    "/ChargeCreditsDialog.fxml"));
+            Parent root = loader.load();
+
+            ChargeCreditsDialogController controller = loader.getController();
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Charge Credits");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(chargeCreditsButton.getScene().getWindow());
+            Scene scene = new Scene(root);
+            dialogStage.setScene(scene);
+            controller.init(availableCredits.get(), dialogStage);
+
+            dialogStage.showAndWait();
+
+            Integer result = (Integer) dialogStage.getUserData();
+            if (result != null) {
+                if (onChargeCredits != null) {
+                    System.out.println("DashboardHeader: Charging credits - " + result);
+                    onChargeCredits.accept(result);
+                }
+            } else {
+                showError("credit charging failed");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -62,4 +62,6 @@ public interface EngineController {
     SystemResponse registerUser(@NotNull String username) throws IOException;
 
     void registerUserAsync(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse);
+
+    void setUserCreditsAsync(@NotNull String username, int credits, @NotNull Consumer<SystemResponse> onResponse);
 }

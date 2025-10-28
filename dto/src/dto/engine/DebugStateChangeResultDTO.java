@@ -17,5 +17,6 @@ import java.util.Map;
  * @param isFinished   A boolean flag indicating whether the program execution has finished.
  */
 public record DebugStateChangeResultDTO(@NotNull Map<String, Integer> allVarsValue, int debugPC, int debugCycles,
+                                        int creditLeft,
                                         boolean isFinished) {
 }

@@ -84,6 +84,20 @@ public class ServletUtils {
         return true;
     }
     /**
+     * Validates if the provided credit amount string represents a valid positive integer.
+     * @param creditAmount The credit amount as a string.
+     * @return true if the credit amount is a valid positive integer, false otherwise.
+     */
+    public static boolean isCreditAmountValid(String creditAmount) {
+        try {
+            int amount = Integer.parseInt(creditAmount);
+            return amount > 0;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    /**
      * Extracts and validates 'displayName' and 'expandLevel' parameters from the request.
      * @param req: The HTTP request
      * @param resp: The HTTP response

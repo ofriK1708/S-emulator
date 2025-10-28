@@ -2,6 +2,8 @@ package engine.core;
 
 
 import dto.engine.ExecutionResultValuesDTO;
+import engine.exception.InstructionExecutionException;
+import engine.exception.InsufficientCredits;
 import engine.utils.ProgramUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +49,7 @@ public class ProgramRunner extends ProgramExecutor {
     }
 
     @Contract(pure = true)
-    public @NotNull ExecutionResultValuesDTO run() {
+    public @NotNull ExecutionResultValuesDTO run() throws InstructionExecutionException, InsufficientCredits {
         while (executedContextMap.get(PC_NAME) < executedInstructions.size()) {
             executeInstruction(executedInstructions.get(executedContextMap.get(PC_NAME)));
         }
