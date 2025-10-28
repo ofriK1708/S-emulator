@@ -1,5 +1,6 @@
 package dto.engine;
 
+import engine.utils.ArchitectureType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -19,5 +20,6 @@ public record ProgramDTO(@NotNull String ProgramName,
                          @NotNull Map<String, Integer> arguments,
                          @NotNull List<String> allVariablesIncludingLabelsNames,
                          int maxExpandLevel,
+                         ArchitectureType minimumArchitectureTypeNeeded,
                          @NotNull List<InstructionDTO> instructions) {
 }

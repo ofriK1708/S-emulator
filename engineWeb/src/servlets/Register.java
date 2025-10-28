@@ -25,7 +25,6 @@ public class Register extends HttpServlet {
         }
         username = username.trim();
         UserManager userManager = ServletUtils.getUserManager(getServletContext());
-        resp.setContentType("text/plain");
         synchronized (this) {
             if (userManager.isUserExists(username)) {
                 resp.setStatus(HttpServletResponse.SC_CONFLICT);
@@ -37,7 +36,6 @@ public class Register extends HttpServlet {
                         ServletUtils.getExecutionHistoryManager(getServletContext());
                 executionHistoryManager.initUserHistory(username);
                 resp.setStatus(HttpServletResponse.SC_OK);
-                resp.setContentType("text/plain");
                 resp.getWriter().println("user " + username + " has been successfully registered.");
                 req.getSession().setAttribute(USERNAME_PARAM, username);
             }

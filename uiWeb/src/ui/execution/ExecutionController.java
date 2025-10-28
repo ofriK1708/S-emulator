@@ -82,6 +82,8 @@ public class ExecutionController {
     private final StringProperty currentUserName = new SimpleStringProperty("Guest User");
     private final StringProperty screenTitle = new SimpleStringProperty("S-Emulator Execution");
     private final IntegerProperty availableCredits = new SimpleIntegerProperty(0);
+    private final ObjectProperty<ArchitectureType> minimumArchitectureTypeNeeded =
+            new SimpleObjectProperty<>(ArchitectureType.ARCHITECTURE_I);
 
 
     @FXML
@@ -171,7 +173,9 @@ public class ExecutionController {
             runControlsController.initComponent(this::RunProgram,
                     this::prepareForTakingArguments,
                     isProgramLoaded,
-                    argumentsLoaded
+                    argumentsLoaded,
+                    minimumArchitectureTypeNeeded,
+                    this::highlightArchitectureInstructions
             );
             cyclesController.initComponent(currentCycles);
 
@@ -319,6 +323,7 @@ public class ExecutionController {
                         mainProgramName.set(program.ProgramName());
                         currentLoadedProgramName.set(program.ProgramName());
                         isProgramLoaded.set(true);
+                        minimumArchitectureTypeNeeded.set(program.minimumArchitectureTypeNeeded());
                         if (executionResultStatisticsDTO != null) {
                             handleRerunRequest(executionResultStatisticsDTO);
                         }
@@ -501,7 +506,9 @@ public class ExecutionController {
             if (!systemResponse.isSuccess()) {
                 Platform.runLater(() -> {
                     showError("Error during execution: " + systemResponse.message());
-                    availableCredits.set(systemResponse.getSafeCreditLeft());
+                    if (systemResponse.isCreditsIncluded()) {
+                        availableCredits.set(systemResponse.creditsLeft());
+                    }
                     handleBackToDashboard();
                 });
             } else {
@@ -579,6 +586,14 @@ public class ExecutionController {
     private void highlightCurrentInstruction(int instructionIndex) {
         instructionsTableController.highlightCurrentInstruction(instructionIndex);
     }
+
+    public void highlightArchitectureInstructions(@Nullable ArchitectureType selectedArchitecture) {
+        if (selectedArchitecture == null) {
+            instructionsTableController.clearArchitectureHighlighting();
+        } else {
+            instructionsTableController.highlightArchitectureInstructions(selectedArchitecture);
+        }
+    }
     // DEBUG METHODS
 
     public void stopDebugSession() {
@@ -612,7 +627,9 @@ public class ExecutionController {
                 Platform.runLater(() -> {
                     inDebugSession = true;
                     highlightCurrentInstruction(0);
-                    availableCredits.set(systemResponse.getSafeCreditLeft());
+                    if (systemResponse.isCreditsIncluded()) {
+                        availableCredits.set(systemResponse.creditsLeft());
+                    }
                 });
             }
         });
@@ -677,9 +694,7 @@ public class ExecutionController {
                     endUnsuccessfulDebugSession(systemResponse);
                 });
             } else {
-                Platform.runLater(() -> {
-                    afterDebugAction(systemResponse);
-                });
+                Platform.runLater(() -> afterDebugAction(systemResponse));
             }
         });
     }
@@ -736,7 +751,9 @@ public class ExecutionController {
 
     private void endUnsuccessfulDebugSession(SystemResponse systemResponse) {
         endDebugSession();
-        availableCredits.set(systemResponse.getSafeCreditLeft());
+        if (systemResponse.isCreditsIncluded()) {
+            availableCredits.set(systemResponse.creditsLeft());
+        }
         handleBackToDashboard();
     }
 

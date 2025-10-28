@@ -14,6 +14,8 @@ import utils.ServletUtils;
 
 import java.io.IOException;
 
+import static utils.ServletConstants.PLAIN_TEXT_CONTENT_TYPE;
+
 @WebServlet(name = "startDebugProgram", urlPatterns = "/debugger/start")
 public class startDebugProgram extends HttpServlet {
     @Override
@@ -51,7 +53,7 @@ public class startDebugProgram extends HttpServlet {
                 resp.getWriter().write(gson.toJson(response));
             } catch (Exception e) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                resp.setContentType("text/plain");
+                resp.setContentType(PLAIN_TEXT_CONTENT_TYPE);
                 String errorMessage = String.format(
                         "Error trying to start debug session for %s at expand level %d: %s",
                         rdp.programName(),

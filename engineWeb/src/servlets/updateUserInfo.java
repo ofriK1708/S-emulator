@@ -12,10 +12,13 @@ import utils.ServletUtils;
 
 import java.io.IOException;
 
+import static utils.ServletConstants.PLAIN_TEXT_CONTENT_TYPE;
+
 @WebServlet(name = "updateUserInfo", urlPatterns = {"/updateUserInfo"})
 public class updateUserInfo extends HttpServlet {
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Gson gson = new Gson();
+        resp.setContentType(PLAIN_TEXT_CONTENT_TYPE);
         UserManager uManger = ServletUtils.getUserManager(getServletContext());
         UpdateUserInfoBody updateUserInfoBody = gson.fromJson(req.getReader(), UpdateUserInfoBody.class);
         if (isInvalidRequest(updateUserInfoBody, uManger, resp)) {

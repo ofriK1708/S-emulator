@@ -122,20 +122,10 @@ public class HttpEngineController implements EngineController {
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 try (ResponseBody responseBody = response.body()) {
                     if (response.isSuccessful()) {
-                        String successMessage = getAndValidateBodyString(responseBody);
-                        SystemResponse systemResponse = SystemResponse.builder()
-                                .isSuccess(true)
-                                .message(successMessage)
-                                .build();
-                        onResponse.accept(systemResponse);
+                        handelStringSuccess(responseBody, onResponse);
 
                     } else {
-                        String errorMessage = getAndValidateBodyString(responseBody);
-                        SystemResponse systemResponse = SystemResponse.builder()
-                                .isSuccess(false)
-                                .message("Failed to upload program: " + errorMessage)
-                                .build();
-                        onResponse.accept(systemResponse);
+                        handelFailedRequest(response, responseBody, onResponse);
                     }
                 }
             }
@@ -365,12 +355,7 @@ public class HttpEngineController implements EngineController {
                                         .build();
                                 onResponse.accept(systemResponse);
                             } else {
-                                String errorMessage = getAndValidateBodyString(responseBody);
-                                SystemResponse systemResponse = SystemResponse.builder()
-                                        .isSuccess(false)
-                                        .message("Failed to get basic program: " + errorMessage)
-                                        .build();
-                                onResponse.accept(systemResponse);
+                                handelFailedRequest(response, responseBody, onResponse);
                             }
                         }
                     }
@@ -440,12 +425,7 @@ public class HttpEngineController implements EngineController {
 
                         onResponse.accept(systemResponse);
                     } else {
-                        String errorMessage = getAndValidateBodyString(responseBody);
-                        SystemResponse systemResponse = SystemResponse.builder()
-                                .isSuccess(false)
-                                .message("Failed to get user statistics: " + errorMessage)
-                                .build();
-                        onResponse.accept(systemResponse);
+                        handelFailedRequest(response, responseBody, onResponse);
                     }
                 }
             }
@@ -505,20 +485,9 @@ public class HttpEngineController implements EngineController {
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 try (ResponseBody responseBody = response.body()) {
                     if (response.isSuccessful()) {
-                        String successMessage = getAndValidateBodyString(responseBody);
-
-                        SystemResponse systemResponse = SystemResponse.builder()
-                                .isSuccess(true)
-                                .message(successMessage)
-                                .build();
-                        onResponse.accept(systemResponse);
+                        handelStringSuccess(responseBody, onResponse);
                     } else {
-                        String errorMessage = getAndValidateBodyString(responseBody);
-                        SystemResponse systemResponse = SystemResponse.builder()
-                                .isSuccess(false)
-                                .message("Failed to register user: " + errorMessage)
-                                .build();
-                        onResponse.accept(systemResponse);
+                        handelFailedRequest(response, responseBody, onResponse);
                     }
                 }
             }
@@ -540,29 +509,26 @@ public class HttpEngineController implements EngineController {
                     public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                         try (ResponseBody responseBody = response.body()) {
                             if (response.isSuccessful()) {
-                                String successMessage = getAndValidateBodyString(responseBody);
-
-                                SystemResponse systemResponse = SystemResponse.builder()
-                                        .isSuccess(true)
-                                        .message(successMessage)
-                                        .build();
-
-                                onResponse.accept(systemResponse);
+                                handelStringSuccess(responseBody, onResponse);
                             } else {
-                                String errorMessage = getAndValidateBodyString(responseBody);
-
-                                SystemResponse systemResponse = SystemResponse.builder()
-                                        .isSuccess(false)
-                                        .message("Failed to update user credits: " + errorMessage)
-                                        .build();
-
-                                onResponse.accept(systemResponse);
+                                handelFailedRequest(response, responseBody, onResponse);
                             }
                         }
                     }
                 });
 
 
+    }
+
+    private void handelStringSuccess(ResponseBody responseBody, @NotNull Consumer<SystemResponse> onResponse) throws IOException {
+        String successMessage = getAndValidateBodyString(responseBody);
+
+        SystemResponse systemResponse = SystemResponse.builder()
+                .isSuccess(true)
+                .message(successMessage)
+                .build();
+
+        onResponse.accept(systemResponse);
     }
 
     // endregion
@@ -609,8 +575,7 @@ public class HttpEngineController implements EngineController {
 
                                 onResponse.accept(systemResponse);
                             } else {
-                                SystemResponse errorResponse = getAndValidateBodySystemResponse(responseBody);
-                                onResponse.accept(errorResponse);
+                                handelFailedRequest(response, responseBody, onResponse);
                             }
                         }
                     }
@@ -651,27 +616,48 @@ public class HttpEngineController implements EngineController {
                                 SystemResponse systemResponse = getAndValidateBodySystemResponse(responseBody);
                                 onResponse.accept(systemResponse);
                             } else {
-                                String contentType = response.header("Content-Type");
-                                String bodyString = getAndValidateBodyString(responseBody);
-
-                                // Check if the content type is JSON
-                                if (contentType != null && contentType.contains("application/json")) {
-                                    // If it's JSON, parse it as a SystemResponse object.
-                                    SystemResponse errorResponse = gson.fromJson(bodyString, SystemResponse.class);
-                                    onResponse.accept(errorResponse);
-                                } else {
-                                    // Otherwise, treat it as a plain text error message.
-                                    System.out.println("Failed to start debug session: " + bodyString);
-                                    SystemResponse errorResponse = SystemResponse.builder()
-                                            .isSuccess(false)
-                                            .message(bodyString)
-                                            .build();
-                                    onResponse.accept(errorResponse);
-                                }
+                                handelFailedRequest(response, responseBody, onResponse);
                             }
                         }
                     }
                 });
+    }
+
+    /**
+     * Handles a failed HTTP request by checking the content type and parsing the response body accordingly.
+     *
+     * @param response     The HTTP response.
+     * @param responseBody The response body.
+     * @param onResponse   A consumer that will be called with the SystemResponse.
+     * @throws IOException If an I/O error occurs.
+     */
+    private void handelFailedRequest(@NotNull Response response, ResponseBody responseBody,
+                                     @NotNull Consumer<SystemResponse> onResponse) throws IOException {
+        String contentType = response.header(CONTENT_TYPE_HEADER);
+        String bodyString = getAndValidateBodyString(responseBody);
+
+        // Check if the content type is JSON
+        if (contentType != null && contentType.contains(JSON_CONTENT_TYPE)) {
+            // If it's JSON, parse it as a SystemResponse object.
+            SystemResponse errorResponse = gson.fromJson(bodyString, SystemResponse.class);
+            onResponse.accept(errorResponse);
+        } else if (contentType != null && contentType.contains(PLAIN_TEXT_CONTENT_TYPE)) {
+            // check if it's plain text
+            System.out.println("Failed to start debug session: " + bodyString);
+            SystemResponse errorResponse = SystemResponse.builder()
+                    .isSuccess(false)
+                    .message(bodyString)
+                    .build();
+            onResponse.accept(errorResponse);
+        } else {
+            // Fallback for unknown content types
+            System.out.println("Failed to start debug session with unknown content type: " + bodyString);
+            SystemResponse errorResponse = SystemResponse.builder()
+                    .isSuccess(false)
+                    .message("Failed with unknown content type: " + bodyString)
+                    .build();
+            onResponse.accept(errorResponse);
+        }
     }
 
     /**

@@ -50,6 +50,11 @@ public class ServletConstants {
     // region info to update
     public static final String UPDATE_CREDITS_INFO = "credits";
     // endregion
+    // region Content Types
+    public static final String JSON_CONTENT_TYPE = "application/json";
+    public static final String PLAIN_TEXT_CONTENT_TYPE = "text/plain";
+    public static final String CONTENT_TYPE_HEADER = "Content-Type";
+    // endregion
 
     // region Debug Actions Names
     public static final String DEBUG_ACTION_STEP_OVER = DebugAction.STEP_OVER.toString();

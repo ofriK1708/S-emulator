@@ -17,7 +17,7 @@ import static utils.ServletConstants.*;
 public class getSystemInfo extends HttpServlet {
     @Override
     protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType("text/html;charset=utf-8");
+        resp.setContentType(PLAIN_TEXT_CONTENT_TYPE);
         resp.getWriter().println(getAllSystemInfoOptionsNames());
         resp.setStatus(HttpServletResponse.SC_OK);
     }
@@ -28,12 +28,13 @@ public class getSystemInfo extends HttpServlet {
             String infoToGet = req.getParameter(INFO_PARAM);
             if (infoToGet == null) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.setContentType(PLAIN_TEXT_CONTENT_TYPE);
                 resp.getWriter().println("item parameter is missing or invalid, available options are: " +
                         getAllSystemInfoOptionsNames() + ".");
                 return;
             }
             Gson gson = new Gson();
-            resp.setContentType("application/json");
+            resp.setContentType(JSON_CONTENT_TYPE);
             ProgramManager pm = ServletUtils.getProgramManager(getServletContext());
             switch (infoToGet) {
                 case PROGRAMS_METADATA_INFO -> {
@@ -58,11 +59,12 @@ public class getSystemInfo extends HttpServlet {
                 }
                 case ALL_USERS_INFO -> {
                     UserManager userManager = ServletUtils.getUserManager(getServletContext());
-                    resp.setContentType("application/json");
+                    resp.setContentType(JSON_CONTENT_TYPE);
                     resp.getWriter().write(gson.toJson(userManager.getAllUsersDTO()));
                 }
                 default -> {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    resp.setContentType(PLAIN_TEXT_CONTENT_TYPE);
                     resp.getWriter().println("item parameter is missing or invalid");
                 }
             }

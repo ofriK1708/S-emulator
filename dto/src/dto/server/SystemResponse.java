@@ -95,17 +95,8 @@ public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullab
         return fullExecutionResultDTO;
     }
 
-    /**
-     * Returns the number of credits left for the user.
-     *
-     * @return the number of credits left
-     * @throws IllegalStateException if the creditsLeft is not available in this response
-     */
-    public @NotNull Integer getSafeCreditLeft() {
-        if (creditsLeft == null) {
-            throw new IllegalStateException("creditsLeft is not available in this response.");
-        }
-        return creditsLeft;
+    public boolean isCreditsIncluded() {
+        return creditsLeft != null;
     }
 
     @Contract(value = " -> new", pure = true)

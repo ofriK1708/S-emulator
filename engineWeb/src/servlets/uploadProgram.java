@@ -1,6 +1,5 @@
 package servlets;
 
-import com.google.gson.Gson;
 import engine.generated_2.SProgram;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -19,6 +18,9 @@ import utils.ServletUtils;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static utils.ServletConstants.JSON_CONTENT_TYPE;
+import static utils.ServletConstants.PLAIN_TEXT_CONTENT_TYPE;
+
 
 @WebServlet(name = "uploadProgram", urlPatterns = "/uploadProgram")
 @MultipartConfig
@@ -28,13 +30,13 @@ public class uploadProgram extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         User user = ServletUtils.getUser(req, getServletContext());
+        resp.setContentType(PLAIN_TEXT_CONTENT_TYPE);
         if (user == null) {
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.getWriter().write("Error! User is not logged in.");
             return;
         }
         SProgram sProgram = getSProgramFromRequest(req, resp);
-        Gson json = new Gson();
         if (sProgram != null) {
             ProgramManager programManager = ServletUtils.getProgramManager(getServletContext());
             String programName = sProgram.getName();
@@ -51,7 +53,7 @@ public class uploadProgram extends HttpServlet {
                         // Validate sProgram by trying to create an engine - check for label not exists, etc.
                         programManager.addProgram(programName, sProgram, user);
                         resp.setStatus(HttpServletResponse.SC_OK);
-                        resp.setContentType("application/json");
+                        resp.setContentType(JSON_CONTENT_TYPE);
                         resp.getWriter().println("Program " + programName + " uploaded successfully.");
                         System.out.println("Program " + programName + " uploaded successfully.");
 
@@ -74,11 +76,11 @@ public class uploadProgram extends HttpServlet {
             return xmlHandler.unmarshallFile(xmlFilePart.getInputStream());
         } catch (JAXBException e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.setContentType("text/plain");
+            resp.setContentType(PLAIN_TEXT_CONTENT_TYPE);
             resp.getWriter().println("Failed to parse XML file: " + e.getMessage());
             return null;
         } catch (ServletException | IOException e) {
-            resp.setContentType("text/plain");
+            resp.setContentType(PLAIN_TEXT_CONTENT_TYPE);
             resp.getWriter().println("Failed to process uploaded file: " + e.getMessage());
             return null;
         }

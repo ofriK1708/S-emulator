@@ -18,7 +18,7 @@ import static utils.ServletConstants.*;
 public class getProgramInfo extends HttpServlet {
     @Override
     protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("text/html;charset=utf-8");
+        resp.setContentType(PLAIN_TEXT_CONTENT_TYPE);
         resp.getWriter().write(getAllProgramInfoOptionsNames());
 
     }
@@ -30,6 +30,7 @@ public class getProgramInfo extends HttpServlet {
             Gson gson = new Gson();
             String programName = req.getParameter(PROGRAM_NAME_PARAM);
             ProgramManager pm = ServletUtils.getProgramManager(req.getServletContext());
+            resp.setContentType(PLAIN_TEXT_CONTENT_TYPE); // default content type
             if (programName == null || programName.isEmpty()) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().println("program name parameter is missing or invalid");
@@ -43,11 +44,11 @@ public class getProgramInfo extends HttpServlet {
                 return;
             }
             Engine currentEngine = pm.getProgramOrFunctionEngine(programName);
-            resp.setContentType("application/json;charset=UTF-8");
             if (isExpandLevelRequired(infoToGet)) {
                 expandLevel = getAndValidateExpandLevel(req, resp, currentEngine);
             }
             resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setContentType(JSON_CONTENT_TYPE); // set content type to JSON for valid responses
             System.out.println("current program: " + currentEngine.getProgramName() + ", info requested: " + infoToGet);
 
             switch (infoToGet) {
@@ -75,6 +76,7 @@ public class getProgramInfo extends HttpServlet {
 
                 default -> {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    resp.setContentType(PLAIN_TEXT_CONTENT_TYPE);
                     resp.getWriter().println("Info parameter is missing or invalid, if you want to see all available " +
                             "options," +
                             "please send an OPTIONS request to this URL");

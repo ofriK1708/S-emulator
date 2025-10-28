@@ -234,6 +234,7 @@ public class Engine {
                 getSortedArgumentsMap(),
                 new ArrayList<>(instructionSequence.getAllVariablesAndLabelsNamesSorted(expandLevel)),
                 instructionSequence.getMaxExpandLevel(),
+                instructionSequence.getMinimumArchitectureTypeNeededAtExpandLevel(expandLevel),
                 IntStream.range(0, instructionsAtLevel.size())
                         .mapToObj(i -> instructionsAtLevel.get(i).toDTO(i))
                         .toList()

@@ -12,7 +12,7 @@ import utils.ServletUtils;
 
 import java.io.IOException;
 
-import static utils.ServletConstants.USERNAME_PARAM;
+import static utils.ServletConstants.*;
 
 @WebServlet(name = "getUserStatistics", urlPatterns = "/user/ExecutionStatistics")
 public class getUserExecutionStatistics extends HttpServlet {
@@ -22,15 +22,19 @@ public class getUserExecutionStatistics extends HttpServlet {
         String username = req.getParameter(USERNAME_PARAM);
         UserManager userManager = ServletUtils.getUserManager(getServletContext());
         if (userManager.isUserExists(username)) {
-            resp.setContentType("application/json");
+            resp.setContentType(JSON_CONTENT_TYPE);
             resp.getWriter().println(gson.toJson(userManager.getUserStatisticsDTO(username)));
+        } else {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.setContentType(PLAIN_TEXT_CONTENT_TYPE);
+            resp.getWriter().println("User " + username + " does not exist!");
         }
     }
 
     @Override
     protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType("text/plain;charset=utf-8");
+        resp.setContentType(PLAIN_TEXT_CONTENT_TYPE);
         resp.getWriter().println(ServletConstants.getAllUsersOptionsNames());
     }
 }

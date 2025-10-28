@@ -861,3 +861,41 @@
     -fx-text-fill: -fx-debug-resume-bright;
     -fx-effect: dropshadow(gaussian, #00f80088, 6, 0.4, 0, 2);
 }
+
+/* Red for inadequate architecture */
+.table-row-cell.highlighted-row-inadequate-architecture {
+    -fx-background-color: rgba(255, 0, 0, 0.15); /* Red with opacity */
+    -fx-border-color: rgba(255, 0, 0, 0.4);
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.table-row-cell.highlighted-row-inadequate-architecture:hover {
+    -fx-background-color: rgba(255, 0, 0, 0.25);
+    -fx-border-color: rgba(255, 0, 0, 0.6);
+}
+
+.table-row-cell.highlighted-row-inadequate-architecture:selected {
+    -fx-background-color: rgba(255, 0, 0, 0.35);
+    -fx-text-background-color: white;
+}
+
+/* Green for suffice architecture */
+.table-row-cell.highlighted-row-suffice-architecture {
+    -fx-background-color: rgba(0, 255, 0, 0.15); /* Green with opacity */
+    -fx-border-color: rgba(0, 255, 0, 0.4);
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.table-row-cell.highlighted-row-suffice-architecture:hover {
+    -fx-background-color: rgba(0, 255, 0, 0.25);
+    -fx-border-color: rgba(0, 255, 0, 0.6);
+}
+
+.table-row-cell.highlighted-row-suffice-architecture:selected {
+    -fx-background-color: rgba(0, 255, 0, 0.35);
+    -fx-text-background-color: white;
+}

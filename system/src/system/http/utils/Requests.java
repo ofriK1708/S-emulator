@@ -339,7 +339,7 @@ public class Requests {
      * @return The constructed Request object.
      */
     private static @NotNull Request getPostJsonRequest(@NotNull String jsonArguments, HttpUrl url) {
-        RequestBody body = RequestBody.create(jsonArguments, MediaType.parse("application/json"));
+        RequestBody body = RequestBody.create(jsonArguments, MediaType.parse(JSON_CONTENT_TYPE));
         return new Request.Builder()
                 .url(url)
                 .post(body)
@@ -347,7 +347,7 @@ public class Requests {
     }
 
     private static @NotNull Request getPatchJsonRequest(@NotNull String jsonArguments, HttpUrl url) {
-        RequestBody body = RequestBody.create(jsonArguments, MediaType.parse("application/json"));
+        RequestBody body = RequestBody.create(jsonArguments, MediaType.parse(JSON_CONTENT_TYPE));
         return new Request.Builder()
                 .url(url)
                 .patch(body)

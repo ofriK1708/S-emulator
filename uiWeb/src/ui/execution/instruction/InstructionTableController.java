@@ -1,6 +1,7 @@
 package ui.execution.instruction;
 
 import dto.engine.InstructionDTO;
+import engine.utils.ArchitectureType;
 import javafx.animation.FadeTransition;
 import javafx.beans.property.*;
 import javafx.fxml.FXML;
@@ -42,6 +43,8 @@ public class InstructionTableController {
     public void markAsDerivedInstructionsTable() {
         isDerivedMap = true;
     }
+
+    private ArchitectureType currentSelectedArchitectureType;
 
     @FXML
     public void initialize() {
@@ -141,6 +144,7 @@ public class InstructionTableController {
         if (item != null) {
             boolean instructionContainsVariable = instructionContainsVariable(item, currentHighlightedVariable);
             boolean debugInstructionHighlight = (row.getIndex() == highlightedInstructionIndex);
+            boolean shouldHighlightForArchitecture = currentSelectedArchitectureType != null;
 
             // Apply/remove variable highlighting
             if (instructionContainsVariable) {
@@ -159,6 +163,23 @@ public class InstructionTableController {
                 }
             } else {
                 row.getStyleClass().removeAll("highlighted-row-debug");
+            }
+            if (shouldHighlightForArchitecture) {
+                // it the instruction's architecture type is greater than the current selected architecture type,
+                // it means the instruction cannot be executed on the current architecture
+                if (item.architectureType().compareTo(currentSelectedArchitectureType) > 0) {
+                    if (!row.getStyleClass().contains("highlighted-row-inadequate-architecture")) {
+                        row.getStyleClass().add("highlighted-row-inadequate-architecture");
+                    }
+                } else {
+                    if (!row.getStyleClass().contains("highlighted-row-suffice-architecture")) {
+                        row.getStyleClass().add("highlighted-row-suffice-architecture");
+                    }
+                }
+
+            } else {
+                row.getStyleClass().removeAll("highlighted-row-suffice-architecture", "highlighted-row-inadequate" +
+                        "-architecture");
             }
         }
     }
@@ -191,6 +212,16 @@ public class InstructionTableController {
 
     public void clearAllDebugHighlighting() {
         highlightedInstructionIndex = -1;
+        instructionTable.refresh();
+    }
+
+    public void highlightArchitectureInstructions(@NotNull ArchitectureType architectureType) {
+        this.currentSelectedArchitectureType = architectureType;
+        instructionTable.refresh();
+    }
+
+    public void clearArchitectureHighlighting() {
+        this.currentSelectedArchitectureType = null;
         instructionTable.refresh();
     }
 }

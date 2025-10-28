@@ -22,8 +22,7 @@ import utils.ServletUtils;
 
 import java.io.IOException;
 
-import static utils.ServletConstants.DEBUG_ACTION_PARAM;
-import static utils.ServletConstants.getAllDebugActionsOptions;
+import static utils.ServletConstants.*;
 
 @WebServlet(name = "debugAction", urlPatterns = "/debugger/action")
 public class debugAction extends HttpServlet {
@@ -31,6 +30,7 @@ public class debugAction extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // Get the user from the session and validate
         User user = ServletUtils.getUser(req, getServletContext());
+        resp.setContentType(PLAIN_TEXT_CONTENT_TYPE);
         if (user == null) {
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.getWriter().println("You must be logged in to perform debug actions.");
@@ -61,6 +61,7 @@ public class debugAction extends HttpServlet {
         }
 
         DebugStateChangeResultDTO stateChange;
+        resp.setContentType(JSON_CONTENT_TYPE);
         try {
             switch (debugAction) {
                 case STEP_OVER -> {
@@ -104,7 +105,7 @@ public class debugAction extends HttpServlet {
         user.setRemainingCredits(creditsLeft);
         user.clearDebugger();
         resp.setStatus(errorStatus);
-        resp.setContentType("application/json");
+        resp.setContentType(JSON_CONTENT_TYPE);
         resp.getWriter().write(gson.toJson(errorResponse));
     }
 
@@ -160,7 +161,6 @@ public class debugAction extends HttpServlet {
             throws IOException {
         Gson gson = new Gson();
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType("application/json");
         resp.getWriter().write(gson.toJson(stateChange));
     }
 
