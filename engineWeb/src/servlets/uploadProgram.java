@@ -46,7 +46,7 @@ public class uploadProgram extends HttpServlet {
                     resp.setStatus(HttpServletResponse.SC_CONFLICT);
                     String fileName = req.getPart(XML_FILE_PART_NAME).getSubmittedFileName();
                     resp.getWriter().println("Failed to upload the File \"" + fileName + "\"! " +
-                            "A sProgram with the name \"" + programName + "\" already " +
+                            "A program with the name \"" + programName + "\" already " +
                             "exists in the server, please choose a different name or file.");
                 } else {
                     try {
@@ -59,7 +59,7 @@ public class uploadProgram extends HttpServlet {
 
                     } catch (Exception e) {
                         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        resp.getWriter().println("Failed to upload sProgram " + programName + ": " + e.getMessage());
+                        resp.getWriter().println("Failed to upload program " + programName + ": " + e.getMessage());
                         System.out.println(Arrays.toString(e.getStackTrace()));
                     }
                 }

@@ -113,7 +113,7 @@ public class HttpEngineController implements EngineController {
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 SystemResponse systemResponse = SystemResponse.builder()
                         .isSuccess(false)
-                        .message("Failed to upload program: " + e.getMessage())
+                        .message(e.getMessage())
                         .build();
                 onResponse.accept(systemResponse);
             }
@@ -151,7 +151,7 @@ public class HttpEngineController implements EngineController {
                 System.out.println("Program uploaded successfully: " + successMessage);
             } else {
                 String errorMessage = getAndValidateBodyString(response.body());
-                throw new IOException("Failed to upload program: " + errorMessage);
+                throw new IOException(errorMessage);
             }
         }
     }
@@ -643,7 +643,7 @@ public class HttpEngineController implements EngineController {
             onResponse.accept(errorResponse);
         } else if (contentType != null && contentType.contains(PLAIN_TEXT_CONTENT_TYPE)) {
             // check if it's plain text
-            System.out.println("Failed to start debug session: " + bodyString);
+            System.out.println(bodyString);
             SystemResponse errorResponse = SystemResponse.builder()
                     .isSuccess(false)
                     .message(bodyString)
@@ -651,10 +651,10 @@ public class HttpEngineController implements EngineController {
             onResponse.accept(errorResponse);
         } else {
             // Fallback for unknown content types
-            System.out.println("Failed to start debug session with unknown content type: " + bodyString);
+            System.out.println("Failed, unknown content type: " + bodyString);
             SystemResponse errorResponse = SystemResponse.builder()
                     .isSuccess(false)
-                    .message("Failed with unknown content type: " + bodyString)
+                    .message(bodyString)
                     .build();
             onResponse.accept(errorResponse);
         }

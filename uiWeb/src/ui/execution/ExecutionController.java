@@ -206,36 +206,10 @@ public class ExecutionController {
             }
 
             initializeExecutionHeader();
-            initializeExecutionActionButtons();
             System.out.println("AppController initialized with cleaned architecture");
         } else {
             System.err.println("One or more controllers are not injected properly!");
             throw new IllegalStateException("FXML injection failed: required controllers are null.");
-        }
-    }
-
-    private void initializeExecutionActionButtons() {
-        if (rerunButton != null && showInfoButton != null) {
-            // Rerun button: enabled when program has finished execution and we have arguments
-            rerunButton.disableProperty().bind(
-                    isProgramFinished.not()
-                            .or(argumentsDTO.emptyProperty())
-                            .or(isProgramLoaded.not())
-            );
-
-            // Show Info button: enabled when program has run at least once
-            showInfoButton.disableProperty().bind(
-                    didProgramRanAtLeastOnce.not()
-            );
-
-            // Bind the execution actions pane expansion
-            executionActionsTitledPane.expandedProperty().bind(
-                    Bindings.and(isProgramLoaded, didProgramRanAtLeastOnce)
-            );
-
-            System.out.println("Execution action buttons initialized and bound");
-        } else {
-            System.err.println("Execution action buttons not injected!");
         }
     }
 

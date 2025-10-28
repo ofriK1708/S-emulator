@@ -34,7 +34,7 @@
 
             <placeholder>
                 <Label styleClass="placeholder-text"
-                       text="No execution history available.\nSelect a user to view their statistics."/>
+                       text="No execution history available. Select a user to view their statistics."/>
             </placeholder>
             <columnResizePolicy>
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>

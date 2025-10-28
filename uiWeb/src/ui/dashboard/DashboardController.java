@@ -224,7 +224,6 @@ public class DashboardController {
                         } else {
                             fileLoaded.set(false);
                             programLoaded.set(false);
-                            showError("File loading failed: " + file.getName());
                         }
                         loadingStage.close();
                     }));

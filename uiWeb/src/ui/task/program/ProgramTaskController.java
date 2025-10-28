@@ -65,7 +65,7 @@ public class ProgramTaskController {
             onFinish.accept(false);
         });
         task.setOnFailed(e -> {
-            UIUtils.showError("Failed to upload the program file: " + task.getException().getMessage());
+            UIUtils.showError(task.getException().getMessage());
             onFinish.accept(false);
         });
     }
@@ -76,7 +76,7 @@ public class ProgramTaskController {
         task.setOnSucceeded(e -> uiAdapter.onFinish().accept(task.getValue()));
         task.setOnCancelled(e -> uiAdapter.onFinish().accept(null));
         task.setOnFailed(e -> {
-            UIUtils.showError("Failed to load the program: " + task.getException().getMessage());
+            UIUtils.showError(task.getException().getMessage());
             uiAdapter.onFinish().accept(null);
         });
     }

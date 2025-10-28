@@ -41,7 +41,7 @@
 
             <placeholder>
                 <Label styleClass="placeholder-text"
-                       text="No functions available.\nLoad a programDTO file to view functions."/>
+                       text="No functions available. Load a program file to view functions."/>
             </placeholder>
             <columnResizePolicy>
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
