@@ -70,12 +70,12 @@
                                                  scaleY="2.0"/>
                                     </graphic>
                                     <toggleGroup>
-                                        <ToggleGroup fx:id="ArchType"/>
+                                        <ToggleGroup fx:id="archType"/>
                                     </toggleGroup>
                                 </ToggleButton>
                                 <ToggleButton fx:id="archII" mnemonicParsing="false" onAction="#selectArchII"
                                               prefHeight="35.0" prefWidth="54.0" styleClass="button-green-black"
-                                              toggleGroup="$ArchType">
+                                              toggleGroup="$archType">
                                     <graphic>
                                         <SVGPath content="M11 7v2h-1v6h1v2H7v-2h1V9H7V7zm6 0v2h-1v6h1v2h-4v-2h1V9h-1V7z"
                                                  fill="#00f800" scaleX="2.0" scaleY="2.0"/>
@@ -83,7 +83,7 @@
                                 </ToggleButton>
                                 <ToggleButton fx:id="archIII" mnemonicParsing="false" onAction="#selectArchIII"
                                               prefHeight="35.0" prefWidth="54.0" styleClass="button-green-black"
-                                              toggleGroup="$ArchType">
+                                              toggleGroup="$archType">
                                     <graphic>
                                         <SVGPath
                                                 content="M9 7v2H8v6h1v2H5v-2h1V9H5V7zm5 0v2h-1v6h1v2h-4v-2h1V9h-1V7zm5 0v2h-1v6h1v2h-4v-2h1V9h-1V7z"
@@ -92,7 +92,7 @@
                                 </ToggleButton>
                                 <ToggleButton fx:id="archIV" mnemonicParsing="false" onAction="#selectArchIV"
                                               prefHeight="35.0" prefWidth="54.0" styleClass="button-green-black"
-                                              toggleGroup="$ArchType">
+                                              toggleGroup="$archType">
                                     <graphic>
                                         <SVGPath content="m12 7l2 10h2l2-10h-2l-1 5l-1-5zm-1 0v2h-1v6h1v2H7v-2h1V9H7V7z"
                                                  fill="#00f800" scaleX="2.0" scaleY="2.0"/>

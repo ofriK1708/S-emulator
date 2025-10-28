@@ -51,6 +51,10 @@ public class ProgramExecutor {
         return instruction.getCycles();
     }
 
+    public int getCreditCost() {
+        return initialUserCredits - runningUserCredits;
+    }
+
     protected int getPC() {
         return executedContextMap.get(PC_NAME);
     }

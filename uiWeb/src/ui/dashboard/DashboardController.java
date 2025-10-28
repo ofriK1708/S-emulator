@@ -183,7 +183,7 @@ public class DashboardController {
         );
 
         // Programs panel: set engine and execution callback
-        programsPanelController.initComponent(this::handleLoadProgramOrFunctionToExecution,
+        programsPanelController.initComponent(this::handleLoadProgramToExecution,
                 programsMetadataListProperty// Navigation happens here
         );
 
@@ -257,6 +257,16 @@ public class DashboardController {
             System.err.println("Dashboard: Error executing program - " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void handleLoadProgramToExecution(@NotNull String programName, float avgCreditCost) {
+        if (availableCredits.get() < avgCreditCost) {
+            showError("Insufficient credits to execute the program. you have " + availableCredits.get() +
+                    " but average cost is " + avgCreditCost + " Please charge more credits.");
+            System.out.println("Dashboard: Insufficient credits to execute program '" + programName + "'");
+            return;
+        }
+        handleLoadProgramOrFunctionToExecution(programName);
     }
 
     /**

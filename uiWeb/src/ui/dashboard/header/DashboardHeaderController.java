@@ -104,8 +104,11 @@ public class DashboardHeaderController {
             Integer result = (Integer) dialogStage.getUserData();
             if (result != null) {
                 if (onChargeCredits != null) {
-                    System.out.println("DashboardHeader: Charging credits - " + result);
-                    onChargeCredits.accept(result);
+                    // Only charge if the amount has changed
+                    if (availableCredits.get() != result) {
+                        System.out.println("DashboardHeader: Charging credits - " + result);
+                        onChargeCredits.accept(result);
+                    }
                 }
             } else {
                 showError("credit charging failed");

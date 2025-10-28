@@ -35,7 +35,7 @@ public class RunControlsController {
     final BooleanProperty archTypeChosen = new SimpleBooleanProperty(false);
     private final @NotNull BooleanProperty debugModeActive = new SimpleBooleanProperty(false);
     @FXML
-    public ToggleGroup ArchType;
+    public ToggleGroup archType;
     @Nullable ProgramRunType programRunType;
 
     @FXML
@@ -65,6 +65,7 @@ public class RunControlsController {
                 programRunType = null;
                 debugModeActive.set(false);
                 runTypes.selectToggle(null);
+                archType.selectToggle(null);
             }
         });
         archI.disableProperty().bind(programLoaded.not().or(argumentsEntered.not()));

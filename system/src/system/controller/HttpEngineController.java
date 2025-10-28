@@ -648,13 +648,26 @@ public class HttpEngineController implements EngineController {
                     public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                         try (ResponseBody responseBody = response.body()) {
                             if (response.isSuccessful()) {
-
                                 SystemResponse systemResponse = getAndValidateBodySystemResponse(responseBody);
-
                                 onResponse.accept(systemResponse);
                             } else {
-                                String errorMessage = getAndValidateBodyString(responseBody);
-                                System.out.println("Failed to start debug session: " + errorMessage);
+                                String contentType = response.header("Content-Type");
+                                String bodyString = getAndValidateBodyString(responseBody);
+
+                                // Check if the content type is JSON
+                                if (contentType != null && contentType.contains("application/json")) {
+                                    // If it's JSON, parse it as a SystemResponse object.
+                                    SystemResponse errorResponse = gson.fromJson(bodyString, SystemResponse.class);
+                                    onResponse.accept(errorResponse);
+                                } else {
+                                    // Otherwise, treat it as a plain text error message.
+                                    System.out.println("Failed to start debug session: " + bodyString);
+                                    SystemResponse errorResponse = SystemResponse.builder()
+                                            .isSuccess(false)
+                                            .message(bodyString)
+                                            .build();
+                                    onResponse.accept(errorResponse);
+                                }
                             }
                         }
                     }

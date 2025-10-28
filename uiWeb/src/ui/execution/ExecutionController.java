@@ -587,7 +587,7 @@ public class ExecutionController {
                 if (systemResponse.isSuccess()) {
                     Platform.runLater(() -> {
                         showInfo("Debug session stopped.");
-                        handleExecutionFinished();
+                        endDebugSession();
                     });
                 } else {
                     Platform.runLater(() -> showError("Error stopping debug session: " + systemResponse.message()));
@@ -606,7 +606,7 @@ public class ExecutionController {
             if (!systemResponse.isSuccess()) {
                 Platform.runLater(() -> {
                     showError("Error starting debug session: " + systemResponse.message());
-                    endUnsuccessfulDebugSession(systemResponse);
+                    handleBackToDashboard();
                 });
             } else {
                 Platform.runLater(() -> {
@@ -674,12 +674,11 @@ public class ExecutionController {
             if (!systemResponse.isSuccess()) {
                 Platform.runLater(() -> {
                     showError("Error during debug resume: " + systemResponse.message());
-                    endDebugSession();
+                    endUnsuccessfulDebugSession(systemResponse);
                 });
             } else {
                 Platform.runLater(() -> {
-                    isDebugFinished = true; // resume always finishes the program
-                    handleExecutionFinished();
+                    afterDebugAction(systemResponse);
                 });
             }
         });
@@ -693,7 +692,7 @@ public class ExecutionController {
         updateDebugVariableState(stateChangeResultDTO.allVarsValue());
         isDebugFinished = stateChangeResultDTO.isFinished();
         if (isDebugFinished) {
-            handleExecutionFinished();
+            endDebugSession();
         } else {
             availableCredits.set(stateChangeResultDTO.creditLeft());
             System.out.println("Debug step completed - PC: " + currentPC + ", Cycles: " +
@@ -735,17 +734,8 @@ public class ExecutionController {
         );
     }
 
-    private void handleExecutionFinished() {
-        try {
-            endDebugSession();
-        } catch (Exception e) {
-            System.err.println("Error handling execution completion: " + e.getMessage());
-            showError("Error completing execution: " + e.getMessage());
-        }
-    }
-
     private void endUnsuccessfulDebugSession(SystemResponse systemResponse) {
-        stopDebugSession();
+        endDebugSession();
         availableCredits.set(systemResponse.getSafeCreditLeft());
         handleBackToDashboard();
     }
@@ -756,6 +746,7 @@ public class ExecutionController {
         isProgramRunning.set(false);
         isProgramFinished.set(true);
         previousDebugVariables.clear();
+        isDebugFinished = false;
         isFirstDebugStep = true;
         didProgramRanAtLeastOnce.set(true);
         debugControlsController.notifyDebugSessionEnded();

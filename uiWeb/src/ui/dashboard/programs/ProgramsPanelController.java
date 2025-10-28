@@ -11,7 +11,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 /**
  * Controller for the Programs Panel.
@@ -38,7 +38,7 @@ public class ProgramsPanelController {
     @FXML
     private Button executeProgramButton;
 
-    private Consumer<String> executeProgramCallback;
+    private BiConsumer<String, Float> executeProgramCallback;
 
     @FXML
     public void initialize() {
@@ -73,7 +73,7 @@ public class ProgramsPanelController {
     /**
      * Initialize component with necessary dependencies
      */
-    public void initComponent(@NotNull Consumer<String> executeProgramCallback,
+    public void initComponent(@NotNull BiConsumer<String, Float> executeProgramCallback,
                               ListProperty<ProgramMetadata> availableProgramsProperty) {
 
         this.executeProgramCallback = executeProgramCallback;
@@ -92,10 +92,12 @@ public class ProgramsPanelController {
         ProgramMetadata selectedProgram = programsTableView.getSelectionModel().getSelectedItem();
         if (selectedProgram != null && executeProgramCallback != null) {
             String programName = selectedProgram.name();
+            float avgCredits = selectedProgram.averageCreditsCost();
             System.out.println("Execute program requested: " + programName);
-            executeProgramCallback.accept(programName);
+            executeProgramCallback.accept(programName, avgCredits);
         }
     }
+
     /**
      * Clear all programs from the table
      */

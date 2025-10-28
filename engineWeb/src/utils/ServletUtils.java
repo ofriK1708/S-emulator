@@ -91,7 +91,7 @@ public class ServletUtils {
     public static boolean isCreditAmountValid(String creditAmount) {
         try {
             int amount = Integer.parseInt(creditAmount);
-            return amount > 0;
+            return amount >= 0;
         } catch (NumberFormatException e) {
             return false;
         }

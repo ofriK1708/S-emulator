@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import logic.User;
 import logic.manager.ExecutionHistoryManager;
+import logic.manager.ProgramManager;
 import org.jetbrains.annotations.NotNull;
 import utils.ServletUtils;
 
@@ -107,7 +108,7 @@ public class debugAction extends HttpServlet {
         resp.getWriter().write(gson.toJson(errorResponse));
     }
 
-    private String getErrorMessage(Exception e) throws IOException {
+    private @NotNull String getErrorMessage(@NotNull Exception e) {
         return "Error executing debug action: " + e.getMessage();
     }
 
@@ -125,14 +126,19 @@ public class debugAction extends HttpServlet {
      * @param stateChange The result of the debug state change.
      * @param debugger    The program debugger instance
      * @param user        The user performing the debug action.
-     * @throws IOException If an I/O error occurs during logging.
      */
     private void checkIfDebugEnded(@NotNull DebugStateChangeResultDTO stateChange,
                                    @NotNull ProgramDebugger debugger,
-                                   @NotNull User user) throws IOException {
+                                   @NotNull User user) {
         if (stateChange.isFinished()) {
             ExecutionHistoryManager executionHistoryManager = ServletUtils.
                     getExecutionHistoryManager(getServletContext());
+            ProgramManager programManager = ServletUtils.getProgramManager(getServletContext());
+            programManager.getProgramOrFunctionEngine(
+                            debugger.getProgramName())
+                    .addExecutionStats(
+                            debugger.getCreditCost()
+                    );
             FullExecutionResultDTO fullExecutionResult = debugger.getDebugFinishedExecutionResult();
             executionHistoryManager.addExecutionResult(
                     user.getName(),

@@ -142,6 +142,11 @@ public class Engine {
                 .build();
     }
 
+    public void addExecutionStats(int creditsCost) {
+        averageCreditsCost = calcAverageCredits(creditsCost);
+        numberOfExecutions++;
+    }
+
     /**
      * Validates if the program/function can be run at the given expand level and architecture type,
      * checks if all the arguments are non-negative integers, and returns the credit cost required to run it.
