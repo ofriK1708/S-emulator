@@ -1,4 +1,4 @@
-package ui.dashboard.chargecredits;
+package ui.dashboard.chargeCredits;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -69,15 +69,15 @@ public class ChargeCreditsDialogController {
     private void setCustomAmount() {
         try {
             int customAmount = Integer.parseInt(customAmountField.getText());
-            if (customAmount > 0) {
+            if (customAmount >= 0) {
                 finalAmount = customAmount;
                 updateFinalAmountLabel();
                 hideError();
             } else {
-                showError("Please enter a positive integer.");
+                showError("Invalid amount. Please enter a non-negative integer.");
             }
         } catch (NumberFormatException e) {
-            showError("Invalid amount. Please enter a positive integer.");
+            showError("Invalid amount. Please enter a non-negative integer.");
         }
     }
 

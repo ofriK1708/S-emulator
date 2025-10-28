@@ -59,10 +59,7 @@ public class ProgramTaskController {
 
     private void bindUploadTaskToUIComponents(@NotNull UploadFileToSystemTask task, Consumer<Boolean> onFinish) {
         bindUIComponents(task);
-        task.setOnSucceeded(e -> {
-            UIUtils.showSuccess("Program file uploaded successfully.");
-            onFinish.accept(true);
-        });
+        task.setOnSucceeded(e -> onFinish.accept(true));
         task.setOnCancelled(e -> {
             UIUtils.showInfo("Program file upload cancelled.");
             onFinish.accept(false);

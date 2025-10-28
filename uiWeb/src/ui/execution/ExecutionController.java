@@ -362,7 +362,7 @@ public class ExecutionController {
                 " and arguments: " + previousArguments);
 
         resetForRerun();
-        expandProgramToLevel(expandLevel);
+        expandProgramToLevel(expandLevel, true);
 
         programArguments.clear();
         programArguments.putAll(previousArguments);
@@ -408,8 +408,8 @@ public class ExecutionController {
         argumentsDTO.clear();
         currentCycles.set(0);
         summaryLineController.clearCounts();
-        instructionsTableController.clearHighlighting();
-        derivedInstructionsTableController.clearHighlighting();
+        instructionsTableController.clearAllHighlighting();
+        derivedInstructionsTableController.clearAllHighlighting();
         programVariablesNamesAndLabels.clear();
         previousDebugVariables.clear();
         isFirstDebugStep = true;
@@ -532,6 +532,11 @@ public class ExecutionController {
     }
 
     public void expandProgramToLevel(int expandLevel) {
+        expandProgramToLevel(expandLevel, false);
+    }
+
+
+    public void expandProgramToLevel(int expandLevel, boolean isForRerun) {
         if (!isProgramLoaded.get()) {
             showError("No program loaded");
             return;
@@ -552,6 +557,11 @@ public class ExecutionController {
                     programInstructions.setAll(loadedProgram.instructions());
                     summaryLineController.updateCounts(loadedProgram.instructions());
                     programVariablesNamesAndLabels.setAll(loadedProgram.allVariablesIncludingLabelsNames());
+                    minimumArchitectureTypeNeeded.set(loadedProgram.minimumArchitectureTypeNeeded());
+                    if (isForRerun) {
+                        instructionsTableController.highlightArchitectureInstructions(
+                                loadedProgram.minimumArchitectureTypeNeeded());
+                    }
                     System.out.println("Program expanded to level " + expandLevel + " successfully.");
 
                 });
@@ -560,8 +570,8 @@ public class ExecutionController {
     }
 
     private void resetForExpansion(int expandLevel) {
-        instructionsTableController.clearHighlighting();
-        derivedInstructionsTableController.clearHighlighting();
+        instructionsTableController.clearAllHighlighting();
+        derivedInstructionsTableController.clearAllHighlighting();
         currentExpandLevel.set(expandLevel);
         derivedInstructions.clear();
         allVariablesDTO.clear();
@@ -573,8 +583,13 @@ public class ExecutionController {
 // Debug Methods - Continuation of AppController.java
 
     private void handleVariableSelection(@Nullable String variableName) {
-        instructionsTableController.highlightVariable(variableName);
-        derivedInstructionsTableController.highlightVariable(variableName);
+        if (variableName == null) {
+            instructionsTableController.clearSelectionHighlight();
+            derivedInstructionsTableController.clearSelectionHighlight();
+        } else {
+            instructionsTableController.highlightVariable(variableName);
+            derivedInstructionsTableController.highlightVariable(variableName);
+        }
 
         if (variableName != null) {
             System.out.println("Highlighting variable '" + variableName + "' in all instruction tables");

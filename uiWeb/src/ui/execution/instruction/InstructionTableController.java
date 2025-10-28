@@ -129,8 +129,14 @@ public class InstructionTableController {
         }
     }
 
-    public void clearHighlighting() {
+    public void clearSelectionHighlight() {
         highlightVariable(null);
+    }
+
+    public void clearAllHighlighting() {
+        clearSelectionHighlight();
+        clearAllDebugHighlighting();
+        clearArchitectureHighlighting();
     }
 
     private void updateRowHighlighting(@NotNull TableRow<InstructionDTO> row, @Nullable InstructionDTO item) {
@@ -169,10 +175,13 @@ public class InstructionTableController {
                 // it means the instruction cannot be executed on the current architecture
                 if (item.architectureType().compareTo(currentSelectedArchitectureType) > 0) {
                     if (!row.getStyleClass().contains("highlighted-row-inadequate-architecture")) {
+                        row.getStyleClass().remove("highlighted-row-suffice-architecture"); // clear if previously set
                         row.getStyleClass().add("highlighted-row-inadequate-architecture");
                     }
                 } else {
                     if (!row.getStyleClass().contains("highlighted-row-suffice-architecture")) {
+                        row.getStyleClass().remove("highlighted-row-inadequate-architecture"); // clear if previously
+                        // set
                         row.getStyleClass().add("highlighted-row-suffice-architecture");
                     }
                 }

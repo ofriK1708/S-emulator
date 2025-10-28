@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" spacing="15" stylesheets="@ChargeCreditsDialog.css"
       xmlns="http://javafx.com/javafx/17.0.12"
-      fx:controller="ui.dashboard.chargecredits.ChargeCreditsDialogController"
+      fx:controller="ui.dashboard.chargeCredits.ChargeCreditsDialogController"
       alignment="CENTER">
     <padding>
         <Insets bottom="20" left="20" right="20" top="20"/>

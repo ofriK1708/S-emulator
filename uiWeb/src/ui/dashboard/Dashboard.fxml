@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.*?>
@@ -23,19 +22,27 @@
 
                     <!-- Top-Left: Available Users Panel -->
                     <fx:include fx:id="usersPanel" source="users/UsersPanel.fxml" GridPane.columnIndex="0"
-                                GridPane.rowIndex="0"/>
+                                GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.vgrow="ALWAYS"/>
 
                     <!-- Top-Right: Available Programs Panel -->
                     <fx:include fx:id="programsPanel" source="programs/ProgramsPanel.fxml" GridPane.columnIndex="1"
-                                GridPane.rowIndex="0"/>
+                                GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.vgrow="ALWAYS"/>
 
                     <!-- Bottom-Left: Users History/Statistics Panel -->
                     <fx:include fx:id="historyPanel" source="history/table/HistoryPanel.fxml" GridPane.columnIndex="0"
-                                GridPane.rowIndex="1"/>
+                                GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS"/>
 
                     <!-- Bottom-Right: Available Functions Panel -->
                     <fx:include fx:id="functionsPanel" source="functions/FunctionsPanel.fxml" GridPane.columnIndex="1"
-                                GridPane.rowIndex="1"/>
+                                GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS"/>
+                    <columnConstraints>
+                        <ColumnConstraints/>
+                        <ColumnConstraints/>
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints/>
+                        <RowConstraints/>
+                    </rowConstraints>
 
                 </GridPane>
             </center>

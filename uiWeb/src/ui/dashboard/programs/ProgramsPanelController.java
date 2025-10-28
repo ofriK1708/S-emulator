@@ -5,6 +5,7 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
@@ -20,6 +21,8 @@ import java.util.function.BiConsumer;
 public class ProgramsPanelController {
 
     private final ObservableList<ProgramMetadata> programsList = FXCollections.observableArrayList();
+    @FXML
+    public Button clearSelectionButton;
 
     @FXML
     private TableView<ProgramMetadata> programsTableView;
@@ -46,8 +49,9 @@ public class ProgramsPanelController {
 
         // Enable/disable execute button based on selection
         executeProgramButton.disableProperty().bind(
-                programsTableView.getSelectionModel().selectedItemProperty().isNull()
-        );
+                programsTableView.getSelectionModel().selectedItemProperty().isNull());
+        clearSelectionButton.disableProperty().bind(
+                programsTableView.getSelectionModel().selectedItemProperty().isNull());
 
         System.out.println("ProgramsPanelController initialized");
     }
@@ -103,5 +107,9 @@ public class ProgramsPanelController {
      */
     public void clearPrograms() {
         programsList.clear();
+    }
+
+    public void clearSelection(ActionEvent actionEvent) {
+        programsTableView.getSelectionModel().clearSelection();
     }
 }

@@ -13,7 +13,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
-import ui.dashboard.chargecredits.ChargeCreditsDialogController;
+import ui.dashboard.chargeCredits.ChargeCreditsDialogController;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,7 +85,7 @@ public class DashboardHeaderController {
     @FXML
     private void handleChargeCredits() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/dashboard/chargecredits" +
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/dashboard/chargeCredits" +
                     "/ChargeCreditsDialog.fxml"));
             Parent root = loader.load();
 

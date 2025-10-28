@@ -12,9 +12,23 @@
         <padding>
             <Insets bottom="10" left="10" right="10" top="10"/>
         </padding>
+        <GridPane>
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
+            </rowConstraints>
+            <children>
 
-        <!-- Panel Title -->
-        <Label styleClass="panel-title" text="Available Programs"/>
+                <!-- Panel Title -->
+                <Label styleClass="panel-title" text="Available Programs"/>
+                <Button fx:id="clearSelectionButton" mnemonicParsing="false" onAction="#clearSelection"
+                        styleClass="clear-selection-button" text="Clear Selection" GridPane.columnIndex="1"
+                        GridPane.halignment="RIGHT"/>
+            </children>
+        </GridPane>
 
         <!-- Programs Table -->
         <TableView fx:id="programsTableView" styleClass="programs-table" VBox.vgrow="ALWAYS">
@@ -22,7 +36,7 @@
             <columns>
                 <TableColumn fx:id="programNameColumn" prefWidth="150" text="Program Name"/>
                 <TableColumn fx:id="uploadedByColumn" prefWidth="100" text="Uploaded By"/>
-                <TableColumn fx:id="instructionCountColumn" prefWidth="140" text="Instruction Count (L0)"/>
+                <TableColumn fx:id="instructionCountColumn" prefWidth="140" text="Instruction Count"/>
                 <TableColumn fx:id="maxExpandLevelColumn" prefWidth="120" text="Max Expand Level"/>
                 <TableColumn fx:id="totalRunsColumn" prefWidth="90" text="Total Runs"/>
                 <TableColumn fx:id="avgCreditCostColumn" prefWidth="110" text="Avg Credit Cost"/>

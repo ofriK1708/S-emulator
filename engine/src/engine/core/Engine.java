@@ -279,7 +279,10 @@ public class Engine {
         return instructionSequence.getSortedWorkVars(expandLevel);
     }
 
-    public @Nullable String getFuncName() {
+    public @NotNull String getFuncName() {
+        if (funcName == null) {
+            throw new IllegalStateException("Not a function");
+        }
         return funcName;
     }
 
@@ -322,7 +325,7 @@ public class Engine {
 
     public @NotNull FunctionMetadata functionToMetadata() {
         if (isFunction()) {
-            return new FunctionMetadata(programName, mainProgramName, userUploadedBy,
+            return new FunctionMetadata(programName, getFuncName(), mainProgramName, userUploadedBy,
                     instructionSequence.getOriginalInstructionCount(), instructionSequence.getMaxExpandLevel());
         } else {
             throw new IllegalStateException("Cannot get metadata for a program from a function");

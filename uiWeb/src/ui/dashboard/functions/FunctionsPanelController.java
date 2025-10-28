@@ -6,6 +6,7 @@ import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
@@ -21,6 +22,9 @@ import java.util.function.Consumer;
 public class FunctionsPanelController {
 
     private final ObservableList<FunctionMetadata> functionsList = FXCollections.observableArrayList();
+
+    @FXML
+    public Button clearSelection;
 
     @FXML
     private TableView<FunctionMetadata> functionsTableView;
@@ -54,7 +58,7 @@ public class FunctionsPanelController {
     private void setupTableColumns() {
         // Bind columns to FunctionMetadata properties
         functionNameColumn.setCellValueFactory(cellData ->
-                new ReadOnlyStringWrapper(cellData.getValue().name()));
+                new ReadOnlyStringWrapper(cellData.getValue().displayName()));
         programNameColumn.setCellValueFactory(cellData ->
                 new ReadOnlyStringWrapper(cellData.getValue().ProgramContext()));
         uploadedByColumn.setCellValueFactory(cellData ->
@@ -78,6 +82,8 @@ public class FunctionsPanelController {
         // Bind execute button to both program loaded and selection state
         executeFunctionButton.disableProperty().bind(
                 functionsTableView.getSelectionModel().selectedItemProperty().isNull());
+        clearSelection.disableProperty().bind(
+                functionsTableView.getSelectionModel().selectedItemProperty().isNull());
     }
 
     @FXML
@@ -88,5 +94,9 @@ public class FunctionsPanelController {
             System.out.println("Execute function requested: " + functionName);
             executeFunctionCallback.accept(functionName);
         }
+    }
+
+    public void clearSelection(ActionEvent actionEvent) {
+        functionsTableView.getSelectionModel().clearSelection();
     }
 }
