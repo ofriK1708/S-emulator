@@ -27,7 +27,8 @@ import static engine.utils.ProgramUtils.PC_NAME;
 public class ProgramDebugger extends ProgramExecutor {
     // region Final fields set via Builder
     private final boolean isMainProgram;
-    private final @NotNull String programName;
+    private final @NotNull String innerProgramName;
+    private final @NotNull String displayName;
     private final @NotNull ArchitectureType architectureType;
     private final int expandLevel;
     // endregion
@@ -50,7 +51,8 @@ public class ProgramDebugger extends ProgramExecutor {
         super(builder.instructions, builder.contextMap, builder.userCredits);
         this.expandLevel = builder.expandLevel;
         this.isMainProgram = builder.isMainProgram;
-        this.programName = builder.programName;
+        this.innerProgramName = builder.innerName;
+        this.displayName = builder.displayName;
         this.architectureType = builder.architectureType;
     }
 
@@ -183,7 +185,8 @@ public class ProgramDebugger extends ProgramExecutor {
     public FullExecutionResultDTO getDebugFinishedExecutionResult() {
         return new FullExecutionResultDTO(
                 isMainProgram,
-                programName,
+                innerProgramName,
+                displayName,
                 architectureType,
                 debugArguments,
                 ProgramUtils.extractSortedVariables(executedContextMap),
@@ -197,8 +200,8 @@ public class ProgramDebugger extends ProgramExecutor {
 
     // region public getters
 
-    public @NotNull String getProgramName() {
-        return programName;
+    public @NotNull String getInnerProgramName() {
+        return innerProgramName;
     }
 
     // region private helpers
@@ -232,7 +235,8 @@ public class ProgramDebugger extends ProgramExecutor {
 
         // Optional parameters with default values
         private boolean isMainProgram = false;
-        private String programName = " ";
+        private String innerName = " ";
+        private String displayName = " ";
         private ArchitectureType architectureType = ArchitectureType.ARCHITECTURE_I; // the default architecture
 
         private Builder(@NotNull ProgramExecutable executable, int userCredits, int expandLevel) {
@@ -247,8 +251,13 @@ public class ProgramDebugger extends ProgramExecutor {
             return this;
         }
 
-        public Builder programName(@NotNull String programName) {
-            this.programName = programName;
+        public Builder innerProgramName(@NotNull String programName) {
+            this.innerName = programName;
+            return this;
+        }
+
+        public Builder displayName(@NotNull String displayName) {
+            this.displayName = displayName;
             return this;
         }
 

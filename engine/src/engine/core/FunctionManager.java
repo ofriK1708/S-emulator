@@ -92,6 +92,9 @@ public class FunctionManager {
                                                         @NotNull Engine mainProgramEngine)
             throws LabelNotExist {
         Map<String, Engine> functionMap = new HashMap<>();
+        if (program.getSFunctions() == null) {
+            return functionMap;
+        }
         List<SFunction> sFunctions = program.getSFunctions().getSFunction();
         String userUploadedBy = mainProgramEngine.getUserUploadedBy();
 

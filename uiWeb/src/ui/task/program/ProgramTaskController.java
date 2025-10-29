@@ -40,10 +40,11 @@ public class ProgramTaskController {
     }
 
     public void initializeAndRunLoadTaskThread(@NotNull String programName,
+                                               @NotNull String displayName,
                                                @NotNull EngineController engineController,
                                                @NotNull UIAdapter uiAdapter) {
         taskTitle.setText("Loading Program");
-        initTaskMeasurements(programName);
+        initTaskMeasurements(displayName);
         LoadProgramToExecutionTask loadProgramToExecutionTask = new LoadProgramToExecutionTask(
                 engineController, uiAdapter, programName);
         bindLoadProgramToExecutionToUIComponents(loadProgramToExecutionTask, uiAdapter);

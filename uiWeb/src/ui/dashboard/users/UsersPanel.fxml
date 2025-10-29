@@ -21,9 +21,9 @@
 
             <columns>
                 <TableColumn fx:id="usernameColumn" prefWidth="100" text="Username"/>
-                <TableColumn fx:id="mainProgramsUploadedColumn" prefWidth="166.0" text="Main Programs contributed"/>
-                <TableColumn fx:id="subFunctionsUploadedColumn" prefWidth="166.0" text="Sub-Functions contributed"/>
-                <TableColumn fx:id="currentCreditsColumn" minWidth="0.0" prefWidth="100.0" text="Current Credits"/>
+                <TableColumn fx:id="mainProgramsUploadedColumn" prefWidth="190.0" text="Main Programs contributed"/>
+                <TableColumn fx:id="subFunctionsUploadedColumn" prefWidth="190.0" text="Sub-Functions contributed"/>
+                <TableColumn fx:id="currentCreditsColumn" minWidth="0.0" prefWidth="130.0" text="Current Credits"/>
                 <TableColumn fx:id="creditsSpentColumn" prefWidth="100" text="Credits Spent"/>
                 <TableColumn fx:id="totalRunsColumn" prefWidth="90" text="Total Runs"/>
             </columns>

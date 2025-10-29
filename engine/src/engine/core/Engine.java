@@ -141,7 +141,8 @@ public class Engine {
                 .valuesDTO(valuesResult)
                 .expandLevel(expandLevel)
                 .isMainProgram(isMainProgram())
-                .programName(getRepresentationName())
+                .innerName(programName)
+                .displayName(getDisplayName())
                 .architectureType(architectureType)
                 .build();
     }
@@ -225,7 +226,8 @@ public class Engine {
 
         ProgramDebugger debugger = ProgramDebugger.builder(executable, userCredits, expandLevel)
                 .isMainProgram(isMainProgram())
-                .programName(getRepresentationName())
+                .innerProgramName(programName)
+                .displayName(getDisplayName())
                 .architectureType(architectureType)
                 .build();
         return debugger.start(arguments);

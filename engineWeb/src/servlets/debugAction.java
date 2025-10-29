@@ -136,14 +136,14 @@ public class debugAction extends HttpServlet {
                     getExecutionHistoryManager(getServletContext());
             ProgramManager programManager = ServletUtils.getProgramManager(getServletContext());
             programManager.getProgramOrFunctionEngine(
-                            debugger.getProgramName())
+                            debugger.getInnerProgramName())
                     .addExecutionStats(
                             debugger.getCreditCost()
                     );
             FullExecutionResultDTO fullExecutionResult = debugger.getDebugFinishedExecutionResult();
             executionHistoryManager.addExecutionResult(
                     user.getName(),
-                    debugger.getProgramName(),
+                    debugger.getInnerProgramName(),
                     ExecutionResultStatisticsDTO.of(fullExecutionResult, user.getTotalRuns()));
             user.clearDebugger();
             user.chargeCredits(fullExecutionResult.creditsCost());

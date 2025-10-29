@@ -15,7 +15,7 @@ import static engine.utils.ProgramUtils.OUTPUT_NAME;
  *
  * @param runNumber        The run number of the execution.
  * @param isMainProgram    Indicates if the executed program is the main program.
- * @param displayName      The name of the executed program.
+ * @param innerName      The name of the executed program.
  * @param architectureType The architecture type used during execution.
  * @param expandLevel      The level of expansion used during execution.
  * @param output           The output value produced by the program.
@@ -27,6 +27,7 @@ import static engine.utils.ProgramUtils.OUTPUT_NAME;
  */
 public record ExecutionResultStatisticsDTO(int runNumber,
                                            boolean isMainProgram,
+                                           @NotNull String innerName,
                                            @NotNull String displayName,
                                            @NotNull ArchitectureType architectureType,
                                            int expandLevel,
@@ -50,7 +51,8 @@ public record ExecutionResultStatisticsDTO(int runNumber,
         return new ExecutionResultStatisticsDTO(
                 runNumber,
                 dto.isMainProgram(),
-                dto.programName(),
+                dto.innerName(),
+                dto.displayName(),
                 dto.architectureType(),
                 dto.expandLevel(),
                 dto.output(),

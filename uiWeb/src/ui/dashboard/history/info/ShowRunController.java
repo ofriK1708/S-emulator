@@ -26,22 +26,34 @@ public class ShowRunController {
     // FXML injected components
     @FXML
     private Label titleLabel;
+
+    @FXML
+    public Label programNameLabel;
+
     @FXML
     private Label executionInfoLabel;
+
     @FXML
     private Label expandLevelLabel;
+
     @FXML
     private Label cyclesLabel;
+
     @FXML
     private Label resultLabel;
+
     @FXML
     private Label argumentsLabel;
+
     @FXML
     private TableView<VariableDTO> variablesTable;
+
     @FXML
     private TableColumn<VariableDTO, String> variableNameColumn;
+
     @FXML
     private TableColumn<VariableDTO, Number> variableValueColumn;
+
     @FXML
     private Button closeButton;
 
@@ -89,6 +101,7 @@ public class ShowRunController {
      * @param executionStats The execution statistics to display
      */
     private void updateHeaderLabels(@NotNull ExecutionResultStatisticsDTO executionStats) {
+        programNameLabel.setText(executionStats.displayName());
         executionInfoLabel.setText("Execution #" + executionStats.runNumber());
         expandLevelLabel.setText("Expand Level: " + executionStats.expandLevel());
         cyclesLabel.setText("Cycles: " + executionStats.cycleCount());

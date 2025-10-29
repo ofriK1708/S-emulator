@@ -13,7 +13,7 @@ import static engine.utils.ProgramUtils.OUTPUT_NAME;
  * A Data Transfer Object (DTO) that encapsulates the full execution result of a program.
  *
  * @param isMainProgram    Indicates if the executed program is the main program.
- * @param programName      The name of the executed program.
+ * @param displayName      The name of the executed program.
  * @param architectureType The architecture type used during execution.
  * @param arguments        A map of argument (x1,x2,x3,...) names to their integer sorted by their numeric suffixes
  * @param workVariables    A map of work variable (z1,z2,...) names to their integer sorted by their numeric suffixes
@@ -23,7 +23,8 @@ import static engine.utils.ProgramUtils.OUTPUT_NAME;
  * @param creditsCost      The cost in credits for executing the program.
  */
 public record FullExecutionResultDTO(boolean isMainProgram,
-                                     String programName,
+                                     String innerName,
+                                     String displayName,
                                      ArchitectureType architectureType,
                                      Map<String, Integer> arguments,
                                      Map<String, Integer> workVariables,
@@ -35,10 +36,12 @@ public record FullExecutionResultDTO(boolean isMainProgram,
     @Contract("_, _, _, _, _ -> new")
     private static @NotNull FullExecutionResultDTO from(@NotNull ExecutionResultValuesDTO valuesDTO, int expandLevel,
                                                         boolean isMainProgram,
-                                                        String programName, ArchitectureType architectureType) {
+                                                        String innerName, String displayName,
+                                                        ArchitectureType architectureType) {
         return new FullExecutionResultDTO(
                 isMainProgram,
-                programName,
+                innerName,
+                displayName,
                 architectureType,
                 valuesDTO.arguments(),
                 valuesDTO.workVariables(),
@@ -71,7 +74,8 @@ public record FullExecutionResultDTO(boolean isMainProgram,
         private ExecutionResultValuesDTO valuesDTO;
         private int expandLevel;
         private boolean isMainProgram;
-        private String programName;
+        private String innerName;
+        private String displayName;
         private ArchitectureType architectureType;
 
         public Builder valuesDTO(ExecutionResultValuesDTO valuesDTO) {
@@ -89,8 +93,13 @@ public record FullExecutionResultDTO(boolean isMainProgram,
             return this;
         }
 
-        public Builder programName(String programName) {
-            this.programName = programName;
+        public Builder innerName(String programName) {
+            this.innerName = programName;
+            return this;
+        }
+
+        public Builder displayName(String displayName) {
+            this.displayName = displayName;
             return this;
         }
 
@@ -100,7 +109,8 @@ public record FullExecutionResultDTO(boolean isMainProgram,
         }
 
         public FullExecutionResultDTO build() {
-            return FullExecutionResultDTO.from(valuesDTO, expandLevel, isMainProgram, programName, architectureType);
+            return FullExecutionResultDTO.from(valuesDTO, expandLevel, isMainProgram, innerName, displayName,
+                    architectureType);
         }
     }
 }

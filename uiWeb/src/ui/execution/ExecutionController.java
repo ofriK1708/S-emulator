@@ -238,29 +238,30 @@ public class ExecutionController {
         });
     }
 
-    public void loadProgramToExecution(@NotNull String programName) {
-        loadProgramToExecution(programName, null);
+    public void loadProgramToExecution(@NotNull String programName, @NotNull String displayName) {
+        loadProgramToExecution(programName, displayName, null);
     }
 
     /**
      * Load a program into the execution environment asynchronously.
      *
-     * @param programName                  Name of the program to load
+     * @param internalProgramName          Name of the program to load
      * @param executionResultStatisticsDTO Optional statistics from previous executions otherwise§ null
      */
-    public void loadProgramToExecution(@NotNull String programName,
+    public void loadProgramToExecution(@NotNull String internalProgramName,
+                                       @NotNull String displayName,
                                        @Nullable ExecutionResultStatisticsDTO executionResultStatisticsDTO) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(TASK_PATH));
             Parent root = loader.load();
             ProgramTaskController programTaskController = loader.getController();
 
-            Stage loadingStage = createTaskLoadingStage("Loading Program: " + programName, root);
-            UIAdapter uiAdapter = buildUIAdapter(programName, loadingStage, executionResultStatisticsDTO);
+            Stage loadingStage = createTaskLoadingStage("Loading Program: " + displayName, root);
+            UIAdapter uiAdapter = buildUIAdapter(displayName, loadingStage, executionResultStatisticsDTO);
 
 
             loadingStage.setOnShown(event -> programTaskController.initializeAndRunLoadTaskThread(
-                    programName, engineController, uiAdapter));
+                    internalProgramName, displayName, engineController, uiAdapter));
             loadingStage.show();
 
         } catch (Exception e) {
@@ -272,12 +273,12 @@ public class ExecutionController {
     /**
      * Build the UIAdapter for program loading callbacks.
      *
-     * @param programName                  the name of the program being loaded
+     * @param displayName                  the name of the program being loaded
      * @param loadingStage                 the stage showing the loading progress
      * @param executionResultStatisticsDTO optional previous execution statistics
      * @return the constructed UIAdapter
      */
-    private UIAdapter buildUIAdapter(@NotNull String programName, Stage loadingStage,
+    private UIAdapter buildUIAdapter(@NotNull String displayName, Stage loadingStage,
                                      @Nullable ExecutionResultStatisticsDTO executionResultStatisticsDTO) {
         return UIAdapter.builder()
                 .programLoadedDelegate(isProgramLoaded::set)
@@ -291,7 +292,7 @@ public class ExecutionController {
                 .cyclesDelegate(currentCycles::set)
                 .onFinish(program -> {
                     if (program != null) {
-                        showSuccess("Program loaded successfully: " + programName);
+                        showSuccess("Program loaded successfully: " + displayName);
                         loadedProgram = program;
                         mainProgramName.set(program.ProgramName());
                         currentLoadedProgramName.set(program.ProgramName());
@@ -366,6 +367,7 @@ public class ExecutionController {
     }
 
     public void clearLoadedProgram() {
+        System.out.println("Clearing loaded program and resetting state");
         isProgramLoaded.set(false);
         currentLoadedProgramName.set("");
         mainProgramName.set("");
@@ -389,7 +391,7 @@ public class ExecutionController {
         inDebugSession.set(false);
         isProgramRunning.set(false);
         isProgramFinished.set(false);
-        didProgramRanAtLeastOnce.set(false);
+        isDebugFinished.set(false);
     }
 
     private void bindTitlePanesExpansion() {
@@ -721,12 +723,12 @@ public class ExecutionController {
         currentCycles.set(stateChangeResultDTO.debugCycles());
         updateDebugVariableState(stateChangeResultDTO.allVarsValue());
         isDebugFinished.set(stateChangeResultDTO.isFinished());
+        availableCredits.set(stateChangeResultDTO.creditLeft());
         if (isDebugFinished.get()) {
             endDebugSession();
             showSuccess("Debug session finished.\n Final output = " +
                     stateChangeResultDTO.outputValue() + "\nTotal Cycles: " + stateChangeResultDTO.debugCycles());
         } else {
-            availableCredits.set(stateChangeResultDTO.creditLeft());
             System.out.println("Debug step completed - PC: " + currentPC + ", Cycles: " +
                     stateChangeResultDTO.debugCycles() + ", Credits left: " + stateChangeResultDTO.creditLeft());
         }

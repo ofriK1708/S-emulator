@@ -190,7 +190,7 @@ public class DashboardController {
         // Functions panel: set engine and execution callback
         functionsPanelController.initComponent(
                 functionsMetadataListProperty,
-                this::handleLoadProgramOrFunctionToExecution  // Navigation happens here
+                this::LoadToExecution  // Navigation happens here
         );
 
         // History panel: user statistics
@@ -244,13 +244,14 @@ public class DashboardController {
      * Handle program execution request from Programs panel.
      * CRITICAL: This is where navigation to Execution screen happens for programs.
      */
-    private void handleLoadProgramOrFunctionToExecution(@NotNull String programName) {
+    private void LoadToExecution(@NotNull String functionInternalName,
+                                 @NotNull String displayName) {
         try {
-            System.out.println("Dashboard: Executing program '" + programName + "'");
+            System.out.println("Dashboard: Executing program '" + functionInternalName + "'");
 
-            configureExecutionController(programName);
+            configureExecutionController(displayName);
             setStageAndShow();
-            executionController.loadProgramToExecution(programName);
+            executionController.loadProgramToExecution(functionInternalName, displayName);
 
         } catch (Exception e) {
             System.err.println("Dashboard: Error executing program - " + e.getMessage());
@@ -265,7 +266,7 @@ public class DashboardController {
             System.out.println("Dashboard: Insufficient credits to execute program '" + programName + "'");
             return;
         }
-        handleLoadProgramOrFunctionToExecution(programName);
+        LoadToExecution(programName, programName);// For programs, internal name = display name
     }
 
     /**
@@ -285,12 +286,13 @@ public class DashboardController {
 
     private void onRerunRequested(@NotNull ExecutionResultStatisticsDTO selectedExecutionResultStatisticsDTO) {
         try {
-            String programName = selectedExecutionResultStatisticsDTO.displayName();
+            String programName = selectedExecutionResultStatisticsDTO.innerName();
+            String displayName = selectedExecutionResultStatisticsDTO.displayName();
             System.out.println("Dashboard: Re-running program '" + programName + "'");
 
             configureExecutionController(programName);
             setStageAndShow();
-            executionController.loadProgramToExecution(programName, selectedExecutionResultStatisticsDTO);
+            executionController.loadProgramToExecution(programName, displayName, selectedExecutionResultStatisticsDTO);
 
         } catch (Exception e) {
             System.err.println("Dashboard: Error re-running program - " + e.getMessage());
@@ -309,14 +311,14 @@ public class DashboardController {
         loadingStage.show();
     }
 
-    private void configureExecutionController(String programName) {
+    private void configureExecutionController(String displayName) {
         // Get AppController and configure it
         executionController = executionLoader.getController();
         if (executionController == null) {
             throw new IllegalStateException("Dashboard: ExecutionController is null!");
         }
         executionController.setUserName(loggedInUserName.get());
-        executionController.setScreenTitle("S-Emulator - Execution: " + programName);
+        executionController.setScreenTitle("S-Emulator - Execution: " + displayName);
         executionController.setAvailableCredits(availableCredits);
 
         // Set up return-to-dashboard callback

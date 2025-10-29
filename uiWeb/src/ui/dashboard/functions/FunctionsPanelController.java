@@ -13,7 +13,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 /**
  * Controller for the Functions Panel.
@@ -41,7 +41,7 @@ public class FunctionsPanelController {
     @FXML
     private Button executeFunctionButton;
 
-    private Consumer<String> executeFunctionCallback;
+    private BiConsumer<String, String> executeFunctionCallback;
 
     @FXML
     public void initialize() {
@@ -75,7 +75,7 @@ public class FunctionsPanelController {
      * Initialize component with necessary dependencies
      */
     public void initComponent(@NotNull ListProperty<FunctionMetadata> functionsList,
-                              @NotNull Consumer<String> executeFunctionCallback) {
+                              @NotNull BiConsumer<String, String> executeFunctionCallback) {
         this.executeFunctionCallback = executeFunctionCallback;
         functionsTableView.itemsProperty().bind(functionsList);
 
@@ -90,13 +90,23 @@ public class FunctionsPanelController {
     private void handleExecuteFunction() {
         FunctionMetadata selected = functionsTableView.getSelectionModel().getSelectedItem();
         if (selected != null && executeFunctionCallback != null) {
-            String functionName = selected.name();
-            System.out.println("Execute function requested: " + functionName);
-            executeFunctionCallback.accept(functionName);
+            String internalFunctionName = selected.name();
+            String displayFunctionName = selected.displayName();
+            System.out.println("Execute function requested: " + internalFunctionName);
+            executeFunctionCallback.accept(internalFunctionName, displayFunctionName);
         }
     }
 
     public void clearSelection(ActionEvent actionEvent) {
         functionsTableView.getSelectionModel().clearSelection();
+    }
+
+    public String getDisplayName(String internalName) {
+        for (FunctionMetadata function : functionsList) {
+            if (function.name().equals(internalName)) {
+                return function.displayName();
+            }
+        }
+        return internalName; // Fallback to internal name if not found
     }
 }

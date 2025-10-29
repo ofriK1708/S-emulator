@@ -69,7 +69,7 @@ public class HistoryPanelController {
                 new SimpleIntegerProperty(callData.getValue().runNumber()));
 
         programTypeColumn.setCellValueFactory(cellData -> {
-            String programType = cellData.getValue().isMainProgram() ? "Main Program" : "Sub-function";
+            String programType = cellData.getValue().isMainProgram() ? "Main Program" : "Sub-Function";
             return new SimpleStringProperty(programType);
         });
 
