@@ -207,6 +207,10 @@ public class DashboardController {
     private void handleFileLoadFromDashboard(@NotNull File file) {
         try {
             System.out.println("Dashboard: Loading file " + file.getName());
+            URL url = getClass().getResource(TASK_PATH);
+            if (url == null) {
+                throw new IllegalStateException("FXML resource not found: " + TASK_PATH);
+            }
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource(TASK_PATH));
             Parent root = loader.load();
@@ -278,7 +282,7 @@ public class DashboardController {
         FXMLLoader executionLoader = new FXMLLoader();
         URL url = getClass().getResource(EXECUTION_PATH);
         if (url == null) {
-            throw new IllegalStateException("Execution.fxml not found");
+            throw new IllegalStateException("FXML resource not found: " + EXECUTION_PATH);
         }
         executionLoader.setLocation(url);
         return executionLoader;

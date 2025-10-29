@@ -520,7 +520,7 @@ public class HttpEngineController implements EngineController {
      * @param onResponse   A consumer that will be called with the SystemResponse.
      * @throws IOException If an I/O error occurs.
      */
-    private void handelFailedRequest(@NotNull Response response, ResponseBody responseBody,
+    public static void handelFailedRequest(@NotNull Response response, ResponseBody responseBody,
                                      @NotNull Consumer<SystemResponse> onResponse) throws IOException {
         String contentType = response.header(CONTENT_TYPE_HEADER);
         String bodyString = getAndValidateBodyString(responseBody);

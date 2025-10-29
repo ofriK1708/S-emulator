@@ -8,7 +8,7 @@
     <content>
         <BorderPane styleClass="dashboard-root" stylesheets="@Dashboard.css">
 
-            <!-- Header Section: User Name, File Path, Credits -->
+            <!-- Header Section: Username, File Path, Credits -->
             <top>
                 <fx:include fx:id="headerSection" source="header/DashboardHeader.fxml"/>
             </top>

@@ -17,9 +17,11 @@ import ui.dashboard.chargeCredits.ChargeCreditsDialogController;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.function.Consumer;
 
 import static ui.utils.UIUtils.showError;
+import static ui.utils.clientConstants.CHARGE_CREDITS_PATH;
 
 /**
  * Controller for the Dashboard header bar.
@@ -85,8 +87,11 @@ public class DashboardHeaderController {
     @FXML
     private void handleChargeCredits() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/dashboard/chargeCredits" +
-                    "/ChargeCreditsDialog.fxml"));
+            URL url = getClass().getResource(CHARGE_CREDITS_PATH);
+            if (url == null) {
+                throw new IllegalStateException("FXML resource not found: " + CHARGE_CREDITS_PATH);
+            }
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(CHARGE_CREDITS_PATH));
             Parent root = loader.load();
 
             ChargeCreditsDialogController controller = loader.getController();

@@ -41,11 +41,11 @@ public class Main extends Application {
         // Step 2: Load Dashboard as the main screen
         FXMLLoader dashboardLoader = new FXMLLoader();
         URL dashboardResource = getClass().getResource(DASHBOARD_PATH);
-        dashboardLoader.setLocation(dashboardResource);
-
         if (dashboardResource == null) {
             throw new IllegalStateException("Dashboard.fxml not found");
         }
+        dashboardLoader.setLocation(dashboardResource);
+
 
         Parent dashboardRoot = dashboardLoader.load(dashboardResource.openStream());
         Scene dashboardScene = new Scene(dashboardRoot, 1200, 700);
@@ -72,11 +72,12 @@ public class Main extends Application {
         // Load Login FXML
         FXMLLoader loginLoader = new FXMLLoader();
         URL loginResource = getClass().getResource(LOGIN_PATH);
-        loginLoader.setLocation(loginResource);
-
         if (loginResource == null) {
             throw new IllegalStateException("Login.fxml not found");
         }
+
+        loginLoader.setLocation(loginResource);
+
 
         Parent loginRoot = loginLoader.load(loginResource.openStream());
 

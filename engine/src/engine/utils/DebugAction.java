@@ -4,7 +4,7 @@ public enum DebugAction {
     STEP_OVER("step_over"),
     STEP_BACK("step_back"),
     RESUME("resume"),
-    STOP("pause");
+    STOP("stop");
 
     public final String debugActionString;
 

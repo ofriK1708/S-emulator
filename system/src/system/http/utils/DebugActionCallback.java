@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 import static system.controller.HttpEngineController.getAndValidateBodyString;
-import static system.controller.HttpEngineController.getAndValidateBodySystemResponse;
+import static system.controller.HttpEngineController.handelFailedRequest;
 
 public class DebugActionCallback implements Callback {
     private final @NotNull Consumer<SystemResponse> onResponse;
@@ -48,8 +48,7 @@ public class DebugActionCallback implements Callback {
 
                 onResponse.accept(systemResponse);
             } else {
-                SystemResponse systemResponse = getAndValidateBodySystemResponse(responseBody);
-                onResponse.accept(systemResponse);
+                handelFailedRequest(response, responseBody, onResponse);
             }
         }
     }

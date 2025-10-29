@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Class-Path: lib/JFX/javafx.web.jar lib/JFX/javafx.swing.jar lib/JFX/java
+ fx.media.jar lib/JFX/javafx.graphics.jar lib/JFX/javafx.fxml.jar lib/JF
+ X/javafx.controls.jar lib/JFX/javafx.base.jar lib/JFX/javafx-swt.jar li
+ b/JAXB/jaxb-xjc.jar lib/JAXB/jaxb-jxc.jar lib/JAXB/jaxb-impl.jar lib/JA
+ XB/jaxb-core.jar lib/JAXB/jakarta.xml.bind-api.jar lib/JAXB/jakarta.act
+ ivation-api.jar lib/JAXB/angus-activation.jar lib/JetBrainsAnnotation/a
+ nnotations-26.0.2.jar lib/controlsfx-11.2.2.jar lib/okHttp/okio-2.8.0.j
+ ar lib/okHttp/okhttp-4.9.1.jar lib/okHttp/okhttp-4.9.1-sources.jar lib/
+ okHttp/kotlin-stdlib-common-1.4.10.jar lib/okHttp/kotlin-stdlib-1.4.10.
+ jar lib/okHttp/annotations-13.0.jar lib/Gson/gson-2.11.0.jar lib/Gson/g
+ son-2.11.0-sources.jar engine.jar engineWeb.jar system.jar dto.jar
+Main-Class: ui.Main
+

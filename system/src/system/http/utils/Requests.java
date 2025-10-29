@@ -8,8 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static utils.ServletConstants.*;
 
@@ -19,12 +17,6 @@ public class Requests {
             .cookieJar(cookieManager)
             .build();
     private final static Gson gson = new Gson();
-
-    // TODO - remove this before submission
-    static {
-        Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
-        cookieManager.disableLogging();
-    }
 
     /**
      * Safely parses a URL string and returns a HttpUrl.Builder

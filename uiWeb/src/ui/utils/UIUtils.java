@@ -17,6 +17,7 @@ import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
 import ui.dashboard.history.info.ShowRunController;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -91,6 +92,10 @@ public class UIUtils {
 
         try {
             // Load the FXML file for the Show Run dialog
+            URL url = UIUtils.class.getResource(SHOW_INFO_PATH);
+            if (url == null) {
+                throw new IllegalStateException("FXML resource not found: " + SHOW_INFO_PATH);
+            }
             FXMLLoader loader = new FXMLLoader(
                     UIUtils.class.getResource(SHOW_INFO_PATH)
             );

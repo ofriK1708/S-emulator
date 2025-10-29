@@ -5,7 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" spacing="20" stylesheets="@login.css"
+<VBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" spacing="20" stylesheets="@Login.css"
       xmlns="http://javafx.com/javafx/17.0.12" fx:controller="ui.login.LoginController">
 
     <padding>

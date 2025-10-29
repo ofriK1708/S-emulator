@@ -620,6 +620,7 @@ public class ExecutionController {
             if (!systemResponse.isSuccess()) {
                 Platform.runLater(() -> {
                     showError("Error starting debug session: " + systemResponse.message());
+                    endUnsuccessfulDebugSession(systemResponse);
                     handleBackToDashboard();
                 });
             } else {
@@ -780,11 +781,11 @@ public class ExecutionController {
         inDebugSession.set(false);
         isInDebugMode.set(false);
         isProgramRunning.set(false);
-        isProgramFinished.set(true);
+        isProgramFinished.set(false);
         previousDebugVariables.clear();
-        isDebugFinished.set(true);
+        isDebugFinished.set(false);
         isFirstDebugStep.set(true);
-        didProgramRanAtLeastOnce.set(true);
+        didProgramRanAtLeastOnce.set(false);
         debugControlsController.notifyDebugSessionEnded();
         instructionsTableController.clearAllDebugHighlighting();
 
@@ -794,6 +795,9 @@ public class ExecutionController {
 
     @FXML
     private void handleBackToDashboard() {
+        if (inDebugSession.get() && !isDebugFinished.get()) {
+            stopDebugSession();
+        }
         if (returnToDashboardCallback != null) {
             if (stage != null) {
                 stage.close();

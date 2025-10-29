@@ -30,7 +30,7 @@
 
             <placeholder>
                 <Label styleClass="placeholder-text"
-                       text="User management not yet implemented.\nThis feature will be available in a future update."/>
+                       text="No User yet in the system"/>
             </placeholder>
             <columnResizePolicy>
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
