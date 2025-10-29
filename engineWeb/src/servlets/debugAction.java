@@ -147,6 +147,7 @@ public class debugAction extends HttpServlet {
                     ExecutionResultStatisticsDTO.of(fullExecutionResult, user.getTotalRuns()));
             user.clearDebugger();
             user.chargeCredits(fullExecutionResult.creditsCost());
+            user.incrementTotalRuns();
         }
     }
 

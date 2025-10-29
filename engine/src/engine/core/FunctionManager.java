@@ -9,10 +9,7 @@ import engine.generated_2.SProgram;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Manages functions defined within a program.
@@ -25,6 +22,8 @@ public class FunctionManager {
     private final @NotNull Map<String, Engine> allFunctionsAndProgramsInSystem;
     private final @NotNull List<Quote> uninitializedQuotes = new ArrayList<>();
     private final @NotNull Map<String, Engine> functionsInCurrentProgram;
+    // Map of function name to the set of functions it calls
+    private final @NotNull Map<String, Set<String>> functionToCalledFunctions = new HashMap<>();
     private boolean initialised = false;
 
     private FunctionManager(@NotNull SProgram sMainProgram,
@@ -85,7 +84,7 @@ public class FunctionManager {
      * @param mainProgramName   the name of the main program
      * @param mainProgramEngine the ProgramEngine of the main program
      * @return a map of function names to their corresponding ProgramEngine instances
-     * @throws LabelNotExist    if a label referenced in a function does not exist
+     * @throws LabelNotExist if a label referenced in a function does not exist
      */
 
     private @NotNull Map<String, Engine> buildFunctions(@NotNull SProgram program,
@@ -98,7 +97,7 @@ public class FunctionManager {
 
         for (SFunction sFunc : sFunctions) {
             Engine engine = Engine.createFunctionEngine(sFunc, mainProgramName, this, userUploadedBy);
-            functionMap.put(engine.getProgramName(), engine);
+            functionMap.put(engine.getInternalName(), engine);
         }
 
         return functionMap;
@@ -120,14 +119,23 @@ public class FunctionManager {
         uninitializedQuotes.clear();
     }
 
+    public void addFunctionCallRelation(@NotNull String callerFunctionName,
+                                        @NotNull String calledFunctionName) {
+        functionToCalledFunctions
+                .computeIfAbsent(callerFunctionName, k -> new HashSet<>())
+                .add(calledFunctionName);
+    }
+
     public void checkForNameConflicts(@NotNull Map<String, Engine> allFunctionAndProgramsInSystem)
             throws FunctionAlreadyExist {
 
-        for (String functionNameInSystem : allFunctionAndProgramsInSystem.keySet()) {
+        for (Map.Entry<String, Engine> entry : allFunctionAndProgramsInSystem.entrySet()) {
+            Engine engine = entry.getValue();
+            String internalName = engine.getInternalName();
             // Prevent having functions with the same name as the main program and vice versa
-            if (functionsInCurrentProgram.containsKey(functionNameInSystem) ||
-                    functionNameInSystem.equals(mainProgramName)) {
-                throw new FunctionAlreadyExist(mainProgramName, functionNameInSystem);
+            if (functionsInCurrentProgram.containsKey(internalName) ||
+                    internalName.equals(mainProgramName)) {
+                throw new FunctionAlreadyExist(mainProgramName, engine.getDisplayName());
             }
         }
     }
@@ -154,5 +162,13 @@ public class FunctionManager {
 
     public int getFunctionCount() {
         return functionsInCurrentProgram.size();
+    }
+
+    public Set<String> getSubFunctionsInProgramName() {
+        return functionsInCurrentProgram.keySet();
+    }
+
+    public Set<String> getCalledFunctionsOf(@NotNull String functionName) {
+        return functionToCalledFunctions.getOrDefault(functionName, Collections.emptySet());
     }
 }

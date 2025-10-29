@@ -52,7 +52,7 @@ public class runProgram extends HttpServlet {
             FullExecutionResultDTO fullExecutionResultDTO = currentEngine.mainRun(
                     expandLevel, args, user.getCurrentCredits(), runAndDebugParams.architectureType());
 
-            user.increaseTotalRuns();
+            user.incrementTotalRuns();
             user.chargeCredits(fullExecutionResultDTO.creditsCost());
 
             executionHistoryManager.addExecutionResult(

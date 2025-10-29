@@ -72,7 +72,7 @@ final class InstructionSequence {
                                                           @NotNull FunctionManager functionManager)
             throws LabelNotExist {
         ParsedComponents components = parseRawInstructions(sProgram.getSInstructions().getSInstruction(),
-                functionManager, sProgram.getName());
+                functionManager, sProgram.getName(), sProgram.getName());
 
         return new InstructionSequence(components.originalInstructions(), components.originalLabels());
     }
@@ -81,27 +81,30 @@ final class InstructionSequence {
                                                           @NotNull FunctionManager functionManager)
             throws LabelNotExist {
         ParsedComponents components = parseRawInstructions(sFunction.getSInstructions().getSInstruction(),
-                functionManager, sFunction.getUserString());
+                functionManager, sFunction.getName(), sFunction.getUserString());
 
         return new InstructionSequence(components.originalInstructions(), components.originalLabels());
     }
 
     private static @NotNull ParsedComponents parseRawInstructions(@NotNull List<SInstruction> rawInstructions,
                                                                   @NotNull FunctionManager functionManager,
-                                                                  @NotNull String enclosingFunctionName) {
+                                                                  @NotNull String enclosingFunctionInternalName,
+                                                                  @NotNull String enclosingFunctionDisplayName) {
         List<Instruction> originalInstructions = buildInstructions(rawInstructions, functionManager,
-                enclosingFunctionName);
+                enclosingFunctionInternalName, enclosingFunctionDisplayName);
         Set<String> originalLabels = buildLabels(rawInstructions);
         return new ParsedComponents(originalInstructions, originalLabels);
     }
 
     private static @NotNull List<Instruction> buildInstructions(@NotNull List<SInstruction> rawInstructions,
                                                                 @NotNull FunctionManager functionManager,
-                                                                @NotNull String enclosingFunctionName) {
+                                                                @NotNull String enclosingFunctionInternalName,
+                                                                @NotNull String enclosingFunctionDisplayName) {
         List<Instruction> instructions = new ArrayList<>();
         for (int i = 0; i < rawInstructions.size(); i++) {
             SInstruction sInstruction = rawInstructions.get(i);
-            instructions.add(Instruction.createInstruction(sInstruction, functionManager, i, enclosingFunctionName));
+            instructions.add(Instruction.createInstruction(sInstruction, functionManager, i,
+                    enclosingFunctionInternalName, enclosingFunctionDisplayName));
         }
         return instructions;
     }

@@ -47,7 +47,8 @@ public abstract class Instruction implements Command {
     public static @NotNull Instruction createInstruction(@NotNull SInstruction sInstruction,
                                                          @NotNull FunctionManager functionManager,
                                                          int instructionIndex,
-                                                         @NotNull String enclosingFunctionName) {
+                                                         @NotNull String enclosingFunctionInternalName,
+                                                         @NotNull String enclosingFunctionDisplayName) {
 
         Map<String, String> args = Optional.ofNullable(sInstruction.getSInstructionArguments())
                 .map(SInstructionArguments::getSInstructionArgument)
@@ -74,10 +75,10 @@ public abstract class Instruction implements Command {
             case "JUMP_EQUAL_CONSTANT" -> new JumpEqualConstant(mainVarName, args, labelName);
             case "JUMP_EQUAL_VARIABLE" -> new JumpEqualVariable(mainVarName, args, labelName);
             case "QUOTE" -> Quote.createInitialQuote(mainVarName, args, labelName, functionManager, instructionIndex,
-                    enclosingFunctionName);
+                    enclosingFunctionInternalName, enclosingFunctionDisplayName);
             case "JUMP_EQUAL_FUNCTION" ->
                     new JumpEqualFunction(mainVarName, args, labelName, functionManager, instructionIndex,
-                            enclosingFunctionName);
+                            enclosingFunctionInternalName, enclosingFunctionDisplayName);
             default -> throw new IllegalArgumentException("Unknown instruction type: " + sInstruction.getName());
         };
     }
@@ -93,7 +94,8 @@ public abstract class Instruction implements Command {
     protected static @NotNull Quote createSubFunctionCall(@NotNull String argName,
                                                           @NotNull FunctionManager functionManager,
                                                           int instructionIndex,
-                                                          @NotNull String enclosingFunctionName) throws FunctionNotFound {
+                                                          @NotNull String enclosingFunctionInnerName,
+                                                          @NotNull String enclosingFunctionDisplayName) throws FunctionNotFound {
         String functionCallContent = ProgramUtils.extractFunctionContent(argName);
         List<String> parts = ProgramUtils.splitArgs(functionCallContent);
         String functionName = parts.getFirst().trim();
@@ -102,7 +104,7 @@ public abstract class Instruction implements Command {
         quoteArgs.put(Quote.functionNameArgumentName, functionName);
         quoteArgs.put(Quote.functionArgumentsArgumentName, functionArgs);
         return Quote.createSubFunctionQuote("", quoteArgs, "", functionManager, instructionIndex,
-                enclosingFunctionName);
+                enclosingFunctionInnerName, enclosingFunctionDisplayName);
     }
 
     public String getMainVarName() {

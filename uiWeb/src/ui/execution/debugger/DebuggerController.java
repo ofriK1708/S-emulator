@@ -9,23 +9,39 @@ import org.jetbrains.annotations.NotNull;
 
 public class DebuggerController {
 
-    // Internal state properties
-    private final BooleanProperty debugSessionActive = new SimpleBooleanProperty(false);
-    private final BooleanProperty atFirstStep = new SimpleBooleanProperty(true);
-    private final BooleanProperty executionFinished = new SimpleBooleanProperty(false);
-
-    // Callback interfaces for debug actions
-    private Runnable debugStepCallback;
-    private Runnable debugResumeCallback;
-    private Runnable stopDebugSessionCallback;
-
-    // FXML-injected controls
     @FXML
     private Button resume;
+
     @FXML
     private Button stepOver;
+
+    @FXML
+    public Button stepBackward;
+
     @FXML
     private Button stop;
+
+
+    // Internal state properties
+    private BooleanProperty debugSessionActive = new SimpleBooleanProperty(false);
+    // FXML-injected controls
+    private BooleanProperty atFirstStep = new SimpleBooleanProperty(true);
+    private BooleanProperty executionFinished = new SimpleBooleanProperty(false);
+
+    // Callback interfaces for debug actions
+    private @NotNull Runnable debugStepCallback = () -> {
+        System.out.println("Debug step callback not initialized");
+    };
+    private @NotNull Runnable debugResumeCallback = () -> {
+        System.out.println("Debug resume callback not initialized");
+    };
+    private @NotNull Runnable stopDebugSessionCallback = () -> {
+        System.out.println("Stop debug session callback not initialized");
+    };
+    private @NotNull Runnable debugStepBackwardCallback = () -> {
+        System.out.println("Debug step backward callback not initialized");
+    };
+
 
     @FXML
     private void initialize() {
@@ -38,12 +54,20 @@ public class DebuggerController {
      */
     public void initComponent(
             @NotNull Runnable debugStepCallback,
+            @NotNull Runnable debugStepBackwardCallback,
             @NotNull Runnable debugResumeCallback,
-            @NotNull Runnable stopDebugSessionCallback) {
+            @NotNull Runnable stopDebugSessionCallback,
+            @NotNull BooleanProperty executionFinishedProperty,
+            @NotNull BooleanProperty atFirstStepProperty,
+            @NotNull BooleanProperty debugSessionActiveProperty) {
 
         this.debugStepCallback = debugStepCallback;
         this.debugResumeCallback = debugResumeCallback;
+        this.debugStepBackwardCallback = debugStepBackwardCallback;
         this.stopDebugSessionCallback = stopDebugSessionCallback;
+        this.executionFinished = executionFinishedProperty;
+        this.atFirstStep = atFirstStepProperty;
+        this.debugSessionActive = debugSessionActiveProperty;
 
         // Debug controls disabled when session inactive OR execution finished
         BooleanProperty controlsDisabled = new SimpleBooleanProperty();
@@ -52,6 +76,7 @@ public class DebuggerController {
         stop.disableProperty().bind(controlsDisabled);
         resume.disableProperty().bind(controlsDisabled);
         stepOver.disableProperty().bind(controlsDisabled);
+        stepBackward.disableProperty().bind(controlsDisabled);
 
         System.out.println("DebuggerController bindings initialized successfully");
     }
@@ -59,24 +84,28 @@ public class DebuggerController {
     // FXML Event Handlers
     @FXML
     private void handleStepOver() {
-        if (debugStepCallback != null && !executionFinished.get()) {
+        if (!executionFinished.get()) {
             debugStepCallback.run();
             atFirstStep.set(false);
         }
     }
 
+    public void handleStepBackward(ActionEvent actionEvent) {
+        if (!executionFinished.get()) {
+            debugStepBackwardCallback.run();
+        }
+    }
+
     @FXML
     private void handleResume() {
-        if (debugResumeCallback != null && !executionFinished.get()) {
+        if (!executionFinished.get()) {
             debugResumeCallback.run();
         }
     }
 
     @FXML
     private void handleStop() {
-        if (stopDebugSessionCallback != null) {
-            stopDebugSessionCallback.run();
-        }
+        stopDebugSessionCallback.run();
     }
 
     // Public methods for AppController to manage debug session state
@@ -92,31 +121,5 @@ public class DebuggerController {
         atFirstStep.set(true);
         executionFinished.set(false);
         System.out.println("Debug session ended - debug controls disabled");
-    }
-
-    public void notifyExecutionFinished() {
-        executionFinished.set(true);
-        System.out.println("Execution finished - all debug controls disabled");
-    }
-
-    // Getters
-    public boolean isDebugSessionActive() {
-        return debugSessionActive.get();
-    }
-
-    public BooleanProperty debugSessionActiveProperty() {
-        return debugSessionActive;
-    }
-
-    public boolean isExecutionFinished() {
-        return executionFinished.get();
-    }
-
-    public BooleanProperty executionFinishedProperty() {
-        return executionFinished;
-    }
-
-    public void handleStepBackward(ActionEvent actionEvent) {
-        // Currently unimplemented
     }
 }

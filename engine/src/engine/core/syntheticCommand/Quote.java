@@ -20,7 +20,8 @@ public class Quote extends Instruction {
     private static final @NotNull ArchitectureType ARCHITECTURE_TYPE = ArchitectureType.ARCHITECTURE_IV;
 
     public final static @NotNull String functionArgumentsArgumentName = "functionArguments";
-    private final @NotNull String enclosingFunctionName;
+    private final @NotNull String enclosingFunctionInternalName;
+    private final @NotNull String enclosingFunctionDisplayName;
     private int quoteIndex = -1;
     private boolean isFinishedInitialization = false;
     private final @NotNull FunctionManager functionManager;
@@ -34,11 +35,14 @@ public class Quote extends Instruction {
     // region Constructors
     private Quote(@NotNull String mainVarName, @NotNull Map<String, String> args,
                   @NotNull String label, @NotNull FunctionManager functionManager,
-                  int quoteIndex, @NotNull String enclosingFunctionName, boolean isFinishedInitialization) throws FunctionNotFound {
+                  int quoteIndex, @NotNull String enclosingFunctionInternalName,
+                  @NotNull String enclosingFunctionDisplayName,
+                  boolean isFinishedInitialization) throws FunctionNotFound {
         super(mainVarName, args, label);
         this.functionManager = functionManager;
         this.quoteIndex = quoteIndex;
-        this.enclosingFunctionName = enclosingFunctionName;
+        this.enclosingFunctionInternalName = enclosingFunctionInternalName;
+        this.enclosingFunctionDisplayName = enclosingFunctionDisplayName;
         if (!isFinishedInitialization) {
             functionManager.addToUninitializedQuotes(this);
         } else {
@@ -65,7 +69,8 @@ public class Quote extends Instruction {
         this.funcArgsNames = new ArrayList<>(quote.funcArgsNames);
         this.subfunctionCalls.addAll(quote.subfunctionCalls);
         this.isFinishedInitialization = quote.isFinishedInitialization;
-        this.enclosingFunctionName = quote.enclosingFunctionName;
+        this.enclosingFunctionInternalName = quote.enclosingFunctionInternalName;
+        this.enclosingFunctionDisplayName = quote.enclosingFunctionDisplayName;
     }
     // endregion
 
@@ -84,9 +89,11 @@ public class Quote extends Instruction {
      */
     public static @NotNull Quote createInitialQuote(@NotNull String mainVarName, @NotNull Map<String, String> args,
                                                     @NotNull String label, @NotNull FunctionManager functionManager,
-                                                    int quoteIndex, @NotNull String enclosingFunctionName) {
+                                                    int quoteIndex, @NotNull String enclosingFunctionInternalName,
+                                                    @NotNull String enclosingFunctionDisplayName) {
         try {
-            return new Quote(mainVarName, args, label, functionManager, quoteIndex, enclosingFunctionName,
+            return new Quote(mainVarName, args, label, functionManager, quoteIndex, enclosingFunctionInternalName,
+                    enclosingFunctionDisplayName,
                     functionManager.isInitialised());
         } catch (FunctionNotFound ignored) {
             // this should not happen here, as we are not initializing yet
@@ -109,8 +116,10 @@ public class Quote extends Instruction {
      */
     public static @NotNull Quote createSubFunctionQuote(@NotNull String mainVarName, @NotNull Map<String, String> args,
                                                         @NotNull String label, @NotNull FunctionManager functionManager,
-                                                        int quoteIndex, @NotNull String enclosingFunctionName) throws FunctionNotFound {
-        return new Quote(mainVarName, args, label, functionManager, quoteIndex, enclosingFunctionName, true);
+                                                        int quoteIndex, @NotNull String enclosingFunctionInternalName,
+                                                        @NotNull String enclosingFunctionDisplayName) throws FunctionNotFound {
+        return new Quote(mainVarName, args, label, functionManager, quoteIndex, enclosingFunctionInternalName,
+                enclosingFunctionDisplayName, true);
     }
     // endregion
 
@@ -122,10 +131,11 @@ public class Quote extends Instruction {
 
         if (functionToRun == null) {
             throw new FunctionNotFound(quoteIndex, this.getClass().getSimpleName(),
-                    enclosingFunctionName,
+                    enclosingFunctionDisplayName,
                     funcName);
         }
         isFinishedInitialization = true;
+        functionManager.addFunctionCallRelation(enclosingFunctionInternalName, functionToRun.getInternalName());
         if (allArgsString.isBlank()) {
             funcArgsNames = List.of();
         } else {
@@ -140,7 +150,7 @@ public class Quote extends Instruction {
         for (String argName : funcArgsNames) {
             if (ProgramUtils.isFunctionCall(argName)) {
                 Quote functionCall = Instruction.createSubFunctionCall(argName, functionManager, quoteIndex,
-                        enclosingFunctionName);
+                        enclosingFunctionInternalName, enclosingFunctionDisplayName);
                 subfunctionCalls.add(functionCall);
             }
         }

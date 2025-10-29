@@ -49,7 +49,7 @@ public class getProgramInfo extends HttpServlet {
             }
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(JSON_CONTENT_TYPE); // set content type to JSON for valid responses
-            System.out.println("current program: " + currentEngine.getProgramName() + ", info requested: " + infoToGet);
+            System.out.println("current program: " + currentEngine.getInternalName() + ", info requested: " + infoToGet);
 
             switch (infoToGet) {
                 case BASIC_PROGRAM_INFO -> resp.getWriter().write(gson.toJson(currentEngine.

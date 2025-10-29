@@ -4,6 +4,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
+import static engine.utils.ProgramUtils.OUTPUT_NAME;
+
 /**
  * A Data Transfer Object (DTO) representing the result of a debug state change action.
  * This DTO contains the current values of all variables in the program being debugged
@@ -19,4 +21,7 @@ import java.util.Map;
 public record DebugStateChangeResultDTO(@NotNull Map<String, Integer> allVarsValue, int debugPC, int debugCycles,
                                         int creditLeft,
                                         boolean isFinished) {
+    public int outputValue() {
+        return allVarsValue.get(OUTPUT_NAME);
+    }
 }

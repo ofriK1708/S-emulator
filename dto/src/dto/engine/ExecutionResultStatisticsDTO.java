@@ -22,7 +22,7 @@ import static engine.utils.ProgramUtils.OUTPUT_NAME;
  * @param allVarsSorted    A map of all variable names to their values, sorted with output first,
  *                         followed by arguments and work variables. sorted by their numerical suffixes.
  *                         (y,x1,x2,...z1,z2,...)
- * @param arguments       A map of argument names to their values.
+ * @param arguments        A map of argument names to their values.
  * @param cycleCount       The number of cycles taken during execution.
  */
 public record ExecutionResultStatisticsDTO(int runNumber,

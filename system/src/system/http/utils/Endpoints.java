@@ -1,6 +1,7 @@
 package system.http.utils;
 
 public class Endpoints {
+    // private static final String BASE_URL = "http://localhost:8080/engineWeb_Web";
     private static final String BASE_URL = "http://localhost:8080/engineWeb_Web_exploded";
     public static final String UPLOAD_PROGRAM = BASE_URL + "/uploadProgram";
     public static final String RUN_PROGRAM = BASE_URL + "/runProgram";

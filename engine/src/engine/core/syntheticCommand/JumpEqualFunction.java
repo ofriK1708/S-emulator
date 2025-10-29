@@ -26,11 +26,12 @@ public class JumpEqualFunction extends Instruction {
     // region Constructors
     public JumpEqualFunction(String mainVarName, Map<String, String> args,
                              String label, @NotNull FunctionManager functionManager,
-                             int quoteIndex, @NotNull String enclosingFunctionName) {
+                             int quoteIndex, @NotNull String enclosingFunctionName,
+                             @NotNull String enclosingFunctionDisplayName) {
         super(mainVarName, args, label);
         this.functionManager = functionManager;
         functionQuoteToCheck = Quote.createInitialQuote("", this.args, "", functionManager, quoteIndex,
-                enclosingFunctionName);
+                enclosingFunctionName, enclosingFunctionDisplayName);
     }
     // endregion
 

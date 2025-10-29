@@ -161,6 +161,11 @@ public class RunControlsController {
         }
     }
 
+    /**
+     * Sets the architecture type programmatically and updates the UI accordingly.
+     *
+     * @param architectureType the architecture type to set
+     */
     public void setArchitectureType(@NotNull ArchitectureType architectureType) {
         this.architectureType = architectureType;
         switch (architectureType) {
@@ -170,6 +175,8 @@ public class RunControlsController {
             case ARCHITECTURE_IV -> archIV.setSelected(true);
         }
         archTypeChosen.set(true);
+        minimumArchitectureTypeNeededChosen.set(architectureType.compareTo(
+                minimumArchitectureTypeNeeded.get()) >= 0);
     }
 
 }

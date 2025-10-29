@@ -119,6 +119,7 @@ public class ProgramDebugger extends ProgramExecutor {
         }
         // charge credits for stepping back, and increase total debug cycles
         runningUserCredits -= lastCycleCreditCost;
+        cyclesCount += lastCycleCreditCost;
 
         // Remove current state and restore previous
         debugCyclesHistory.removeLast();

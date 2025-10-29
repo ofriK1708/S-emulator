@@ -142,11 +142,11 @@ public class ExecutionController {
 
     private @Nullable ProgramDTO loadedProgram = null;
     private Runnable returnToDashboardCallback = null;
-    private boolean inDebugSession = false;
+    private final BooleanProperty inDebugSession = new SimpleBooleanProperty(false);
     @FXML
     private VBox historyStats;
-    private boolean isFirstDebugStep = true;
-    private boolean isDebugFinished = false;
+    private final BooleanProperty isFirstDebugStep = new SimpleBooleanProperty(true);
+    private final BooleanProperty isDebugFinished = new SimpleBooleanProperty(false);
 
     public ExecutionController() {
         this.engineController = new HttpEngineController();
@@ -194,16 +194,15 @@ public class ExecutionController {
             allVarsTableController.initAllVarsTable(allVariablesDTO, isAnimationsOn
             );
 
-            // Set back button callback in DebuggerController
-            if (debugControlsController != null) {
-                System.out.println("Back to Dashboard callback registered with DebuggerController");
-                debugControlsController.initComponent(
-                        this::debugStep,
-                        this::debugResume,
-                        this::stopDebugSession
-                );
-
-            }
+            debugControlsController.initComponent(
+                    this::debugStep,
+                    this::debugStepBack,
+                    this::debugResume,
+                    this::stopDebugSession,
+                    isProgramFinished,
+                    isFirstDebugStep,
+                    inDebugSession
+            );
 
             initializeExecutionHeader();
             System.out.println("AppController initialized with cleaned architecture");
@@ -247,7 +246,7 @@ public class ExecutionController {
      * Load a program into the execution environment asynchronously.
      *
      * @param programName                  Name of the program to load
-     * @param executionResultStatisticsDTO Optional statistics from previous executions otherwise null
+     * @param executionResultStatisticsDTO Optional statistics from previous executions otherwise§ null
      */
     public void loadProgramToExecution(@NotNull String programName,
                                        @Nullable ExecutionResultStatisticsDTO executionResultStatisticsDTO) {
@@ -353,7 +352,7 @@ public class ExecutionController {
         isProgramFinished.set(false);
 
         previousDebugVariables.clear();
-        isFirstDebugStep = true;
+        isFirstDebugStep.set(true);
         allVariablesDTO.clear();
         argumentsLoaded.set(false);
         argumentsDTO.clear();
@@ -386,8 +385,8 @@ public class ExecutionController {
         derivedInstructionsTableController.clearAllHighlighting();
         programVariablesNamesAndLabels.clear();
         previousDebugVariables.clear();
-        isFirstDebugStep = true;
-        inDebugSession = false;
+        isFirstDebugStep.set(true);
+        inDebugSession.set(false);
         isProgramRunning.set(false);
         isProgramFinished.set(false);
         didProgramRanAtLeastOnce.set(false);
@@ -474,6 +473,7 @@ public class ExecutionController {
     }
 
     public void startRegularExecution(ArchitectureType architectureType) {
+        cleanBeforeExecution();
         int expandLevel = currentExpandLevel.get();
         isProgramRunning.set(true);
         engineController.runLoadedProgram(expandLevel, programArguments, architectureType, systemResponse -> {
@@ -493,6 +493,9 @@ public class ExecutionController {
                     currentCycles.set(resultDTO.cycleCount());
                     availableCredits.set(availableCredits.get() - resultDTO.creditsCost());
                     updatePropertiesAfterExecuting();
+                    showSuccess("Program executed successfully.\nOutput = " +
+                            resultDTO.output() + "\nTotal Cycles: " + resultDTO.cycleCount() +
+                            "\nCredits Used: " + resultDTO.creditsCost());
                 });
             }
         });
@@ -503,6 +506,10 @@ public class ExecutionController {
         isProgramRunning.set(false);
         isProgramFinished.set(true);
         didProgramRanAtLeastOnce.set(true);
+    }
+
+    public void cleanBeforeExecution() {
+        instructionsTableController.clearAllHighlighting();
     }
 
     public void expandProgramToLevel(int expandLevel) {
@@ -604,6 +611,7 @@ public class ExecutionController {
     }
 
     public void startDebugExecution(ArchitectureType architectureType) {
+        cleanBeforeExecution();
         int expandLevel = prepareForDebugSession();
 
         engineController.startDebugSession(expandLevel, programArguments, architectureType, systemResponse -> {
@@ -614,7 +622,7 @@ public class ExecutionController {
                 });
             } else {
                 Platform.runLater(() -> {
-                    inDebugSession = true;
+                    inDebugSession.set(true);
                     highlightCurrentInstruction(0);
                     if (systemResponse.isCreditsIncluded()) {
                         availableCredits.set(systemResponse.creditsLeft());
@@ -632,20 +640,14 @@ public class ExecutionController {
         currentCycles.set(0);
 
         previousDebugVariables.clear();
-        isFirstDebugStep = true;
+        isFirstDebugStep.set(true);
         System.out.println("Debug session started - change tracking reset");
         debugControlsController.prepareForDebugSession();
         return expandLevel;
     }
 
     public void debugStep() {
-        if (!inDebugSession) {
-            showError("No debug session active");
-            return;
-        }
-
-        if (isDebugFinished) {
-            showInfo("Execution finished. Program has completed successfully.");
+        if (isInvalidDebugState("Execution finished. Program has completed successfully.")) {
             return;
         }
 
@@ -660,19 +662,43 @@ public class ExecutionController {
             }
         });
 
-        if (isFirstDebugStep) {
-            isFirstDebugStep = false;
+        if (isFirstDebugStep.get()) {
+            isFirstDebugStep.set(false);
         }
     }
 
-    public void debugResume() {
-        if (!inDebugSession) {
-            showError("No debug session active");
+    private void debugStepBack() {
+        if (isInvalidDebugState("Execution already finished.")) {
             return;
         }
 
-        if (isDebugFinished) {
-            showInfo("Execution already finished.");
+        engineController.debugStepBack(systemResponse -> {
+            if (!systemResponse.isSuccess()) {
+                Platform.runLater(() -> {
+                    showError("Error during debug step back: " + systemResponse.message());
+                    endUnsuccessfulDebugSession(systemResponse);
+                });
+            } else {
+                Platform.runLater(() -> afterDebugAction(systemResponse));
+            }
+        });
+    }
+
+    private boolean isInvalidDebugState(String message) {
+        if (!inDebugSession.get()) {
+            showError("No debug session active");
+            return true;
+        }
+
+        if (isDebugFinished.get()) {
+            showInfo(message);
+            return true;
+        }
+        return false;
+    }
+
+    public void debugResume() {
+        if (isInvalidDebugState("Execution already finished.")) {
             return;
         }
 
@@ -694,9 +720,11 @@ public class ExecutionController {
         highlightCurrentInstruction(currentPC);
         currentCycles.set(stateChangeResultDTO.debugCycles());
         updateDebugVariableState(stateChangeResultDTO.allVarsValue());
-        isDebugFinished = stateChangeResultDTO.isFinished();
-        if (isDebugFinished) {
+        isDebugFinished.set(stateChangeResultDTO.isFinished());
+        if (isDebugFinished.get()) {
             endDebugSession();
+            showSuccess("Debug session finished.\n Final output = " +
+                    stateChangeResultDTO.outputValue() + "\nTotal Cycles: " + stateChangeResultDTO.debugCycles());
         } else {
             availableCredits.set(stateChangeResultDTO.creditLeft());
             System.out.println("Debug step completed - PC: " + currentPC + ", Cycles: " +
@@ -720,14 +748,14 @@ public class ExecutionController {
     private @NotNull VariableDTO createVariableDTOWithChangeDetection(@NotNull String name, @NotNull Integer value) {
         boolean hasChanged = false;
 
-        if (!isFirstDebugStep && previousDebugVariables.containsKey(name)) {
+        if (!isFirstDebugStep.get() && previousDebugVariables.containsKey(name)) {
             Integer previousValue = previousDebugVariables.get(name);
             hasChanged = !previousValue.equals(value);
 
             if (hasChanged) {
                 System.out.println("Variable changed: " + name + " from " + previousValue + " to " + value);
             }
-        } else if (isFirstDebugStep) {
+        } else if (isFirstDebugStep.get()) {
             hasChanged = value != 0 && !ProgramUtils.isArgument(name);
         }
 
@@ -747,13 +775,13 @@ public class ExecutionController {
     }
 
     private void endDebugSession() {
-        inDebugSession = false;
+        inDebugSession.set(false);
         isInDebugMode.set(false);
         isProgramRunning.set(false);
         isProgramFinished.set(true);
         previousDebugVariables.clear();
-        isDebugFinished = false;
-        isFirstDebugStep = true;
+        isDebugFinished.set(true);
+        isFirstDebugStep.set(true);
         didProgramRanAtLeastOnce.set(true);
         debugControlsController.notifyDebugSessionEnded();
         instructionsTableController.clearAllDebugHighlighting();

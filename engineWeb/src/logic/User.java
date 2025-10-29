@@ -69,7 +69,7 @@ public class User {
         this.currentCredits = remainingCredits;
     }
 
-    public void increaseTotalRuns() {
+    public void incrementTotalRuns() {
         this.totalRuns++;
     }
 

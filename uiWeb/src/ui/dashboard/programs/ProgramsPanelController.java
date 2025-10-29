@@ -88,6 +88,7 @@ public class ProgramsPanelController {
         );
         // Bind the available programs property to the internal list
         programsTableView.itemsProperty().bind(availableProgramsProperty);
+
     }
 
 

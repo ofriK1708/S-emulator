@@ -102,8 +102,12 @@ public class Engine {
         instructionSequence.finalizeInitialization();
     }
 
-    public String getProgramName() {
+    public @NotNull String getInternalName() {
         return programName;
+    }
+
+    public @NotNull String getDisplayName() {
+        return isFunction() ? getFuncName() : programName;
     }
 
     public void addProgramAndFunctionsToSystem(@NotNull Map<String, Engine> allFunctionsAndProgramsInSystem,
@@ -172,7 +176,7 @@ public class Engine {
                     "type (" + loadedArchitecture + ")",
                     userCredits, requiredCredits);
         }
-        if (arguments.values().stream().allMatch(value -> (value == null) || (value < 0))) {
+        if (arguments.values().stream().anyMatch(value -> (value == null) || (value < 0))) {
             throw new IllegalArgumentException("All arguments must be non-negative integers.");
         }
         return requiredCredits;
@@ -316,6 +320,7 @@ public class Engine {
     public @NotNull ProgramMetadata programToMetadata() {
         if (!isFunction()) {
             return new ProgramMetadata(programName, userUploadedBy,
+                    functionManager.getCalledFunctionsOf(getInternalName()),
                     instructionSequence.getOriginalInstructionCount(), instructionSequence.getMaxExpandLevel(),
                     numberOfExecutions, averageCreditsCost);
         } else {
@@ -326,6 +331,7 @@ public class Engine {
     public @NotNull FunctionMetadata functionToMetadata() {
         if (isFunction()) {
             return new FunctionMetadata(programName, getFuncName(), mainProgramName, userUploadedBy,
+                    functionManager.getCalledFunctionsOf(getInternalName()),
                     instructionSequence.getOriginalInstructionCount(), instructionSequence.getMaxExpandLevel());
         } else {
             throw new IllegalStateException("Cannot get metadata for a program from a function");
