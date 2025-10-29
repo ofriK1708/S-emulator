@@ -9,7 +9,6 @@ import engine.core.ProgramDebugger;
 import engine.exception.InstructionExecutionException;
 import engine.exception.InsufficientCredits;
 import engine.utils.DebugAction;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +26,7 @@ import static utils.ServletConstants.*;
 @WebServlet(name = "debugAction", urlPatterns = "/debugger/action")
 public class debugAction extends HttpServlet {
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         // Get the user from the session and validate
         User user = ServletUtils.getUser(req, getServletContext());
         resp.setContentType(PLAIN_TEXT_CONTENT_TYPE);
@@ -113,7 +112,7 @@ public class debugAction extends HttpServlet {
         return "Error executing debug action: " + e.getMessage();
     }
 
-    private SystemResponse getErrorResponse(String errorMessage, int creditsLeft) throws IOException {
+    private SystemResponse getErrorResponse(String errorMessage, int creditsLeft) {
         return SystemResponse.builder()
                 .isSuccess(false)
                 .message(errorMessage)
@@ -166,7 +165,7 @@ public class debugAction extends HttpServlet {
     }
 
     @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.getWriter().println("available debug actions: " + getAllDebugActionsOptions());
     }
 }

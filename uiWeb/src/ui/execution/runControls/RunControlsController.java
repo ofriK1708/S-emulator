@@ -47,9 +47,8 @@ public class RunControlsController {
     private BiConsumer<ProgramRunType, ArchitectureType> runCallback;
     private Runnable setCallback;
     private @NotNull ArchitectureType architectureType = ArchitectureType.ARCHITECTURE_I;
-    private @NotNull Consumer<@Nullable ArchitectureType> onArchitectureTypeChangeCallback = architectureType -> {
-        System.out.println("Architecture type changed to: " + architectureType);
-    };
+    private @NotNull Consumer<@Nullable ArchitectureType> onArchitectureTypeChangeCallback =
+            architectureType -> System.out.println("Architecture type changed to: " + architectureType);
     private ObjectProperty<ArchitectureType> minimumArchitectureTypeNeeded;
     private final BooleanProperty minimumArchitectureTypeNeededChosen = new SimpleBooleanProperty(false);
 

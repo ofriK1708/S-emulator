@@ -102,16 +102,4 @@ public class VariablesTableController {
         }
     }
 
-    // for the animated rows with highlighting
-    private static class HighlightingAnimatedTableRow extends AnimatedTableRow<VariableDTO> {
-        private final TableView<VariableDTO> tableView;
-        private final VariablesTableController controller;
-
-        public HighlightingAnimatedTableRow(BooleanProperty animationsEnabled, int delay, boolean onlyAnimateOnce,
-                                            TableView<VariableDTO> tableView, VariablesTableController controller) {
-            super(animationsEnabled, delay, onlyAnimateOnce);
-            this.tableView = tableView;
-            this.controller = controller;
-        }
-    }
 }

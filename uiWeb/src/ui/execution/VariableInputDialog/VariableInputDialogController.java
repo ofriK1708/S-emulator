@@ -116,10 +116,7 @@ public class VariableInputDialogController {
 
             if (inputText.isEmpty()) {
                 // If field is empty, keep existing value or set to 0
-                Integer existingValue = programArguments.get(argumentName);
-                if (existingValue == null) {
-                    programArguments.put(argumentName, 0);
-                }
+                programArguments.putIfAbsent(argumentName, 0);
                 // If existing value is already set (from pre-fill), keep it
             } else {
                 // Parse and set the new value

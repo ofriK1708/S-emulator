@@ -103,13 +103,6 @@ public class ProgramsPanelController {
         }
     }
 
-    /**
-     * Clear all programs from the table
-     */
-    public void clearPrograms() {
-        programsList.clear();
-    }
-
     public void clearSelection(ActionEvent actionEvent) {
         programsTableView.getSelectionModel().clearSelection();
     }

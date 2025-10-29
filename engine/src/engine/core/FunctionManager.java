@@ -167,10 +167,6 @@ public class FunctionManager {
         return functionsInCurrentProgram.size();
     }
 
-    public Set<String> getSubFunctionsInProgramName() {
-        return functionsInCurrentProgram.keySet();
-    }
-
     public Set<String> getCalledFunctionsOf(@NotNull String functionName) {
         return functionToCalledFunctions.getOrDefault(functionName, Collections.emptySet());
     }

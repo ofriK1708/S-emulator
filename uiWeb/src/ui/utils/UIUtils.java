@@ -18,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import ui.dashboard.history.info.ShowRunController;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -26,9 +25,7 @@ import static ui.utils.clientConstants.SHOW_INFO_PATH;
 
 public class UIUtils {
     public static final String ArgumentResourcePath = "/ui/execution/VariableInputDialog/VariableInputDialog.fxml";
-    public static final Comparator<String> programNameComparator =
-            Comparator.comparingInt(str -> Integer.parseInt(str.substring(1)));
-    public static boolean showInfoAndSuccess = true;
+    public static final boolean showInfoAndSuccess = true;
 
     public static boolean isValidProgramArgument(String arg) {
         try {

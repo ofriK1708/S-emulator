@@ -1,6 +1,9 @@
 package ui.execution.program.function;
 
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -18,7 +21,6 @@ public class ProgramFunctionController {
 
     final IntegerProperty currentLevel = new SimpleIntegerProperty();
     final IntegerProperty maxLevel = new SimpleIntegerProperty();
-    private final StringProperty mainFunctionName = new SimpleStringProperty();
 
     @FXML
     public RadioButton autoPaneMode;

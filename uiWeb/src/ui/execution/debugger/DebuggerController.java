@@ -29,18 +29,12 @@ public class DebuggerController {
     private BooleanProperty executionFinished = new SimpleBooleanProperty(false);
 
     // Callback interfaces for debug actions
-    private @NotNull Runnable debugStepCallback = () -> {
-        System.out.println("Debug step callback not initialized");
-    };
-    private @NotNull Runnable debugResumeCallback = () -> {
-        System.out.println("Debug resume callback not initialized");
-    };
-    private @NotNull Runnable stopDebugSessionCallback = () -> {
-        System.out.println("Stop debug session callback not initialized");
-    };
-    private @NotNull Runnable debugStepBackwardCallback = () -> {
-        System.out.println("Debug step backward callback not initialized");
-    };
+    private @NotNull Runnable debugStepCallback = () -> System.out.println("Debug step callback not initialized");
+    private @NotNull Runnable debugResumeCallback = () -> System.out.println("Debug resume callback not initialized");
+    private @NotNull Runnable stopDebugSessionCallback = () -> System.out.println("Stop debug session callback not " +
+            "initialized");
+    private @NotNull Runnable debugStepBackwardCallback = () -> System.out.println("Debug step backward callback not " +
+            "initialized");
 
 
     @FXML

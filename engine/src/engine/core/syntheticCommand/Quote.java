@@ -167,6 +167,9 @@ public class Quote extends Instruction {
     }
 
     public int executeAndGetResult(@NotNull Map<String, Integer> contextMap) throws IllegalArgumentException {
+        if (functionToRun == null) {
+            throw new IllegalStateException("Quote functionToRun is not initialized");
+        }
         executedCycles = 0;
         List<Integer> arguments = getArgumentsValues(contextMap);
         Map<String, Integer> functionToRunNeededArguments = functionToRun.getSortedArgumentsMap();
@@ -216,6 +219,9 @@ public class Quote extends Instruction {
     // region Expansion
     @Override
     public @NotNull List<Instruction> expand(@NotNull Map<String, Integer> contextMap, int originalInstructionIndex) {
+        if (functionToRun == null) {
+            throw new IllegalStateException("Quote functionToRun is not initialized");
+        }
         List<Instruction> expandedInstructions = new ArrayList<>();
         Map<String, String> argsReplacements = new HashMap<>();
         if (!label.isBlank()) {
@@ -232,6 +238,9 @@ public class Quote extends Instruction {
                                      @NotNull Map<String, String> argsReplacements,
                                      @NotNull List<Instruction> expandedInstructions) {
 
+        if (functionToRun == null) {
+            throw new IllegalStateException("Quote functionToRun is not initialized");
+        }
         List<String> functionParamNames = functionToRun.getSortedProgramArgsNames();
         Iterator<Quote> subFuncIter = subfunctionCalls.iterator();
         Iterator<String> funcArgsName = funcArgsNames.iterator();
@@ -300,6 +309,9 @@ public class Quote extends Instruction {
     }
 
     public @NotNull String getFunctionStringRepresentation() {
+        if (functionToRun == null) {
+            throw new IllegalStateException("Quote functionToRun is not initialized");
+        }
         StringBuilder quoteStringBuilder = new StringBuilder();
         quoteStringBuilder.append("(").append(functionToRun.getFuncName());
 

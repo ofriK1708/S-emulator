@@ -32,14 +32,6 @@ public record SystemResponse(boolean isSuccess, @NotNull String message, @Nullab
                              @Nullable List<ExecutionResultStatisticsDTO> userStatisticsDTOList,
                              @Nullable FullExecutionResultDTO fullExecutionResultDTO,
                              Integer creditsLeft) {
-    /**
-     * Indicates whether the operation was successful.
-     *
-     * @return true if the operation was successful, false otherwise
-     */
-    public boolean isSuccessful() {
-        return isSuccess;
-    }
 
     /**
      * Returns the ProgramDTO object associated with the response.

@@ -8,7 +8,6 @@ import dto.server.SystemResponse;
 import dto.server.UserDTO;
 import engine.utils.ArchitectureType;
 import engine.utils.DebugAction;
-import jakarta.xml.bind.JAXBException;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -49,7 +48,6 @@ public class HttpEngineController implements EngineController {
      *
      * @param responseBody The response body to validate and retrieve the string from.
      * @return The body string.
-     * @throws IOException If the response body is null or an I/O error occurs.
      */
     public static @NotNull String getAndValidateBodyString(@Nullable ResponseBody responseBody) throws IOException {
         if (responseBody == null) {
@@ -96,41 +94,6 @@ public class HttpEngineController implements EngineController {
     // endregion
 
     // region load and get program methods
-
-    /**
-     * Loads a program from an XML file to the server <strong>asynchronously</strong>.
-     *
-     * @param xmlFilePath The path to the XML file containing the program.
-     * @param onResponse  A consumer that will be called with the SystemResponse when the operation is complete.
-     */
-    @Override
-    public void LoadProgramFromFileAsync(@NotNull Path xmlFilePath, Consumer<SystemResponse> onResponse)
-            throws JAXBException, IOException {
-
-        File xmlFile = xmlFilePath.toFile();
-        Requests.uploadFileAsync(Endpoints.UPLOAD_PROGRAM, xmlFile, new Callback() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                SystemResponse systemResponse = SystemResponse.builder()
-                        .isSuccess(false)
-                        .message(e.getMessage())
-                        .build();
-                onResponse.accept(systemResponse);
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                try (ResponseBody responseBody = response.body()) {
-                    if (response.isSuccessful()) {
-                        handelStringSuccess(responseBody, onResponse);
-
-                    } else {
-                        handelFailedRequest(response, responseBody, onResponse);
-                    }
-                }
-            }
-        });
-    }
 
     /**
      * Loads a program from an XML file to the server.
@@ -208,42 +171,6 @@ public class HttpEngineController implements EngineController {
     }
 
     /**
-     * Gets the programs and functions metadata from the server.
-     * this happens <strong>synchronously</strong>.
-     * <p>
-     * call this with 'pulling' threads or async tasks. <strong>NOT THE JAT!</strong>
-     * </p>
-     *
-     * @return A ProgramsAndFunctionsMetadata object representing the programs and functions metadata.
-     * @throws IOException If an I/O error occurs.
-     */
-    public ProgramsAndFunctionsMetadata getProgramsAndFunctionsMetadata() throws IOException {
-        try (Response response = Requests
-                .getSystemInfo(Endpoints.GET_SYSTEM_INFO, PROGRAMS_AND_FUNCTIONS_METADATA)) {
-
-            if (response.isSuccessful()) {
-                String jsonString = getAndValidateBodyString(response.body());
-                return gson.fromJson(jsonString, ProgramsAndFunctionsMetadata.class);
-            } else {
-                String errorMessage = getAndValidateBodyString(response.body());
-                throw new IOException("Failed to get programs and functions metadata: " + errorMessage);
-            }
-        }
-    }
-
-    /**
-     * Loads a program by name from the server to be executed.
-     *
-     * @param programName The name of the program to load.
-     * @param onResponse  A consumer that will be called with the SystemResponse when the operation is complete.
-     */
-    @Override
-    public void loadProgramAsync(@NotNull String programName, @NotNull Consumer<SystemResponse> onResponse) {
-        this.loadedProgramName = programName;
-        getBasicProgramAsync(onResponse);
-    }
-
-    /**
      * Loads a program by name from the server to be executed.
      * this happens <strong>synchronously</strong>.
      * <p>
@@ -257,14 +184,6 @@ public class HttpEngineController implements EngineController {
     public ProgramDTO loadProgram(String programName) {
         this.loadedProgramName = programName;
         return getBasicProgram();
-    }
-
-    /**
-     * Clears the currently loaded program.
-     */
-    @Override
-    public void clearLoadedProgram() {
-        this.loadedProgramName = null;
     }
 
     /**
@@ -431,36 +350,6 @@ public class HttpEngineController implements EngineController {
             }
         });
 
-    }
-
-    /**
-     * Registers a new user on the server <strong>synchronously</strong>.
-     * we cant proceed without registering. so this must be sync.
-     *
-     * @param username The username of the user to register.
-     * @return A SystemResponse indicating the success or failure of the registration.
-     * @throws IOException If an I/O error occurs.
-     */
-    @Override
-    public SystemResponse registerUser(@NotNull String username) throws IOException {
-        try (Response response = Requests
-                .postRegisterUser(Endpoints.REGISTER_USER, username)) {
-
-            if (response.isSuccessful()) {
-                String successMessage = getAndValidateBodyString(response.body());
-
-                return SystemResponse.builder()
-                        .isSuccess(true)
-                        .message(successMessage)
-                        .build();
-            } else {
-                String errorMessage = getAndValidateBodyString(response.body());
-                return SystemResponse.builder()
-                        .isSuccess(false)
-                        .message("Failed to register user: " + errorMessage)
-                        .build();
-            }
-        }
     }
 
     /**

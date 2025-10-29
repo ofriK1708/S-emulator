@@ -35,7 +35,6 @@ public class ServletConstants {
     public static final String PROGRAMS_METADATA_INFO = "programs_metadata";
     public static final String FUNCTIONS_METADATA_INFO = "functions_metadata";
     public static final String PROGRAMS_AND_FUNCTIONS_METADATA = "programs_and_functions_metadata";
-    public static final String USER_STATISTICS_INFO = "user_statistics";
     public static final String PROGRAMS_STATISTICS_INFO = "programs_statistics";
     public static final String ALL_USERS_INFO = "all_users";
     public static final String BASIC_PROGRAM_INFO = "basic_program";
@@ -74,11 +73,11 @@ public class ServletConstants {
     };
 
     public static final TypeToken<Set<FunctionMetadata>> FUNCTIONS_METADATA_SET_TYPE_TOKEN =
-            new TypeToken<Set<FunctionMetadata>>() {
+            new TypeToken<>() {
             };
 
     public static final TypeToken<List<ExecutionResultStatisticsDTO>> EXECUTION_RESULT_STATISTICS_DTO_LIST_TYPE_TOKEN =
-            new TypeToken<List<ExecutionResultStatisticsDTO>>() {
+            new TypeToken<>() {
             };
     // endregion
 

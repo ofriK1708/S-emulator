@@ -33,7 +33,7 @@ public record FullExecutionResultDTO(boolean isMainProgram,
                                      int cycleCount,
                                      int creditsCost) {
 
-    @Contract("_, _, _, _, _ -> new")
+    @Contract("_, _, _, _ , _, _ -> new")
     private static @NotNull FullExecutionResultDTO from(@NotNull ExecutionResultValuesDTO valuesDTO, int expandLevel,
                                                         boolean isMainProgram,
                                                         String innerName, String displayName,

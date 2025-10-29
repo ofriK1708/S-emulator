@@ -1,6 +1,5 @@
 package servlets;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,7 +15,7 @@ import static utils.ServletConstants.USERNAME_PARAM;
 @WebServlet(name = "registerUser", urlPatterns = "/users/register")
 public class Register extends HttpServlet {
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String username = req.getParameter(USERNAME_PARAM);
         if (username == null || username.isEmpty()) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);

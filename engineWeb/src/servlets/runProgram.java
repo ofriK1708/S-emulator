@@ -105,7 +105,7 @@ public class runProgram extends HttpServlet {
     }
 
     private String getErrorMessage(Exception e,
-                                   ServletUtils.runAndDebugParams runAndDebugParams, int expandLevel) throws IOException {
+                                   ServletUtils.runAndDebugParams runAndDebugParams, int expandLevel) {
         return String.format(
                 "Error trying to run %s at expand level %d: %s",
                 runAndDebugParams.programName(),
@@ -114,7 +114,7 @@ public class runProgram extends HttpServlet {
         );
     }
 
-    private SystemResponse getErrorResponse(String errorMessage, int creditLeft) throws IOException {
+    private SystemResponse getErrorResponse(String errorMessage, int creditLeft) {
         return SystemResponse.builder()
                 .isSuccess(false)
                 .message(errorMessage)

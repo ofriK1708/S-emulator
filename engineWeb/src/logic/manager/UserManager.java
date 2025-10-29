@@ -61,14 +61,13 @@ public class UserManager {
      * Add a new user to the system. keeps the order of insertion (users registration order).
      *
      * @param username the username of the new user, this will be the ID for the user
-     * @return the DTO of the newly created user
      */
-    public @NotNull UserDTO addUser(String username) {
+    public void addUser(String username) {
         writeLock.lock();
         try {
             User user = new User(username);
             users.put(username, user);
-            return user.getUserDTO();
+            user.getUserDTO();
         } finally {
             writeLock.unlock();
         }

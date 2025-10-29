@@ -19,13 +19,4 @@ public record ExecutionResultValuesDTO(int output,
                                        @NotNull Map<String, Integer> arguments,
                                        @NotNull Map<String, Integer> workVariables) {
 
-    public static ExecutionResultValuesDTO of(FullExecutionResultDTO dto) {
-        return new ExecutionResultValuesDTO(
-                dto.output(),
-                dto.cycleCount(),
-                dto.creditsCost(),
-                dto.arguments(),
-                dto.workVariables()
-        );
-    }
 }

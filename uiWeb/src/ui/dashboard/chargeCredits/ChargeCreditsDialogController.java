@@ -74,18 +74,18 @@ public class ChargeCreditsDialogController {
                 updateFinalAmountLabel();
                 hideError();
             } else {
-                showError("Invalid amount. Please enter a non-negative integer.");
+                showError();
             }
         } catch (NumberFormatException e) {
-            showError("Invalid amount. Please enter a non-negative integer.");
+            showError();
         }
     }
 
-    private void showError(String message) {
-        errorLabel.setText(message);
+    private void showError() {
+        errorLabel.setText("Invalid amount. Please enter a non-negative integer.");
         errorLabel.setVisible(true);
         customAmountField.getStyleClass().add("error");
-        Tooltip tooltip = new Tooltip(message);
+        Tooltip tooltip = new Tooltip("Invalid amount. Please enter a non-negative integer.");
         customAmountField.setTooltip(tooltip);
     }
 

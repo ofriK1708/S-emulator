@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import dto.server.SystemResponse;
 import engine.core.Engine;
 import engine.core.ProgramDebugger;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +18,7 @@ import static utils.ServletConstants.PLAIN_TEXT_CONTENT_TYPE;
 @WebServlet(name = "startDebugProgram", urlPatterns = "/debugger/start")
 public class startDebugProgram extends HttpServlet {
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (ServletUtils.checkAndHandleUnauthorized(req, resp, getServletContext())) {
             User user = ServletUtils.getUser(req, getServletContext());
             Gson gson = new Gson();

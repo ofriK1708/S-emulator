@@ -74,19 +74,6 @@ public class Requests {
     }
 
     /**
-     * Retrieves system information <strong>asynchronously</strong> from the specified server endpoint.
-     *
-     * @param serverEndpoint The server endpoint URL from which to retrieve the information.
-     * @param info           The specific information to retrieve.
-     * @param callback       The callback to handle the response or failure.
-     */
-    public static void getSystemInfoAsync(String serverEndpoint, String info, Callback callback) {
-        Call call = getSystemInfoCall(serverEndpoint, info);
-
-        call.enqueue(callback);
-    }
-
-    /**
      * Retrieves system information <strong>synchronously</strong> from the specified server endpoint.
      *
      * @param serverEndpoint The server endpoint URL from which to retrieve the information.
@@ -153,21 +140,6 @@ public class Requests {
     }
 
     /**
-     * Retrieves program information <strong>asynchronously</strong> from the specified server endpoint.
-     *
-     * @param serverEndpoint The server endpoint URL from which to retrieve the information.
-     * @param info           The specific information to retrieve.
-     * @param programName    The name of the program.
-     * @param callback       The callback to handle the response or failure.
-     */
-    public static void getProgramInfoAsync(@NotNull String serverEndpoint,
-                                           @NotNull String info,
-                                           @NotNull String programName,
-                                           @NotNull Callback callback) {
-        getProgramInfoAsync(serverEndpoint, info, programName, 0, callback);
-    }
-
-    /**
      * Retrieves program information <strong>synchronously</strong> from the specified server endpoint.
      *
      * @param serverEndpoint The server endpoint URL from which to retrieve the information.
@@ -184,21 +156,6 @@ public class Requests {
 
         Call call = getProgramInfoCall(serverEndpoint, info, programName, expandLevel);
         return call.execute();
-    }
-
-    /**
-     * Retrieves program information <strong>synchronously</strong> from the specified server endpoint.
-     *
-     * @param serverEndpoint The server endpoint URL from which to retrieve the information.
-     * @param info           The specific information to retrieve.
-     * @param programName    The name of the program.
-     * @return The response from the server.
-     */
-    public static @NotNull Response getProgramInfo(@NotNull String serverEndpoint,
-                                                   @NotNull String info,
-                                                   @NotNull String programName)
-            throws IOException {
-        return getProgramInfo(serverEndpoint, info, programName, 0);
     }
 
     /**
@@ -396,26 +353,6 @@ public class Requests {
 
         Call call = HTTP_CLIENT.newCall(request);
         call.enqueue(callback);
-    }
-
-    /**
-     * Retrieves all users DTO <strong>synchronously</strong> from the specified server endpoint.
-     *
-     * @param serverEndpoint The server endpoint URL from which to retrieve the users DTO.
-     * @return The response from the server.
-     */
-    public static @NotNull Response getAllUsersDTO(@NotNull String serverEndpoint) throws IOException {
-        HttpUrl url = safeUrlBuilder(serverEndpoint)
-                .build();
-
-        System.out.println("about to send request to: " + url);
-
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
-
-        Call call = HTTP_CLIENT.newCall(request);
-        return call.execute();
     }
 
     /**

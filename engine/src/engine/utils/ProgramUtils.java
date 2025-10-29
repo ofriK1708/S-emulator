@@ -6,7 +6,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 public class ProgramUtils {
     public static final String EXIT_LABEL_NAME = "EXIT";
@@ -16,16 +15,6 @@ public class ProgramUtils {
     public static final String WORK_VAR_PREFIX = "z";
     public static final String LABEL_PREFIX = "L";
 
-
-    public static @NotNull Predicate<String> validArgumentCheck = (arg) ->
-    {
-        try {
-            int value = Integer.parseInt(arg);
-            return value >= 0;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    };
 
     public static @NotNull ArchitectureType calcMinimumArchitectureLevelNeeded(@NotNull List<Instruction> instructions) {
         Optional<ArchitectureType> minimumArchNeeded = instructions.stream()

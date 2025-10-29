@@ -5,10 +5,7 @@ import dto.engine.ProgramDTO;
 import dto.engine.ProgramMetadata;
 import dto.server.SystemResponse;
 import dto.server.UserDTO;
-import engine.exception.FunctionNotFound;
-import engine.exception.LabelNotExist;
 import engine.utils.ArchitectureType;
-import jakarta.xml.bind.JAXBException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -18,20 +15,14 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public interface EngineController {
-    void LoadProgramFromFileAsync(@NotNull Path xmlFilePath, Consumer<SystemResponse> onResponse) throws LabelNotExist, JAXBException, IOException,
-            FunctionNotFound;
 
-    void loadProgramAsync(String programName, @NotNull Consumer<SystemResponse> onResponse);
+    ProgramDTO loadProgram(String programName);
 
-    ProgramDTO loadProgram(String programName) throws IOException;
-
-    void loadProgramFromFile(@NotNull Path xmlFilePath) throws JAXBException, IOException;
+    void loadProgramFromFile(@NotNull Path xmlFilePath) throws IOException;
 
     List<ProgramMetadata> getProgramsMetadata() throws IOException;
 
     List<FunctionMetadata> getFunctionsMetadata() throws IOException;
-
-    void clearLoadedProgram();
 
     void getBasicProgramAsync(@NotNull Consumer<SystemResponse> onResponse);
 
@@ -58,8 +49,6 @@ public interface EngineController {
     void FetchUserExecutionHistoryAsync(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse);
 
     List<UserDTO> getAllUsersDTO() throws IOException;
-
-    SystemResponse registerUser(@NotNull String username) throws IOException;
 
     void registerUserAsync(@NotNull String username, @NotNull Consumer<SystemResponse> onResponse);
 

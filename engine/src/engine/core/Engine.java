@@ -314,11 +314,6 @@ public class Engine {
     }
 
 
-    public @NotNull String getRepresentationName() {
-        //noinspection DataFlowIssue
-        return isFunction() ? funcName : programName;
-    }
-
     public @NotNull ProgramMetadata programToMetadata() {
         if (!isFunction()) {
             return new ProgramMetadata(programName, userUploadedBy,

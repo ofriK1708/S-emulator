@@ -19,7 +19,7 @@ public class SimpleCookieManager implements CookieJar {
     private final @NotNull ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private final @NotNull Lock writeLock = readWriteLock.writeLock();
     private final @NotNull Lock readLock = readWriteLock.readLock();
-    Map<String, Map<String, Cookie>> cookies = new HashMap<>();
+    final Map<String, Map<String, Cookie>> cookies = new HashMap<>();
     private Consumer<String> logData = System.out::println;
 
     public void setLogData(Consumer<String> logData) {

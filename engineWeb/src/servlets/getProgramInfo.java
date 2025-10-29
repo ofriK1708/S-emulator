@@ -2,7 +2,6 @@ package servlets;
 
 import com.google.gson.Gson;
 import engine.core.Engine;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,14 +16,14 @@ import static utils.ServletConstants.*;
 @WebServlet(name = "getProgramInfo", urlPatterns = "/programInfo")
 public class getProgramInfo extends HttpServlet {
     @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType(PLAIN_TEXT_CONTENT_TYPE);
         resp.getWriter().write(getAllProgramInfoOptionsNames());
 
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (ServletUtils.checkAndHandleUnauthorized(req, resp, getServletContext())) {
             int expandLevel = 0;
             Gson gson = new Gson();

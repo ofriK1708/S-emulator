@@ -17,7 +17,7 @@ import static ui.utils.UIUtils.showSuccess;
  */
 public class LoginController {
 
-    HttpEngineController httpEngineController = new HttpEngineController();
+    final HttpEngineController httpEngineController = new HttpEngineController();
 
     @FXML
     private TextField usernameField;

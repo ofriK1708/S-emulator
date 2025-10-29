@@ -101,12 +101,4 @@ public class FunctionsPanelController {
         functionsTableView.getSelectionModel().clearSelection();
     }
 
-    public String getDisplayName(String internalName) {
-        for (FunctionMetadata function : functionsList) {
-            if (function.name().equals(internalName)) {
-                return function.displayName();
-            }
-        }
-        return internalName; // Fallback to internal name if not found
-    }
 }

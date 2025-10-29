@@ -93,11 +93,10 @@ public class uploadProgram extends HttpServlet {
      *
      * @param resp     The HttpServletResponse to set error status if validation fails.
      * @param filePart The uploaded file part to validate.
-     * @throws IOException      If an I/O error occurs during validation.
      * @throws ServletException If the file is not a valid XML file.
      */
     private void validateFile(HttpServletResponse resp, Part filePart)
-            throws IOException, ServletException {
+            throws ServletException {
 
         // 1. Check content type
         String contentType = filePart.getContentType();
