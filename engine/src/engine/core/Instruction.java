@@ -192,6 +192,8 @@ public abstract class Instruction implements Command {
         try {
             functionInstructions = function.getTempFunctionBasicInstructions();
         } catch (Exception ignored) {
+            // at this point there is no way this can fail, as the function has already been validated
+            // still, we need to catch the exception to satisfy the compiler
         }
         Map<String, String> allReplacements = new HashMap<>(argsReplacements);
         setupConflictAvoidanceReplacements(mainContextMap, argsReplacements, allReplacements, function);
@@ -224,6 +226,16 @@ public abstract class Instruction implements Command {
         return functionInstructions;
     }
 
+    /**
+     * Sets up replacements to avoid conflicts between the main program and the function being inlined.
+     * make sure that none of the variables used in the function clash with those in the main program.
+     * and if they do, we create new unique variable names for them.
+     *
+     * @param mainContextMap   the main program context map
+     * @param argsReplacements replacements for the function arguments
+     * @param allReplacements  all replacements to be used
+     * @param function         the function being expanded
+     */
     private void setupConflictAvoidanceReplacements(@NotNull Map<String, Integer> mainContextMap,
                                                     @NotNull Map<String, String> argsReplacements,
                                                     @NotNull Map<String, String> allReplacements,
@@ -240,7 +252,7 @@ public abstract class Instruction implements Command {
         }
 
 
-        /* we need to check if out replacements of arguments are already taken and if so we replace them too */
+        /* we need to check if our replacements of arguments are already taken and if so we replace them too */
         for (String newArgsName : argsReplacements.values()) {
             if (function.isVariableInContext(newArgsName)) {
                 String newWorkVarInPlaceOfArg = ProgramUtils.getNextFreeWorkVariableName(mainContextMap);
@@ -280,6 +292,13 @@ public abstract class Instruction implements Command {
         }
     }
 
+    /**
+     * Processes the arguments of an instruction, replacing variable names as needed.
+     *
+     * @param instruction     The instruction whose arguments are to be processed.
+     * @param mainContextMap  The main context map containing variable names.
+     * @param allReplacements A map of variable name replacements.
+     */
     private void processInstructionArguments(
             @NotNull Instruction instruction,
             @NotNull Map<String, Integer> mainContextMap,
@@ -301,21 +320,50 @@ public abstract class Instruction implements Command {
         }
     }
 
+    /**
+     * Replaces variable names in function call arguments based on the provided replacements map.
+     *
+     * @param functionArguments The string containing function call arguments.
+     * @param replacements      A map of variable name replacements.
+     * @param valueSetter       A consumer to set the updated function arguments.
+     */
     private void swapIfNeededInFunctionCall(@NotNull String functionArguments,
                                             @NotNull Map<String, String> replacements,
                                             @NotNull Consumer<String> valueSetter) {
 
+        // 1. Build a regex pattern to find any of the keys.
+        // Example: if replacements.keySet() is ["z1", "x2"], pattern becomes "\b(z1|x2)\b"
+        // - \b is a "word boundary". This is crucial to not match "z1" inside "z10".
+        // - | is the "OR" operator.
+        // - (...) creates a capturing group to later identify which key was matched.
         String pattern = "\\b(" + String.join("|", replacements.keySet()) + ")\\b";
         Pattern regex = Pattern.compile(pattern);
 
+        // 2. Create a Matcher to find all occurrences of the pattern in the input string.
         Matcher matcher = regex.matcher(functionArguments);
+
+        // 3. Use StringBuilder for efficient string construction in a loop.
         StringBuilder result = new StringBuilder();
 
+        // 4. Loop through all matches found in the string.
         while (matcher.find()) {
-            String match = matcher.group(1); // the actual variable name matched
-            matcher.appendReplacement(result, replacements.get(match));
+            // Get the specific key that was matched (e.g., "z1" or "x2").
+            // we use group(1) even though there is only one group, because it's a good practice
+            String match = matcher.group(1);
+
+            String replacement = replacements.get(match);
+
+            // This is the core logic:
+            // 1. Appends all text from the end of the last match up to this current match.
+            // 2. Appends the replacement string  instead of the matched string
+            matcher.appendReplacement(result, replacement);
         }
+
+        // 5. After the loop, append any remaining text from the end of the last match
+        // to the end of the string. (e.g., if input was "z1, z10", and only "z1" was replaced,
+        // this appends the ", z10").
         matcher.appendTail(result);
+
         valueSetter.accept(result.toString());
     }
 }
